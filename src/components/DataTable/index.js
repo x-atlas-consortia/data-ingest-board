@@ -38,7 +38,7 @@ const DataTable = () => {
             title: "Group Name",
             dataIndex: "group_name",
             align: "center",
-            editTable: true
+            editTable: true,
         },
         {
             title: "Status",
@@ -50,7 +50,7 @@ const DataTable = () => {
             title: "Organ Type",
             dataIndex: "organ",
             align: "center",
-            editTable: true
+            editTable: true,
         },
         {
             title: "Provider Experiment ID",
@@ -113,7 +113,7 @@ const DataTable = () => {
         },
         {
             title: "Has Donor Metadata",
-            dataIndex: "ha_metadata",
+            dataIndex: "has_metadata",
             align: "center",
             editTable: true
         },
@@ -162,6 +162,8 @@ const DataTable = () => {
             dataSource={gridData}
             bordered
             loading={loading}
+            pagination={{position: ['topRight', 'bottomRight']}}
+            scroll={{x: 1500}}
             />
         </div>
     )

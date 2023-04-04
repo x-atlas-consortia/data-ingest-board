@@ -6,7 +6,7 @@ import DataTable from "@/components/DataTable";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App" style={{padding: '0 80px'}}>
         <center>
             <h1>Dataset Publication Dashboard</h1>
         </center>
