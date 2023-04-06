@@ -31,8 +31,10 @@ const DataTable = () => {
 
     const columns = [
         {
-            title: "UUID",
-            dataIndex: "uuid",
+            title: "HuBMAP ID",
+            dataIndex: "hubmap_id",
+            align: "center",
+            editTable: true
         },
         {
             title: "Group Name",
@@ -79,12 +81,6 @@ const DataTable = () => {
         {
             title: "Data Types",
             dataIndex: "datatypes",
-            align: "center",
-            editTable: true
-        },
-        {
-            title: "HuBMAP ID",
-            dataIndex: "hubmap_id",
             align: "center",
             editTable: true
         },
