@@ -10,10 +10,6 @@ function App() {
         <center>
             <h1>Dataset Publication Dashboard</h1>
         </center>
-        <div style={{textAlign: 'right'}}>
-            <button>Dataset/Upload Toggle</button>
-            <button>Export</button>
-        </div>
         <DataTable />
     </div>
   )

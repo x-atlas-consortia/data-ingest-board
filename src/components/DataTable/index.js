@@ -4,8 +4,13 @@ import {Table} from "antd";
 
 const DataTable = () => {
     const [gridData, setGridData] = useState([]);
+    const [datasetData, setDatasetData] = useState([]);
+    const [uploadData, setUploadData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [sortedInfo, setSortedInfo] = useState({});
+    const [useDatasetApi, setUseDatasetApi] = useState(true)
+    //const [sortedInfo, setSortedInfo] = useState({});
+    const datasetUrl = "http://localhost:8484/datasets/data-status"
+    const uploadUrl = "http://localhost:8484/uploads/data-status"
 
     useEffect(() => {
         loadData();
@@ -13,11 +18,23 @@ const DataTable = () => {
 
     const loadData = async () => {
         setLoading(true);
-        //const response = await axios.get("http://jsonplaceholder.typicode.com/comments");
-        const response = await axios.get("http://localhost:8484/datasets/data-status")
-        setGridData(response.data);
-        setLoading(false)
+        try {
+            const datasetResponse = await axios.get(datasetUrl);
+            const uploadResponse = await axios.get(uploadUrl);
+            setDatasetData(datasetResponse.data)
+            setUploadData(uploadResponse.data)
+            setGridData(useDatasetApi? datasetResponse.data : uploadResponse.data)
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false)
+        }
     }
+
+    const toggleApi = () => {
+    setUseDatasetApi(!useDatasetApi);
+    setGridData(useDatasetApi? uploadData : datasetData)
+  };
 
     const dataWithAge = gridData.map((item) => ({
         ...item,
@@ -30,7 +47,7 @@ const DataTable = () => {
         message: body
     }));
 
-    const columns = [
+    const dataColumns = [
         {
             title: "HuBMAP ID",
             dataIndex: "hubmap_id",
@@ -89,10 +106,10 @@ const DataTable = () => {
         },
         {
             title: "Data Types",
-            dataIndex: "datatypes",
+            dataIndex: "data_types",
             align: "center",
             editTable: true,
-            sorter: (a,b) => a.datatypes.localeCompare(b.datatypes)
+            sorter: (a,b) => a.data_types.localeCompare(b.data_types)
         },
         {
             title: "Donor HuBMAP ID",
@@ -165,8 +182,68 @@ const DataTable = () => {
         }
     ]
 
+    const uploadColumns = [
+        {
+            title: "Datasets",
+            dataIndex: "datasets",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.datasets.localeCompare(b.datasets)
+        },
+        {
+            title: "Group Name",
+            dataIndex: "group_name",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.group_name.localeCompare(b.group_name)
+        },
+        {
+            title: "HuBMAP ID",
+            dataIndex: "hubmap_id",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id)
+        },
+        {
+            title: "Ingest Url",
+            dataIndex: "ingest_url",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url)
+        },
+        {
+            title: "Status",
+            dataIndex: "status",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.status.localeCompare(b.status)
+        },
+        {
+            title: "Title",
+            dataIndex: "title",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.title.localeCompare(b.title)
+        },
+        {
+            title: "UUID",
+            dataIndex: "uuid",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.uuid.localeCompare(b.uuid)
+        }
+    ];
+
+    const columns = useDatasetApi ? dataColumns : uploadColumns;
+
     return (
         <div>
+            <center>
+            <h2>{useDatasetApi ? "Datasets" : "Uploads"}</h2>
+            </center>
+            <button onClick={toggleApi}>
+            {useDatasetApi ? "Switch to Uploads Table" : "Switch to Datasetse Table"}
+            </button>
             <Table
             columns={columns}
             dataSource={gridData}
