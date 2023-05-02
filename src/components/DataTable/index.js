@@ -233,14 +233,14 @@ const DataTable = () => {
             const datasetResponse = await axios.get(datasetUrl);
             const uploadResponse = await axios.get(uploadUrl);
             setDatasetData(datasetResponse.data);
-            const dataWithDatasetsList = uploadResponse.data.map((item) => {
-                const datasetsList = item.datasets.split(",");
-                return {
-                    ...item,
-                    datasets: datasetsList,
-                };
-            });
-            setUploadData(dataWithDatasetsList);
+            // const dataWithDatasetsList = uploadResponse.data.map((item) => {
+            //     const datasetsList = item.datasets !== undefined && item.datasets !== null && item.datasets !== "" ? item.datasets.split(",") : " ";
+            //     return {
+            //         ...item,
+            //         datasets: datasetsList,
+            //     };
+            // });
+            setUploadData(uploadResponse.data);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
