@@ -1,53 +1,9 @@
-import React, {useState, useEffect} from "react";
-import axios from "axios"
-import {Table} from "antd";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Table } from "antd";
 
-const DataTable = () => {
-    const [gridData, setGridData] = useState([]);
-    const [datasetData, setDatasetData] = useState([]);
-    const [uploadData, setUploadData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [useDatasetApi, setUseDatasetApi] = useState(true)
-    //const [sortedInfo, setSortedInfo] = useState({});
-    const datasetUrl = "http://localhost:8484/datasets/data-status"
-    const uploadUrl = "http://localhost:8484/uploads/data-status"
-
-    useEffect(() => {
-        loadData();
-    }, [])
-
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            const datasetResponse = await axios.get(datasetUrl);
-            const uploadResponse = await axios.get(uploadUrl);
-            setDatasetData(datasetResponse.data)
-            setUploadData(uploadResponse.data)
-            setGridData(useDatasetApi? datasetResponse.data : uploadResponse.data)
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const toggleApi = () => {
-    setUseDatasetApi(!useDatasetApi);
-    setGridData(useDatasetApi? uploadData : datasetData)
-  };
-
-    const dataWithAge = gridData.map((item) => ({
-        ...item,
-        age: Math.floor(Math.random() * 6) + 20,
-    }));
-
-    const modifiedData = dataWithAge.map(({body, ...item}) => ({
-        ...item,
-        key: item.id,
-        message: body
-    }));
-
-    const dataColumns = [
+const DatasetTable = ({ data, loading }) => {
+    const datasetColumns = [
         {
             title: "HuBMAP ID",
             dataIndex: "hubmap_id",
@@ -182,6 +138,19 @@ const DataTable = () => {
         }
     ]
 
+    return (
+        <Table
+            columns={datasetColumns}
+            dataSource={data}
+            bordered
+            loading={loading}
+            pagination={{ position: ["topRight", "bottomRight"] }}
+            scroll={{ x: 1500 }}
+        />
+    );
+};
+
+const UploadTable = ({ data, loading }) => {
     const uploadColumns = [
         {
             title: "Datasets",
@@ -234,26 +203,73 @@ const DataTable = () => {
         }
     ];
 
-    const columns = useDatasetApi ? dataColumns : uploadColumns;
+    return (
+        <Table
+            columns={uploadColumns}
+            dataSource={data}
+            bordered
+            loading={loading}
+            pagination={{ position: ["topRight", "bottomRight"] }}
+            scroll={{ x: 1500 }}
+        />
+    );
+};
+
+const DataTable = () => {
+    const [datasetData, setDatasetData] = useState([]);
+    const [uploadData, setUploadData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [useDatasetApi, setUseDatasetApi] = useState(true);
+    const datasetUrl = "http://localhost:8484/datasets/data-status";
+    const uploadUrl = "http://localhost:8484/uploads/data-status";
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const datasetResponse = await axios.get(datasetUrl);
+            const uploadResponse = await axios.get(uploadUrl);
+            setDatasetData(datasetResponse.data);
+            const dataWithDatasetsList = uploadResponse.data.map((item) => {
+                const datasetsList = item.datasets.split(",");
+                return {
+                    ...item,
+                    datasets: datasetsList,
+                };
+            });
+            setUploadData(dataWithDatasetsList);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    const toggleApi = () => {
+        setUseDatasetApi(!useDatasetApi);
+    };
+
+    const table = useDatasetApi ? (
+        <DatasetTable data={datasetData} loading={loading} />
+    ) : (
+        <UploadTable data={uploadData} loading={loading} />
+    );
 
     return (
         <div>
             <center>
-            <h2>{useDatasetApi ? "Datasets" : "Uploads"}</h2>
+                <h2>{useDatasetApi ? "Datasets" : "Uploads"}</h2>
             </center>
             <button onClick={toggleApi}>
-            {useDatasetApi ? "Switch to Uploads Table" : "Switch to Datasetse Table"}
+                {useDatasetApi ? "Switch to Uploads Table" : 'Switch to Datasets Table'}
             </button>
-            <Table
-            columns={columns}
-            dataSource={gridData}
-            bordered
-            loading={loading}
-            pagination={{position: ['topRight', 'bottomRight']}}
-            scroll={{x: 1500}}
-            />
+            {table}
         </div>
     )
 }
 
 export default DataTable
+
