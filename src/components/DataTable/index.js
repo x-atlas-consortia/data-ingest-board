@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Button } from "antd";
 
 const DatasetTable = ({ data, loading }) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -183,15 +183,8 @@ const DatasetTable = ({ data, loading }) => {
     );
 };
 
-const UploadTable = ({ data, loading }) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) => {
     const uploadColumns = [
-        // {
-        //     title: "Datasets",
-        //     dataIndex: "datasets",
-        //     align: "center",
-        //     editTable: true,
-        //     sorter: (a,b) => a.datasets.localeCompare(b.datasets)
-        // },
         {
             title: "HuBMAP ID",
             dataIndex: "hubmap_id",
@@ -234,6 +227,18 @@ const UploadTable = ({ data, loading }) => {
             align: "center",
             editTable: true,
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
+        },
+        {
+            title: "Show Datasets",
+            dataIndex: "show_datasets",
+            render: (text, record) => (
+                <Button onClick={() => {
+                    const hm_uuid = record.uuid.trim();
+                    filterUploads(uploadData, datasetData, hm_uuid);
+                }}>
+                    Filter
+                </Button>
+            )
         }
     ];
 
@@ -252,29 +257,33 @@ const UploadTable = ({ data, loading }) => {
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
     const [uploadData, setUploadData] = useState([]);
-    const [datasetsInUploadData, setDatasetsInUploadData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [useDatasetApi, setUseDatasetApi] = useState(props.useDatasetApi);
+    const [originalDatasetData, setOriginalDatasetData] = useState([]);
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
-    console.log(`upload id is ${selectUploadId}!`);
     useEffect(() => {
         loadData();
     }, []);
 
-    if (typeof selectUploadId !== 'undefined') {
-        const matchingUpload = uploadData.find(obj => obj.uuid === selectUploadId || obj.hubmap_id === selectUploadId);
-        if (typeof matchingUpload === 'undefined') {
-            setInvalidUploadId(true);
+    const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
+        console.log(uploadId);
+        if (typeof selectUploadId !== 'undefined') {
+            const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload.hubmap_id === uploadId);
+            if (typeof matchingUpload !== 'undefined') {
+                const datasetsInUpload = matchingUpload.datasets;
+                const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
+                const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
+                setDatasetData(filteredDatasets);
+                setUseDatasetApi(true);
+                setInvalidUploadId(false);
+            }
+            else if (typeof matchingUpload === 'undefined') {
+                setInvalidUploadId(true);
+            }
         }
-        else {
-            setUseDatasetApi(true);
-            const listOfDatasets = matchingUpload.split(',');
-
-        }
-
     }
     const loadData = async () => {
         setLoading(true);
@@ -282,16 +291,10 @@ const DataTable = (props) => {
             const datasetResponse = await axios.get(datasetUrl);
             const uploadResponse = await axios.get(uploadUrl);
             setDatasetData(datasetResponse.data);
-            // const dataWithDatasetsList = uploadResponse.data.map((item) => {
-            //     const datasetsList = item.datasets !== undefined && item.datasets !== null && item.datasets !== "" ? item.datasets.split(",") : " ";
-            //     return {
-            //         ...item,
-            //         datasets: datasetsList,
-            //     };
-            // });
+            setOriginalDatasetData(datasetResponse.data);
             setUploadData(uploadResponse.data);
+            filterUploads(uploadResponse.data, datasetResponse.data, selectUploadId);
         } catch (error) {
-            console.error("Error fetching data:", error);
         } finally {
         setLoading(false);
         }
@@ -304,7 +307,7 @@ const DataTable = (props) => {
     const table = useDatasetApi ? (
         <DatasetTable data={datasetData} loading={loading} />
     ) : (
-        <UploadTable data={uploadData} loading={loading} />
+        <UploadTable data={uploadData} loading={loading} filterUploads={filterUploads} uploadData={uploadData} datasetData={datasetData}/>
     );
 
     return (
