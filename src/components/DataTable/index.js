@@ -270,7 +270,7 @@ const DataTable = (props) => {
 
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         console.log(uploadId);
-        if (typeof selectUploadId !== 'undefined') {
+        if (typeof uploadId !== 'undefined') {
             const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload.hubmap_id === uploadId);
             if (typeof matchingUpload !== 'undefined') {
                 const datasetsInUpload = matchingUpload.datasets;
