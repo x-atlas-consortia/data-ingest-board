@@ -307,7 +307,7 @@ const DataTable = (props) => {
     const table = useDatasetApi ? (
         <DatasetTable data={datasetData} loading={loading} />
     ) : (
-        <UploadTable data={uploadData} loading={loading} filterUploads={filterUploads} uploadData={uploadData} datasetData={datasetData}/>
+        <UploadTable data={uploadData} loading={loading} filterUploads={filterUploads} uploadData={uploadData} datasetData={originalDatasetData}/>
     );
 
     return (
