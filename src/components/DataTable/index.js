@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Button } from "antd";
 
-const DatasetTable = ({ data, loading }) => {
+const DatasetTable = ({ data, loading, handleTableChange }) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
@@ -179,11 +179,15 @@ const DatasetTable = ({ data, loading }) => {
             loading={loading}
             pagination={{ position: ["topRight", "bottomRight"] }}
             scroll={{ x: 1500 }}
+            onChange={handleTableChange}
+            rowKey="hubmap_id"
         />
     );
 };
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange}) => {
+    const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
+    const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uploadColumns = [
         {
             title: "HuBMAP ID",
@@ -199,13 +203,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) =
             align: "center",
             editTable: true,
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-        },
-        {
-            title: "Ingest Url",
-            dataIndex: "ingest_url",
-            align: "center",
-            editTable: true,
-            sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
+            filters: uniqueGroupNames.map(name => ({ text: name, value: name })),
+            onFilter: (value, record) => record.group_name === value,
         },
         {
             title: "Status",
@@ -213,6 +212,29 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) =
             align: "center",
             editTable: true,
             sorter: (a,b) => a.status.localeCompare(b.status),
+            filters: [
+                {text: 'Unreorganized', value: 'Unreorganized'},
+                {text: 'Error', value: 'Error'},
+                {text: 'Valid', value: 'Valid'},
+                {text: 'Invalid', value: 'Invalid'},
+                {text: 'New', value: 'New'},
+                {text: 'Processing', value: 'Processing'},
+                {text: 'Submitted', value: 'Submitted'},
+                {text: 'Reorganized', value: 'Reorganized'},
+            ],
+            onFilter: (value, record) => {
+                if (value === 'Unreorganized') {
+                    return record.status !== 'Reorganized';
+                }
+                return record.status === value;
+            }
+        },
+        {
+            title: "Ingest Url",
+            dataIndex: "ingest_url",
+            align: "center",
+            editTable: true,
+            sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
         },
         {
             title: "Title",
@@ -250,6 +272,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) =
             loading={loading}
             pagination={{ position: ["topRight", "bottomRight"] }}
             scroll={{ x: 1500 }}
+            onChange={handleTableChange}
+            rowKey="hubmap_id"
         />
     );
 };
@@ -258,18 +282,57 @@ const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
     const [uploadData, setUploadData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [useDatasetApi, setUseDatasetApi] = useState(props.useDatasetApi);
-    const [originalDatasetData, setOriginalDatasetData] = useState([]);
+    const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
+    const [page, setPage] = useState(props.page);
+    const [pageSize, setPageSize] = useState(props.pageSize);
+    const [sortField, setSortField] = useState(props.sortField);
+    const [sortOrder, setSortOrder] = useState(props.sortOrder);
+    const [filters, setFilters] = useState(props.filters);
+    const [originalDatasetData, setOriginalDatasetData] = useState([]);
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
+
     useEffect(() => {
         loadData();
     }, []);
 
+    const handleTableChange = (pagination, filters, sorter) => {
+        const query = new URLSearchParams(window.location.search);
+        if (sorter.field) {
+            query.set('sortField', sorter.field);
+            if (sorter.order) {
+                query.set('sortOrder', sorter.order);
+            } else {
+                query.delete('sortField');
+                query.delete('sortOrder');
+            }
+        } else {
+            query.delete('sortField');
+            query.delete('sortOrder');
+        }
+        Object.keys(filters).forEach(key => {
+            if (filters[key]) {
+                query.set(key, filters[key].join(','));
+            } else {
+                query.delete(key);
+            }
+        });
+        if (pagination.current && pagination.current !== 1) {
+            query.set('page', pagination.current);
+        } else {
+            query.delete('page');
+        }
+        if (pagination.pageSize && pagination.pageSize !== 10) {
+            query.set('pageSize', pagination.pageSize);
+        } else {
+            query.delete('pageSize');
+        }
+        window.history.pushState(null, null, `?${query.toString()}`);
+    }
+
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
-        console.log(uploadId);
         if (typeof uploadId !== 'undefined') {
             const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload.hubmap_id === uploadId);
             if (typeof matchingUpload !== 'undefined') {
@@ -277,7 +340,8 @@ const DataTable = (props) => {
                 const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
                 const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
                 setDatasetData(filteredDatasets);
-                setUseDatasetApi(true);
+                //setUseDatasetApi(true);
+                toggleApi();
                 setInvalidUploadId(false);
             }
             else if (typeof matchingUpload === 'undefined') {
@@ -285,6 +349,8 @@ const DataTable = (props) => {
             }
         }
     }
+
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -302,12 +368,34 @@ const DataTable = (props) => {
 
     const toggleApi = () => {
         setUseDatasetApi(!useDatasetApi);
-    };
+        if (useDatasetApi) {
+            window.history.pushState(null, null, `/?entity_type=uploads`)
+        } else {
+            window.history.pushState(null, null, `/`)
 
+        }
+
+    };
+    //
+    // const clearUploadFilter = () => {
+    //     setSelectUploadId(undefined);
+    //     setDatasetData(originalDatasetData);
+    // };
     const table = useDatasetApi ? (
-        <DatasetTable data={datasetData} loading={loading} />
+        <DatasetTable
+            data={datasetData}
+            loading={loading}
+            handleTableChange={handleTableChange}
+        />
     ) : (
-        <UploadTable data={uploadData} loading={loading} filterUploads={filterUploads} uploadData={uploadData} datasetData={originalDatasetData}/>
+        <UploadTable
+            data={uploadData}
+            loading={loading}
+            filterUploads={filterUploads}
+            uploadData={uploadData}
+            datasetData={originalDatasetData}
+            handleTableChange={handleTableChange}
+        />
     );
 
     return (
@@ -319,6 +407,9 @@ const DataTable = (props) => {
             <button onClick={toggleApi}>
                 {useDatasetApi ? "Switch to Uploads Table" : 'Switch to Datasets Table'}
             </button>
+            {/*<button>*/}
+            {/*    onClick={clearUploadFilter}>*/}
+            {/*</button>*/}
             {table}
         </div>
     )
