@@ -9,11 +9,11 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     //const useDatasetApi = entity_type !== 'uploads';
     const [entityType, setEntityType] = useState(entity_type);
     const [selectUploadId, setSelectUploadId] = useState(upload_id);
-    const [page, setPage] = useState(page);
+    const [initialPage, setInitialPage] = useState(page);
     const [pageSize, setPageSize] = useState(page_size);
     const [sortField, setSortField] = useState(sort_field);
-    const [sortOrder, setSortOrder] = userState(sort_order);
-    const [filters, setFilters] = userState(filters);
+    const [sortOrder, setSortOrder] = useState(sort_order);
+    const [tableFilters, setTableFilters] = useState(filters);
     return (
         <div className="App" style={{ padding: "0 80px" }}>
             <center>
@@ -24,16 +24,16 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 setEntityType={setEntityType}
                 selectUploadId={selectUploadId}
                 setSelectUploadId={setSelectUploadId}
-                page={page}
-                setPage={setPage}
+                initialPage={initialPage}
+                setInitialPage={setInitialPage}
                 pageSize={pageSize}
                 setPageSize={setPageSize}
                 sortField={sortField}
                 setSortField={setSortField}
                 sortOrder={sortOrder}
                 setSortOrder={setSortOrder}
-                filters={filters}
-                setFilters={setFilters}
+                tableFilters={tableFilters}
+                setTableFilters={setTableFilters}
             />
         </div>
     );
@@ -41,7 +41,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
 
 App.getInitialProps = ({ query }) => {
   const { entity_type, upload_id, page, page_size, sort_field, sort_order, ...filters } = query;
-  return { entity_type, upload_id, filters };
+  return { entity_type, upload_id, page, page_size, sort_field, sort_order, filters};
 };
 
 export default App;

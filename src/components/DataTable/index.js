@@ -2,11 +2,33 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Button } from "antd";
 
-const DatasetTable = ({ data, loading, handleTableChange }) => {
+const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = [...new Set(data.map(item => item.data_types))]
+    let order = sortOrder;
+    let field = sortField;
+    if (typeof sortOrder === "object"){
+        order = order[0];
+    }
+    if (typeof sortField === "object"){
+        field = field[0];
+    }
+
+    let defaultFilteredValue = {};
+    if (filters.hasOwnProperty("group_name")) {
+        defaultFilteredValue["group_name"] = filters["group_name"].split(",");
+    }
+    if (filters.hasOwnProperty("status")) {
+        defaultFilteredValue["status"] = filters["status"].split(",");
+    }
+    if (filters.hasOwnProperty("organ")) {
+        defaultFilteredValue["organ"] = filters["organ"].split(",");
+    }
+    if (filters.hasOwnProperty("data_types")) {
+        defaultFilteredValue["data_types"] = filters["data_types"].split(",");
+    }
     const datasetColumns = [
         {
             title: "HuBMAP ID",
@@ -21,8 +43,9 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             align: "center",
             editTable: true,
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-            filters: uniqueGroupNames.map(name => ({ text: name, value: name })),
-            onFilter: (value, record) => record.group_name === value,
+            defaultFilteredValue: defaultFilteredValue["group_name"] || null,
+            filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
         },
         {
             title: "Status",
@@ -30,6 +53,7 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             align: "center",
             editTable: true,
             sorter: (a,b) => a.status.localeCompare(b.status),
+            defaultFilteredValue: defaultFilteredValue["status"] || null,
             filters: [
                 {text: 'Unpublished', value: 'Unpublished'},
                 {text: 'Published', value: 'Published'},
@@ -42,9 +66,9 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             ],
             onFilter: (value, record) => {
                 if (value === 'Unpublished') {
-                    return record.status !== 'Published';
+                    return record.status.toLowerCase() !== 'published';
                 }
-                return record.status === value;
+                return record.status.toLowerCase() === value.toLowerCase();
             }
         },
         {
@@ -53,8 +77,9 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             align: "center",
             editTable: true,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            filters: uniqueOrganType.map(name => ({ text: name, value: name })),
-            onFilter: (value, record) => record.organ === value,
+            defaultFilteredValue: defaultFilteredValue["organ"] || null,
+            filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
         },
         {
             title: "Data Types",
@@ -62,8 +87,9 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             align: "center",
             editTable: true,
             sorter: (a,b) => a.data_types.localeCompare(b.data_types),
-            filters: uniqueDataType.map(name => ({ text: name, value: name })),
-            onFilter: (value, record) => record.data_types === value,
+            defaultFilteredValue: defaultFilteredValue["data_types"] || null,
+            filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
         },
         {
             title: "Provider Experiment ID",
@@ -177,7 +203,7 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
             dataSource={data}
             bordered
             loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"] }}
+            pagination={{ position: ["topRight", "bottomRight"], current: page, showLessItems:true, defaultPageSize: pageSize}}
             scroll={{ x: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
@@ -185,9 +211,16 @@ const DatasetTable = ({ data, loading, handleTableChange }) => {
     );
 };
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange}) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
+    let defaultFilteredValue = {};
+    if (filters.hasOwnProperty("group_name")) {
+        defaultFilteredValue["group_name"] = filters["group_name"].split(",");
+    }
+    if (filters.hasOwnProperty("status")) {
+        defaultFilteredValue["status"] = filters["status"].split(",");
+    }
     const uploadColumns = [
         {
             title: "HuBMAP ID",
@@ -195,7 +228,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             align: "center",
             editTable: true,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
-            filter: true
         },
         {
             title: "Group Name",
@@ -203,8 +235,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             align: "center",
             editTable: true,
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-            filters: uniqueGroupNames.map(name => ({ text: name, value: name })),
-            onFilter: (value, record) => record.group_name === value,
+            defaultFilteredValue: defaultFilteredValue["group_name"] || null,
+            filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
         },
         {
             title: "Status",
@@ -212,6 +245,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             align: "center",
             editTable: true,
             sorter: (a,b) => a.status.localeCompare(b.status),
+            defaultFilteredValue: defaultFilteredValue["status"] || null,
             filters: [
                 {text: 'Unreorganized', value: 'Unreorganized'},
                 {text: 'Error', value: 'Error'},
@@ -224,9 +258,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ],
             onFilter: (value, record) => {
                 if (value === 'Unreorganized') {
-                    return record.status !== 'Reorganized';
+                    return record.status.toLowerCase() !== 'Reorganized';
                 }
-                return record.status === value;
+                return record.status.toLowerCase() === value.toLowerCase();
             }
         },
         {
@@ -257,6 +291,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <Button onClick={() => {
                     const hm_uuid = record.uuid.trim();
                     filterUploads(uploadData, datasetData, hm_uuid);
+                    window.history.pushState(null, null, `/upload_id=${record.hubmap_id}`)
                 }}>
                     Filter
                 </Button>
@@ -270,7 +305,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataSource={data}
             bordered
             loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"] }}
+            pagination={{ position: ["topRight", "bottomRight"], current: page, showLessItems:true, defaultPageSize: pageSize}}
             scroll={{ x: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
@@ -285,32 +320,34 @@ const DataTable = (props) => {
     const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
-    const [page, setPage] = useState(props.page);
-    const [pageSize, setPageSize] = useState(props.pageSize);
+    const [page, setPage] = useState(props.initialPage);
+    const [pageSize, setPageSize] = useState(props.pageSize !== undefined ? props.pageSize : 10);
     const [sortField, setSortField] = useState(props.sortField);
     const [sortOrder, setSortOrder] = useState(props.sortOrder);
-    const [filters, setFilters] = useState(props.filters);
+    const [filters, setFilters] = useState(props.tableFilters);
     const [originalDatasetData, setOriginalDatasetData] = useState([]);
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
-
+    console.log(JSON.stringify(filters));
     useEffect(() => {
         loadData();
     }, []);
 
     const handleTableChange = (pagination, filters, sorter) => {
+        setPage(pagination.current)
+        setPageSize(pagination.pageSize)
         const query = new URLSearchParams(window.location.search);
         if (sorter.field) {
-            query.set('sortField', sorter.field);
+            query.set('sort_field', sorter.field);
             if (sorter.order) {
-                query.set('sortOrder', sorter.order);
+                query.set('sort_order', sorter.order);
             } else {
-                query.delete('sortField');
-                query.delete('sortOrder');
+                query.delete('sort_field');
+                query.delete('sort_order');
             }
         } else {
-            query.delete('sortField');
-            query.delete('sortOrder');
+            query.delete('sort_field');
+            query.delete('sort_order');
         }
         Object.keys(filters).forEach(key => {
             if (filters[key]) {
@@ -325,9 +362,9 @@ const DataTable = (props) => {
             query.delete('page');
         }
         if (pagination.pageSize && pagination.pageSize !== 10) {
-            query.set('pageSize', pagination.pageSize);
+            query.set('page_size', pagination.pageSize);
         } else {
-            query.delete('pageSize');
+            query.delete('page_size');
         }
         window.history.pushState(null, null, `?${query.toString()}`);
     }
@@ -340,8 +377,7 @@ const DataTable = (props) => {
                 const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
                 const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
                 setDatasetData(filteredDatasets);
-                //setUseDatasetApi(true);
-                toggleApi();
+                setUseDatasetApi(true);
                 setInvalidUploadId(false);
             }
             else if (typeof matchingUpload === 'undefined') {
@@ -349,6 +385,15 @@ const DataTable = (props) => {
             }
         }
     }
+
+    // const handleInitialProps = (sortField, sortOrder, page, pageSize, filters) => {
+    //     setSorter({
+    //         columnKey: sortField,
+    //         sortOrder: sortOrder,
+    //     });
+    //     setPagination(current, pageSize);
+    //     setFilter(filters);
+    // }
 
 
     const loadData = async () => {
@@ -367,12 +412,12 @@ const DataTable = (props) => {
     };
 
     const toggleApi = () => {
+        setInvalidUploadId(false);
         setUseDatasetApi(!useDatasetApi);
         if (useDatasetApi) {
             window.history.pushState(null, null, `/?entity_type=uploads`)
         } else {
             window.history.pushState(null, null, `/`)
-
         }
 
     };
@@ -386,6 +431,12 @@ const DataTable = (props) => {
             data={datasetData}
             loading={loading}
             handleTableChange={handleTableChange}
+            //handleInitialProps={handleInitialProps}
+            page={page}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            filters={filters}
         />
     ) : (
         <UploadTable
@@ -395,6 +446,12 @@ const DataTable = (props) => {
             uploadData={uploadData}
             datasetData={originalDatasetData}
             handleTableChange={handleTableChange}
+            //handleInitialProps={handleInitialProps}
+            page={page}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            filters={filters}
         />
     );
 
