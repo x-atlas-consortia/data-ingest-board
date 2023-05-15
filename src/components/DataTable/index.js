@@ -203,7 +203,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataSource={data}
             bordered
             loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, showLessItems:true, defaultPageSize: pageSize}}
+            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
             scroll={{ x: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
@@ -305,7 +305,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataSource={data}
             bordered
             loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, showLessItems:true, defaultPageSize: pageSize}}
+            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
             scroll={{ x: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
@@ -328,7 +328,6 @@ const DataTable = (props) => {
     const [originalDatasetData, setOriginalDatasetData] = useState([]);
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
-    console.log(JSON.stringify(filters));
     useEffect(() => {
         loadData();
     }, []);
@@ -336,6 +335,7 @@ const DataTable = (props) => {
     const handleTableChange = (pagination, filters, sorter) => {
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
+        //setFilters(filters);
         const query = new URLSearchParams(window.location.search);
         if (sorter.field) {
             query.set('sort_field', sorter.field);
