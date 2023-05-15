@@ -291,7 +291,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <Button onClick={() => {
                     const hm_uuid = record.uuid.trim();
                     filterUploads(uploadData, datasetData, hm_uuid);
-                    window.history.pushState(null, null, `/upload_id=${record.hubmap_id}`)
+                    window.history.pushState(null, null, `/?upload_id=${record.hubmap_id}`)
                 }}>
                     Filter
                 </Button>
