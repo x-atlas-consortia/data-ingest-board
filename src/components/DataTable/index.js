@@ -15,16 +15,78 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (typeof sortField === "object"){
         field = field[0];
     }
-
     let defaultFilteredValue = {};
+    let defaultSortOrder = {};
+    if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")){
+        if (field === "hubmap_id"){
+            defaultSortOrder["hubmap_id"] = order;
+        }
+        if (field === "group_name"){
+            defaultSortOrder["group_name"] = order;
+        }
+        if (field === "status"){
+            defaultSortOrder["status"] = order;
+        }
+        if (field === "organ_type"){
+            defaultSortOrder["organ_type"] = order;
+        }
+        if (field === "data_types"){
+            defaultSortOrder["data_types"] = order;
+        }
+        if (field === "provider_experiment_id"){
+            defaultSortOrder["provider_experiment_id"] = order;
+        }
+        if (field === "last_touch"){
+            defaultSortOrder["last_touch"] = order;
+        }
+        if (field === "has_contacts"){
+            defaultSortOrder["has_contacts"] = order;
+        }
+        if (field === "has_contributors"){
+            defaultSortOrder["has_contributors"] = order;
+        }
+        if (field === "donor_hubmap_id"){
+            defaultSortOrder["donor_hubmap_id"] = order;
+        }
+        if (field === "donor_submission_id"){
+            defaultSortOrder["donor_submission_id"] = order;
+        }
+        if (field === "donor_lab_id"){
+            defaultSortOrder["donor_lab_id"] = order;
+        }
+        if (field === "has_donor_metadata"){
+            defaultSortOrder["has_donor_metadata"] = order;
+        }
+        if (field === "parent_dataset"){
+            defaultSortOrder["parent_dataset"] = order;
+        }
+        if (field === "upload"){
+            defaultSortOrder["upload"] = order;
+        }
+        if (field === "has_rui_info"){
+            defaultSortOrder["has_rui_info"] = order;
+        }
+        if (field === "has_data"){
+            defaultSortOrder["has_data"] = order;
+        }
+        if (field === "globus_url"){
+            defaultSortOrder["globus_url"] = order;
+        }
+        if (field === "portal_url"){
+            defaultSortOrder["portal_url"] = order;
+        }
+        if (field === "ingest_url"){
+            defaultSortOrder["ingest_url"] = order;
+        }
+    }
     if (filters.hasOwnProperty("group_name")) {
         defaultFilteredValue["group_name"] = filters["group_name"].split(",");
     }
     if (filters.hasOwnProperty("status")) {
         defaultFilteredValue["status"] = filters["status"].split(",");
     }
-    if (filters.hasOwnProperty("organ")) {
-        defaultFilteredValue["organ"] = filters["organ"].split(",");
+    if (filters.hasOwnProperty("organ_type")) {
+        defaultFilteredValue["organ_type"] = filters["organ_type"].split(",");
     }
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
@@ -35,6 +97,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "hubmap_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
         },
         {
@@ -42,6 +105,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "group_name",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["group_name"] || null,
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
@@ -52,6 +116,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "status",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["status"] || null,
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             filters: [
@@ -76,8 +141,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "organ",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["organ_type"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            defaultFilteredValue: defaultFilteredValue["organ"] || null,
+            defaultFilteredValue: defaultFilteredValue["organ_type"] || null,
             filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
         },
@@ -86,6 +152,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "data_types",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["data_types"] || null,
             sorter: (a,b) => a.data_types.localeCompare(b.data_types),
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
@@ -96,6 +163,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "provider_experiment_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["provider_experiment_id"] || null,
             sorter: (a,b) => a.provider_experiment_id.localeCompare(b.provider_experiment_id),
         },
         {
@@ -103,6 +171,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "last_touch",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
         },
         {
@@ -110,6 +179,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "has_contacts",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["has_contacts"] || null,
             sorter: (a,b) => b.has_contacts.localeCompare(a.has_contacts),
         },
         {
@@ -117,6 +187,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "has_contributors",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["has_contributors"] || null,
             sorter: (a,b) => b.has_contributors.localeCompare(a.has_contributors),
         },
         {
@@ -124,12 +195,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "donor_hubmap_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["donor_hubmap_id"] || null,
             sorter: (a,b) => a.donor_hubmap_id.localeCompare(b.donor_hubmap_id),
         },{
             title: "Donor Submission ID",
             dataIndex: "donor_submission_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["donor_submission_id"] || null,
             sorter: (a,b) => a.donor_submission_id.localeCompare(b.donor_submission_id),
         },
         {
@@ -137,6 +210,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "donor_lab_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["donor_lab_id"] || null,
             sorter: (a,b) => a.donor_lab_id.localeCompare(b.donor_lab_id),
         },
         {
@@ -144,6 +218,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "has_metadata",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["has_donor_metadata"] || null,
             sorter: (a,b) => b.has_metadata.localeCompare(a.has_metadata),
         },
         {
@@ -151,6 +226,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "parent_dataset",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["parent_dataset"] || null,
             sorter: (a,b) => a.parent_dataset.localeCompare(b.parent_dataset),
         },
         {
@@ -158,6 +234,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "upload",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["upload"] || null,
             sorter: (a,b) => a.upload.localeCompare(b.upload),
         },
         {
@@ -165,6 +242,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "has_rui_info",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
         },
         {
@@ -172,6 +250,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "has_data",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["has_data"] || null,
             sorter: (a,b) => b.has_data.localeCompare(a.has_data),
         },
         {
@@ -179,6 +258,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "globus_url",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["globus_url"] || null,
             sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
         },
         {
@@ -186,6 +266,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "portal_url",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["portal_url"] || null,
             sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
         },
         {
@@ -193,6 +274,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "ingest_url",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["ingest_url"] || null,
             sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
         }
     ]
@@ -221,12 +303,42 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     if (filters.hasOwnProperty("status")) {
         defaultFilteredValue["status"] = filters["status"].split(",");
     }
+    let order = sortOrder;
+    let field = sortField;
+    if (typeof sortOrder === "object"){
+        order = order[0];
+    }
+    if (typeof sortField === "object"){
+        field = field[0];
+    }
+    let defaultSortOrder = {};
+    if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")) {
+        if (field === "hubmap_id") {
+            defaultSortOrder["hubmap_id"] = order;
+        }
+        if (field === "group_name") {
+            defaultSortOrder["group_name"] = order;
+        }
+        if (field === "status") {
+            defaultSortOrder["status"] = order;
+        }
+        if (field === "ingest_url") {
+            defaultSortOrder["ingest_url"] = order;
+        }
+        if (field === "title") {
+            defaultSortOrder["title"] = order;
+        }
+        if (field === "uuid") {
+            defaultSortOrder["uuid"] = order;
+        }
+    }
     const uploadColumns = [
         {
             title: "HuBMAP ID",
             dataIndex: "hubmap_id",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
         },
         {
@@ -234,6 +346,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataIndex: "group_name",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["group_name"] || null,
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
@@ -244,6 +357,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataIndex: "status",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["status"] || null,
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             filters: [
@@ -268,6 +382,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataIndex: "ingest_url",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["ingest_url"] || null,
             sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
         },
         {
@@ -275,6 +390,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataIndex: "title",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["title"] || null,
             sorter: (a,b) => a.title.localeCompare(b.title),
         },
         {
@@ -282,6 +398,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             dataIndex: "uuid",
             align: "center",
             editTable: true,
+            defaultSortOrder: defaultSortOrder["uuid"] || null,
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
         },
         {
@@ -335,7 +452,19 @@ const DataTable = (props) => {
     const handleTableChange = (pagination, filters, sorter) => {
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
-        //setFilters(filters);
+        let correctedFilters = {};
+        for (let filter in filters) {
+            if (filters[filter]) {
+                correctedFilters[filter] = filters[filter];
+            }
+        }
+
+        for (let correctedFilter in correctedFilters){
+            if (Array.isArray(correctedFilters[correctedFilter])){
+                correctedFilters[correctedFilter] = correctedFilters[correctedFilter].join(',');
+            }
+        }
+        setFilters(correctedFilters);
         const query = new URLSearchParams(window.location.search);
         if (sorter.field) {
             query.set('sort_field', sorter.field);
