@@ -433,6 +433,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
     const [uploadData, setUploadData] = useState([]);
+    const [primaryData, setPrimaryData] = useState([]);
+    const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
@@ -442,13 +444,12 @@ const DataTable = (props) => {
     const [sortField, setSortField] = useState(props.sortField);
     const [sortOrder, setSortOrder] = useState(props.sortOrder);
     const [filters, setFilters] = useState(props.tableFilters);
-    const [originalDatasetData, setOriginalDatasetData] = useState([]);
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
     useEffect(() => {
         loadData();
     }, []);
-
+    console.log(`filters: ${JSON.stringify(filters)}`);
     const handleTableChange = (pagination, filters, sorter) => {
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
@@ -515,6 +516,10 @@ const DataTable = (props) => {
         }
     }
 
+    const getPrimaryDatasets = (dataResponse) => {
+        return dataResponse.filter(dataset => dataset.parent_dataset === null || dataset.parent_dataset === undefined || dataset.parent_dataset.trim() === "");
+    }
+
     // const handleInitialProps = (sortField, sortOrder, page, pageSize, filters) => {
     //     setSorter({
     //         columnKey: sortField,
@@ -530,8 +535,10 @@ const DataTable = (props) => {
         try {
             const datasetResponse = await axios.get(datasetUrl);
             const uploadResponse = await axios.get(uploadUrl);
+            const primaryDatasets = getPrimaryDatasets(datasetResponse.data);
             setDatasetData(datasetResponse.data);
-            setOriginalDatasetData(datasetResponse.data);
+            setPrimaryData(primaryDatasets);
+            setOriginalPrimaryData(primaryDatasets);
             setUploadData(uploadResponse.data);
             filterUploads(uploadResponse.data, datasetResponse.data, selectUploadId);
         } catch (error) {
@@ -548,16 +555,20 @@ const DataTable = (props) => {
         } else {
             window.history.pushState(null, null, `/`)
         }
+        setFilters({});
+        setSortField(undefined);
+        setSortOrder(undefined);
+        setPage(undefined);
 
     };
     //
     // const clearUploadFilter = () => {
     //     setSelectUploadId(undefined);
-    //     setDatasetData(originalDatasetData);
+    //     setDatasetData(originalPrimaryData);
     // };
     const table = useDatasetApi ? (
         <DatasetTable
-            data={datasetData}
+            data={primaryData}
             loading={loading}
             handleTableChange={handleTableChange}
             //handleInitialProps={handleInitialProps}
@@ -573,7 +584,7 @@ const DataTable = (props) => {
             loading={loading}
             filterUploads={filterUploads}
             uploadData={uploadData}
-            datasetData={originalDatasetData}
+            datasetData={originalPrimaryData}
             handleTableChange={handleTableChange}
             //handleInitialProps={handleInitialProps}
             page={page}
