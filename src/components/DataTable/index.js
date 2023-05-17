@@ -449,7 +449,6 @@ const DataTable = (props) => {
     useEffect(() => {
         loadData();
     }, []);
-    console.log(`filters: ${JSON.stringify(filters)}`);
     const handleTableChange = (pagination, filters, sorter) => {
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
@@ -517,7 +516,8 @@ const DataTable = (props) => {
     }
 
     const getPrimaryDatasets = (dataResponse) => {
-        return dataResponse.filter(dataset => dataset.parent_dataset === null || dataset.parent_dataset === undefined || dataset.parent_dataset.trim() === "");
+        console.log(JSON.stringify(dataResponse));
+        return dataResponse.filter(dataset => dataset.is_primary === "true");
     }
 
     // const handleInitialProps = (sortField, sortOrder, page, pageSize, filters) => {
