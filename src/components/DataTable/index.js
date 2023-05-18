@@ -33,6 +33,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "data_types"){
             defaultSortOrder["data_types"] = order;
         }
+        if (field === "descendants"){
+            defaultSortOrder["descendants"] = order;
+        }
         if (field === "provider_experiment_id"){
             defaultSortOrder["provider_experiment_id"] = order;
         }
@@ -157,6 +160,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
+        },
+        {
+          title: "Descendants",
+          dataIndex: "descendants",
+          align: "center",
+          editTable: true,
+          defaultSortOrder: defaultSortOrder["descendants"] || null,
+          sorter: (a,b) => a.descendants.localeCompare(b.descendants),
         },
         {
             title: "Provider Experiment ID",
@@ -516,7 +527,6 @@ const DataTable = (props) => {
     }
 
     const getPrimaryDatasets = (dataResponse) => {
-        console.log(JSON.stringify(dataResponse));
         return dataResponse.filter(dataset => dataset.is_primary === "true");
     }
 
@@ -529,14 +539,30 @@ const DataTable = (props) => {
     //     setFilter(filters);
     // }
 
+    const addDescendants = (datasetResponse) => {
+        return datasetResponse.map(dataset => {
+            const descendantsArray = dataset.descendant_datasets ? dataset.descendant_datasets.split(",") : [];
+            let descendant = "";
+            if (descendantsArray.length === 1) {
+                descendant = descendantsArray[0];
+            } else if (descendantsArray.length > 1) {
+                descendant = descendantsArray.length.toString();
+            }
+            return {
+                ...dataset,
+                descendants: descendant
+            };
+        });
+    }
 
     const loadData = async () => {
         setLoading(true);
         try {
             const datasetResponse = await axios.get(datasetUrl);
             const uploadResponse = await axios.get(uploadUrl);
-            const primaryDatasets = getPrimaryDatasets(datasetResponse.data);
-            setDatasetData(datasetResponse.data);
+            const datasetsWithDescendants = addDescendants(datasetResponse.data);
+            const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
+            setDatasetData(datasetsWithDescendants);
             setPrimaryData(primaryDatasets);
             setOriginalPrimaryData(primaryDatasets);
             setUploadData(uploadResponse.data);
