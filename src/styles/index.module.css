@@ -1,0 +1,15 @@
+.Banner {
+    background-color: #454a63;
+    color: white;
+    display: flex
+}
+
+.Title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.Logo {
+
+}
