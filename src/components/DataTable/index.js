@@ -455,6 +455,7 @@ const DataTable = (props) => {
     const [sortField, setSortField] = useState(props.sortField);
     const [sortOrder, setSortOrder] = useState(props.sortOrder);
     const [filters, setFilters] = useState(props.tableFilters);
+    const [tableKey, setTableKey] = useState('initialKey');
     const datasetUrl = "http://localhost:8484/datasets/data-status";
     const uploadUrl = "http://localhost:8484/uploads/data-status";
     useEffect(() => {
@@ -530,15 +531,6 @@ const DataTable = (props) => {
         return dataResponse.filter(dataset => dataset.is_primary === "true");
     }
 
-    // const handleInitialProps = (sortField, sortOrder, page, pageSize, filters) => {
-    //     setSorter({
-    //         columnKey: sortField,
-    //         sortOrder: sortOrder,
-    //     });
-    //     setPagination(current, pageSize);
-    //     setFilter(filters);
-    // }
-
     const addDescendants = (datasetResponse) => {
         return datasetResponse.map(dataset => {
             const descendantsArray = dataset.descendant_datasets ? dataset.descendant_datasets.split(",") : [];
@@ -584,20 +576,31 @@ const DataTable = (props) => {
         setFilters({});
         setSortField(undefined);
         setSortOrder(undefined);
-        setPage(undefined);
+        setPage(1);
+        setPageSize( 10);
+    };
+
+    const clearAll = () => {
+        setInvalidUploadId(false);
+        if (!useDatasetApi) {
+            window.history.pushState(null, null, `/?entity_type=uploads`)
+        } else {
+            window.history.pushState(null, null, `/`)
+        }
+        setFilters({});
+        setSortField(undefined);
+        setSortOrder(undefined);
+        setPage(1);
+        setPageSize( 10);
+        setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
 
     };
-    //
-    // const clearUploadFilter = () => {
-    //     setSelectUploadId(undefined);
-    //     setDatasetData(originalPrimaryData);
-    // };
     const table = useDatasetApi ? (
         <DatasetTable
+            key={tableKey}
             data={primaryData}
             loading={loading}
             handleTableChange={handleTableChange}
-            //handleInitialProps={handleInitialProps}
             page={page}
             pageSize={pageSize}
             sortField={sortField}
@@ -606,13 +609,13 @@ const DataTable = (props) => {
         />
     ) : (
         <UploadTable
+            key={tableKey}
             data={uploadData}
             loading={loading}
             filterUploads={filterUploads}
             uploadData={uploadData}
             datasetData={originalPrimaryData}
             handleTableChange={handleTableChange}
-            //handleInitialProps={handleInitialProps}
             page={page}
             pageSize={pageSize}
             sortField={sortField}
@@ -630,9 +633,9 @@ const DataTable = (props) => {
             <button onClick={toggleApi}>
                 {useDatasetApi ? "Switch to Uploads Table" : 'Switch to Datasets Table'}
             </button>
-            {/*<button>*/}
-            {/*    onClick={clearUploadFilter}>*/}
-            {/*</button>*/}
+            <button onClick={clearAll} style={{ marginLeft: '1rem' }}>
+                {"Clear All"}
+            </button>
             {table}
         </div>
     )
