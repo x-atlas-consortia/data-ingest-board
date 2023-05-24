@@ -9,11 +9,16 @@
     margin-right: 7rem;
 }
 
+.ButtonContainer {
+    text-align: center;
+}
+
 .Button {
     margin-bottom: 1rem;
-    /*font-family: Roboto, sans-serif;*/
     font-family: inherit;
-    padding: .75rem 10rem;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    width: 24rem;
     font-weight: bolder;
     cursor: pointer;
     border-radius: 7px;
@@ -26,15 +31,20 @@
 
 .CurrentEntity {
     font-size: 2rem;
+    font-weight: 1000;
 }
 
 .Clear {
     border-color: lightblue;
     background-color: white;
     color: #2074d4;
+    margin-left: 1rem;
+    display: inline-block;
 }
 
 .Switch {
     background-color: #2074d4;
     color: white;
+    display: inline-block;
+
 }

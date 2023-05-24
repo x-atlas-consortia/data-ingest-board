@@ -61,9 +61,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "has_donor_metadata"){
             defaultSortOrder["has_donor_metadata"] = order;
         }
-        if (field === "parent_dataset"){
-            defaultSortOrder["parent_dataset"] = order;
-        }
         if (field === "upload"){
             defaultSortOrder["upload"] = order;
         }
@@ -98,15 +95,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const datasetColumns = [
         {
             title: "HuBMAP ID",
-            width: 1000,
+            width: 175,
             dataIndex: "hubmap_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
+            ellipsis: true,
         },
         {
             title: "Group Name",
-            width: 1000,
+            width: 300,
             dataIndex: "group_name",
             align: "center",
             defaultSortOrder: defaultSortOrder["group_name"] || null,
@@ -114,15 +112,17 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
         },
         {
             title: "Status",
-            width: 1000,
+            width: 150,
             dataIndex: "status",
             align: "center",
             defaultSortOrder: defaultSortOrder["status"] || null,
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
+            ellipsis: true,
             filters: [
                 {text: 'Unpublished', value: 'Unpublished'},
                 {text: 'Published', value: 'Published'},
@@ -142,7 +142,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Organ Type",
-            width: 1000,
+            width: 150,
             dataIndex: "organ",
             align: "center",
             defaultSortOrder: defaultSortOrder["organ_type"] || null,
@@ -150,10 +150,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["organ_type"] || null,
             filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
         },
         {
             title: "Data Types",
-            width: 1000,
+            width: 150,
             dataIndex: "data_types",
             align: "center",
             defaultSortOrder: defaultSortOrder["data_types"] || null,
@@ -161,133 +162,144 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
         },
         {
             title: "Descendants",
-            width: 1000,
+            width: 175,
             dataIndex: "descendants",
             align: "center",
             defaultSortOrder: defaultSortOrder["descendants"] || null,
             sorter: (a,b) => a.descendants.localeCompare(b.descendants),
+            ellipsis: true,
         },
         {
             title: "Provider Experiment ID",
-            width: 1000,
+            width: 200,
             dataIndex: "provider_experiment_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["provider_experiment_id"] || null,
             sorter: (a,b) => a.provider_experiment_id.localeCompare(b.provider_experiment_id),
+            ellipsis: true,
         },
         {
             title: "Last Touch",
-            width: 1000,
+            width: 225,
             dataIndex: "last_touch",
             align: "center",
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
+            ellipsis: true,
         },
         {
             title: "Has Contacts",
-            width: 1000,
+            width: 150,
             dataIndex: "has_contacts",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_contacts"] || null,
             sorter: (a,b) => b.has_contacts.localeCompare(a.has_contacts),
+            ellipsis: true,
         },
         {
             title: "Has Contributors",
-            width: 1000,
+            width: 175,
             dataIndex: "has_contributors",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_contributors"] || null,
             sorter: (a,b) => b.has_contributors.localeCompare(a.has_contributors),
+            ellipsis: true,
         },
         {
             title: "Donor HuBMAP ID",
-            width: 1000,
+            width: 175,
             dataIndex: "donor_hubmap_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["donor_hubmap_id"] || null,
             sorter: (a,b) => a.donor_hubmap_id.localeCompare(b.donor_hubmap_id),
+            ellipsis: true,
         },{
             title: "Donor Submission ID",
-            width: 1000,
+            width: 200,
             dataIndex: "donor_submission_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["donor_submission_id"] || null,
             sorter: (a,b) => a.donor_submission_id.localeCompare(b.donor_submission_id),
+            ellipsis: true,
         },
         {
             title: "Donor Lab ID",
-            width: 1000,
+            width: 150,
             dataIndex: "donor_lab_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["donor_lab_id"] || null,
             sorter: (a,b) => a.donor_lab_id.localeCompare(b.donor_lab_id),
+            ellipsis: true,
         },
         {
             title: "Has Donor Metadata",
-            width: 1000,
+            width: 200,
             dataIndex: "has_metadata",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_donor_metadata"] || null,
             sorter: (a,b) => b.has_metadata.localeCompare(a.has_metadata),
-        },
-        {
-            title: "Parent Dataset",
-            width: 1000,
-            dataIndex: "parent_dataset",
-            align: "center",
-            defaultSortOrder: defaultSortOrder["parent_dataset"] || null,
-            sorter: (a,b) => a.parent_dataset.localeCompare(b.parent_dataset),
+            ellipsis: true,
         },
         {
             title: "Upload",
-            width: 1000,
+            width: 200,
             dataIndex: "upload",
             align: "center",
             defaultSortOrder: defaultSortOrder["upload"] || null,
             sorter: (a,b) => a.upload.localeCompare(b.upload),
+            ellipsis: true,
         },
         {
             title: "Has Rui Info",
-            width: 1000,
+            width: 200,
             dataIndex: "has_rui_info",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
+            ellipsis: true,
         },
         {
             title: "Has Data",
-            width: 1000,
+            width: 200,
             dataIndex: "has_data",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_data"] || null,
             sorter: (a,b) => b.has_data.localeCompare(a.has_data),
+            ellipsis: true,
         },
         {
             title: "Globus URL",
-            width: 1000,
+            width: 200,
             dataIndex: "globus_url",
             align: "center",
             defaultSortOrder: defaultSortOrder["globus_url"] || null,
             sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
+            ellipsis: true,
+            render: (text) => <a href={text}>{text}</a>,
         },
         {
             title: "Portal URL",
-            width: 1000,
+            width: 200,
             dataIndex: "portal_url",
             align: "center",
             defaultSortOrder: defaultSortOrder["portal_url"] || null,
-            sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
+            sorter: (a,b) => a.portal_url.localeCompare(b.portal_url),
+            ellipsis: true,
+            render: (text) => <a href={text}>{text}</a>,
         },
         {
             title: "Ingest URL",
-            width: 1000,
+            width: 200,
             dataIndex: "ingest_url",
             align: "center",
             defaultSortOrder: defaultSortOrder["ingest_url"] || null,
             sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
+            ellipsis: true,
+            render: (text) => <a href={text}>{text}</a>,
         }
     ]
 
@@ -348,15 +360,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         {
             title: "HuBMAP ID",
-            width: 1000,
+            width: 200,
             dataIndex: "hubmap_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
+            ellipsis: true,
         },
         {
             title: "Group Name",
-            width: 1000,
+            width: 200,
             dataIndex: "group_name",
             align: "center",
             defaultSortOrder: defaultSortOrder["group_name"] || null,
@@ -364,15 +377,17 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
         },
         {
             title: "Status",
-            width: 1000,
+            width: 200,
             dataIndex: "status",
             align: "center",
             defaultSortOrder: defaultSortOrder["status"] || null,
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
+            ellipsis: true,
             filters: [
                 {text: 'Unreorganized', value: 'Unreorganized'},
                 {text: 'Error', value: 'Error'},
@@ -392,32 +407,36 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Ingest Url",
-            width: 1000,
+            width: 200,
             dataIndex: "ingest_url",
             align: "center",
             defaultSortOrder: defaultSortOrder["ingest_url"] || null,
             sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
+            ellipsis: true,
         },
         {
             title: "Title",
-            width: 1000,
+            width: 200,
             dataIndex: "title",
             align: "center",
             defaultSortOrder: defaultSortOrder["title"] || null,
             sorter: (a,b) => a.title.localeCompare(b.title),
+            ellipsis: true,
         },
         {
             title: "UUID",
-            width: 1000,
+            width: 200,
             dataIndex: "uuid",
             align: "center",
             defaultSortOrder: defaultSortOrder["uuid"] || null,
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
+            ellipsis: true,
         },
         {
             title: "Show Datasets",
-            width: 1000,
+            width: 200,
             dataIndex: "show_datasets",
+            ellipsis: true,
             render: (text, record) => (
                 <Button onClick={() => {
                     const hm_uuid = record.uuid.trim();
@@ -638,12 +657,15 @@ const DataTable = (props) => {
                 </h2>
             </center>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <button className={`${styles.Button} ${styles.Switch}`} onClick={toggleApi}>
-                {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
-            </button>
-            <button className={`${styles.Button} ${styles.Clear}`} onClick={clearAll} style={{ marginLeft: '1rem' }}>
-                {"CLEAR"}
-            </button>
+            <div className={styles.ButtonContainer}>
+                <button className={`${styles.Button} ${styles.Switch}`} onClick={toggleApi}>
+                    {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
+                </button>
+                <button className={`${styles.Button} ${styles.Clear}`} onClick={clearAll}>
+                    {"CLEAR"}
+                </button>
+            </div>
+
             {table}
         </div>
     )
