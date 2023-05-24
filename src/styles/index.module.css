@@ -1,15 +1,31 @@
+.App {
+    background-color: #ebebeb;
+    margin: 1rem 5rem;
+}
+
 .Banner {
     background-color: #454a63;
     color: white;
-    display: flex
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin: -1rem -6rem;
+    padding-left: 6rem;
+    padding-right: 6rem;
 }
 
 .Title {
     text-align: center;
-    margin-left: auto;
-    margin-right: auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .Logo {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
 
+.DataTable {
+    border-right: 200px;
 }

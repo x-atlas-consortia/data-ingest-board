@@ -4,6 +4,7 @@
 // import styles from '@/styles/Home.module.css'
 import styles from '@/styles/index.module.css'
 import DataTable from "@/components/DataTable";
+import Image from 'next/image';
 import { useState } from "react";
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
@@ -15,16 +16,14 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     const [sortOrder, setSortOrder] = useState(sort_order);
     const [tableFilters, setTableFilters] = useState(filters);
     return (
-        <div className="App" style={{ padding: "0 80px" }}>
+        <div className={styles.App}>
             <div className={styles.Banner}>
-                <h1 className={styles.Logo}>
-                    HuBMAP
-                </h1>
+                <Image className={styles.Logo} src='/images/hubmap-type-white250.png' alt="HuBMAP Logo" width={150} height={37.5}/>
                 <h1 className={styles.Title}>
                     Dataset Publication Dashboard
                 </h1>
             </div>
-            <DataTable
+            <DataTable className={styles.DataTable}
                 entityType={entityType}
                 setEntityType={setEntityType}
                 selectUploadId={selectUploadId}

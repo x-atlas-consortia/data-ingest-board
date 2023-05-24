@@ -1,0 +1,40 @@
+.DataTable {
+    background-color: white;
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-top: 1rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    margin-left: 7rem;
+    margin-right: 7rem;
+}
+
+.Button {
+    margin-bottom: 1rem;
+    /*font-family: Roboto, sans-serif;*/
+    font-family: inherit;
+    padding: .75rem 10rem;
+    font-weight: bolder;
+    cursor: pointer;
+    border-radius: 7px;
+    box-shadow: none;
+}
+
+.Table {
+
+}
+
+.CurrentEntity {
+    font-size: 2rem;
+}
+
+.Clear {
+    border-color: lightblue;
+    background-color: white;
+    color: #2074d4;
+}
+
+.Switch {
+    background-color: #2074d4;
+    color: white;
+}
