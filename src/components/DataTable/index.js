@@ -246,7 +246,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Upload",
-            width: 200,
+            width: 300,
             dataIndex: "upload",
             align: "center",
             defaultSortOrder: defaultSortOrder["upload"] || null,
@@ -255,7 +255,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Has Rui Info",
-            width: 200,
+            width: 150,
             dataIndex: "has_rui_info",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
@@ -264,7 +264,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Has Data",
-            width: 200,
+            width: 125,
             dataIndex: "has_data",
             align: "center",
             defaultSortOrder: defaultSortOrder["has_data"] || null,
@@ -308,6 +308,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             columns={datasetColumns}
             className={className}
             dataSource={data}
+            showHeader={!loading}
             bordered
             loading={loading}
             pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
@@ -360,7 +361,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         {
             title: "HuBMAP ID",
-            width: 200,
+            width: 175,
             dataIndex: "hubmap_id",
             align: "center",
             defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
@@ -369,7 +370,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Group Name",
-            width: 200,
+            width: 250,
             dataIndex: "group_name",
             align: "center",
             defaultSortOrder: defaultSortOrder["group_name"] || null,
@@ -381,7 +382,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Status",
-            width: 200,
+            width: 125,
             dataIndex: "status",
             align: "center",
             defaultSortOrder: defaultSortOrder["status"] || null,
@@ -400,7 +401,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ],
             onFilter: (value, record) => {
                 if (value === 'Unreorganized') {
-                    return record.status.toLowerCase() !== 'Reorganized';
+                    return record.status.toLowerCase() !== 'reorganized';
                 }
                 return record.status.toLowerCase() === value.toLowerCase();
             }
@@ -413,10 +414,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder: defaultSortOrder["ingest_url"] || null,
             sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
             ellipsis: true,
+            render: (text) => <a href={text}>{text}</a>,
+
         },
         {
             title: "Title",
-            width: 200,
+            width: 250,
             dataIndex: "title",
             align: "center",
             defaultSortOrder: defaultSortOrder["title"] || null,
@@ -434,7 +437,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Show Datasets",
-            width: 200,
+            width: 125,
             dataIndex: "show_datasets",
             ellipsis: true,
             render: (text, record) => (
@@ -453,6 +456,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         <Table
             columns={uploadColumns}
             className={className}
+            showHeader={!loading}
             dataSource={data}
             bordered
             loading={loading}
@@ -540,9 +544,11 @@ const DataTable = (props) => {
                 const datasetsInUpload = matchingUpload.datasets;
                 const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
                 const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
-                setDatasetData(filteredDatasets);
+                setPrimaryData(filteredDatasets);
+                setSelectUploadId(uploadId);
                 setUseDatasetApi(true);
                 setInvalidUploadId(false);
+                window.history.pushState(null, null, `/?upload_id=${uploadId}`)
             }
             else if (typeof matchingUpload === 'undefined') {
                 setInvalidUploadId(true);
@@ -610,6 +616,7 @@ const DataTable = (props) => {
         } else {
             window.history.pushState(null, null, `/`)
         }
+        setPrimaryData(originalPrimaryData);
         setFilters({});
         setSortField(undefined);
         setSortOrder(undefined);
