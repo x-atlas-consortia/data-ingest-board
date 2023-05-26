@@ -2,8 +2,9 @@
 // import Image from 'next/image'
 // import { Inter } from 'next/font/google'
 // import styles from '@/styles/Home.module.css'
-import styles from '@/styles/index.module.css'
+import styles from '@/styles/index.module.css';
 import DataTable from "@/components/DataTable";
+import Login from "@/components/Login";
 import Image from 'next/image';
 import { useState } from "react";
 
@@ -23,6 +24,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                     Dataset Publication Dashboard
                 </h1>
             </div>
+            {/*<Login*/}
+            {/*/>*/}
             <DataTable className={styles.DataTable}
                 entityType={entityType}
                 setEntityType={setEntityType}
