@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from '@/styles/dataTable.module.css';
 import axios from "axios";
-import { Table, Button } from "antd";
+import {Table, Button, Dropdown, Menu} from "antd";
+import { ExportOutlined} from "@ant-design/icons";
+import {Span} from "next/dist/server/lib/trace/tracer";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -92,6 +94,36 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
+
+    // const renderHubmapIdPopupContent = (hubmapId, record) => (
+    //     <div>
+    //         <p>
+    //             {record.uuid}
+    //         </p>
+    //
+    //     </div>
+    // )
+    //
+    // const showModal = (hubmapId, record) => {
+    //     Modal.info({
+    //         title: 'Links',
+    //         content: renderHubmapIdPopupContent(hubmapId, record),
+    //     })
+    // }
+    const renderDropdownContent = (record) => (
+        <Menu>
+            <Menu.Item key="1">
+                <a href={record.portal_url}>{record.portal_url}</a>
+            </Menu.Item>
+            <Menu.Item key="2">
+                <a href={record.ingest_url}>{record.ingest_url}</a>
+            </Menu.Item>
+            <Menu.Item key="3">
+                <a href={record.globus_url}>{record.globus_url}</a>
+            </Menu.Item>
+        </Menu>
+);
+
     const datasetColumns = [
         {
             title: "HuBMAP ID",
@@ -101,6 +133,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
             sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
             ellipsis: true,
+            // render: (hubmapId, record) => (
+            //     <a href="#" onClick={() => showModal(hubmapId, record)}>
+            //         {hubmapId}
+            //     </a>
+            // )
+            render: (hubmapId, record) => (
+                <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
+                    <a href="#">{hubmapId}<ExportOutlined /></a>
+                </Dropdown>
+            )
         },
         {
             title: "Group Name",
@@ -164,15 +206,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
             ellipsis: true,
         },
-        {
-            title: "Descendants",
-            width: 175,
-            dataIndex: "descendants",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["descendants"] || null,
-            sorter: (a,b) => a.descendants.localeCompare(b.descendants),
-            ellipsis: true,
-        },
+        // {
+        //     title: "Descendants",
+        //     width: 175,
+        //     dataIndex: "descendants",
+        //     align: "left",
+        //     defaultSortOrder: defaultSortOrder["descendants"] || null,
+        //     sorter: (a,b) => a.descendants.localeCompare(b.descendants),
+        //     ellipsis: true,
+        // },
         {
             title: "Provider Experiment ID",
             width: 200,
@@ -271,36 +313,36 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => b.has_data.localeCompare(a.has_data),
             ellipsis: true,
         },
-        {
-            title: "Globus URL",
-            width: 200,
-            dataIndex: "globus_url",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["globus_url"] || null,
-            sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
-            ellipsis: true,
-            render: (text) => <a href={text}>{text}</a>,
-        },
-        {
-            title: "Portal URL",
-            width: 200,
-            dataIndex: "portal_url",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["portal_url"] || null,
-            sorter: (a,b) => a.portal_url.localeCompare(b.portal_url),
-            ellipsis: true,
-            render: (text) => <a href={text}>{text}</a>,
-        },
-        {
-            title: "Ingest URL",
-            width: 200,
-            dataIndex: "ingest_url",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["ingest_url"] || null,
-            sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
-            ellipsis: true,
-            render: (text) => <a href={text}>{text}</a>,
-        }
+        // {
+        //     title: "Globus URL",
+        //     width: 200,
+        //     dataIndex: "globus_url",
+        //     align: "left",
+        //     defaultSortOrder: defaultSortOrder["globus_url"] || null,
+        //     sorter: (a,b) => a.globus_url.localeCompare(b.globus_url),
+        //     ellipsis: true,
+        //     render: (text) => <a href={text}>{text}</a>,
+        // },
+        // {
+        //     title: "Portal URL",
+        //     width: 200,
+        //     dataIndex: "portal_url",
+        //     align: "left",
+        //     defaultSortOrder: defaultSortOrder["portal_url"] || null,
+        //     sorter: (a,b) => a.portal_url.localeCompare(b.portal_url),
+        //     ellipsis: true,
+        //     render: (text) => <a href={text}>{text}</a>,
+        // },
+        // {
+        //     title: "Ingest URL",
+        //     width: 200,
+        //     dataIndex: "ingest_url",
+        //     align: "left",
+        //     defaultSortOrder: defaultSortOrder["ingest_url"] || null,
+        //     sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
+        //     ellipsis: true,
+        //     render: (text) => <a href={text}>{text}</a>,
+        // }
     ]
 
     return (
