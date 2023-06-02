@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styles from '@/styles/dataTable.module.css'
+import styles from '@/styles/dataTable.module.css';
 import axios from "axios";
 import { Table, Button } from "antd";
 
@@ -306,13 +306,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     return (
         <Table
             columns={datasetColumns}
-            className={className}
+            // className={className}
             dataSource={data}
             showHeader={!loading}
             bordered={false}
             loading={loading}
             pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1500 }}
+            scroll={{ x: 1500, y: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
         />
@@ -446,7 +446,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     filterUploads(uploadData, datasetData, hm_uuid);
                     window.history.pushState(null, null, `/?upload_id=${record.hubmap_id}`)
                 }}>
-                    Filter
+                    Show Datasets
                 </Button>
             )
         }
@@ -455,7 +455,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     return (
         <Table
             columns={uploadColumns}
-            className={className}
+            // className={className}
             showHeader={!loading}
             dataSource={data}
             bordered={false}

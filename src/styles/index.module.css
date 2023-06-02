@@ -1,6 +1,7 @@
 .App {
     background-color: #ebebeb;
-    margin: 1rem 5rem;
+    /*margin: 1rem 5rem;*/
+    margin: 1vh 2vw;
 }
 
 .Banner {
@@ -22,10 +23,12 @@
 }
 
 .Logo {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    /*margin-top: 1rem;*/
+    /*margin-bottom: 1rem;*/
+    margin-top: 3vh;
+    margin-bottom: 2vh;
 }
 
-.DataTable {
-    border-right: 200px;
-}
+/*.DataTable {*/
+/*    border-right: 200px;*/
+/*}*/

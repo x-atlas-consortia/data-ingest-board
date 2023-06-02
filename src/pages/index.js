@@ -21,7 +21,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             <div className={styles.Banner}>
                 <Image className={styles.Logo} src='/images/hubmap-type-white250.png' alt="HuBMAP Logo" width={150} height={37.5}/>
                 <h1 className={styles.Title}>
-                    Dataset Publication Dashboard
+                    Data Ingest Board
                 </h1>
             </div>
             {/*<Login*/}
