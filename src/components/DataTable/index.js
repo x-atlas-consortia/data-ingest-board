@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import styles from '@/styles/dataTable.module.css';
 import axios from "axios";
 import {Table, Button, Dropdown, Menu} from "antd";
 import { ExportOutlined} from "@ant-design/icons";
@@ -669,7 +668,7 @@ const DataTable = (props) => {
     };
     const table = useDatasetApi ? (
         <DatasetTable
-            className= {styles.Table}
+            className= "Table"
             key={tableKey}
             data={primaryData}
             loading={loading}
@@ -682,7 +681,7 @@ const DataTable = (props) => {
         />
     ) : (
         <UploadTable
-            className={styles.Table}
+            className="Table"
             key={tableKey}
             data={uploadData}
             loading={loading}
@@ -699,18 +698,18 @@ const DataTable = (props) => {
     );
 
     return (
-        <div className={styles.DataTable}>
+        <div className="DataTable">
             <center>
-                <h2 className={styles.CurrentEntity}>
+                <h2 className="CurrentEntity">
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </center>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className={styles.ButtonContainer}>
-                <button className={`${styles.Button} ${styles.Switch}`} onClick={toggleApi}>
+            <div className="ButtonContainer">
+                <button className="Button Switch" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
-                <button className={`${styles.Button} ${styles.Clear}`} onClick={clearAll}>
+                <button className="Button Clear" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
             </div>

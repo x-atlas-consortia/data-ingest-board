@@ -1,4 +1,5 @@
 import '@/styles/globals.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { Roboto } from 'next/font/google';
 
 
