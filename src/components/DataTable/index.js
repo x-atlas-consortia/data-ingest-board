@@ -698,18 +698,18 @@ const DataTable = (props) => {
     );
 
     return (
-        <div className="DataTable">
-            <center>
-                <h2 className="CurrentEntity">
+        <div className="DataTable container">
+            <div className="row">
+                <h2 className="CurrentEntity col text-center m-3">
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
-            </center>
+            </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="ButtonContainer">
-                <button className="Button Switch" onClick={toggleApi}>
+            <div className="ButtonContainer row">
+                <button className="Button Switch col-3 offset-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
-                <button className="Button Clear" onClick={clearAll}>
+                <button className="Button Clear col-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
             </div>

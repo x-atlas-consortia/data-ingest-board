@@ -17,10 +17,14 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     return (
         <div className="App">
             <div className="Banner">
-                <Image className="Logo" src='/images/hubmap-type-white250.png' alt="HuBMAP Logo" width={150} height={37.5}/>
-                <h1 className="Title">
-                    Data Ingest Board
-                </h1>
+                <div className="container">
+                    <div className="row">
+                        <img className="Logo col-2 img-fluid p-3" src="images/hubmap-type-white250.png" alt="HuBMAP Logo"/>
+                        <h1 className="Title col-4 offset-2 d-flex justify-content-center align-items-center text-center">
+                            Data Ingest Board
+                        </h1>
+                    </div>
+                </div>
             </div>
             {/*<Login*/}
             {/*/>*/}
