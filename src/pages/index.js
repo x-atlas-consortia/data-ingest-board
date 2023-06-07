@@ -33,8 +33,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 setEntityType={setEntityType}
                 selectUploadId={selectUploadId}
                 setSelectUploadId={setSelectUploadId}
-                initialPage={initialPage}
-                setInitialPage={setInitialPage}
+                initialPage={parseInt(initialPage)}
+                setInitialPage={parseInt(setInitialPage)}
                 pageSize={pageSize}
                 setPageSize={setPageSize}
                 sortField={sortField}

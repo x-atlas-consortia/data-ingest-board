@@ -32,6 +32,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "organ_type"){
             defaultSortOrder["organ_type"] = order;
         }
+        if (field === "organ_hubmap_id"){
+            defaultSortOrder["organ_hubmap_id"] = order;
+        }
         if (field === "data_types"){
             defaultSortOrder["data_types"] = order;
         }
@@ -162,6 +165,18 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             }
         },
         {
+            title: "Data Types",
+            width: 150,
+            dataIndex: "data_types",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["data_types"] || null,
+            sorter: (a,b) => a.data_types.localeCompare(b.data_types),
+            defaultFilteredValue: defaultFilteredValue["data_types"] || null,
+            filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
+        },
+        {
             title: "Organ Type",
             width: 150,
             dataIndex: "organ",
@@ -174,16 +189,21 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Data Types",
-            width: 150,
-            dataIndex: "data_types",
+            title: "Organ Hubmap Id",
+            width: 175,
+            dataIndex: "organ_hubmap_id",
             align: "left",
-            defaultSortOrder: defaultSortOrder["data_types"] || null,
-            sorter: (a,b) => a.data_types.localeCompare(b.data_types),
-            defaultFilteredValue: defaultFilteredValue["data_types"] || null,
-            filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
+            defaultSortOrder: defaultSortOrder['organ_hubmap_id'] || null,
+            sorter: (a,b) => a.organ_hubmap_id.localeCompare(b.organ_hubmap_id),
             ellipsis: true,
+            render: (organHubmapId, record) => {
+                if (!organHubmapId.trim()) {
+                    return null;
+                }
+                return (
+                    <a href={record.organ_portal_url} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined /></a>
+                );
+            }
         },
         {
             title: "Provider Experiment ID",
@@ -258,7 +278,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Upload",
-            width: 300,
+            width: 175,
             dataIndex: "upload",
             align: "left",
             defaultSortOrder: defaultSortOrder["upload"] || null,
@@ -284,7 +304,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
     ]
-
     return (
         <Table className="m-4"
             columns={datasetColumns}
@@ -360,7 +379,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         {
             title: "HuBMAP ID",
-            width: 175,
+            width: '15%',
             dataIndex: "hubmap_id",
             align: "left",
             defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
@@ -374,7 +393,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Group Name",
-            width: 250,
+            width: '25%',
             dataIndex: "group_name",
             align: "left",
             defaultSortOrder: defaultSortOrder["group_name"] || null,
@@ -386,7 +405,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Status",
-            width: 125,
+            width: '10%',
             dataIndex: "status",
             align: "left",
             defaultSortOrder: defaultSortOrder["status"] || null,
@@ -411,19 +430,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             }
         },
         {
-            title: "Ingest Url",
-            width: 200,
-            dataIndex: "ingest_url",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["ingest_url"] || null,
-            sorter: (a,b) => a.ingest_url.localeCompare(b.ingest_url),
-            ellipsis: true,
-            render: (text) => <a href={text}>{text}</a>,
-
-        },
-        {
             title: "Title",
-            width: 250,
+            width: '25%',
             dataIndex: "title",
             align: "left",
             defaultSortOrder: defaultSortOrder["title"] || null,
@@ -432,7 +440,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "UUID",
-            width: 200,
+            width: '25%',
             dataIndex: "uuid",
             align: "left",
             defaultSortOrder: defaultSortOrder["uuid"] || null,
@@ -450,7 +458,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             bordered={false}
             loading={loading}
             pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1500 }}
+            scroll={{ x: 1000 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
         />
@@ -651,7 +659,7 @@ const DataTable = (props) => {
                 </h2>
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="ButtonContainer row">
+            <div className="row">
                 <button className="Button Switch col-3 offset-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
