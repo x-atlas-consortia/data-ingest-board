@@ -94,31 +94,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
 
-    // const renderHubmapIdPopupContent = (hubmapId, record) => (
-    //     <div>
-    //         <p>
-    //             {record.uuid}
-    //         </p>
-    //
-    //     </div>
-    // )
-    //
-    // const showModal = (hubmapId, record) => {
-    //     Modal.info({
-    //         title: 'Links',
-    //         content: renderHubmapIdPopupContent(hubmapId, record),
-    //     })
-    // }
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={record.portal_url}>{record.portal_url}</a>
+                <a href={record.portal_url} target="_blank" rel="noopener noreferrer">{record.portal_url}</a>
             </Menu.Item>
             <Menu.Item key="2">
-                <a href={record.ingest_url}>{record.ingest_url}</a>
+                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">{record.ingest_url}</a>
             </Menu.Item>
             <Menu.Item key="3">
-                <a href={record.globus_url}>{record.globus_url}</a>
+                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">{record.globus_url}</a>
             </Menu.Item>
         </Menu>
 );
@@ -345,7 +330,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     ]
 
     return (
-        <Table
+        <Table className="m-4"
             columns={datasetColumns}
             // className={className}
             dataSource={data}
@@ -494,7 +479,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     ];
 
     return (
-        <Table
+        <Table className="m-4"
             columns={uploadColumns}
             // className={className}
             showHeader={!loading}
@@ -668,7 +653,6 @@ const DataTable = (props) => {
     };
     const table = useDatasetApi ? (
         <DatasetTable
-            className= "Table"
             key={tableKey}
             data={primaryData}
             loading={loading}
@@ -681,7 +665,6 @@ const DataTable = (props) => {
         />
     ) : (
         <UploadTable
-            className="Table"
             key={tableKey}
             data={uploadData}
             loading={loading}
