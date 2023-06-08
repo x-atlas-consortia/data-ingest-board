@@ -14,6 +14,14 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     const [sortField, setSortField] = useState(sort_field);
     const [sortOrder, setSortOrder] = useState(sort_order);
     const [tableFilters, setTableFilters] = useState(filters);
+    const [userLoggedIn, setUserLoggedIn] = useState(false);
+    if (initialPage === undefined) {
+        setInitialPage(1);
+    }
+    const handleLogin = () => {
+  setUserLoggedIn(true);
+};
+
     return (
         <div className="App">
             <div className="Banner">
@@ -26,24 +34,26 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                     </div>
                 </div>
             </div>
-            {/*<Login*/}
-            {/*/>*/}
-            <DataTable className="DataTable"
-                entityType={entityType}
-                setEntityType={setEntityType}
-                selectUploadId={selectUploadId}
-                setSelectUploadId={setSelectUploadId}
-                initialPage={parseInt(initialPage)}
-                setInitialPage={parseInt(setInitialPage)}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                sortField={sortField}
-                setSortField={setSortField}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-                tableFilters={tableFilters}
-                setTableFilters={setTableFilters}
-            />
+            {userLoggedIn ? (
+                <DataTable className="DataTable"
+                    entityType={entityType}
+                    setEntityType={setEntityType}
+                    selectUploadId={selectUploadId}
+                    setSelectUploadId={setSelectUploadId}
+                    initialPage={parseInt(initialPage)}
+                    setInitialPage={parseInt(setInitialPage)}
+                    pageSize={pageSize}
+                    setPageSize={setPageSize}
+                    sortField={sortField}
+                    setSortField={setSortField}
+                    sortOrder={sortOrder}
+                    setSortOrder={setSortOrder}
+                    tableFilters={tableFilters}
+                    setTableFilters={setTableFilters}
+                />
+            ) : (
+                <Login onLogin={handleLogin} />
+            )}
         </div>
     );
 }

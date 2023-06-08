@@ -6,19 +6,31 @@ const roboto_heavy = Roboto({
     subsets: ['latin']
 })
 
-const Login = () => {
+const roboto_light = Roboto( {
+    weight: '300',
+    subsets: ['latin']
+})
+
+const Login = ({ onLogin }) => {
+    const handleButtonClick = () => {
+        onLogin();
+    }
     return (
-        <div className={`${styles.LoginBox}`}>
-            <h1 className={`LoginHeader ${roboto_heavy.className}`}>
-                HuBMAP Dataset Dashboard</h1>
-            <p>
+        <div className="LoginBox container">
+            <div className="row">
+                <h1 className={`LoginHeader col-6 ${roboto_heavy.className}`}>
+                    HuBMAP Data Ingest Board</h1>
+            </div>
+            <p className={`LoginText ${roboto_light.className}`}>
                 User authentication is required to view the Dataset Publishing Dashboard.
                 Please click the button below and you will be redirected to a login page. There you can login with your
                 institution credentials. Thank you!
             </p>
-            <hr style={{color: '#085464', borderTop: '1px'}} />
-            <button>Mybutton</button>
-
+            <div className="row">
+                <button onClick={handleButtonClick} className="LoginButton col-4">
+                    Log in with your institution credentials
+                </button>
+            </div>
         </div>
     )
 }
