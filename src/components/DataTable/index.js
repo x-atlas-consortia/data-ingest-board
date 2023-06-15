@@ -466,6 +466,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 };
 
 const DataTable = (props) => {
+    console.log("DATA TABLE IS RENDERED")
     const [datasetData, setDatasetData] = useState([]);
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
