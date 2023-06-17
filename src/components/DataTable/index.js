@@ -466,7 +466,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 };
 
 const DataTable = (props) => {
-    console.log("DATA TABLE IS RENDERED")
     const [datasetData, setDatasetData] = useState([]);
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
@@ -480,9 +479,10 @@ const DataTable = (props) => {
     const [sortField, setSortField] = useState(props.sortField);
     const [sortOrder, setSortOrder] = useState(props.sortOrder);
     const [filters, setFilters] = useState(props.tableFilters);
+    const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
-    const datasetUrl = "http://localhost:8484/datasets/data-status";
-    const uploadUrl = "http://localhost:8484/uploads/data-status";
+    const datasetUrl = process.env.NEXT_PUBLIC_DATASET_URL;
+    const uploadUrl = process.env.NEXT_PUBLIC_UPLOAD_URL;
     useEffect(() => {
         loadData();
     }, []);
@@ -576,9 +576,16 @@ const DataTable = (props) => {
 
     const loadData = async () => {
         setLoading(true);
+        const options = {
+            headers: {
+            Authorization:
+            "Bearer " + globusToken,
+            "Content-Type": "application/json"
+      }
+    };
         try {
-            const datasetResponse = await axios.get(datasetUrl);
-            const uploadResponse = await axios.get(uploadUrl);
+            const datasetResponse = await axios.get(datasetUrl, options);
+            const uploadResponse = await axios.get(uploadUrl, options);
             const datasetsWithDescendants = addDescendants(datasetResponse.data);
             const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
             setDatasetData(datasetsWithDescendants);
