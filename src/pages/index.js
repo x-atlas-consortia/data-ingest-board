@@ -29,45 +29,63 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         setInitialPage(1);
     }
 
-    const checkLocals = (isAuthenticated, initialInfo) => {
+    const checkLocals = (authenticated, initialInfo) => {
         if (initialInfo) {
             setGlobusInfo(initialInfo);
             setGlobusToken(JSON.parse(initialInfo).groups_token)
-        }
-        const validToken = checkToken(JSON.parse(initialInfo).groups_token)
-        setIsAuthenticated(isAuthenticated && validToken.hubmapUser);
-        if (validToken.hubmapUser === false && validToken.validToken === true) {
-            setUnauthorized(true);
+            checkToken(JSON.parse(initialInfo).groups_token).then(validToken => {
+                setIsAuthenticated(authenticated && validToken.hubmapUser);
+                if (validToken.hubmapUser === false && validToken.validToken === true) {
+                    setUnauthorized(true);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         }
         setIsLoading(false);
-
     }
 
     const loginUrl = `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-login`
+    const logoutUrl = `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-logout`
+
     const handleLogin = () => {
         window.location.href = loginUrl
     };
 
+    const handleLogout = () => {
+        window.location.href = logoutUrl
+        setGlobusToken(null);
+        setGlobusInfo(null);
+        setUnauthorized(null);
+        localStorage.removeItem("info");
+        localStorage.removeItem("isAuthenticated");
+        setIsAuthenticated(false);
+    }
+
     const checkToken = (tokenInfo) => {
         let hubmapUser = false;
         let validToken = false;
-        try {
-            ingest_api_users_groups(JSON.parse(tokenInfo).groups_token).then((results) => {
-                console.debug("results results type", typeof results.results);
-                if (results && results.status === 200) {
-                    hubmapUser = results.results.some(obj => obj.displayname === "HubMAP Read");
-                    validToken = true;
-                }
-            })
-        } catch (error){
-            console.log(error);
-        }
-        return {
-            validToken,
-            hubmapUser
-        };
 
+        return new Promise((resolve, reject) => {
+            try {
+                ingest_api_users_groups(tokenInfo).then((results) => {
+                    if (results && results.status === 200) {
+                        hubmapUser = results.results.some(obj => obj.displayname === "HuBMAP Read");
+                        validToken = true;
+                    }
+                    resolve({ validToken, hubmapUser });
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            } catch(error) {
+                console.log(error)
+                reject(error);
+            }
+        });
     }
+
     useEffect(() => {
         let url = new URL(window.location.href);
         let info = url.searchParams.get("info");
@@ -77,18 +95,23 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             localStorage.setItem("isAuthenticated", "true");
             setGlobusInfo(info);
             setGlobusToken(JSON.parse(info).groups_token);
-            const tokenValidation = checkToken(info);
-            if (tokenValidation.humapUser) {
-                localStorage.setItem("isAuthenticated", "true");
-                setIsAuthenticated(true);
-            }else {
-                if (tokenValidation.validToken) {
-                    setUnauthorized(true);
+            setIsAuthenticated(true);
+            checkToken(info).then(tokenValidation => {
+                if (tokenValidation.hubmapUser) {
+                    localStorage.setItem("isAuthenticated", "true");
+                    setIsAuthenticated(true);
+                } else {
+                    if (tokenValidation.validToken) {
+                        setIsAuthenticated(false);
+                        setUnauthorized(true);
+                    }
                 }
-            }
+            }).catch(error => {
+                console.log(error)
+            })
+            setIsLoading(false);
         }
-
-    }, [globusToken, globusInfo, unauthorized])
+    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading])
 
     return (
         <div className="App">
@@ -96,9 +119,16 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 <div className="container">
                     <div className="row">
                         <img className="Logo col-md-2 col-4 img-fluid p-3" src="images/hubmap-type-white250.png" alt="HuBMAP Logo" />
-                        <h1 className="Title col-4 offset-2 d-flex justify-content-center align-items-center text-center">
+                        <h1 className="Title col-4 col-md-4 col-lg-4 col-xl-4 offset-md-2 offset-lg-2 offset-xl-2 d-flex justify-content-center align-items-center text-center">
                             Data Ingest Board
                         </h1>
+                        {isAuthenticated && (
+                            <span className="col-4 LogoutWrapper">
+                            <button className="LogoutButton" onClick={handleLogout}>
+                                LOG OUT
+                            </button>
+                        </span>
+                        )}
                     </div>
                 </div>
             </div>

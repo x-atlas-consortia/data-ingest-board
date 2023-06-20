@@ -95,3 +95,25 @@ body {
     display: inline-block;
     margin-left: 1rem;
 }
+
+.LogoutButton {
+    background-color: inherit;
+    color:white;
+    border: none;
+    outline: none;
+    border-radius: 0.25rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+
+}
+
+.LogoutWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.LogoutButton:hover {
+    background-color: #d4e6f1;
+    color: #454a63;
+}
