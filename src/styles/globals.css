@@ -1,0 +1,119 @@
+body {
+    background-color: #ebebeb !important;
+    margin-bottom: 2rem;
+}
+
+.ant-table-thead > tr > th {
+  background-color: white !important;
+}
+
+.DataTable {
+    background-color: white;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.Button {
+    margin: 1rem;
+    font-family: inherit;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    font-weight: bolder;
+    cursor: pointer;
+    border-radius: 7px;
+    box-shadow: none;
+    display: inline-block;
+}
+
+.Table {
+    margin: 5rem;
+}
+
+.CurrentEntity {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.Clear {
+    border-color: lightblue;
+    background-color: white;
+    color: #2074d4;
+}
+
+.Switch {
+    background-color: #2074d4;
+    color: white;
+}
+
+.App {
+    background-color: #ebebeb;
+}
+
+.Banner {
+    background-color: #454a63;
+    color: white;
+}
+
+.Title {
+
+}
+
+.Logo {
+    object-fit: contain;
+}
+
+.LoginBox {
+    background-color: #d0f4fc;
+    border: 1px solid #9eeaf9;
+    border-radius: 10px;
+    color: #085464;
+    margin: 1rem;
+    padding: 1rem;
+}
+
+.LoginText {
+    font-weight: lighter;
+    border-bottom: 1px solid #9eeaf9;
+    padding-bottom: 1rem;
+}
+
+.LoginHeader {
+    font-size: 2.5rem;
+}
+
+.LoginButton {
+    background-color: #2074d4;
+    font-size: large;
+    color: white;
+    font-family: inherit;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    font-weight: bolder;
+    cursor: pointer;
+    border-radius: 7px;
+    box-shadow: none;
+    display: inline-block;
+    margin-left: 1rem;
+}
+
+.LogoutButton {
+    background-color: inherit;
+    color:white;
+    border: none;
+    outline: none;
+    border-radius: 0.25rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+
+}
+
+.LogoutWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.LogoutButton:hover {
+    background-color: #d4e6f1;
+    color: #454a63;
+}
