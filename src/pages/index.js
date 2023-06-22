@@ -4,7 +4,7 @@
 import DataTable from "@/components/DataTable";
 import Login from "@/components/Login";
 import Blank from "@/components/Blank";
-import Image from 'next/image';1
+import Image from 'next/image';
 import { useState, useEffect } from "react";
 import {ingest_api_users_groups} from "@/service/ingest_api";
 import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
@@ -38,12 +38,16 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 if (validToken.hubmapUser === false && validToken.validToken === true) {
                     setUnauthorized(true);
                 }
+                setIsLoading(false);
             })
             .catch(error => {
                 console.log(error);
+                setIsLoading(false);
             })
+
+        } else {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
 
     const loginUrl = `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-login`
