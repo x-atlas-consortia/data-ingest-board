@@ -79,8 +79,8 @@ else
         docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board config
     elif [ "$1" = "build" ]; then
         # Delete the copied source code dir if exists
-        if [ -d "ingest-ui/src" ]; then
-            rm -rf ingest-ui/src
+        if [ -d "data-ingest-board/src" ]; then
+            rm -rf data-ingest-board/src
         fi
 
         # Copy over the source code
