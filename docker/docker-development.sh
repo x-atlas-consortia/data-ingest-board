@@ -72,7 +72,7 @@ else
             fi
         done
 
-        absent_or_newer data-ingest-board/src ../src/data-ingest-board
+        absent_or_newer data-ingest-board/src ../src
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
@@ -80,10 +80,12 @@ else
     elif [ "$1" = "build" ]; then
         # Delete the copied source code dir if exists
         if [ -d "data-ingest-board/src" ]; then
+            echo "Removing old src copy..."
             rm -rf data-ingest-board/src
         fi
 
         # Copy over the source code
+        echo "Copying the current src and .env to the build..."
         mkdir data-ingest-board/src
         cp -r ../src/* data-ingest-board/src
         # Also explicitly copy the .env file

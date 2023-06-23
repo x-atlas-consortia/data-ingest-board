@@ -1,6 +1,3 @@
-# Ignore Dockerfile
 Dockerfile
-
-# Ignore itself
 .dockerignore
-
+src/node_modules
