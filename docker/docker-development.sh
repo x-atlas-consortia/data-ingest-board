@@ -2,7 +2,7 @@
 
 # Print a new line and the banner
 echo
-echo "==================== INGEST-UI ===================="
+echo "==================== DATA-INGEST-BOARD ===================="
 
 # The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
 # and if the source src directory is newer. 
@@ -40,8 +40,8 @@ function generate_build_version() {
 # Version number is from the VERSION file
 # Also remove newlines and leading/trailing slashes if present in that VERSION file
 function export_version() {
-    export INGEST_UI_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
-    echo "INGEST_UI_VERSION: $INGEST_UI_VERSION"
+    export DATA_INGEST_BOARD_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
+    echo "DATA_INGEST_BOARD_VERSION: $DATA_INGEST_BOARD_VERSION"
 }
 
 if [[ "$1" != "check" && "$1" != "config" && "$1" != "build" && "$1" != "start" && "$1" != "stop" && "$1" != "down" ]]; then
@@ -72,11 +72,11 @@ else
             fi
         done
 
-        absent_or_newer ingest-ui/src ../src/ingest-ui
+        absent_or_newer data-ingest-board/src ../src/data-ingest-board
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p ingest-ui config
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board config
     elif [ "$1" = "build" ]; then
         # Delete the copied source code dir if exists
         if [ -d "ingest-ui/src" ]; then
@@ -84,17 +84,17 @@ else
         fi
 
         # Copy over the source code
-        mkdir ingest-ui/src
-        cp -r ../src/* ingest-ui/src
+        mkdir data-ingest-board/src
+        cp -r ../src/* data-ingest-board/src
         # Also explicitly copy the .env file
-        cp ../src/.env ingest-ui/src
+        cp ../src/.env data-ingest-board/src
 
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p ingest-ui build
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board build
     elif [ "$1" = "start" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p ingest-ui up -d
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board up -d
     elif [ "$1" = "stop" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p ingest-ui stop
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board stop
     elif [ "$1" = "down" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p ingest-ui down
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board down
     fi
 fi

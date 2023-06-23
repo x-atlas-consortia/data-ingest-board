@@ -2,6 +2,6 @@ version: "3.7"
 
 services:
 
-  ingest-ui:
+  data-ingest-board:
     # Use the published image and tag from DockerHub
-    image: hubmap/ingest-ui:${INGEST_UI_VERSION:?err}
+    image: hubmap/data-ingest-board:${DATA_INGEST_BOARD_VERSION:?err}

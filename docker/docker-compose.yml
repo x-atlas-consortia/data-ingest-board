@@ -3,9 +3,9 @@ version: "3.7"
 # Will use the hostname when talking between services on the same network
 services:
 
-  ingest-ui:
-    hostname: ingest-ui
-    container_name: ingest-ui
+  data-ingest-board:
+    hostname: data-ingest-board
+    container_name: data-ingest-board
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
       interval: 1m30s

@@ -2,7 +2,7 @@
 
 # Print a new line and the banner
 echo
-echo "==================== INGEST-UI ===================="
+echo "==================== DATA-INGEST-BOARD ===================="
 
 # The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
 # and if the source src directory is newer. 
@@ -40,8 +40,8 @@ function generate_build_version() {
 # Version number is from the VERSION file
 # Also remove newlines and leading/trailing slashes if present in that VERSION file
 function export_version() {
-    export INGEST_UI_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
-    echo "INGEST_UI_VERSION: $INGEST_UI_VERSION"
+    export DATA_INGEST_BOARD_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
+    echo "DATA_INGEST_BOARD_VERSION: $DATA_INGEST_BOARD_VERSION"
 }
 
 if [[ "$1" != "start" && "$1" != "stop" && "$1" != "down" ]]; then
@@ -60,10 +60,10 @@ else
     echo
 
     if [ "$1" = "start" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p ingest-ui up -d
+        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p data-ingest-board up -d
     elif [ "$1" = "stop" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p ingest-ui stop
+        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p data-ingest-board stop
     elif [ "$1" = "down" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p ingest-ui down
+        docker-compose -f docker-compose.yml -f docker-compose.deployment.yml -p data-ingest-board down
     fi
 fi
