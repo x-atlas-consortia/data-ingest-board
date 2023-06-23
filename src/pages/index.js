@@ -1,12 +1,12 @@
 // import Head from 'next/head'
 // import Image from 'next/image'
 // import { Inter } from 'next/font/google'
-import DataTable from "@/components/DataTable";
-import Login from "@/components/Login";
-import Blank from "@/components/Blank";
+import DataTable from "../components/DataTable";
+import Login from "../components/Login";
+import Blank from "../components/Blank";
 import Image from 'next/image';
 import { useState, useEffect } from "react";
-import {ingest_api_users_groups} from "@/service/ingest_api";
+import {ingest_api_users_groups} from "../service/ingest_api";
 import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
 
 
