@@ -93,8 +93,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     useEffect(() => {
         let url = new URL(window.location.href);
         let info = url.searchParams.get("info");
-        window.history.pushState(null, null, `/`);
         if (info) {
+            window.history.pushState(null, null, `/`);
             localStorage.setItem("info", info);
             localStorage.setItem("isAuthenticated", "true");
             setGlobusInfo(info);
