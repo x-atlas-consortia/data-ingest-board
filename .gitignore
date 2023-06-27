@@ -1,34 +1,44 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Ignore emacs backup files
+*~
+
+# Ignore generated BUILD file
+BUILD
+
+# Docker copied stuff
+docker/data-ingest-board/src
+
+# log files in any path
+**/*.log
+
+# Rotated log files
+**/*.log*
+
+# UI react-app
+src/node_modules
+src/.pnp
+src/.pnp.js
+src/package-lock.json
+src/package-lock.json
 
 # testing
-/coverage
+src/react-app/coverage
 
-# next.js
-/.next/
-/out/
+# env files
+src/.env.*
+src/.env
 
-# production
-/build
+# nextjs
+src/.next
+src/out
 
 # misc
 .DS_Store
-*.pem
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# local env files
-src/.env.local
 
-# vercel
-.vercel
-
-/src/.next/
