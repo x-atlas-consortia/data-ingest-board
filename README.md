@@ -1,38 +1,36 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Data Ingest Board
 
-## Getting Started
+## For Local Development
 
-First, run the development server:
+Create a file called `.env.local` in `/src` with the same structure as `example.env`. Modify the variables as needed
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+### Required services
+
+The `ingest-api` must be running locally and you must change the variables `GLOBUS_CLIENT_APP_URI` and 
+`DATA_INGEST_BOARD_APP_URI` to be `http://localhost:3000/` for redirects to work properly. You can start the 
+`ingest-api` with the following command:
+
+```
+$ ingest-api/src/python app.py
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To start the application run the following commands inside `/src`:\
+**_Note:_** This application requires Node.js 18 or later
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```
+$ npm install
+$ npm run run
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Usage 
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+This app provides a view of all current primary datasets and uploads. At a glance, users can see information about these
+entities such as Group Name, Last Modified, Title, and, importantly, Status. Toggle view between displaying Datasets
+and Uploads with the `switch` button. Each column can be sorted. Group Name, Status, Data Types, and Organ can be 
+filtered by value for Datasets, and for organs, users can filter by Group Name and Status. 
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Authentication
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Upon visiting the app, clicking "Log in" will redirect users to Globus to chose their institution. Once logged in with 
+their institution credentials, users will be redirected back to the page. HuBMAP Read access is required to view the 
+data. 
