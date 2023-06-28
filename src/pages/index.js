@@ -4,6 +4,7 @@
 import DataTable from "../components/DataTable";
 import Login from "../components/Login";
 import Blank from "../components/Blank";
+import UnauthorizedModal from "../components/UnauthorizedModal";
 import Image from 'next/image';
 import { useState, useEffect } from "react";
 import {ingest_api_users_groups} from "../service/ingest_api";
@@ -61,7 +62,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         window.location.href = logoutUrl
         setGlobusToken(null);
         setGlobusInfo(null);
-        setUnauthorized(null);
+        setUnauthorized(false);
         localStorage.removeItem("info");
         localStorage.removeItem("isAuthenticated");
         setIsAuthenticated(false);
@@ -94,6 +95,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         let url = new URL(window.location.href);
         let info = url.searchParams.get("info");
         if (info) {
+            console.log(info)
             window.history.pushState(null, null, `/`);
             localStorage.setItem("info", info);
             localStorage.setItem("isAuthenticated", "true");
@@ -115,7 +117,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             })
             setIsLoading(false);
         }
-    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading])
+    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading, setUnauthorized()])
 
     return (
         <div className="App">
@@ -158,7 +160,10 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                         globusToken={globusToken}
                     />
                 ) : (
-                    <Login onLogin={handleLogin} unauthorized={unauthorized} />
+                    <>
+                    <Login onLogin={handleLogin}/>
+                    {unauthorized && <UnauthorizedModal onLogout={handleLogout} />}
+                    </>
                 )}
         </div>
     );

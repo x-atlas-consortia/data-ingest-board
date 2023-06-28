@@ -6,7 +6,7 @@ const roboto_light = Roboto( {
     subsets: ['latin']
 })
 
-const Login = ({ onLogin, unauthorized }) => {
+const Login = ({ onLogin }) => {
 
     return (
         <div className="LoginBox container">
@@ -14,11 +14,6 @@ const Login = ({ onLogin, unauthorized }) => {
                 <h1 className="LoginHeader col-6">
                     HuBMAP Data Ingest Board</h1>
             </div>
-            {unauthorized && (
-                <p className="UnauthorizedText" style={{ color: 'red' }}>
-                    User is not part of HuBMAP Read Group. Access Denied. Please log in with an account that is part of the HuBMAP Read Group.
-                </p>
-            )}
             <p className={`LoginText ${roboto_light.className}`}>
                 User authentication is required to view the Dataset Publishing Dashboard.
                 Please click the button below and you will be redirected to a login page. There you can login with your
