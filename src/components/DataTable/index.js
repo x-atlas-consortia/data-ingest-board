@@ -686,13 +686,6 @@ const DataTable = (props) => {
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </div>
-            <div classname="row">
-                {!loading && (
-                    <p className="col text-center">
-                        {useDatasetApi ? `Displaying ${datasetCount} Datasets` : `Displaying ${uploadCount} Uploads`}
-                    </p>
-                )}
-            </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className="row">
                 <button className="Button Switch col-3 offset-3" onClick={toggleApi}>
@@ -702,7 +695,13 @@ const DataTable = (props) => {
                     {"CLEAR"}
                 </button>
             </div>
-
+            <div className="row">
+                {!loading && (
+                    <p className="col count">
+                        {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}
+                    </p>
+                )}
+            </div>
             {table}
         </div>
     )
