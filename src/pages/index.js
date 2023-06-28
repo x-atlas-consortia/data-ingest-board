@@ -77,6 +77,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 ingest_api_users_groups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
                         hubmapUser = results.results.some(obj => obj.displayname === "HuBMAP Read");
+                        console.log(`hubmapUser is: ${hubmapUser}`)
                         validToken = true;
                     }
                     resolve({ validToken, hubmapUser });
@@ -95,7 +96,6 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         let url = new URL(window.location.href);
         let info = url.searchParams.get("info");
         if (info) {
-            console.log(info)
             window.history.pushState(null, null, `/`);
             localStorage.setItem("info", info);
             localStorage.setItem("isAuthenticated", "true");
@@ -117,7 +117,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             })
             setIsLoading(false);
         }
-    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading, setUnauthorized()])
+    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading])
 
     return (
         <div className="App">
