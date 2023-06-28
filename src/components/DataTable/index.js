@@ -359,26 +359,32 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         }
     }
 
-    const renderDropdownContent = (record) => (
-        <Menu>
-            <Menu.Item key="1">
-                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
-            </Menu.Item>
-            <Menu.Item key="2">
-                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
-            </Menu.Item>
-            <Menu.Item key="3">
-                <Button onClick={() => {
-                    const hm_uuid = record.uuid.trim();
-                    filterUploads(uploadData, datasetData, hm_uuid);
-                    window.history.pushState(null, null, `/?upload_id=${record.hubmap_id}`)
-                }}>
-                    Show Datasets
-                </Button>
-            </Menu.Item>
+    const renderDropdownContent = (record) => {
+        const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
+        return (
+            <Menu>
+                <Menu.Item key="1">
+                    <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                </Menu.Item>
+                {showGlobusUrl && (
+                    <Menu.Item key="2">
+                    <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+                </Menu.Item>
+                )}
 
-        </Menu>
-    )
+                <Menu.Item key="3">
+                    <Button onClick={() => {
+                        const hm_uuid = record.uuid.trim();
+                        filterUploads(uploadData, datasetData, hm_uuid);
+                        window.history.pushState(null, null, `/?upload_id=${record.hubmap_id}`)
+                    }}>
+                        Show Datasets
+                    </Button>
+                </Menu.Item>
+
+            </Menu>
+        );
+    };
     const uploadColumns = [
         {
             title: "HuBMAP ID",
