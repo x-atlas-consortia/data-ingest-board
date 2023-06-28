@@ -100,13 +100,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={record.portal_url} target="_blank" rel="noopener noreferrer">{record.portal_url}</a>
+                <a href={record.portal_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
             <Menu.Item key="2">
-                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">{record.ingest_url}</a>
+                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
             </Menu.Item>
             <Menu.Item key="3">
-                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">{record.globus_url}</a>
+                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
             </Menu.Item>
         </Menu>
 );
@@ -362,9 +362,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">{record.ingest_url}</a>
+                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
             <Menu.Item key="2">
+                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+            </Menu.Item>
+            <Menu.Item key="3">
                 <Button onClick={() => {
                     const hm_uuid = record.uuid.trim();
                     filterUploads(uploadData, datasetData, hm_uuid);
@@ -467,6 +470,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
+    const [datasetCount, setDatasetCount] = useState(0);
+    const [uploadCount, setUploadCount] = useState(0);
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
@@ -486,7 +491,7 @@ const DataTable = (props) => {
     useEffect(() => {
         loadData();
     }, []);
-    const handleTableChange = (pagination, filters, sorter) => {
+    const handleTableChange = (pagination, filters, sorter, { currentDataSource }) => {
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
         let correctedFilters = {};
@@ -502,6 +507,15 @@ const DataTable = (props) => {
             }
         }
         setFilters(correctedFilters);
+
+        if (useDatasetApi) {
+            const filteredDatasets = currentDataSource || [];
+            setDatasetCount(filteredDatasets.length)
+        } else {
+            const filteredUploads = currentDataSource || [];
+            setUploadCount(filteredUploads.length);
+        }
+
         const query = new URLSearchParams(window.location.search);
         if (sorter.field) {
             query.set('sort_field', sorter.field);
@@ -581,14 +595,16 @@ const DataTable = (props) => {
             Authorization:
             "Bearer " + globusToken,
             "Content-Type": "application/json"
-      }
-    };
+            }
+        };
         try {
             const datasetResponse = await axios.get(datasetUrl, options);
             const uploadResponse = await axios.get(uploadUrl, options);
             const datasetsWithDescendants = addDescendants(datasetResponse.data);
             const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
             setDatasetData(datasetsWithDescendants);
+            setDatasetCount(primaryDatasets.length);
+            setUploadCount(uploadResponse.data.length);
             setPrimaryData(primaryDatasets);
             setOriginalPrimaryData(primaryDatasets);
             setUploadData(uploadResponse.data);
@@ -612,6 +628,8 @@ const DataTable = (props) => {
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
+        setDatasetCount(primaryData.length);
+        setUploadCount(uploadData.length);
     };
 
     const clearAll = () => {
@@ -627,6 +645,8 @@ const DataTable = (props) => {
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
+        setDatasetCount(primaryData.length);
+        setUploadCount(uploadData.length);
         setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
 
     };
@@ -665,6 +685,13 @@ const DataTable = (props) => {
                 <h2 className="CurrentEntity col text-center m-3">
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
+            </div>
+            <div classname="row">
+                {!loading && (
+                    <p className="col text-center">
+                        {useDatasetApi ? `Displaying ${datasetCount} Datasets` : `Displaying ${uploadCount} Uploads`}
+                    </p>
+                )}
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className="row">
