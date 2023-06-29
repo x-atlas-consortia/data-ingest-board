@@ -4,7 +4,6 @@
 import DataTable from "../components/DataTable";
 import Login from "../components/Login";
 import Blank from "../components/Blank";
-import UnauthorizedModal from "../components/UnauthorizedModal";
 import Image from 'next/image';
 import { useState, useEffect } from "react";
 import {ingest_api_users_groups} from "../service/ingest_api";
@@ -35,8 +34,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             setGlobusInfo(initialInfo);
             setGlobusToken(JSON.parse(initialInfo).groups_token)
             checkToken(JSON.parse(initialInfo).groups_token).then(validToken => {
-                setIsAuthenticated(authenticated && validToken.hubmapUser);
-                if (validToken.hubmapUser === false && validToken.validToken === true) {
+                setIsAuthenticated(authenticated && validToken);
+                if (validToken === false) {
                     setUnauthorized(true);
                 }
                 setIsLoading(false);
@@ -77,10 +76,9 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                 ingest_api_users_groups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
                         hubmapUser = results.results.some(obj => obj.displayname === "HuBMAP Read");
-                        console.log(`hubmapUser is: ${hubmapUser}`)
                         validToken = true;
                     }
-                    resolve({ validToken, hubmapUser });
+                    resolve(hubmapUser);
                 }).catch(error => {
                     console.log(error);
                     reject(error);
@@ -102,22 +100,20 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             setGlobusInfo(info);
             setGlobusToken(JSON.parse(info).groups_token);
             setIsAuthenticated(true);
-            checkToken(info).then(tokenValidation => {
-                if (tokenValidation.hubmapUser) {
+            checkToken(JSON.parse(info).groups_token).then(tokenValidation => {
+                if (tokenValidation) {
                     localStorage.setItem("isAuthenticated", "true");
                     setIsAuthenticated(true);
                 } else {
-                    if (tokenValidation.validToken) {
-                        setIsAuthenticated(false);
-                        setUnauthorized(true);
-                    }
+                    setIsAuthenticated(false);
+                    setUnauthorized(true);
                 }
             }).catch(error => {
                 console.log(error)
             })
             setIsLoading(false);
         }
-    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading])
+    }, [globusToken, globusInfo, isAuthenticated, isLoading])
 
     return (
         <div className="App">
@@ -160,12 +156,11 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                         globusToken={globusToken}
                     />
                 ) : (
-                    <>
-                    <Login onLogin={handleLogin}/>
-                    {unauthorized && <UnauthorizedModal onLogout={handleLogout} />}
-                    </>
+                    <Login onLogin={handleLogin} unauthorized={unauthorized} onLogout={handleLogout}/>
                 )}
         </div>
+
+
     );
 }
 
