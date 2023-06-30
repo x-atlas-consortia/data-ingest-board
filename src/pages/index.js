@@ -33,9 +33,9 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         if (initialInfo) {
             setGlobusInfo(initialInfo);
             setGlobusToken(JSON.parse(initialInfo).groups_token)
-            checkToken(JSON.parse(initialInfo).groups_token).then(validToken => {
-                setIsAuthenticated(authenticated && validToken.hubmapUser);
-                if (validToken.hubmapUser === false && validToken.validToken === true) {
+            checkToken(JSON.parse(initialInfo).groups_token).then(validate => {
+                setIsAuthenticated(authenticated && validate.hubmapUser);
+                if (validate.hubmapUser === false && validate.invalidToken === false) {
                     setUnauthorized(true);
                 }
                 setIsLoading(false);
@@ -61,7 +61,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
         window.location.href = logoutUrl
         setGlobusToken(null);
         setGlobusInfo(null);
-        setUnauthorized(null);
+        setUnauthorized(false);
         localStorage.removeItem("info");
         localStorage.removeItem("isAuthenticated");
         setIsAuthenticated(false);
@@ -69,16 +69,18 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
 
     const checkToken = (tokenInfo) => {
         let hubmapUser = false;
-        let validToken = false;
+        let invalidToken = false;
 
         return new Promise((resolve, reject) => {
             try {
                 ingest_api_users_groups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
                         hubmapUser = results.results.some(obj => obj.displayname === "HuBMAP Read");
-                        validToken = true;
                     }
-                    resolve({ validToken, hubmapUser });
+                    if (results && results.status === 401) {
+                        invalidToken = true;
+                    }
+                    resolve({hubmapUser, invalidToken});
                 }).catch(error => {
                     console.log(error);
                     reject(error);
@@ -100,22 +102,29 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             setGlobusInfo(info);
             setGlobusToken(JSON.parse(info).groups_token);
             setIsAuthenticated(true);
-            checkToken(info).then(tokenValidation => {
+            checkToken(JSON.parse(info).groups_token).then(tokenValidation => {
+                // if (tokenValidation.hubmapUser) {
+                //     localStorage.setItem("isAuthenticated", "true");
+                //     setIsAuthenticated(true);
+                // } else {
+                //     setIsAuthenticated(false);
+                //     setUnauthorized(true);
+                // }
                 if (tokenValidation.hubmapUser) {
                     localStorage.setItem("isAuthenticated", "true");
                     setIsAuthenticated(true);
                 } else {
-                    if (tokenValidation.validToken) {
-                        setIsAuthenticated(false);
+                    if (tokenValidation.invalidToken === false) {
                         setUnauthorized(true);
                     }
                 }
+
             }).catch(error => {
                 console.log(error)
             })
             setIsLoading(false);
         }
-    }, [globusToken, globusInfo, unauthorized, isAuthenticated, isLoading])
+    }, [globusToken, globusInfo, isAuthenticated, isLoading])
 
     return (
         <div className="App">
@@ -158,9 +167,11 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                         globusToken={globusToken}
                     />
                 ) : (
-                    <Login onLogin={handleLogin} unauthorized={unauthorized} />
+                    <Login onLogin={handleLogin} unauthorized={unauthorized} onLogout={handleLogout}/>
                 )}
         </div>
+
+
     );
 }
 
