@@ -315,7 +315,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             scroll={{ x: 1500, y: 1500 }}
             onChange={handleTableChange}
             rowKey="hubmap_id"
-        />
+        >
+            <h1>This is a test</h1>
+        </Table>
     );
 };
 
@@ -703,7 +705,7 @@ const DataTable = (props) => {
             </div>
             <div className="row">
                 {!loading && (
-                    <p className="col count">
+                    <p className="col count mt-md-3 mt-lg-3">
                         {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}
                     </p>
                 )}

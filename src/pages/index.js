@@ -101,7 +101,6 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             localStorage.setItem("isAuthenticated", "true");
             setGlobusInfo(info);
             setGlobusToken(JSON.parse(info).groups_token);
-            setIsAuthenticated(true);
             checkToken(JSON.parse(info).groups_token).then(tokenValidation => {
                 // if (tokenValidation.hubmapUser) {
                 //     localStorage.setItem("isAuthenticated", "true");
