@@ -14,7 +14,7 @@ body {
 }
 
 .Button {
-    margin: 1rem;
+    /*margin: 1rem;*/
     font-family: inherit;
     padding-top: .75rem;
     padding-bottom: .75rem;
@@ -23,6 +23,9 @@ body {
     border-radius: 7px;
     box-shadow: none;
     display: inline-block;
+    position: relative;
+    right: 1rem;
+
 }
 
 .Table {
@@ -38,11 +41,13 @@ body {
     border-color: lightblue;
     background-color: white;
     color: #2074d4;
+    margin-left: .5rem;
 }
 
 .Switch {
     background-color: #2074d4;
     color: white;
+    margin-right: .5rem;
 }
 
 .App {
@@ -120,4 +125,14 @@ body {
 
 .count {
     margin-left: 2rem;
+    margin-bottom: -3rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .count {
+        position: relative;
+        top: 2rem;
+        text-align: left;
+    }
 }
