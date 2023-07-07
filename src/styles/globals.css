@@ -136,3 +136,8 @@ body {
         text-align: left;
     }
 }
+
+.CustomSpinner {
+    text-align: center;
+    padding: 5rem;
+}

@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {Table, Button, Dropdown, Menu} from "antd";
+import {Table, Spin, Button, Dropdown, Menu} from "antd";
 import { ExportOutlined} from "@ant-design/icons";
 import {Span} from "next/dist/server/lib/trace/tracer";
+
+const CustomLoadingIndicator = () => (
+    <div className="CustomSpinner">
+        <Spin size="large" tip="Loading...this may take a minute or two." />
+    </div>
+);
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -162,7 +168,12 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return record.status.toLowerCase() !== 'published';
                 }
                 return record.status.toLowerCase() === value.toLowerCase();
-            }
+            },
+            render: (status) => (
+                <span style={{backgroundColor: getStatusColor(status), color: 'white', borderRadius: '7px', padding: '0px .5rem' }}>
+                    {status}
+                </span>
+            )
         },
         {
             title: "Data Types",
@@ -304,20 +315,48 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
     ]
+
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+            case 'unpublished':
+                return 'grey';
+            case 'published':
+                return 'green';
+            case 'qa':
+                return 'yellow';
+            case 'error':
+                return 'red';
+            case 'invalid':
+                return 'orange';
+            case 'new':
+                return 'cyan';
+            case 'processing':
+                return 'blue';
+            case 'submitted':
+                return 'purple';
+            default:
+                return 'white';
+        }
+    }
+
     return (
-        <Table className="m-4"
-            columns={datasetColumns}
-            dataSource={data}
-            showHeader={!loading}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1500, y: 1500 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        >
-            <h1>This is a test</h1>
-        </Table>
+        <div>
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <Table className="m-4"
+                    columns={datasetColumns}
+                    dataSource={data}
+                    showHeader={!loading}
+                    bordered={false}
+                    // loading={loading}
+                    pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                    scroll={{ x: 1500, y: 1500 }}
+                    onChange={handleTableChange}
+                    rowKey="hubmap_id"
+                />
+            )}
+        </div>
     );
 };
 
@@ -438,7 +477,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     return record.status.toLowerCase() !== 'reorganized';
                 }
                 return record.status.toLowerCase() === value.toLowerCase();
-            }
+            },
+            render: (status) => (
+                <span style={{backgroundColor: getStatusColor(status), color: 'white', borderRadius: '7px', padding: '0px .25rem' }}>
+                    {status}
+                </span>
+            )
         },
         {
             title: "Title",
@@ -460,19 +504,47 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
     ];
 
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+            case 'unreorganized':
+                return 'grey';
+            case 'reorganized':
+                return 'green';
+            case 'error':
+                return 'red';
+            case 'invalid':
+                return 'orange';
+            case 'valid':
+                return 'lime'
+            case 'new':
+                return 'cyan';
+            case 'processing':
+                return 'blue';
+            case 'submitted':
+                return 'purple';
+            default:
+                return 'white';
+        }
+    }
+
     return (
-        <Table className="m-4"
-            columns={uploadColumns}
-            // className={className}
-            showHeader={!loading}
-            dataSource={data}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1000 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        />
+        <div>
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <Table className="m-4"
+                    columns={uploadColumns}
+                    showHeader={!loading}
+                    dataSource={data}
+                    bordered={false}
+                    //loading={loading}
+                    pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                    scroll={{ x: 1000 }}
+                    onChange={handleTableChange}
+                    rowKey="hubmap_id"
+                />
+            )}
+        </div>
     );
 };
 
