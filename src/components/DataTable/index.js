@@ -97,6 +97,24 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
 
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unpublished")) {
+                    if (item[key].toLowerCase() === "published") {
+                        return false;
+                    }
+                } else if (!filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
+    }
+
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
@@ -305,19 +323,27 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
     ]
     return (
-        <Table className="m-4"
-            columns={datasetColumns}
-            dataSource={data}
-            showHeader={!loading}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1500, y: 1500 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        >
-            <h1>This is a test</h1>
-        </Table>
+        <div>
+            <div className="row">
+                {!loading && (
+                    <p className="col count mt-md-3 mt-lg-3">
+                        {countFilteredRecords(data, filters)} Selected
+                        {/*{JSON.stringify(filters)}*/}
+                    </p>
+                )}
+            </div>
+            <Table className="m-4"
+                columns={datasetColumns}
+                dataSource={data}
+                showHeader={!loading}
+                bordered={false}
+                loading={loading}
+                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                scroll={{ x: 1500, y: 1500 }}
+                onChange={handleTableChange}
+                rowKey="hubmap_id"
+            />
+        </div>
     );
 };
 
@@ -359,6 +385,24 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         if (field === "uuid") {
             defaultSortOrder["uuid"] = order;
         }
+    }
+
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unreorganized")) {
+                    if (item[key].toLowerCase() === "reorganized") {
+                        return false;
+                    }
+                } else if (!filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
     }
 
     const renderDropdownContent = (record) => {
@@ -461,18 +505,26 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     ];
 
     return (
-        <Table className="m-4"
-            columns={uploadColumns}
-            // className={className}
-            showHeader={!loading}
-            dataSource={data}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1000 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        />
+        <div>
+            <div className="row">
+                {!loading && (
+                    <p className="col count mt-md-3 mt-lg-3">
+                        {countFilteredRecords(data, filters)} Selected
+                    </p>
+                )}
+            </div>
+            <Table className="m-4"
+                columns={uploadColumns}
+                showHeader={!loading}
+                dataSource={data}
+                bordered={false}
+                loading={loading}
+                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                scroll={{ x: 1000 }}
+                onChange={handleTableChange}
+                rowKey="hubmap_id"
+            />
+        </div>
     );
 };
 
@@ -483,7 +535,7 @@ const DataTable = (props) => {
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
@@ -703,13 +755,13 @@ const DataTable = (props) => {
                     {"CLEAR"}
                 </button>
             </div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}
-                    </p>
-                )}
-            </div>
+            {/*<div className="row">*/}
+            {/*    {!loading && (*/}
+            {/*        <p className="col count mt-md-3 mt-lg-3">*/}
+            {/*            {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}*/}
+            {/*        </p>*/}
+            {/*    )}*/}
+            {/*</div>*/}
             {table}
         </div>
     )
