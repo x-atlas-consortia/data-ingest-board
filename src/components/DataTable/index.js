@@ -336,7 +336,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 {!loading && (
                     <p className="col count mt-md-3 mt-lg-3">
                         {countFilteredRecords(data, filters)} Selected
-                        {/*{JSON.stringify(filters)}*/}
                     </p>
                 )}
             </div>
@@ -770,13 +769,6 @@ const DataTable = (props) => {
                     {"CLEAR"}
                 </button>
             </div>
-            {/*<div className="row">*/}
-            {/*    {!loading && (*/}
-            {/*        <p className="col count mt-md-3 mt-lg-3">*/}
-            {/*            {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}*/}
-            {/*        </p>*/}
-            {/*    )}*/}
-            {/*</div>*/}
             {table}
         </div>
     )
