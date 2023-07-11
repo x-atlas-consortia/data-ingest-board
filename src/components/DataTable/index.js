@@ -9,9 +9,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = [...new Set(data.map(item => item.data_types))]
-    console.log(`Unique group names is: ${uniqueGroupNames}`)
-    console.log(`unique Organs is: ${uniqueOrganType}`)
-    console.log(`uniqueDataType = ${uniqueDataType}`)
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
