@@ -9,6 +9,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = [...new Set(data.map(item => item.data_types))]
+    console.log(`Unique group names is: ${uniqueGroupNames}`)
+    console.log(`unique Organs is: ${uniqueOrganType}`)
+    console.log(`uniqueDataType = ${uniqueDataType}`)
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
@@ -29,8 +32,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "status"){
             defaultSortOrder["status"] = order;
         }
-        if (field === "organ_type"){
-            defaultSortOrder["organ_type"] = order;
+        if (field === "organ"){
+            defaultSortOrder["organ"] = order;
         }
         if (field === "organ_hubmap_id"){
             defaultSortOrder["organ_hubmap_id"] = order;
@@ -90,29 +93,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (filters.hasOwnProperty("status")) {
         defaultFilteredValue["status"] = filters["status"].split(",");
     }
-    if (filters.hasOwnProperty("organ_type")) {
-        defaultFilteredValue["organ_type"] = filters["organ_type"].split(",");
+    if (filters.hasOwnProperty("organ")) {
+        defaultFilteredValue["organ"] = filters["organ"].split(",");
     }
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
-    }
-
-    function countFilteredRecords(data, filters) {
-        const filteredData = data.filter(item => {
-            for (const key in filters) {
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
-                if (filterValues.includes("unpublished")) {
-                    if (item[key].toLowerCase() === "published") {
-                        return false;
-                    }
-                } else if (!filterValues.some(value => item[key].toLowerCase() === value)) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        return filteredData.length;
     }
 
     const renderDropdownContent = (record) => (
@@ -199,9 +184,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: "organ",
             align: "left",
-            defaultSortOrder: defaultSortOrder["organ_type"] || null,
+            defaultSortOrder: defaultSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            defaultFilteredValue: defaultFilteredValue["organ_type"] || null,
+            defaultFilteredValue: defaultFilteredValue["organ"] || null,
             filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
             ellipsis: true,
@@ -322,6 +307,32 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
     ]
+
+    const dataIndexList = datasetColumns.map(column => column.dataIndex);
+
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                if (!dataIndexList.includes(key)) {
+                    continue;
+                }
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unpublished")) {
+                    if (item[key].toLowerCase() === "published") {
+                        return false;
+                    }
+                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                } else if (!item[key]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
+    }
+
     return (
         <div>
             <div className="row">
@@ -385,24 +396,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         if (field === "uuid") {
             defaultSortOrder["uuid"] = order;
         }
-    }
-
-    function countFilteredRecords(data, filters) {
-        const filteredData = data.filter(item => {
-            for (const key in filters) {
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
-                if (filterValues.includes("unreorganized")) {
-                    if (item[key].toLowerCase() === "reorganized") {
-                        return false;
-                    }
-                } else if (!filterValues.some(value => item[key].toLowerCase() === value)) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        return filteredData.length;
     }
 
     const renderDropdownContent = (record) => {
@@ -503,6 +496,31 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ellipsis: true,
         },
     ];
+
+    const dataIndexList = uploadColumns.map(column => column.dataIndex);
+
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                if (!dataIndexList.includes(key)) {
+                    continue;
+                }
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unreorganized")) {
+                    if (item[key].toLowerCase() === "reorganized") {
+                        return false;
+                    }
+                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                } else if (!item[key]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
+    }
 
     return (
         <div>
