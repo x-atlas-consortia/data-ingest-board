@@ -29,8 +29,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "status"){
             defaultSortOrder["status"] = order;
         }
-        if (field === "organ_type"){
-            defaultSortOrder["organ_type"] = order;
+        if (field === "organ"){
+            defaultSortOrder["organ"] = order;
         }
         if (field === "organ_hubmap_id"){
             defaultSortOrder["organ_hubmap_id"] = order;
@@ -90,8 +90,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (filters.hasOwnProperty("status")) {
         defaultFilteredValue["status"] = filters["status"].split(",");
     }
-    if (filters.hasOwnProperty("organ_type")) {
-        defaultFilteredValue["organ_type"] = filters["organ_type"].split(",");
+    if (filters.hasOwnProperty("organ")) {
+        defaultFilteredValue["organ"] = filters["organ"].split(",");
     }
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
@@ -181,9 +181,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: "organ",
             align: "left",
-            defaultSortOrder: defaultSortOrder["organ_type"] || null,
+            defaultSortOrder: defaultSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            defaultFilteredValue: defaultFilteredValue["organ_type"] || null,
+            defaultFilteredValue: defaultFilteredValue["organ"] || null,
             filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
             ellipsis: true,
@@ -304,20 +304,53 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
     ]
+
+    const dataIndexList = datasetColumns.map(column => column.dataIndex);
+
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                if (!dataIndexList.includes(key)) {
+                    continue;
+                }
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unpublished")) {
+                    if (item[key].toLowerCase() === "published") {
+                        return false;
+                    }
+                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                } else if (!item[key]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
+    }
+
     return (
-        <Table className="m-4"
-            columns={datasetColumns}
-            dataSource={data}
-            showHeader={!loading}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1500, y: 1500 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        >
-            <h1>This is a test</h1>
-        </Table>
+        <div>
+            <div className="row">
+                {!loading && (
+                    <p className="col count mt-md-3 mt-lg-3">
+                        {countFilteredRecords(data, filters)} Selected
+                    </p>
+                )}
+            </div>
+            <Table className="m-4"
+                columns={datasetColumns}
+                dataSource={data}
+                showHeader={!loading}
+                bordered={false}
+                loading={loading}
+                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                scroll={{ x: 1500, y: 1500 }}
+                onChange={handleTableChange}
+                rowKey="hubmap_id"
+            />
+        </div>
     );
 };
 
@@ -460,19 +493,52 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
     ];
 
+    const dataIndexList = uploadColumns.map(column => column.dataIndex);
+
+    function countFilteredRecords(data, filters) {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                if (!dataIndexList.includes(key)) {
+                    continue;
+                }
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes("unreorganized")) {
+                    if (item[key].toLowerCase() === "reorganized") {
+                        return false;
+                    }
+                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
+                    return false;
+                } else if (!item[key]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData.length;
+    }
+
     return (
-        <Table className="m-4"
-            columns={uploadColumns}
-            // className={className}
-            showHeader={!loading}
-            dataSource={data}
-            bordered={false}
-            loading={loading}
-            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-            scroll={{ x: 1000 }}
-            onChange={handleTableChange}
-            rowKey="hubmap_id"
-        />
+        <div>
+            <div className="row">
+                {!loading && (
+                    <p className="col count mt-md-3 mt-lg-3">
+                        {countFilteredRecords(data, filters)} Selected
+                    </p>
+                )}
+            </div>
+            <Table className="m-4"
+                columns={uploadColumns}
+                showHeader={!loading}
+                dataSource={data}
+                bordered={false}
+                loading={loading}
+                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                scroll={{ x: 1000 }}
+                onChange={handleTableChange}
+                rowKey="hubmap_id"
+            />
+        </div>
     );
 };
 
@@ -483,7 +549,7 @@ const DataTable = (props) => {
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
@@ -702,13 +768,6 @@ const DataTable = (props) => {
                 <button className="Button Clear col-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
-            </div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {useDatasetApi ? `${datasetCount} Selected` : `${uploadCount} Selected`}
-                    </p>
-                )}
             </div>
             {table}
         </div>
