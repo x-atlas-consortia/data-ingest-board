@@ -170,7 +170,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span style={{backgroundColor: getStatusColor(status), color: 'white', borderRadius: '7px', padding: '0px .5rem' }}>
+                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
                     {status}
                 </span>
             )
@@ -319,23 +319,23 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
             case 'unpublished':
-                return 'grey';
-            case 'published':
-                return 'green';
-            case 'qa':
-                return 'yellow';
-            case 'error':
-                return 'red';
-            case 'invalid':
-                return 'orange';
-            case 'new':
-                return 'cyan';
-            case 'processing':
-                return 'blue';
-            case 'submitted':
-                return 'purple';
-            default:
-                return 'white';
+            return { color: 'grey', darkColor: 'darkgrey' };
+        case 'published':
+            return { color: 'green', darkColor: 'darkgreen' };
+        case 'qa':
+            return { color: 'yellow', darkColor: 'darkyellow' };
+        case 'error':
+            return { color: 'red', darkColor: 'darkred' };
+        case 'invalid':
+            return { color: 'orange', darkColor: 'darkorange' };
+        case 'new':
+            return { color: 'cyan', darkColor: 'darkcyan' };
+        case 'processing':
+            return { color: 'blue', darkColor: 'darkblue' };
+        case 'submitted':
+            return { color: 'purple', darkColor: 'darkpurple' };
+        default:
+            return { color: 'white', darkColor: 'darkgrey' };
         }
     }
 
@@ -455,7 +455,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Status",
-            width: '10%',
+            width: '12%',
             dataIndex: "status",
             align: "left",
             defaultSortOrder: defaultSortOrder["status"] || null,
@@ -479,14 +479,14 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span style={{backgroundColor: getStatusColor(status), color: 'white', borderRadius: '7px', padding: '0px .25rem' }}>
+                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
                     {status}
                 </span>
             )
         },
         {
             title: "Title",
-            width: '25%',
+            width: '23%',
             dataIndex: "title",
             align: "left",
             defaultSortOrder: defaultSortOrder["title"] || null,
@@ -507,23 +507,23 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
             case 'unreorganized':
-                return 'grey';
+                return { color: 'grey', darkColor: "darkgrey" };
             case 'reorganized':
-                return 'green';
+                return { color: 'green', darkColor: "darkgreen"};
             case 'error':
-                return 'red';
+                return { color: 'red', darkColor: "darkred"};
             case 'invalid':
-                return 'orange';
+                return { color: 'orange', darkColor: "darkorange"};
             case 'valid':
-                return 'lime'
+                return { color: 'lime', darkColor: "darkgreen"};
             case 'new':
-                return 'cyan';
+                return { color: 'cyan', darkColor: "darkblue"};
             case 'processing':
-                return 'blue';
+                return { color: 'blue', darkColor: "darkblue"};
             case 'submitted':
-                return 'purple';
+                return { color: 'purple', darkColor: "darkpurple"};
             default:
-                return 'white';
+                return { color: 'white', darkColor: "darkgrey"};
         }
     }
 

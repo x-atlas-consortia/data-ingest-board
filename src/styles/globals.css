@@ -24,7 +24,7 @@ body {
     box-shadow: none;
     display: inline-block;
     position: relative;
-    right: 1rem;
+    right: .5rem;
 
 }
 
@@ -48,6 +48,16 @@ body {
     background-color: #2074d4;
     color: white;
     margin-right: .5rem;
+}
+
+.Switch:hover {
+  background-color: #1b63b3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.Clear:hover {
+    background-color: #F5F9FC;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .App {
@@ -141,3 +151,13 @@ body {
     text-align: center;
     padding: 5rem;
 }
+/*Hide sorter icon unless moused over*/
+/*.ant-table th .ant-table-column-sorter-up,*/
+/*.ant-table th .ant-table-column-sorter-down {*/
+/*  visibility: hidden;*/
+/*}*/
+
+/*.ant-table th:hover .ant-table-column-sorter-up,*/
+/*.ant-table th:hover .ant-table-column-sorter-down {*/
+/*  visibility: visible;*/
+/*}*/
