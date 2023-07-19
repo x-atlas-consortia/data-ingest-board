@@ -366,25 +366,28 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     return (
         <div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {countFilteredRecords(data, filters)} Selected
-                    </p>
-                )}
-            </div>
-            <Table className="m-4"
-                columns={datasetColumns}
-                dataSource={data}
-                showHeader={!loading}
-                bordered={false}
-                loading={loading}
-                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-                scroll={{ x: 1500, y: 1500 }}
-                onChange={handleTableChange}
-                rowKey="hubmap_id"
-            />
-
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <>
+                    <div className="row">
+                        <p className="col count mt-md-3 mt-lg-3">
+                            {countFilteredRecords(data, filters)} Selected
+                        </p>
+                    </div>
+                    <Table className="m-4"
+                        columns={datasetColumns}
+                        dataSource={data}
+                        showHeader={!loading}
+                        bordered={false}
+                        loading={loading}
+                        pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                        scroll={{ x: 1500, y: 1500 }}
+                        onChange={handleTableChange}
+                        rowKey="hubmap_id"
+                    />
+                </>
+            )}
         </div>
     );
 };
@@ -583,25 +586,28 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     return (
         <div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {countFilteredRecords(data, filters)} Selected
-                    </p>
-                )}
-            </div>
-            <Table className="m-4"
-                columns={uploadColumns}
-                showHeader={!loading}
-                dataSource={data}
-                bordered={false}
-                loading={loading}
-                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-                scroll={{ x: 1000 }}
-                onChange={handleTableChange}
-                rowKey="hubmap_id"
-            />
-
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <>
+                    <div className="row">
+                        <p className="col count mt-md-3 mt-lg-3">
+                            {countFilteredRecords(data, filters)} Selected
+                        </p>
+                    </div>
+                    <Table className="m-4"
+                        columns={uploadColumns}
+                        showHeader={!loading}
+                        dataSource={data}
+                        bordered={false}
+                        loading={loading}
+                        pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                        scroll={{ x: 1000 }}
+                        onChange={handleTableChange}
+                        rowKey="hubmap_id"
+                    />
+                </>
+            )}
         </div>
     );
 };
@@ -826,10 +832,10 @@ const DataTable = (props) => {
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className="row">
-                <button className="Button Switch col-3 offset-3" onClick={toggleApi}>
+                <button className="Button Switch col-md-6 col-lg-3 offset-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
-                <button className="Button Clear col-3" onClick={clearAll}>
+                <button className="Button Clear col-md-6 col-lg-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
             </div>
