@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {Table, Spin, Button, Dropdown, Menu} from "antd";
+import { DownloadOutlined } from '@ant-design/icons';
 import { ExportOutlined} from "@ant-design/icons";
-import {Span} from "next/dist/server/lib/trace/tracer";
+import { Span } from "next/dist/server/lib/trace/tracer";
+import { CSVLink } from "react-csv";
 
 const CustomLoadingIndicator = () => (
     <div className="CustomSpinner">
@@ -128,7 +130,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
             render: (hubmapId, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined /></a>
+                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },
@@ -212,7 +214,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <a href={record.organ_portal_url} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined /></a>
+                    <a href={record.organ_portal_url} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 );
             }
         },
@@ -338,7 +340,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             }
             return true;
         });
-        return filteredData.length;
+        return filteredData;
     }
 
     const getStatusColor = (status) => {
@@ -371,11 +373,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ) : (
                 <>
                     <div className="row">
-                        <p className="col count mt-md-3 mt-lg-3">
-                            {countFilteredRecords(data, filters)} Selected
-                        </p>
+                        <div className="col-12 col-md-3 count mt-md-3">
+                            <span style={{ marginRight: '1rem' }}>
+                                {countFilteredRecords(data, filters).length} Selected
+                            </span>
+                            <CSVLink data={countFilteredRecords(data, filters)} filename="datasets-data.csv" className="download-icon">
+                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
+                            </CSVLink>
+                        </div>
                     </div>
-                    <Table className="m-4"
+                    <Table className="m-4 DatasetTable"
                         columns={datasetColumns}
                         dataSource={data}
                         showHeader={!loading}
@@ -469,7 +476,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ellipsis: true,
             render: (hubmapId, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined /></a>
+                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },
@@ -558,7 +565,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             }
             return true;
         });
-        return filteredData.length;
+        return filteredData;
     }
 
     const getStatusColor = (status) => {
@@ -591,11 +598,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ) : (
                 <>
                     <div className="row">
-                        <p className="col count mt-md-3 mt-lg-3">
-                            {countFilteredRecords(data, filters)} Selected
-                        </p>
+                        <div className="col-12 col-md-3 count mt-md-3">
+                            <span style={{ marginRight: '1rem' }}>
+                                {countFilteredRecords(data, filters).length} Selected
+                            </span>
+                            <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="download-icon">
+                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
+                            </CSVLink>
+                        </div>
                     </div>
-                    <Table className="m-4"
+                    <Table className="m-4 UploadTable"
                         columns={uploadColumns}
                         showHeader={!loading}
                         dataSource={data}
@@ -831,7 +843,7 @@ const DataTable = (props) => {
                 </h2>
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="row">
+            <div className="row button-container mx-auto">
                 <button className="Button Switch col-md-6 col-lg-3 offset-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
