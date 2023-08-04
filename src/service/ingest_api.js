@@ -1,7 +1,5 @@
 import axios from "axios";
-import FormData from "form-data"
-
-
+import {URLS} from "./helper";
 
 /*
  * User Groups only those data provider groups are return
@@ -15,8 +13,7 @@ export function ingest_api_users_groups(auth) {
         "Content-Type": "application/json"
       }
     };
-
-    return axios.get(`${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/metadata/usergroups`, options).then(res => {
+    return axios.get(URLS.ingest.privs.userGroups(),  options).then(res => {
         console.debug('API USER GROUPs', res.data.groups);
         return {status: res.status, results: res.data.groups}
    })
