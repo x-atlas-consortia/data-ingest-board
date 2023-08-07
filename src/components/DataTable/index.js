@@ -384,7 +384,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                             </CSVLink>
                         </div>
                     </div>
-                    <Table className="m-4 DatasetTable"
+                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                         columns={datasetColumns}
                         dataSource={data}
                         showHeader={!loading}
@@ -600,16 +600,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ) : (
                 <>
                     <div className="row">
-                        <div className="col-12 col-md-3 count mt-md-3">
-                            <span style={{ marginRight: '1rem' }}>
-                                {countFilteredRecords(data, filters).length} Selected
-                            </span>
-                            <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="download-icon">
-                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
-                            </CSVLink>
+                            <div className="col-12 col-md-3 count mt-md-3">
+                                <span style={{ marginRight: '1rem' }}>
+                                    {countFilteredRecords(data, filters).length} Selected
+                                </span>
+                                <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="download-icon">
+                                    <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
+                                </CSVLink>
+                            </div>
                         </div>
-                    </div>
-                    <Table className="m-4 UploadTable"
+                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                         columns={uploadColumns}
                         showHeader={!loading}
                         dataSource={data}
