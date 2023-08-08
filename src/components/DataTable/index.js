@@ -85,12 +85,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "globus_url"){
             defaultSortOrder["globus_url"] = order;
         }
-        if (field === "portal_url"){
-            defaultSortOrder["portal_url"] = order;
-        }
-        if (field === "ingest_url"){
-            defaultSortOrder["ingest_url"] = order;
-        }
     }
     if (filters.hasOwnProperty("group_name")) {
         defaultFilteredValue["group_name"] = filters["group_name"].split(",");
@@ -105,12 +99,12 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
     const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
-    const organ_portal_url = process.env.NEXT_PUBLIC_PORTAL_URL.endsWith('/') ? process.env.NEXT_PUBLIC_PORTAL_URL : process.env.NEXT_PUBLIC_PORTAL_URL + '/'
+    const portal_url = process.env.NEXT_PUBLIC_PORTAL_URL.endsWith('/') ? process.env.NEXT_PUBLIC_PORTAL_URL : process.env.NEXT_PUBLIC_PORTAL_URL + '/'
 
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={record.portal_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                <a href={portal_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
             <Menu.Item key="2">
                 <a href={ingest_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
@@ -216,7 +210,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <a href={organ_portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    <a href={portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 );
             }
         },
@@ -430,9 +424,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         if (field === "status") {
             defaultSortOrder["status"] = order;
         }
-        if (field === "ingest_url") {
-            defaultSortOrder["ingest_url"] = order;
-        }
         if (field === "title") {
             defaultSortOrder["title"] = order;
         }
@@ -440,13 +431,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder["uuid"] = order;
         }
     }
-
+    const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
     const renderDropdownContent = (record) => {
         const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
         return (
             <Menu>
                 <Menu.Item key="1">
-                    <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                    <a href={ingest_url + 'upload/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
                 </Menu.Item>
                 {showGlobusUrl && (
                     <Menu.Item key="2">
