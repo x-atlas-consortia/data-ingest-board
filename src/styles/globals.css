@@ -223,6 +223,13 @@ body {
     }
 }
 
+.ant-tooltip {
+    z-index: 9999999999;
+}
+
+.no-data {
+    padding-top: 50px;
+}
 
 /*Hide sorter icon unless moused over*/
 /*.ant-table th .ant-table-column-sorter-up,*/
