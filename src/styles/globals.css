@@ -14,7 +14,6 @@ body {
 }
 
 .Button {
-    /*margin: 1rem;*/
     font-family: inherit;
     padding-top: .75rem;
     padding-bottom: .75rem;
@@ -23,9 +22,12 @@ body {
     border-radius: 7px;
     box-shadow: none;
     display: inline-block;
-    position: relative;
-    right: 1rem;
+}
 
+@media (min-width: 992px) {
+  .Button {
+    right: .5rem;
+  }
 }
 
 .Table {
@@ -41,13 +43,55 @@ body {
     border-color: lightblue;
     background-color: white;
     color: #2074d4;
-    margin-left: .5rem;
+}
+
+@media (min-width: 992px) {
+    .Clear {
+        margin-left: .5rem;
+    }
+}
+
+@media (max-width: 991px) {
+    .Clear {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .Switch {
     background-color: #2074d4;
     color: white;
-    margin-right: .5rem;
+
+}
+
+@media (min-width: 992px) {
+    .Switch {
+        margin-right: .5rem;
+    }
+}
+
+@media (max-width: 991px) {
+    .Switch {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .button-container {
+        width: 90%;
+
+    }
+}
+
+.Switch:hover {
+  background-color: #1b63b3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.Clear:hover {
+    background-color: #F5F9FC;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .App {
@@ -123,9 +167,9 @@ body {
     color: #454a63;
 }
 
+
 .count {
     margin-left: 2rem;
-    margin-bottom: -3rem;
     text-align: center;
 }
 
@@ -134,5 +178,66 @@ body {
         position: relative;
         top: 2rem;
         text-align: left;
+        z-index: 99999999999;
     }
 }
+
+@media (max-width: 767px) {
+    .count {
+        margin-bottom: 2rem;
+    }
+}
+
+.DatasetTable {
+    margin-top: -3rem;
+    position: relative;
+    bottom: 2rem;
+    z-index: 0;
+}
+
+.UploadTable {
+    margin-top: -3rem;
+    position: relative;
+    bottom: 2rem;
+    z-index: 0;
+}
+
+
+.CustomSpinner {
+    text-align: center;
+    padding: 5rem;
+}
+
+.download-icon:hover {
+    background-color: #d4e6f1;
+}
+
+.download-icon:active {
+    background-color: #2074d4;
+}
+
+@media (max-width: 576px) {
+    .ant-dropdown {
+        overflow-x: auto;
+        max-width: 200px;
+    }
+}
+
+.ant-tooltip {
+    z-index: 9999999999;
+}
+
+.no-data {
+    padding-top: 50px;
+}
+
+/*Hide sorter icon unless moused over*/
+/*.ant-table th .ant-table-column-sorter-up,*/
+/*.ant-table th .ant-table-column-sorter-down {*/
+/*  visibility: hidden;*/
+/*}*/
+
+/*.ant-table th:hover .ant-table-column-sorter-up,*/
+/*.ant-table th:hover .ant-table-column-sorter-down {*/
+/*  visibility: visible;*/
+/*}*/

@@ -130,7 +130,11 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             <div className="Banner">
                 <div className="container">
                     <div className="row">
-                        <img className="Logo col-md-2 col-4 img-fluid p-3" src="images/hubmap-type-white250.png" alt="HuBMAP Logo" />
+                        <img
+                            className="Logo col-md-2 col-4 img-fluid p-3"
+                            src="images/hubmap-type-white250.png"
+                            alt="HuBMAP Logo"
+                        />
                         <h1 className="Title col-4 col-md-4 col-lg-4 col-xl-4 offset-md-2 offset-lg-2 offset-xl-2 d-flex justify-content-center align-items-center text-center">
                             Data Ingest Board
                         </h1>

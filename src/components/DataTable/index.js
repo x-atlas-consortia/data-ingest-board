@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {Table, Button, Dropdown, Menu} from "antd";
+import {Table, Spin, Button, Dropdown, Menu} from "antd";
+import { DownloadOutlined } from '@ant-design/icons';
 import { ExportOutlined} from "@ant-design/icons";
-import {Span} from "next/dist/server/lib/trace/tracer";
+import { Span } from "next/dist/server/lib/trace/tracer";
+import { CSVLink } from "react-csv";
+
+const CustomLoadingIndicator = () => (
+    <div className="CustomSpinner">
+        <Spin size="large" tip="Loading...this may take a minute or two." />
+    </div>
+);
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -77,12 +85,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (field === "globus_url"){
             defaultSortOrder["globus_url"] = order;
         }
-        if (field === "portal_url"){
-            defaultSortOrder["portal_url"] = order;
-        }
-        if (field === "ingest_url"){
-            defaultSortOrder["ingest_url"] = order;
-        }
     }
     if (filters.hasOwnProperty("group_name")) {
         defaultFilteredValue["group_name"] = filters["group_name"].split(",");
@@ -96,14 +98,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
+    const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
+    const portal_url = process.env.NEXT_PUBLIC_PORTAL_URL.endsWith('/') ? process.env.NEXT_PUBLIC_PORTAL_URL : process.env.NEXT_PUBLIC_PORTAL_URL + '/'
 
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={record.portal_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                <a href={portal_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
             <Menu.Item key="2">
-                <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
+                <a href={ingest_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
             </Menu.Item>
             <Menu.Item key="3">
                 <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
@@ -122,7 +126,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
             render: (hubmapId, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined /></a>
+                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },
@@ -162,7 +166,12 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return record.status.toLowerCase() !== 'published';
                 }
                 return record.status.toLowerCase() === value.toLowerCase();
-            }
+            },
+            render: (status) => (
+                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
+                    {status}
+                </span>
+            )
         },
         {
             title: "Data Types",
@@ -201,7 +210,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <a href={record.organ_portal_url} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined /></a>
+                    <a href={portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 );
             }
         },
@@ -327,29 +336,61 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             }
             return true;
         });
-        return filteredData.length;
+        return filteredData;
+    }
+
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+            case 'unpublished':
+            return { color: 'grey', darkColor: 'darkgrey' };
+        case 'published':
+            return { color: 'green', darkColor: 'darkgreen' };
+        case 'qa':
+            return { color: 'yellow', darkColor: 'darkyellow' };
+        case 'error':
+            return { color: 'red', darkColor: 'darkred' };
+        case 'invalid':
+            return { color: 'orange', darkColor: 'darkorange' };
+        case 'new':
+            return { color: 'cyan', darkColor: 'darkcyan' };
+        case 'processing':
+            return { color: 'blue', darkColor: 'darkblue' };
+        case 'submitted':
+            return { color: 'purple', darkColor: 'darkpurple' };
+        default:
+            return { color: 'white', darkColor: 'darkgrey' };
+        }
     }
 
     return (
         <div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {countFilteredRecords(data, filters)} Selected
-                    </p>
-                )}
-            </div>
-            <Table className="m-4"
-                columns={datasetColumns}
-                dataSource={data}
-                showHeader={!loading}
-                bordered={false}
-                loading={loading}
-                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-                scroll={{ x: 1500, y: 1500 }}
-                onChange={handleTableChange}
-                rowKey="hubmap_id"
-            />
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <>
+                    <div className="row">
+                        <div className="col-12 col-md-3 count mt-md-3">
+                            <span style={{ marginRight: '1rem' }}>
+                                {countFilteredRecords(data, filters).length} Selected
+                            </span>
+                            <CSVLink data={countFilteredRecords(data, filters)} filename="datasets-data.csv" className="download-icon">
+                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
+                            </CSVLink>
+                        </div>
+                    </div>
+                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                        columns={datasetColumns}
+                        dataSource={data}
+                        showHeader={!loading}
+                        bordered={false}
+                        loading={loading}
+                        pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                        scroll={{ x: 1500, y: 1500 }}
+                        onChange={handleTableChange}
+                        rowKey="hubmap_id"
+                    />
+                </>
+            )}
         </div>
     );
 };
@@ -383,9 +424,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         if (field === "status") {
             defaultSortOrder["status"] = order;
         }
-        if (field === "ingest_url") {
-            defaultSortOrder["ingest_url"] = order;
-        }
         if (field === "title") {
             defaultSortOrder["title"] = order;
         }
@@ -393,13 +431,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder["uuid"] = order;
         }
     }
-
+    const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
     const renderDropdownContent = (record) => {
         const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
         return (
             <Menu>
                 <Menu.Item key="1">
-                    <a href={record.ingest_url} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                    <a href={ingest_url + 'upload/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
                 </Menu.Item>
                 {showGlobusUrl && (
                     <Menu.Item key="2">
@@ -431,7 +469,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             ellipsis: true,
             render: (hubmapId, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined /></a>
+                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },
@@ -449,7 +487,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Status",
-            width: '10%',
+            width: '12%',
             dataIndex: "status",
             align: "left",
             defaultSortOrder: defaultSortOrder["status"] || null,
@@ -471,11 +509,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     return record.status.toLowerCase() !== 'reorganized';
                 }
                 return record.status.toLowerCase() === value.toLowerCase();
-            }
+            },
+            render: (status) => (
+                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
+                    {status}
+                </span>
+            )
         },
         {
             title: "Title",
-            width: '25%',
+            width: '23%',
             dataIndex: "title",
             align: "left",
             defaultSortOrder: defaultSortOrder["title"] || null,
@@ -515,29 +558,61 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             }
             return true;
         });
-        return filteredData.length;
+        return filteredData;
+    }
+
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+            case 'unreorganized':
+                return { color: 'grey', darkColor: "darkgrey" };
+            case 'reorganized':
+                return { color: 'green', darkColor: "darkgreen"};
+            case 'error':
+                return { color: 'red', darkColor: "darkred"};
+            case 'invalid':
+                return { color: 'orange', darkColor: "darkorange"};
+            case 'valid':
+                return { color: 'lime', darkColor: "darkgreen"};
+            case 'new':
+                return { color: 'cyan', darkColor: "darkblue"};
+            case 'processing':
+                return { color: 'blue', darkColor: "darkblue"};
+            case 'submitted':
+                return { color: 'purple', darkColor: "darkpurple"};
+            default:
+                return { color: 'white', darkColor: "darkgrey"};
+        }
     }
 
     return (
         <div>
-            <div className="row">
-                {!loading && (
-                    <p className="col count mt-md-3 mt-lg-3">
-                        {countFilteredRecords(data, filters)} Selected
-                    </p>
-                )}
-            </div>
-            <Table className="m-4"
-                columns={uploadColumns}
-                showHeader={!loading}
-                dataSource={data}
-                bordered={false}
-                loading={loading}
-                pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-                scroll={{ x: 1000 }}
-                onChange={handleTableChange}
-                rowKey="hubmap_id"
-            />
+            {loading ? (
+                CustomLoadingIndicator()
+            ) : (
+                <>
+                    <div className="row">
+                            <div className="col-12 col-md-3 count mt-md-3">
+                                <span style={{ marginRight: '1rem' }}>
+                                    {countFilteredRecords(data, filters).length} Selected
+                                </span>
+                                <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="download-icon">
+                                    <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
+                                </CSVLink>
+                            </div>
+                        </div>
+                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                        columns={uploadColumns}
+                        showHeader={!loading}
+                        dataSource={data}
+                        bordered={false}
+                        loading={loading}
+                        pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
+                        scroll={{ x: 1000 }}
+                        onChange={handleTableChange}
+                        rowKey="hubmap_id"
+                    />
+                </>
+            )}
         </div>
     );
 };
@@ -761,11 +836,11 @@ const DataTable = (props) => {
                 </h2>
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="row">
-                <button className="Button Switch col-3 offset-3" onClick={toggleApi}>
+            <div className="row button-container mx-auto">
+                <button className="Button Switch col-md-6 col-lg-3 offset-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
-                <button className="Button Clear col-3" onClick={clearAll}>
+                <button className="Button Clear col-md-6 col-lg-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
             </div>
