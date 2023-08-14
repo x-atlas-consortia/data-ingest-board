@@ -1,9 +1,120 @@
 import { createContext, useEffect, useState} from 'react'
+import {ingest_api_users_groups} from "../service/ingest_api";
+import {ENVS, URLS} from "../service/helper";
 
 const AppContext = createContext()
 
 export const AppProvider = ({ children }) => {
-    return <AppContext.Provider value={{}}>{children}</AppContext.Provider>
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [globusInfo, setGlobusInfo] = useState(null);
+    const [globusToken, setGlobusToken] = useState(null);
+    const [unauthorized, setUnauthorized] = useState(false);
+
+    const handleLogin = () => {
+        window.location.href = URLS.ingest.auth.login()
+    };
+
+    const handleLogout = () => {
+        window.location.href = URLS.ingest.auth.logout()
+        setGlobusToken(null);
+        setGlobusInfo(null);
+        setUnauthorized(false);
+        localStorage.removeItem("info");
+        localStorage.removeItem("isAuthenticated");
+        setIsAuthenticated(false);
+    }
+
+
+    useEffect(() => {
+        let url = new URL(window.location.href);
+        let info = url.searchParams.get("info");
+        if (info) {
+            window.history.pushState(null, null, `/`);
+            localStorage.setItem("info", info);
+            localStorage.setItem("isAuthenticated", "true");
+            setGlobusInfo(info);
+            setGlobusToken(JSON.parse(info).groups_token);
+            checkToken(JSON.parse(info).groups_token).then(tokenValidation => {
+                // if (tokenValidation.hubmapUser) {
+                //     localStorage.setItem("isAuthenticated", "true");
+                //     setIsAuthenticated(true);
+                // } else {
+                //     setIsAuthenticated(false);
+                //     setUnauthorized(true);
+                // }
+                if (tokenValidation.hubmapUser) {
+                    localStorage.setItem("isAuthenticated", "true");
+                    setIsAuthenticated(true);
+                } else {
+                    if (tokenValidation.invalidToken === false) {
+                        setUnauthorized(true);
+                    }
+                }
+
+            }).catch(error => {
+                console.log(error)
+            })
+            setIsLoading(false);
+        }
+    }, [globusToken, globusInfo, isAuthenticated, isLoading])
+
+    const checkToken = (tokenInfo) => {
+        let hubmapUser = false;
+        let invalidToken = false;
+
+        return new Promise((resolve, reject) => {
+            try {
+                ingest_api_users_groups(tokenInfo).then((results) => {
+                    if (results && results.status === 200) {
+                        hubmapUser = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
+                    }
+                    if (results && results.status === 401) {
+                        invalidToken = true;
+                    }
+                    resolve({hubmapUser, invalidToken});
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            } catch(error) {
+                console.log(error)
+                reject(error);
+            }
+        });
+    }
+
+    const checkLocals = (authenticated, initialInfo) => {
+        if (initialInfo) {
+            setGlobusInfo(initialInfo);
+            setGlobusToken(JSON.parse(initialInfo).groups_token)
+            checkToken(JSON.parse(initialInfo).groups_token).then(validate => {
+                setIsAuthenticated(authenticated && validate.hubmapUser);
+                if (validate.hubmapUser === false && validate.invalidToken === false) {
+                    setUnauthorized(true);
+                }
+                setIsLoading(false);
+            })
+                .catch(error => {
+                    console.log(error);
+                    setIsLoading(false);
+                })
+
+        } else {
+            setIsLoading(false);
+        }
+    }
+
+    return <AppContext.Provider value={{
+        globusInfo, setGlobusInfo,
+        globusToken, setGlobusToken,
+        isLoading,
+        isAuthenticated,
+        unauthorized,
+        checkLocals,
+        handleLogin, handleLogout
+    }}>{children}</AppContext.Provider>
 }
 
 export default AppContext
