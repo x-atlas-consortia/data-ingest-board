@@ -1,6 +1,7 @@
 import '../styles/globals.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Roboto } from 'next/font/google';
+import { AppProvider } from '../context/AppContext'
 
 
 const roboto = Roboto({
@@ -11,7 +12,9 @@ const roboto = Roboto({
 export default function App({ Component, pageProps }) {
   return (
     <main className={roboto.className}>
-      <Component {...pageProps} />
+      <AppProvider>
+        <Component {...pageProps} />
+      </AppProvider>
     </main>
   );
 }
