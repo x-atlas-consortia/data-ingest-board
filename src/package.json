@@ -3,10 +3,12 @@
   "version": "1.1.0",
   "private": true,
   "scripts": {
+    "all": "npm-run-all --parallel dev sass",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sass": "sass --watch styles/main.scss public/css/main.css --style compressed"
   },
   "dependencies": {
     "@next/font": "^13.4.3",
@@ -15,9 +17,11 @@
     "boostrap": "^2.0.0",
     "bootstrap": "^5.3.0",
     "next": "13.2.4",
+    "npm-run-all": "^4.1.5",
     "prop-types": "^15.8.1",
     "react": "18.2.0",
     "react-csv": "^2.2.2",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "sass": "^1.65.1"
   }
 }
