@@ -11,9 +11,19 @@ export const ENVS = {
 }
 
 export const URLS = {
+    portal: {
+      main: process.env.NEXT_PUBLIC_PORTAL_URL,
+    },
     ingest: {
+        main: () => process.env.NEXT_PUBLIC_INGEST_URL,
+        auth: {
+          login: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-login`,
+          logout: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-logout`
+        },
         privs: {
             userGroups: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${process.env.NEXT_PUBLIC_PRIVS_GROUP_URL}`
         }
     }
 }
+
+export const ensureTrailingSlash = (url) => url.endsWith('/') ? url : `${url}/`
