@@ -7,7 +7,7 @@ import { Span } from "next/dist/server/lib/trace/tracer";
 import { CSVLink } from "react-csv";
 
 const CustomLoadingIndicator = () => (
-    <div className="CustomSpinner">
+    <div className="c-spinner">
         <Spin size="large" tip="Loading...this may take a minute or two." />
     </div>
 );
@@ -206,7 +206,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.organ_hubmap_id.localeCompare(b.organ_hubmap_id),
             ellipsis: true,
             render: (organHubmapId, record) => {
-                if (!organHubmapId.trim()) {
+                if (!organHubmapId?.trim()) {
                     return null;
                 }
                 return (
@@ -373,12 +373,12 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                             <span style={{ marginRight: '1rem' }}>
                                 {countFilteredRecords(data, filters).length} Selected
                             </span>
-                            <CSVLink data={countFilteredRecords(data, filters)} filename="datasets-data.csv" className="download-icon">
+                            <CSVLink data={countFilteredRecords(data, filters)} filename="datasets-data.csv" className="ic--download">
                                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
                             </CSVLink>
                         </div>
                     </div>
-                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                    <Table className={`m-4 c-table--upload UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                         columns={datasetColumns}
                         dataSource={data}
                         showHeader={!loading}
@@ -595,7 +595,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                                 <span style={{ marginRight: '1rem' }}>
                                     {countFilteredRecords(data, filters).length} Selected
                                 </span>
-                                <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="download-icon">
+                                <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="ic--download">
                                     <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
                                 </CSVLink>
                             </div>
@@ -748,6 +748,7 @@ const DataTable = (props) => {
         };
         try {
             const datasetResponse = await axios.get(datasetUrl, options);
+            //TODO: the request call here needs to be able to be toggled per app requirement
             const uploadResponse = await axios.get(uploadUrl, options);
             const datasetsWithDescendants = addDescendants(datasetResponse.data);
             const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
@@ -829,18 +830,18 @@ const DataTable = (props) => {
     );
 
     return (
-        <div className="DataTable container">
+        <div className="c-table c-table--data container">
             <div className="row">
-                <h2 className="CurrentEntity col text-center m-3">
+                <h2 className="c-table__title col text-center m-3">
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="row button-container mx-auto">
-                <button className="Button Switch col-md-6 col-lg-3 offset-lg-3" onClick={toggleApi}>
+            <div className="c-table__btns mx-auto text-center">
+                <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>
-                <button className="Button Clear col-md-6 col-lg-3" onClick={clearAll}>
+                <button className="c-btn c-btn--lgt col-md-6 col-lg-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
             </div>

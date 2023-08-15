@@ -3,12 +3,12 @@
   "version": "1.1.0",
   "private": true,
   "scripts": {
-    "all": "npm-run-all --parallel dev sass",
+    "all": "npm-run-all --parallel dev css",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sass": "sass --watch styles/main.scss public/css/main.css --style compressed"
+    "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css"
   },
   "prettier": {
     "singleQuote": true,
@@ -30,6 +30,6 @@
     "react": "18.2.0",
     "react-csv": "^2.2.2",
     "react-dom": "18.2.0",
-    "sass": "^1.65.1"
+    "stylus": "^0.59.0"
   }
 }

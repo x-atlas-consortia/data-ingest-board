@@ -7,17 +7,18 @@ const roboto_light = Roboto( {
 })
 
 const Login = ({ onLogin, unauthorized, onLogout }) => {
+    //TODO: Dry into pageData = () =>
     return (
         <div>
             {unauthorized ? (
                 <div className="container">
-                    <div className="LoginBox row">
-                        <h1 className="LoginHeader col-6">Unauthorized</h1>
-                        <p className={`LoginText ${roboto_light.className}`}>
+                    <div className="c-login row">
+                        <h1 className="c-login__head col-6">Unauthorized</h1>
+                        <p className={`c-login__txt ${roboto_light.className}`}>
                             You are logged in to an account without access. Please log out and log back in with a HuBMAP Consortium Registered Account
                         </p>
                         <div className="row">
-                            <button className="LoginButton col-4" onClick={onLogout}>
+                            <button className="c-login__btn col-4" onClick={onLogout}>
                                 Log Out
                             </button>
                         </div>
@@ -25,13 +26,13 @@ const Login = ({ onLogin, unauthorized, onLogout }) => {
                 </div>
             ) : (
                 <div className="container">
-                    <div className="LoginBox row">
-                        <h1 className="LoginHeader col-6">HuBMAP Data Ingest Board</h1>
-                        <p className={`LoginText ${roboto_light.className}`}>
+                    <div className="c-login row">
+                        <h1 className="c-login__head col-6">HuBMAP Data Ingest Board</h1>
+                        <p className={`c-login__txt ${roboto_light.className}`}>
                             User authentication is required to view the Dataset Publishing Dashboard. Please click the button below and you will be redirected to a login page. There you can login with your institution credentials. Thank you!
                         </p>
                         <div className="row">
-                            <button className="LoginButton col-4" onClick={onLogin}>
+                            <button className="c-login__btn col-4" onClick={onLogin}>
                                 Log in with your institution credentials
                             </button>
                         </div>

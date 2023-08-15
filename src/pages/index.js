@@ -23,12 +23,12 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
     }
 
     return (
-        <div className="App">
-            <div className="Banner">
+        <div className="App bg--galGrey">
+            <div className="c-nav">
                 <div className="container">
                     <div className="row">
                         <img
-                            className="Logo col-md-2 col-4 img-fluid p-3"
+                            className="c-logo col-md-2 col-4 img-fluid p-3"
                             src="images/hubmap-type-white250.png"
                             alt="HuBMAP Logo"
                         />
@@ -36,8 +36,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                             Data Ingest Board
                         </h1>
                         {isAuthenticated && (
-                            <span className="col-4 LogoutWrapper">
-                            <button className="LogoutButton" onClick={handleLogout}>
+                            <span className="col-4 c-logout">
+                            <button className="c-logout__btn" onClick={handleLogout}>
                                 LOG OUT
                             </button>
                         </span>
@@ -49,7 +49,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             {isLoading ? (
                 <div></div>
             ) : isAuthenticated ? (
-                    <DataTable className="DataTable"
+                    <DataTable className="c-table--data"
                         entityType={entityType}
                         setEntityType={setEntityType}
                         selectUploadId={selectUploadId}
