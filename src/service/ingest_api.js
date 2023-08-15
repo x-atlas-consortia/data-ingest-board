@@ -13,6 +13,7 @@ export function ingest_api_users_groups(auth) {
         "Content-Type": "application/json"
       }
     };
+    // TODO: this needs to be refactored to use endpoint which check AuthHelper.has_write_privs
     return axios.get(URLS.ingest.privs.userGroups(),  options).then(res => {
         console.debug('API USER GROUPs', res.data.groups);
         return {status: res.status, results: res.data.groups || res.data.user_write_groups}

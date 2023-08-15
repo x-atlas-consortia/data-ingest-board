@@ -68,6 +68,7 @@ export const AppProvider = ({ children }) => {
             try {
                 ingest_api_users_groups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
+                        // TODO: refactor to be a bool check from AuthHelper.has_write_privs
                         hubmapUser = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
                     }
                     if (results && results.status === 401) {
