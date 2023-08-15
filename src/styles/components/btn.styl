@@ -1,0 +1,30 @@
+.c-btn
+  font-family: inherit;
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-weight: bolder;
+  cursor: pointer;
+  border-radius: 7px;
+  box-shadow: none;
+  display: inline-block;
+  +md-min()
+    right: .5rem;
+    margin-left: .5rem;
+  +md-max()
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+  &--lgt
+    border-color: lightblue;
+    background-color: white;
+    color: #2074d4;
+    &:hover
+      background-color: #F5F9FC;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  &--primary
+    background-color: #2074d4;
+    color: white;
+    &:hover
+      background-color: #1b63b3;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
