@@ -1,19 +1,10 @@
-.count {
-  margin-left: 2rem;
-  text-align: center;
-}
-
-@media (min-width: 768px) {
-  .count {
-    position: relative;
-    top: 2rem;
-    text-align: left;
-    z-index: 99999999999;
-  }
-}
-
-@media (max-width: 767px) {
-  .count {
-    margin-bottom: 2rem;
-  }
-}
+.count
+  margin-left 2rem
+  text-align center
+  +md-min()
+    position relative
+    top 2rem
+    text-align left
+    z-index 99999999999
+  +md-max()
+    margin-bottom 2rem
