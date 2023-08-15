@@ -104,7 +104,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={portal_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                <a href={portal_url + 'browse/dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
             <Menu.Item key="2">
                 <a href={ingest_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
