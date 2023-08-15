@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState} from 'react'
+import { createContext, useEffect, useState, useRef} from 'react'
 import {ingest_api_users_groups} from "../service/ingest_api";
 import {ENVS, URLS} from "../service/helper";
 
@@ -11,6 +11,7 @@ export const AppProvider = ({ children }) => {
     const [globusInfo, setGlobusInfo] = useState(null);
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
+    const pageLoaded = useRef(false)
 
     const handleLogin = () => {
         window.location.href = URLS.ingest.auth.login()
@@ -28,6 +29,10 @@ export const AppProvider = ({ children }) => {
 
 
     useEffect(() => {
+        if (pageLoaded.current === false) {
+            ENVS.theme()
+            pageLoaded.current = true
+        }
         let url = new URL(window.location.href);
         let info = url.searchParams.get("info");
         if (info) {

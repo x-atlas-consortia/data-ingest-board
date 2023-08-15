@@ -7,7 +7,17 @@ export function eq(s1, s2, insensitive = true) {
 }
 
 export const ENVS = {
-    privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME
+    privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
+    theme: () => {
+        let themeConfig = JSON.parse(process.env.NEXT_PUBLIC_THEME)
+        for (let t in themeConfig) {
+            document.body.style.setProperty(
+                `--${t}`,
+                `${themeConfig[t]}`
+            );
+        }
+
+    }
 }
 
 export const URLS = {
