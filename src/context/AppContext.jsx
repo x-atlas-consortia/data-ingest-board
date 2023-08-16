@@ -1,12 +1,14 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {ingest_api_users_groups} from "../service/ingest_api";
 import {ENVS, URLS} from "../service/helper";
-import useSession from "../hooks/useSession";
 
 const AppContext = createContext()
 
 export const AppProvider = ({ children }) => {
+    const KEY_AUTH = 'isAuthenticated'
+    const KEY_INFO = 'info'
 
+    const [isLogout, setIsLogout] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [globusInfo, setGlobusInfo] = useState(null);
@@ -14,60 +16,52 @@ export const AppProvider = ({ children }) => {
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
 
-    const session = useSession()
-    // Could also do but naming used above
-    // const {isAuthenticated, globusInfo} = useSession()
-
     const handleLogin = () => {
         window.location.href = URLS.ingest.auth.login()
     };
 
     const handleLogout = () => {
+        setIsLogout(true)
         window.location.href = URLS.ingest.auth.logout()
         setGlobusToken(null);
         setGlobusInfo(null);
         setUnauthorized(false);
-        localStorage.removeItem("info");
-        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem(KEY_INFO);
+        localStorage.removeItem(KEY_AUTH);
         setIsAuthenticated(false);
     }
 
+    const resolveLocals = () =>  {
+        let url = new URL(window.location.href)
+        let info = url.searchParams.get(KEY_INFO)
+        let authorized = false
+        let globusInfo
+
+        if (localStorage.getItem(KEY_AUTH)) {
+            authorized = localStorage.getItem(KEY_AUTH) === 'true'
+        }
+        if (localStorage.getItem(KEY_INFO)) {
+            globusInfo = JSON.parse(localStorage.getItem(KEY_INFO))
+        }
+
+        if (info && !globusInfo) {
+            window.history.pushState(null, null, `/`);
+            globusInfo = JSON.parse(info)
+            authorized = true
+        }
+
+        localStorage.setItem(KEY_INFO, info);
+        localStorage.setItem(KEY_AUTH, authorized.toString())
+        setIsAuthenticated(authorized)
+        checkLocals(authorized, globusInfo)
+    }
 
     useEffect(() => {
-        checkLocals(session.isAuthenticated, session.globusInfo)
+        setIsLoading(true)
+        resolveLocals()
         if (pageLoaded.current === false) {
             ENVS.theme()
             pageLoaded.current = true
-        }
-        let url = new URL(window.location.href);
-        let info = url.searchParams.get("info");
-        if (info) {
-            window.history.pushState(null, null, `/`);
-            localStorage.setItem("info", info);
-            localStorage.setItem("isAuthenticated", "true");
-            setGlobusInfo(info);
-            setGlobusToken(JSON.parse(info).groups_token);
-            checkToken(JSON.parse(info).groups_token).then(tokenValidation => {
-                // if (tokenValidation.hubmapUser) {
-                //     localStorage.setItem("isAuthenticated", "true");
-                //     setIsAuthenticated(true);
-                // } else {
-                //     setIsAuthenticated(false);
-                //     setUnauthorized(true);
-                // }
-                if (tokenValidation.hubmapUser) {
-                    localStorage.setItem("isAuthenticated", "true");
-                    setIsAuthenticated(true);
-                } else {
-                    if (tokenValidation.invalidToken === false) {
-                        setUnauthorized(true);
-                    }
-                }
-
-            }).catch(error => {
-                console.log(error)
-            })
-            setIsLoading(false);
         }
     }, [globusToken, globusInfo, isAuthenticated, isLoading])
 
@@ -100,8 +94,8 @@ export const AppProvider = ({ children }) => {
     const checkLocals = (authenticated, initialInfo) => {
         if (initialInfo) {
             setGlobusInfo(initialInfo);
-            setGlobusToken(JSON.parse(initialInfo).groups_token)
-            checkToken(JSON.parse(initialInfo).groups_token).then(validate => {
+            setGlobusToken(initialInfo.groups_token)
+            checkToken(initialInfo.groups_token).then(validate => {
                 setIsAuthenticated(authenticated && validate.hubmapUser);
                 if (validate.hubmapUser === false && validate.invalidToken === false) {
                     setUnauthorized(true);
@@ -122,6 +116,7 @@ export const AppProvider = ({ children }) => {
         globusInfo, setGlobusInfo,
         globusToken, setGlobusToken,
         isLoading,
+        isLogout,
         isAuthenticated,
         unauthorized,
         checkLocals,
