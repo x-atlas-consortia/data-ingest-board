@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {ingest_api_users_groups} from "../service/ingest_api";
 import {ENVS, URLS} from "../service/helper";
+import useSession from "../hooks/useSession";
 
 const AppContext = createContext()
 
@@ -12,6 +13,10 @@ export const AppProvider = ({ children }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
+
+    const session = useSession()
+    // Could also do but naming used above
+    // const {isAuthenticated, globusInfo} = useSession()
 
     const handleLogin = () => {
         window.location.href = URLS.ingest.auth.login()
@@ -29,6 +34,7 @@ export const AppProvider = ({ children }) => {
 
 
     useEffect(() => {
+        checkLocals(session.isAuthenticated, session.globusInfo)
         if (pageLoaded.current === false) {
             ENVS.theme()
             pageLoaded.current = true

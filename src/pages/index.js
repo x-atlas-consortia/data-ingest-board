@@ -3,13 +3,12 @@
 // import { Inter } from 'next/font/google'
 import DataTable from "../components/DataTable";
 import Login from "../components/Login";
-import Blank from "../components/Blank";
 import { useState, useEffect, useContext } from "react";
 import AppContext from "../context/AppContext";
 
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
-    const {globusInfo, globusToken, handleLogin, handleLogout, checkLocals, isLoading, isAuthenticated, unauthorized} = useContext(AppContext)
+    const {globusToken, handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized} = useContext(AppContext)
     const [entityType, setEntityType] = useState(entity_type);
     const [selectUploadId, setSelectUploadId] = useState(upload_id);
     const [initialPage, setInitialPage] = useState(page);
@@ -45,7 +44,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                     </div>
                 </div>
             </div>
-            <Blank checkLocals={checkLocals}/>
+
             {isLoading ? (
                 <div></div>
             ) : isAuthenticated ? (
