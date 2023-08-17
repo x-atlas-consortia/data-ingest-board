@@ -40,7 +40,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder["uuid"] = order;
         }
     }
-    const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
+    const ingest_url = process.env.NEXT_PUBLIC_INGEST_BASE.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_BASE : process.env.NEXT_PUBLIC_INGEST_BASE + '/'
     const renderDropdownContent = (record) => {
         const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
         return (

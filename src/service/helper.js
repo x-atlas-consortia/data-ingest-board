@@ -42,7 +42,7 @@ export const getHeadersWith = (value, key = 'Authorization') => {
 
 export const ENVS = {
     ubkg: {
-        base: () => process.env.NEXT_PUBLIC_UBKG_URL,
+        base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
         sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
     },
     privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
@@ -59,10 +59,10 @@ export const ENVS = {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
     urlFormat: {
-        portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_URL}${path}`,
+        portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
         ingest: {
-            be: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`,
-            fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_URL}${path}`,
+            be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
+            fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_BASE}${path}`,
         }
     },
     tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS)
@@ -83,14 +83,14 @@ export const TABLE = {
 
 export const URLS = {
     portal: {
-      main: () => process.env.NEXT_PUBLIC_PORTAL_URL,
+      main: () => process.env.NEXT_PUBLIC_PORTAL_BASE,
       view: (uuid, entity = 'dataset')  => {
           let path = process.env.NEXT_PUBLIC_PORTAL_VIEW_PATH.format(entity, uuid)
           return ENVS.urlFormat.portal(path)
       }
     },
     ingest: {
-        main: () => process.env.NEXT_PUBLIC_INGEST_URL,
+        main: () => process.env.NEXT_PUBLIC_INGEST_BASE,
         view: (uuid, entity = 'dataset') => {
             let path = process.env.NEXT_PUBLIC_INGEST_VIEW_PATH.format(entity, uuid)
             return ENVS.urlFormat.ingest.fe(path)
@@ -100,8 +100,8 @@ export const URLS = {
           logout: () => ENVS.urlFormat.ingest.be('/data-ingest-board-logout')
         },
         privs: {
-            hasRW: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL),
-            userGroups: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_GROUP_URL)
+            hasRW: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_PATH),
+            userGroups: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_GROUP_PATH)
         }
     }
 }
