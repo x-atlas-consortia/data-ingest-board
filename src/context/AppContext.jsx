@@ -119,8 +119,6 @@ export const AppProvider = ({ children, messages }) => {
         }
     }
 
-
-
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
         globusToken, setGlobusToken,
