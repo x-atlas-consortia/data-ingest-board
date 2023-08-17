@@ -24,7 +24,7 @@ export const getRequestOptions = () => {
     };
 }
 
-export const getHeadersWith = (key = 'Authorization', value) => {
+export const getHeadersWith = (value, key = 'Authorization') => {
     const options = getRequestOptions()
     options.headers[key] = value
     return options
@@ -57,6 +57,7 @@ export const URLS = {
           logout: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-logout`
         },
         privs: {
+            hasRW: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL}`,
             userGroups: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${process.env.NEXT_PUBLIC_PRIVS_GROUP_URL}`
         }
     }

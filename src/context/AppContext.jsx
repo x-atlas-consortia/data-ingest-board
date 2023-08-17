@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ingest_api_users_groups} from "../service/ingest_api";
+import {INGEST_API} from "../service/apis";
 import {ENVS, URLS} from "../service/helper";
 
 const AppContext = createContext()
@@ -77,9 +77,10 @@ export const AppProvider = ({ children, messages }) => {
 
         return new Promise((resolve, reject) => {
             try {
-                ingest_api_users_groups(tokenInfo).then((results) => {
+                INGEST_API.privs.userGroups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
-                        // TODO: refactor to be a bool check from AuthHelper.has_write_privs
+                        // TODO: refactor to be a bool check from AuthHelper.has_read_privs
+                        //hubmapUser = results.results.read_privs
                         hubmapUser = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
                     }
                     if (results && results.status === 401) {
