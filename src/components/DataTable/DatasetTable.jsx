@@ -3,6 +3,7 @@ import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
+import {eq, getUBKGName, TABLE} from "../../service/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -109,16 +110,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const datasetColumns = [
         {
-            title: "HuBMAP ID",
+            title: TABLE.cols.n('id'),
             width: 175,
-            dataIndex: "hubmap_id",
+            dataIndex: TABLE.cols.f('id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
-            sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
+            sorter: (a,b) => a.hubmap_id.localeCompare(b[TABLE.cols.f('id')]),
             ellipsis: true,
-            render: (hubmapId, record) => (
+            render: (id, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    <a href="#">{id}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },
@@ -174,7 +175,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.data_types.localeCompare(b.data_types),
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.data_types.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.data_types, value),
             ellipsis: true,
         },
         {
@@ -186,23 +187,32 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.organ.localeCompare(b.organ),
             defaultFilteredValue: defaultFilteredValue["organ"] || null,
             filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.organ.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.organ, value),
             ellipsis: true,
+            render: (organType, record) => {
+                if (!organType) return null
+                return (
+                    <span>{getUBKGName(organType)}</span>
+                )
+            }
         },
         {
-            title: "Organ Hubmap Id",
+            title: TABLE.cols.n('organ_id'),
             width: 175,
-            dataIndex: "organ_hubmap_id",
+            dataIndex: TABLE.cols.f('organ_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder['organ_hubmap_id'] || null,
-            sorter: (a,b) => a.organ_hubmap_id.localeCompare(b.organ_hubmap_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('organ_id')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('organ_id')].localeCompare(b[TABLE.cols.f('organ_id')]),
             ellipsis: true,
-            render: (organHubmapId, record) => {
-                if (!organHubmapId?.trim()) {
+            render: (organId, record) => {
+                if (!organId?.trim()) {
                     return null;
                 }
                 return (
-                    <a href={portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">{organHubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    <a href={portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">
+                        {organId}
+                         <ExportOutlined style={{verticalAlign: 'middle'}}/>
+                    </a>
                 );
             }
         },
@@ -243,29 +253,29 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Donor HuBMAP ID",
+            title: TABLE.cols.n('donor_id'),
             width: 175,
-            dataIndex: "donor_hubmap_id",
+            dataIndex: TABLE.cols.f('donor_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder["donor_hubmap_id"] || null,
-            sorter: (a,b) => a.donor_hubmap_id.localeCompare(b.donor_hubmap_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_id')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('donor_id')].localeCompare(b[TABLE.cols.f('donor_id')]),
             ellipsis: true,
         },{
-            title: "Donor Submission ID",
+            title: TABLE.cols.n('donor_submission_id'),
             width: 200,
-            dataIndex: "donor_submission_id",
+            dataIndex: TABLE.cols.f('donor_submission_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder["donor_submission_id"] || null,
-            sorter: (a,b) => a.donor_submission_id.localeCompare(b.donor_submission_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_submission_id')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('donor_submission_id')].localeCompare(b[TABLE.cols.f('donor_submission_id')]),
             ellipsis: true,
         },
         {
-            title: "Donor Lab ID",
+            title: TABLE.cols.n('donor_lab_id'),
             width: 150,
-            dataIndex: "donor_lab_id",
+            dataIndex: TABLE.cols.f('donor_lab_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder["donor_lab_id"] || null,
-            sorter: (a,b) => a.donor_lab_id.localeCompare(b.donor_lab_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_lab_id')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('donor_lab_id')].localeCompare(b[TABLE.cols.f('donor_lab_id')]),
             ellipsis: true,
         },
         {
