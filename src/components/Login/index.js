@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useContext} from "react";
-import { Roboto } from 'next/font/google';
-import AppContext from "../../context/AppContext";
+import React, { useContext } from 'react'
+import { Roboto } from 'next/font/google'
+import AppContext from '../../context/AppContext'
 
 const roboto_light = Roboto( {
     weight: '300',
