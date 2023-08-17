@@ -43,7 +43,8 @@ export const ENVS = {
     },
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
-    }
+    },
+    urlFormat: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`
 }
 
 export const URLS = {
@@ -53,12 +54,12 @@ export const URLS = {
     ingest: {
         main: () => process.env.NEXT_PUBLIC_INGEST_URL,
         auth: {
-          login: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-login`,
-          logout: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/data-ingest-board-logout`
+          login: () => ENVS.urlFormat('/data-ingest-board-login'),
+          logout: () => ENVS.urlFormat('/data-ingest-board-logout')
         },
         privs: {
-            hasRW: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL}`,
-            userGroups: () => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${process.env.NEXT_PUBLIC_PRIVS_GROUP_URL}`
+            hasRW: () => ENVS.urlFormat(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL),
+            userGroups: () => ENVS.urlFormat(process.env.NEXT_PUBLIC_PRIVS_GROUP_URL)
         }
     }
 }
