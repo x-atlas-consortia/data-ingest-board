@@ -8,7 +8,7 @@ import AppContext from "../context/AppContext";
 
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
-    const {globusToken, handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout} = useContext(AppContext)
+    const {globusToken, handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout, t} = useContext(AppContext)
     const [entityType, setEntityType] = useState(entity_type);
     const [selectUploadId, setSelectUploadId] = useState(upload_id);
     const [initialPage, setInitialPage] = useState(page);
@@ -28,8 +28,8 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                     <div className="row">
                         <img
                             className="c-logo col-md-2 col-4 img-fluid p-3"
-                            src="images/hubmap-type-white250.png"
-                            alt="HuBMAP Logo"
+                            src={`images/${t('hubmap-type-white250.png')}`}
+                            alt={t('HuBMAP Logo')}
                         />
                         <h1 className="Title col-4 col-md-4 col-lg-4 col-xl-4 offset-md-2 offset-lg-2 offset-xl-2 d-flex justify-content-center align-items-center text-center">
                             Data Ingest Board

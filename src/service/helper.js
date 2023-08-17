@@ -6,6 +6,30 @@ export function eq(s1, s2, insensitive = true) {
     return res
 }
 
+String.prototype.format = function() {
+    let args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+            ;
+    });
+};
+
+export const getRequestOptions = () => {
+    return {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+}
+
+export const getHeadersWith = (key = 'Authorization', value) => {
+    const options = getRequestOptions()
+    options.headers[key] = value
+    return options
+}
+
 export const ENVS = {
     privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
     theme: () => {
@@ -16,7 +40,9 @@ export const ENVS = {
                 `${themeConfig[t]}`
             );
         }
-
+    },
+    locale: () => {
+        return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     }
 }
 

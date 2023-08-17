@@ -4,7 +4,7 @@ import {ENVS, URLS} from "../service/helper";
 
 const AppContext = createContext()
 
-export const AppProvider = ({ children }) => {
+export const AppProvider = ({ children, messages }) => {
     const KEY_AUTH = 'isAuthenticated'
     const KEY_INFO = 'info'
 
@@ -15,6 +15,12 @@ export const AppProvider = ({ children }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
+
+    const t = (key, args) => {
+        let msg = messages[key] || key
+        msg = args ? msg.format(...args) : msg
+        return msg
+    }
 
     const handleLogin = () => {
         window.location.href = URLS.ingest.auth.login()
@@ -112,6 +118,8 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+
+
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
         globusToken, setGlobusToken,
@@ -120,7 +128,8 @@ export const AppProvider = ({ children }) => {
         isAuthenticated,
         unauthorized,
         checkLocals,
-        handleLogin, handleLogout
+        handleLogin, handleLogout,
+        t
     }}>{children}</AppContext.Provider>
 }
 

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useContext} from "react";
 import { Roboto } from 'next/font/google';
+import AppContext from "../../context/AppContext";
 
 const roboto_light = Roboto( {
     weight: '300',
@@ -8,17 +9,19 @@ const roboto_light = Roboto( {
 
 const Login = ({ onLogin, unauthorized, onLogout }) => {
 
+    const {t} = useContext(AppContext)
+
     const pageData = () => {
         if (unauthorized) {
             return {
                 title: 'Unauthorized',
-                body: 'You are logged in to an account without access. Please log out and log back in with a HuBMAP Consortium Registered Account',
+                body: 'You are logged in to an account without access. Please log out and log back in with a {0} Consortium Registered Account',
                 cb: onLogout,
                 btn: 'Log Out'
             }
         } else {
             return {
-                title: 'HuBMAP Data Ingest Board',
+                title: '{0} Data Ingest Board',
                 body: 'User authentication is required to view the Dataset Publishing Dashboard. Please click the button below and you will be redirected to a login page. There you can login with your institution credentials. Thank you!',
                 cb: onLogin,
                 btn: 'Log in with your institution credentials'
@@ -30,9 +33,9 @@ const Login = ({ onLogin, unauthorized, onLogout }) => {
         <div>
             <div className="container">
                 <div className="c-login row">
-                    <h1 className="c-login__head col-6">{details.title}</h1>
+                    <h1 className="c-login__head col-6">{t(details.title, [t('HuBMAP')])}</h1>
                     <p className={`c-login__txt ${roboto_light.className}`}>
-                        {details.body}
+                        {t(details.body, [t('HuBMAP')])}
                     </p>
                     <div className="row">
                         <button className="c-login__btn col-4" onClick={details.cb}>
