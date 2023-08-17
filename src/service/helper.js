@@ -16,6 +16,16 @@ String.prototype.format = function() {
     });
 };
 
+export const getUBKGName = (o) => {
+    let organTypes = window.UBKG.organTypes
+    for (let organ of organTypes) {
+        if (organ.rui_code === o) {
+            return organ.term
+        }
+    }
+    return o
+}
+
 export const getRequestOptions = () => {
     return {
         headers: {
@@ -31,6 +41,10 @@ export const getHeadersWith = (value, key = 'Authorization') => {
 }
 
 export const ENVS = {
+    ubkg: {
+        base: () => process.env.NEXT_PUBLIC_UBKG_URL,
+        sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
+    },
     privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
     theme: () => {
         let themeConfig = JSON.parse(process.env.NEXT_PUBLIC_THEME)
@@ -44,7 +58,21 @@ export const ENVS = {
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
-    urlFormat: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`
+    urlFormat: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`,
+    tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS)
+}
+
+export const TABLE = {
+    cols: {
+        n: (k) => {
+            const cols = ENVS.tableColumns()
+            return cols[k].name || k
+        },
+        f: (k) => {
+            const cols = ENVS.tableColumns()
+            return cols[k].field || k
+        }
+    }
 }
 
 export const URLS = {
