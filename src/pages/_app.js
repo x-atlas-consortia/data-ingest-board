@@ -5,6 +5,7 @@ import { AppProvider } from '../context/AppContext'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { ENVS, getRequestOptions } from '../service/helper'
+import useContent from "../hooks/useContent";
 
 const roboto = Roboto({
     weight: '500',
@@ -12,19 +13,7 @@ const roboto = Roboto({
 })
 
 export default function App({ Component, pageProps }) {
-    const [messages, setMessages] = useState({})
-    const loadMessages = async () => {
-        let res = await axios.get(
-            `locale/${ENVS.locale()}.json`,
-            getRequestOptions()
-        )
-        console.log(res)
-        return res.data
-    }
-
-    useEffect(() => {
-        loadMessages().then((r) => setMessages(r))
-    }, [])
+    const { messages } = useContent()
 
     return (
         <main className={roboto.className}>
