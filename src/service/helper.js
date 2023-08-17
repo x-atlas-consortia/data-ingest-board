@@ -58,7 +58,13 @@ export const ENVS = {
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
-    urlFormat: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`,
+    urlFormat: {
+        portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_URL}${path}`,
+        ingest: {
+            be: (path) => `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}${path}`,
+            fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_URL}${path}`,
+        }
+    },
     tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS)
 }
 
@@ -77,17 +83,25 @@ export const TABLE = {
 
 export const URLS = {
     portal: {
-      main: process.env.NEXT_PUBLIC_PORTAL_URL,
+      main: () => process.env.NEXT_PUBLIC_PORTAL_URL,
+      view: (uuid, entity = 'dataset')  => {
+          let path = process.env.NEXT_PUBLIC_PORTAL_VIEW_PATH.format(entity, uuid)
+          return ENVS.urlFormat.portal(path)
+      }
     },
     ingest: {
         main: () => process.env.NEXT_PUBLIC_INGEST_URL,
+        view: (uuid, entity = 'dataset') => {
+            let path = process.env.NEXT_PUBLIC_INGEST_VIEW_PATH.format(entity, uuid)
+            return ENVS.urlFormat.ingest.fe(path)
+        },
         auth: {
-          login: () => ENVS.urlFormat('/data-ingest-board-login'),
-          logout: () => ENVS.urlFormat('/data-ingest-board-logout')
+          login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
+          logout: () => ENVS.urlFormat.ingest.be('/data-ingest-board-logout')
         },
         privs: {
-            hasRW: () => ENVS.urlFormat(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL),
-            userGroups: () => ENVS.urlFormat(process.env.NEXT_PUBLIC_PRIVS_GROUP_URL)
+            hasRW: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_URL),
+            userGroups: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_GROUP_URL)
         }
     }
 }

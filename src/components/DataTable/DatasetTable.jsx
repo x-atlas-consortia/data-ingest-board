@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {eq, getUBKGName, TABLE} from "../../service/helper";
+import {eq, getUBKGName, TABLE, URLS} from "../../service/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -91,17 +91,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (filters.hasOwnProperty("data_types")) {
         defaultFilteredValue["data_types"] = filters["data_types"].split(",");
     }
-    const ingest_url = process.env.NEXT_PUBLIC_INGEST_URL.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_URL : process.env.NEXT_PUBLIC_INGEST_URL + '/'
-    const portal_url = process.env.NEXT_PUBLIC_PORTAL_URL.endsWith('/') ? process.env.NEXT_PUBLIC_PORTAL_URL : process.env.NEXT_PUBLIC_PORTAL_URL + '/'
 
     const renderDropdownContent = (record) => (
         <Menu>
             <Menu.Item key="1">
-                <a href={portal_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
             </Menu.Item>
-            <Menu.Item key="2">
-                <a href={ingest_url + 'dataset/' + record.uuid} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
-            </Menu.Item>
+            {!eq(URLS.portal.main(), URLS.ingest.main()) && <Menu.Item key="2">
+                <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
+            </Menu.Item> }
             <Menu.Item key="3">
                 <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
             </Menu.Item>
@@ -209,7 +207,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <a href={portal_url + 'browse/sample/' + record.organ_uuid} target="_blank" rel="noopener noreferrer">
+                    <a href={URLS.portal.view(record.organ_uuid, 'sample')} target="_blank" rel="noopener noreferrer">
                         {organId}
                          <ExportOutlined style={{verticalAlign: 'middle'}}/>
                     </a>
@@ -389,7 +387,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
-                           rowKey="hubmap_id"
+                           rowKey={TABLE.cols.n('id')}
                     />
                 </>
             )}
