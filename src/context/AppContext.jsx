@@ -72,7 +72,7 @@ export const AppProvider = ({ children, messages }) => {
     }, [globusToken, globusInfo, isAuthenticated, isLoading])
 
     const checkToken = (tokenInfo) => {
-        let hubmapUser = false;
+        let user = false;
         let invalidToken = false;
 
         return new Promise((resolve, reject) => {
@@ -80,13 +80,13 @@ export const AppProvider = ({ children, messages }) => {
                 INGEST_API.privs.userGroups(tokenInfo).then((results) => {
                     if (results && results.status === 200) {
                         // TODO: refactor to be a bool check from AuthHelper.has_read_privs
-                        //hubmapUser = results.results.read_privs
-                        hubmapUser = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
+                        //user = results.results.read_privs
+                        user = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
                     }
                     if (results && results.status === 401) {
                         invalidToken = true;
                     }
-                    resolve({hubmapUser, invalidToken});
+                    resolve({user, invalidToken});
                 }).catch(error => {
                     console.log(error);
                     reject(error);
@@ -103,8 +103,8 @@ export const AppProvider = ({ children, messages }) => {
             setGlobusInfo(initialInfo);
             setGlobusToken(initialInfo.groups_token)
             checkToken(initialInfo.groups_token).then(validate => {
-                setIsAuthenticated(authenticated && validate.hubmapUser);
-                if (validate.hubmapUser === false && validate.invalidToken === false) {
+                setIsAuthenticated(authenticated && validate.user);
+                if (validate.user === false && validate.invalidToken === false) {
                     setUnauthorized(true);
                 }
                 setIsLoading(false);
