@@ -1,5 +1,5 @@
 import {Dropdown, Menu, Table} from "antd";
-import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
+import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
@@ -109,7 +109,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const datasetColumns = [
         {
             title: TABLE.cols.n('id'),
-            width: 175,
+            width: 180,
             dataIndex: TABLE.cols.f('id'),
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
@@ -117,7 +117,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
             render: (id, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{id}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    <a href="#">{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                 </Dropdown>
             )
         },
@@ -159,7 +159,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
+                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, fontSize: '0.85em', color: 'white', borderRadius: '0.375rem', padding: '0.35em 0.65em', fontWeight: 'bold'}}>
                     {status}
                 </span>
             )
@@ -196,7 +196,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: TABLE.cols.n('organ_id'),
-            width: 175,
+            width: 180,
             dataIndex: TABLE.cols.f('organ_id'),
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('organ_id')] || null,
@@ -207,10 +207,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <a href={URLS.portal.view(record.organ_uuid, 'sample')} target="_blank" rel="noopener noreferrer">
-                        {organId}
-                         <ExportOutlined style={{verticalAlign: 'middle'}}/>
+                    <><a href={URLS.portal.view(record.organ_uuid, 'sample')} target="_blank" rel="noopener noreferrer">
+                        {organId} <ExportOutlined style={{verticalAlign: 'middle'}}/>
                     </a>
+                        </>
                 );
             }
         },
@@ -344,19 +344,19 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             case 'unpublished':
                 return { color: 'grey', darkColor: 'darkgrey' };
             case 'published':
-                return { color: 'green', darkColor: 'darkgreen' };
+                return { color: 'green', darkColor: 'green' };
             case 'qa':
                 return { color: 'yellow', darkColor: 'darkyellow' };
             case 'error':
-                return { color: 'red', darkColor: 'darkred' };
+                return { color: '#dc3545', darkColor: '#dc3545' };
             case 'invalid':
-                return { color: 'orange', darkColor: 'darkorange' };
+                return { color: 'orange', darkColor: 'orange' };
             case 'new':
-                return { color: 'cyan', darkColor: 'darkcyan' };
+                return { color: '#20c997', darkColor: '#20c997' };
             case 'processing':
                 return { color: 'blue', darkColor: 'darkblue' };
             case 'submitted':
-                return { color: 'purple', darkColor: 'darkpurple' };
+                return { color: '#0dcaf0', darkColor: '#0dcaf0' };
             default:
                 return { color: 'white', darkColor: 'darkgrey' };
         }
@@ -387,7 +387,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
-                           rowKey={TABLE.cols.n('id')}
+                           rowKey={TABLE.cols.f('id')}
                     />
                 </>
             )}
