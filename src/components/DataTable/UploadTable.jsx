@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {TABLE, URLS} from "../../service/helper";
+import {ENVS, TABLE, URLS} from "../../service/helper";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -25,20 +25,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
     let defaultSortOrder = {};
     if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")) {
-        if (field === "hubmap_id") {
-            defaultSortOrder["hubmap_id"] = order;
-        }
-        if (field === "group_name") {
-            defaultSortOrder["group_name"] = order;
-        }
-        if (field === "status") {
-            defaultSortOrder["status"] = order;
-        }
-        if (field === "title") {
-            defaultSortOrder["title"] = order;
-        }
-        if (field === "uuid") {
-            defaultSortOrder["uuid"] = order;
+        if (ENVS.filterFields().includes(field)) {
+            defaultSortOrder[field] = order;
         }
     }
 
@@ -70,16 +58,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     };
     const uploadColumns = [
         {
-            title: "HuBMAP ID",
+            title: TABLE.cols.n('id'),
             width: '15%',
-            dataIndex: "hubmap_id",
+            dataIndex: TABLE.cols.f('id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder["hubmap_id"] || null,
-            sorter: (a,b) => a.hubmap_id.localeCompare(b.hubmap_id),
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
             ellipsis: true,
-            render: (hubmapId, record) => (
+            render: (id, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{hubmapId}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    <a href="#">{id}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                 </Dropdown>
             )
         },

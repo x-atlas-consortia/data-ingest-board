@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/i
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {eq, getUBKGName, TABLE, URLS} from "../../service/helper";
+import {ENVS, eq, getUBKGName, TABLE, URLS} from "../../service/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -21,75 +21,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     let defaultFilteredValue = {};
     let defaultSortOrder = {};
     if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")){
-        if (field === "hubmap_id"){
-            defaultSortOrder["hubmap_id"] = order;
-        }
-        if (field === "group_name"){
-            defaultSortOrder["group_name"] = order;
-        }
-        if (field === "status"){
-            defaultSortOrder["status"] = order;
-        }
-        if (field === "organ"){
-            defaultSortOrder["organ"] = order;
-        }
-        if (field === "organ_hubmap_id"){
-            defaultSortOrder["organ_hubmap_id"] = order;
-        }
-        if (field === "data_types"){
-            defaultSortOrder["data_types"] = order;
-        }
-        if (field === "descendants"){
-            defaultSortOrder["descendants"] = order;
-        }
-        if (field === "provider_experiment_id"){
-            defaultSortOrder["provider_experiment_id"] = order;
-        }
-        if (field === "last_touch"){
-            defaultSortOrder["last_touch"] = order;
-        }
-        if (field === "has_contacts"){
-            defaultSortOrder["has_contacts"] = order;
-        }
-        if (field === "has_contributors"){
-            defaultSortOrder["has_contributors"] = order;
-        }
-        if (field === "donor_hubmap_id"){
-            defaultSortOrder["donor_hubmap_id"] = order;
-        }
-        if (field === "donor_submission_id"){
-            defaultSortOrder["donor_submission_id"] = order;
-        }
-        if (field === "donor_lab_id"){
-            defaultSortOrder["donor_lab_id"] = order;
-        }
-        if (field === "has_donor_metadata"){
-            defaultSortOrder["has_donor_metadata"] = order;
-        }
-        if (field === "upload"){
-            defaultSortOrder["upload"] = order;
-        }
-        if (field === "has_rui_info"){
-            defaultSortOrder["has_rui_info"] = order;
-        }
-        if (field === "has_data"){
-            defaultSortOrder["has_data"] = order;
-        }
-        if (field === "globus_url"){
-            defaultSortOrder["globus_url"] = order;
+        if (ENVS.filterFields().includes(field)) {
+            defaultSortOrder[field] = order;
         }
     }
-    if (filters.hasOwnProperty("group_name")) {
-        defaultFilteredValue["group_name"] = filters["group_name"].split(",");
-    }
-    if (filters.hasOwnProperty("status")) {
-        defaultFilteredValue["status"] = filters["status"].split(",");
-    }
-    if (filters.hasOwnProperty("organ")) {
-        defaultFilteredValue["organ"] = filters["organ"].split(",");
-    }
-    if (filters.hasOwnProperty("data_types")) {
-        defaultFilteredValue["data_types"] = filters["data_types"].split(",");
+
+    for (let _field of ENVS.defaultFilterFields()) {
+        if (filters.hasOwnProperty(_field)) {
+            defaultFilteredValue[_field] = filters[_field].split(",");
+        }
     }
 
     const renderDropdownContent = (record) => (
@@ -113,7 +53,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: TABLE.cols.f('id'),
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
-            sorter: (a,b) => a.hubmap_id.localeCompare(b[TABLE.cols.f('id')]),
+            sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
             ellipsis: true,
             render: (id, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>

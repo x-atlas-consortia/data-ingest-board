@@ -65,7 +65,9 @@ export const ENVS = {
             fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_BASE}${path}`,
         }
     },
-    tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS)
+    tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
+    filterFields: () => JSON.parse(process.env.NEXT_PUBLIC_FILTER_FIELDS),
+    defaultFilterFields: () => JSON.parse(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS)
 }
 
 export const TABLE = {
