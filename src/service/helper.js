@@ -68,6 +68,14 @@ export const ENVS = {
     tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
     filterFields: () => JSON.parse(process.env.NEXT_PUBLIC_FILTER_FIELDS),
     defaultFilterFields: () => JSON.parse(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
+    excludeTableColumns: ()=> {
+        let cols = JSON.parse(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
+        const dict = {}
+        for (let col of cols) {
+            dict[col] = true
+        }
+        return dict
+    },
     uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === 1
 }
 

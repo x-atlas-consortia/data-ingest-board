@@ -254,7 +254,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
     ]
 
-    const dataIndexList = datasetColumns.map(column => column.dataIndex);
+    // Exclude named columns in .env from table
+    const filteredDatasetColumns = []
+    const excludedColumns = ENVS.excludeTableColumns()
+    for (let x = 0; x < datasetColumns.length; x++) {
+        if (excludedColumns[datasetColumns[x].dataIndex] === undefined) {
+            filteredDatasetColumns.push(datasetColumns[x])
+        }
+    }
+
+    const dataIndexList = filteredDatasetColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
         const filteredData = data.filter(item => {
@@ -319,7 +328,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                         </div>
                     </div>
                     <Table className={`m-4 c-table--upload UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={datasetColumns}
+                           columns={filteredDatasetColumns}
                            dataSource={data}
                            showHeader={!loading}
                            bordered={false}
