@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {Table, Spin, Button, Dropdown, Menu} from "antd";
-import { DownloadOutlined } from '@ant-design/icons';
-import { ExportOutlined} from "@ant-design/icons";
-import { Span } from "next/dist/server/lib/trace/tracer";
-import { CSVLink } from "react-csv";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS} from "../../service/helper";
+import {ENVS, getHeadersWith} from "../../service/helper";
 
 
 const DataTable = (props) => {
@@ -134,13 +129,7 @@ const DataTable = (props) => {
 
     const loadData = async () => {
         setLoading(true);
-        const options = {
-            headers: {
-            Authorization:
-            "Bearer " + globusToken,
-            "Content-Type": "application/json"
-            }
-        };
+        const options = getHeadersWith(globusToken)
         try {
             const datasetResponse = await axios.get(datasetUrl, options);
 
@@ -166,14 +155,18 @@ const DataTable = (props) => {
         }
     };
 
-    const toggleApi = () => {
-        setInvalidUploadId(false);
-        setUseDatasetApi(!useDatasetApi);
-        if (useDatasetApi) {
+    const toggleHistory = (condition) => {
+        if (condition) {
             window.history.pushState(null, null, `/?entity_type=uploads`)
         } else {
             window.history.pushState(null, null, `/`)
         }
+    }
+
+    const toggleApi = () => {
+        setInvalidUploadId(false);
+        setUseDatasetApi(!useDatasetApi);
+        toggleHistory(useDatasetApi)
         setFilters({});
         setSortField(undefined);
         setSortOrder(undefined);
@@ -185,11 +178,7 @@ const DataTable = (props) => {
 
     const clearAll = () => {
         setInvalidUploadId(false);
-        if (!useDatasetApi) {
-            window.history.pushState(null, null, `/?entity_type=uploads`)
-        } else {
-            window.history.pushState(null, null, `/`)
-        }
+        toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData);
         setFilters({});
         setSortField(undefined);
