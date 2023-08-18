@@ -124,7 +124,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
             defaultFilteredValue: defaultFilteredValue["organ"] || null,
-            filters: uniqueOrganType.map(name => ({ text: name, value: name.toLowerCase() })),
+            filters: uniqueOrganType.map(name => ({ text: getUBKGName(name), value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.organ, value),
             ellipsis: true,
             render: (organType, record) => {

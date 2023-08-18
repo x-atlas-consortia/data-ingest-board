@@ -235,7 +235,7 @@ const DataTable = (props) => {
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>}
                 <button className="c-btn c-btn--lgt col-md-6 col-lg-3" onClick={clearAll}>
-                    {"CLEAR"}
+                    {"CLEAR FILTERS"}
                 </button>
             </div>
             {table}
