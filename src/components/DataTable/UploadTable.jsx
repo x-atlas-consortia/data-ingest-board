@@ -3,6 +3,7 @@ import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
+import {TABLE, URLS} from "../../service/helper";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -40,13 +41,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder["uuid"] = order;
         }
     }
-    const ingest_url = process.env.NEXT_PUBLIC_INGEST_BASE.endsWith('/') ? process.env.NEXT_PUBLIC_INGEST_BASE : process.env.NEXT_PUBLIC_INGEST_BASE + '/'
+
     const renderDropdownContent = (record) => {
         const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
         return (
             <Menu>
                 <Menu.Item key="1">
-                    <a href={ingest_url + 'upload/' + record.uuid} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                    <a href={URLS.ingest.view(record.uuid, 'upload')} target="_blank" rel="noopener noreferrer">Data Portal</a>
                 </Menu.Item>
                 {showGlobusUrl && (
                     <Menu.Item key="2">
@@ -218,7 +219,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1000 }}
                            onChange={handleTableChange}
-                           rowKey="hubmap_id"
+                           rowKey={TABLE.cols.f('id')}
                     />
                 </>
             )}
