@@ -31,7 +31,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                             src={`images/${t('hubmap-type-white250.png')}`}
                             alt={t('HuBMAP Logo')}
                         />
-                        <h1 className="Title col-4 col-md-4 col-lg-4 col-xl-4 offset-md-2 offset-lg-2 offset-xl-2 d-flex justify-content-center align-items-center text-center">
+                        <h1 className="c-nav__title col-4 col-md-4 col-lg-4 col-xl-4 offset-md-2 offset-lg-2 offset-xl-2 d-flex justify-content-center align-items-center text-center">
                             Data Ingest Board
                         </h1>
                         {isAuthenticated && (

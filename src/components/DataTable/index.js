@@ -225,12 +225,12 @@ const DataTable = (props) => {
     return (
         <div className="c-table c-table--data container">
             <div className="row">
-                <h2 className="c-table__title col text-center m-3">
+                <h2 className="c-table__title col text-center m-5">
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className="c-table__btns mx-auto text-center">
+            <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                 {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                 </button>}

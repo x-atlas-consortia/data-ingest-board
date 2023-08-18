@@ -1,7 +1,5 @@
 .c-logout
-  display flex
-  justify-content right
-  align-items center
+  align-right()
   &__btn
     background-color inherit
     color white
@@ -10,6 +8,8 @@
     border-radius 0.25rem
     padding-top .5rem
     padding-bottom .5rem
+    +md-max()
+      font-size .8rem
     &:hover
       background-color $col-link-water
       color #454a63

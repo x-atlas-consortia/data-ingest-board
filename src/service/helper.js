@@ -79,7 +79,7 @@ export const ENVS = {
         }
         return dict
     },
-    uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === 1
+    uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1'
 }
 
 let THEME_CONFIG
