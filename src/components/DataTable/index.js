@@ -7,6 +7,7 @@ import { Span } from "next/dist/server/lib/trace/tracer";
 import { CSVLink } from "react-csv";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
+import {ENVS} from "../../service/helper";
 
 
 const DataTable = (props) => {
@@ -142,17 +143,23 @@ const DataTable = (props) => {
         };
         try {
             const datasetResponse = await axios.get(datasetUrl, options);
-            //TODO: the request call here needs to be able to be toggled per app requirement
-            const uploadResponse = await axios.get(uploadUrl, options);
+
+            let uploadData = []
+            if (ENVS.uploadsEnabled()) {
+                const uploadResponse = await axios.get(uploadUrl, options);
+                setUploadCount(uploadResponse.data.length);
+                setUploadData(uploadResponse.data);
+                uploadData = uploadResponse.data
+            }
+
             const datasetsWithDescendants = addDescendants(datasetResponse.data);
             const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
             setDatasetData(datasetsWithDescendants);
             setDatasetCount(primaryDatasets.length);
-            setUploadCount(uploadResponse.data.length);
             setPrimaryData(primaryDatasets);
             setOriginalPrimaryData(primaryDatasets);
-            setUploadData(uploadResponse.data);
-            filterUploads(uploadResponse.data, datasetResponse.data, selectUploadId);
+
+            filterUploads(uploadData, datasetResponse.data, selectUploadId);
         } catch (error) {
         } finally {
         setLoading(false);
@@ -194,19 +201,8 @@ const DataTable = (props) => {
         setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
 
     };
-    const table = useDatasetApi ? (
-        <DatasetTable
-            key={tableKey}
-            data={primaryData}
-            loading={loading}
-            handleTableChange={handleTableChange}
-            page={page}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            filters={filters}
-        />
-    ) : (
+
+    const uploadTable = ENVS.uploadsEnabled() ? (
         <UploadTable
             key={tableKey}
             data={uploadData}
@@ -221,7 +217,21 @@ const DataTable = (props) => {
             sortOrder={sortOrder}
             filters={filters}
         />
-    );
+    ) : (<></>)
+
+    const table = useDatasetApi ? (
+        <DatasetTable
+            key={tableKey}
+            data={primaryData}
+            loading={loading}
+            handleTableChange={handleTableChange}
+            page={page}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            filters={filters}
+        />
+    ) : uploadTable;
 
     return (
         <div className="c-table c-table--data container">
@@ -232,9 +242,9 @@ const DataTable = (props) => {
             </div>
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className="c-table__btns mx-auto text-center">
-                <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
+                {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
                     {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
-                </button>
+                </button>}
                 <button className="c-btn c-btn--lgt col-md-6 col-lg-3" onClick={clearAll}>
                     {"CLEAR"}
                 </button>
