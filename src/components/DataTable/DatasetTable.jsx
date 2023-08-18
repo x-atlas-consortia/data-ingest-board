@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/i
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, URLS} from "../../service/helper";
+import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../service/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -57,7 +57,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
             render: (id, record) => (
                 <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                    <a href="#" className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                 </Dropdown>
             )
         },
@@ -99,7 +99,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, fontSize: '0.85em', color: 'white', borderRadius: '0.375rem', padding: '0.35em 0.65em', fontWeight: 'bold'}}>
+                <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
                     {status}
                 </span>
             )
@@ -147,10 +147,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     return null;
                 }
                 return (
-                    <><a href={URLS.portal.view(record.organ_uuid, 'sample')} target="_blank" rel="noopener noreferrer">
+                    <a href={URLS.portal.view(record.organ_uuid, 'sample')} target="_blank" rel="noopener noreferrer" className='lnk--ic'>
                         {organId} <ExportOutlined style={{verticalAlign: 'middle'}}/>
                     </a>
-                        </>
+
                 );
             }
         },
@@ -288,29 +288,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return filteredData;
     }
 
-    const getStatusColor = (status) => {
-        switch (status.toLowerCase()) {
-            case 'unpublished':
-                return { color: 'grey', darkColor: 'darkgrey' };
-            case 'published':
-                return { color: 'green', darkColor: 'green' };
-            case 'qa':
-                return { color: 'yellow', darkColor: 'darkyellow' };
-            case 'error':
-                return { color: '#dc3545', darkColor: '#dc3545' };
-            case 'invalid':
-                return { color: 'orange', darkColor: 'orange' };
-            case 'new':
-                return { color: '#20c997', darkColor: '#20c997' };
-            case 'processing':
-                return { color: 'blue', darkColor: 'darkblue' };
-            case 'submitted':
-                return { color: '#0dcaf0', darkColor: '#0dcaf0' };
-            default:
-                return { color: 'white', darkColor: 'darkgrey' };
-        }
-    }
-
     return (
         <div>
             {loading ? (
@@ -327,7 +304,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                             </CSVLink>
                         </div>
                     </div>
-                    <Table className={`m-4 c-table--upload UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                    <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredDatasetColumns}
                            dataSource={data}
                            showHeader={!loading}

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {INGEST_API} from "../service/apis";
-import {ENVS, URLS} from "../service/helper";
+import {ENVS, THEME, URLS} from "../service/helper";
 
 const AppContext = createContext()
 
@@ -66,7 +66,7 @@ export const AppProvider = ({ children, messages }) => {
         setIsLoading(true)
         resolveLocals()
         if (pageLoaded.current === false) {
-            ENVS.theme()
+            THEME.cssProps()
             pageLoaded.current = true
         }
     }, [globusToken, globusInfo, isAuthenticated, isLoading])

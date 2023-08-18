@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {ENVS, TABLE, URLS} from "../../service/helper";
+import {ENVS, TABLE, THEME, URLS} from "../../service/helper";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -45,9 +45,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
                 <Menu.Item key="3">
                     <Button onClick={() => {
-                        const hm_uuid = record.uuid.trim();
-                        filterUploads(uploadData, datasetData, hm_uuid);
-                        window.history.pushState(null, null, `/?upload_id=${record.hubmap_id}`)
+                        const uuid = record.uuid.trim();
+                        filterUploads(uploadData, datasetData, uuid);
+                        window.history.pushState(null, null, `/?upload_id=${record[TABLE.cols.f('id')]}`)
                     }}>
                         Show Datasets
                     </Button>
@@ -109,7 +109,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span style={{backgroundColor: getStatusColor(status).color, border: `1px solid ${getStatusColor(status).darkColor}`, color: 'white', borderRadius: '7px', padding: '0px .5rem', fontWeight: 'bold', textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',}}>
+                <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
                     {status}
                 </span>
             )
@@ -159,29 +159,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return filteredData;
     }
 
-    const getStatusColor = (status) => {
-        switch (status.toLowerCase()) {
-            case 'unreorganized':
-                return { color: 'grey', darkColor: "darkgrey" };
-            case 'reorganized':
-                return { color: 'green', darkColor: "darkgreen"};
-            case 'error':
-                return { color: 'red', darkColor: "darkred"};
-            case 'invalid':
-                return { color: 'orange', darkColor: "darkorange"};
-            case 'valid':
-                return { color: 'lime', darkColor: "darkgreen"};
-            case 'new':
-                return { color: 'cyan', darkColor: "darkblue"};
-            case 'processing':
-                return { color: 'blue', darkColor: "darkblue"};
-            case 'submitted':
-                return { color: 'purple', darkColor: "darkpurple"};
-            default:
-                return { color: 'white', darkColor: "darkgrey"};
-        }
-    }
-
     return (
         <div>
             {loading ? (
@@ -198,7 +175,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                             </CSVLink>
                         </div>
                     </div>
-                    <Table className={`m-4 UploadTable ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                    <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={uploadColumns}
                            showHeader={!loading}
                            dataSource={data}

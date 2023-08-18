@@ -40,21 +40,24 @@ export const getHeadersWith = (value, key = 'Authorization') => {
     return options
 }
 
+const parseJSON = (obj) => {
+    try {
+        return JSON.parse(obj)
+    } catch (e) {
+        console.error(e)
+    }
+    return {}
+}
+
+
+
 export const ENVS = {
     ubkg: {
         base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
         sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
     },
     privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
-    theme: () => {
-        let themeConfig = JSON.parse(process.env.NEXT_PUBLIC_THEME)
-        for (let t in themeConfig) {
-            document.body.style.setProperty(
-                `--${t}`,
-                `${themeConfig[t]}`
-            );
-        }
-    },
+    theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
@@ -65,11 +68,11 @@ export const ENVS = {
             fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_BASE}${path}`,
         }
     },
-    tableColumns: () => JSON.parse(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
-    filterFields: () => JSON.parse(process.env.NEXT_PUBLIC_FILTER_FIELDS),
-    defaultFilterFields: () => JSON.parse(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
+    tableColumns: () => parseJSON(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
+    filterFields: () => parseJSON(process.env.NEXT_PUBLIC_FILTER_FIELDS),
+    defaultFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
     excludeTableColumns: ()=> {
-        let cols = JSON.parse(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
+        let cols = parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
         const dict = {}
         for (let col of cols) {
             dict[col] = true
@@ -77,6 +80,28 @@ export const ENVS = {
         return dict
     },
     uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === 1
+}
+
+let THEME_CONFIG
+export const THEME = {
+    cssProps: () => {
+        const themeConfig = ENVS.theme()
+        for (let t in themeConfig.cssProps) {
+            document.body.style.setProperty(
+                `--${t}`,
+                `${themeConfig.cssProps[t]}`
+            );
+        }
+    },
+    getStatusColor: (status) => {
+        status = status.toLowerCase()
+        if (!THEME_CONFIG) {
+            // Store this to avoid constantly parsing during table build
+            THEME_CONFIG = ENVS.theme()
+        }
+        const statusColors = THEME_CONFIG.statusColors
+        return statusColors[status] || statusColors.default || 'darkgrey'
+    }
 }
 
 export const TABLE = {
