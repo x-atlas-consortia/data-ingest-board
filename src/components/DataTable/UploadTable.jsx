@@ -1,5 +1,5 @@
 import {Button, Dropdown, Menu, Table} from "antd";
-import {DownloadOutlined, ExportOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
@@ -31,19 +31,31 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
 
     const renderDropdownContent = (record) => {
-        const showGlobusUrl = record.status.toLowerCase() !== 'reorganized';
-        return (
-            <Menu>
-                <Menu.Item key="1">
+        const showGlobusUrl = record.status?.toLowerCase() !== 'reorganized';
+        const items = [
+            {
+                key: '1',
+                label: (
                     <a href={URLS.ingest.view(record.uuid, 'upload')} target="_blank" rel="noopener noreferrer">Data Portal</a>
-                </Menu.Item>
-                {showGlobusUrl && (
-                    <Menu.Item key="2">
-                        <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
-                    </Menu.Item>
-                )}
+                )
+            }
+        ]
 
-                <Menu.Item key="3">
+        if (showGlobusUrl) {
+            items.push(
+                {
+                    key: '2',
+                    label: (
+                        <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+                    )
+                }
+            )
+        }
+
+        items.push(
+            {
+                key: '3',
+                label: (
                     <Button onClick={() => {
                         const uuid = record.uuid.trim();
                         filterUploads(uploadData, datasetData, uuid);
@@ -51,10 +63,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     }}>
                         Show Datasets
                     </Button>
-                </Menu.Item>
-
-            </Menu>
-        );
+                )
+            }
+        )
+        return items
     };
     const uploadColumns = [
         {
@@ -66,8 +78,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
             ellipsis: true,
             render: (id, record) => (
-                <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#">{id}<ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                <Dropdown menu={{items: renderDropdownContent(record)}} trigger={['click']}>
+                    <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                 </Dropdown>
             )
         },

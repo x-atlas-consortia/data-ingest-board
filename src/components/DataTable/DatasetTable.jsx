@@ -32,19 +32,38 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
     }
 
-    const renderDropdownContent = (record) => (
-        <Menu>
-            <Menu.Item key="1">
-                <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
-            </Menu.Item>
-            {!eq(URLS.portal.main(), URLS.ingest.main()) && <Menu.Item key="2">
-                <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
-            </Menu.Item> }
-            <Menu.Item key="3">
-                <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
-            </Menu.Item>
-        </Menu>
-    );
+    const renderDropdownContent = (record) => {
+        const items = [
+            {
+                key: '1',
+                label: (
+                    <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                )
+            }
+        ]
+
+        if (!eq(URLS.portal.main(), URLS.ingest.main())) {
+            items.push(
+                {
+                    key: '2',
+                    label: (
+                        <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
+                    )
+                }
+            )
+        }
+
+        items.push(
+            {
+                key: '3',
+                label: (
+                    <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+                )
+            }
+        )
+
+        return items
+    };
 
     const datasetColumns = [
         {
@@ -56,8 +75,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
             ellipsis: true,
             render: (id, record) => (
-                <Dropdown overlay={renderDropdownContent(record)} trigger={['click']}>
-                    <a href="#" className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                <Dropdown menu={{items: renderDropdownContent(record)}} trigger={['click']}>
+                    <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                 </Dropdown>
             )
         },

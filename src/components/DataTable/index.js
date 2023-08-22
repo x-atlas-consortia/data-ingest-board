@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, getHeadersWith} from "../../service/helper";
+import {ENVS, getHeadersWith, TABLE} from "../../service/helper";
 
 
 const DataTable = (props) => {
@@ -90,7 +90,7 @@ const DataTable = (props) => {
 
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         if (typeof uploadId !== 'undefined') {
-            const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload.hubmap_id === uploadId);
+            const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload[TABLE.cols.f('id')] === uploadId);
             if (typeof matchingUpload !== 'undefined') {
                 const datasetsInUpload = matchingUpload.datasets;
                 const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
