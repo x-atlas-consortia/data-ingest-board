@@ -1,4 +1,4 @@
-import {Dropdown, Menu, Table} from "antd";
+import {Dropdown, Menu, Table, Tooltip} from "antd";
 import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
@@ -99,9 +99,12 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
-                    {status}
-                </span>
+                <Tooltip title={TABLE.getStatusDefinition(status)}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
+                        {status}
+                    </span>
+                </Tooltip>
+
             )
         },
         {

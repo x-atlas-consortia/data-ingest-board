@@ -92,6 +92,7 @@ export const THEME = {
                 `${themeConfig.cssProps[t]}`
             );
         }
+        document.documentElement.classList.add(`theme--${themeConfig.theme}`)
     },
     getStatusColor: (status) => {
         status = status.toLowerCase()
@@ -114,6 +115,39 @@ export const TABLE = {
             const cols = ENVS.tableColumns()
             return cols[k].field || k
         }
+    },
+    getStatusDefinition: (status) => {
+        let msg
+        if (status) {
+            status = status.toUpperCase();
+            switch(status) {
+                case 'NEW':
+                    msg = <span>The data provider has begun to upload data but is not ready for validation or processing via the ingest pipeline.</span>
+                    break;
+                case 'INVALID':
+                    msg = <span>The data did not pass validation prior to processing via the ingest pipeline.</span>
+                    break;
+                case 'QA':
+                    msg = <span>The data has been successfully processed via the ingest pipeline and is awaiting data provider curation.</span>
+                    break;
+                case 'ERROR':
+                    msg = <span>An error occurred during processing via the ingest pipeline.</span>
+                    break;
+                case 'PROCESSING':
+                    msg = <span>The data is currently being processed via the ingest pipeline.</span>
+                    break;
+                case 'SUBMITTED':
+                    msg = <span>The data provider has finished uploading data and the data is ready for validation.</span>
+                    break;
+                case 'PUBLISHED':
+                    msg = <span>The data has been successfully curated and released for public use.</span>
+                    break;
+                default:
+                    msg = <span>The <code>Dataset</code> has been {status}.</span>
+                    break;
+            }
+        }
+        return msg;
     }
 }
 
