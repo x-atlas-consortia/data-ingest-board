@@ -32,7 +32,7 @@ const Login = ({ onLogin, unauthorized, onLogout }) => {
     return (
         <div>
             <div className="container">
-                <div className="c-login row">
+                <div className="c-login row mt-4">
                     <h1 className="c-login__head col-6">{t(details.title, [t('HuBMAP')])}</h1>
                     <p className={`c-login__txt ${roboto_light.className}`}>
                         {t(details.body, [t('HuBMAP')])}
