@@ -39,15 +39,13 @@ function Search({ useDatasetApi, callbacks, originalResponse }) {
     }
 
     return (
-        <div className={`c-search container`}>
-            <div className={'row'}>
-                <div className='col-lg-10'><input id='appSearch' className='form-control form-control-lg rounded-0' name={'search'} onKeyDown={(e) => {
-                    if (eq(e.key, 'Enter')) {
-                        onSearch(e)
-                    }
-                }} /></div>
-                <div className='col-lg-2'><button className={'c-btn c-btn--outline'} type={'submit'} onClick={(e) => onSearch(e)}>Search</button></div>
-            </div>
+        <div className={`c-search`}>
+            <div className='col col-lg-10 col-md-6'><input id='appSearch' className='form-control form-control-lg rounded-0' name={'search'} onKeyDown={(e) => {
+                if (eq(e.key, 'Enter')) {
+                    onSearch(e)
+                }
+            }} /></div>
+            <div className='col col-lg-2 col-md-6'><button className={'c-btn c-btn--outline'} type={'submit'} onClick={(e) => onSearch(e)}>Search</button></div>
         </div>
     )
 }
