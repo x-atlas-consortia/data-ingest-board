@@ -1,6 +1,6 @@
 import {ENVS, eq, TABLE} from "../service/helper";
 
-function Search({ uploads, datasets, useDatasetApi, callbacks }) {
+function Search({ useDatasetApi, callbacks, originalResponse }) {
     let dict = {}
 
     const prepareIndices = (data, entity) => {
@@ -15,24 +15,27 @@ function Search({ uploads, datasets, useDatasetApi, callbacks }) {
     }
 
     const onSearch = (e) => {
-        prepareIndices(datasets, 'datasets')
-        prepareIndices(uploads, 'uploads')
+        let val = document.getElementById('appSearch').value.toLowerCase()
+        const entity = useDatasetApi ? 'Datasets' : 'Uploads'
+        const cb = `apply${entity}`
+
+        if (!val) {
+            callbacks[`${cb}`](originalResponse[entity.toLowerCase()])
+            return
+        }
+        prepareIndices(originalResponse.datasets.data, 'datasets')
+        prepareIndices(originalResponse.uploads.data, 'uploads')
         let found = {}
         let results = []
-        let data = useDatasetApi ? dict.datasets : dict.upload
+        let data = dict[entity.toLowerCase()]
         for (let k in data) {
             let idKey = data[k][TABLE.cols.f('id')]
-            let val = document.getElementById('appSearch').value.toLowerCase()
             if (k.toLowerCase().includes(val) && found[idKey] === undefined) {
                 results.push(data[k])
                 found[idKey] = true
             }
         }
-        if (useDatasetApi) {
-            callbacks.applyDatasets({data: results})
-        } else {
-            callbacks.applyUploads({data: results})
-        }
+        callbacks[`${cb}`]({data: results})
     }
 
     return (

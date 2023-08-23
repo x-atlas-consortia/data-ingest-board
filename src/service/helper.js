@@ -81,6 +81,13 @@ export const ENVS = {
     searchIndices: (entity) => {
         const config = parseJSON(process.env.NEXT_PUBLIC_SEARCH_INDICES)
         return config[entity]
+    },
+    idleTimeout: () => {
+        let num = process.env.NEXT_PUBLIC_IDLE_TIME
+        try {
+            num = Number(num) || 1000
+        } catch (e) {}
+        return num * 60 * 60
     }
 }
 

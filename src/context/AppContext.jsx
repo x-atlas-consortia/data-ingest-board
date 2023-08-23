@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {parseJSON, THEME, URLS} from "../service/helper";
+import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
+import {useIdleTimer} from 'react-idle-timer'
 
 const AppContext = createContext()
 
@@ -72,6 +73,14 @@ export const AppProvider = ({ children, messages }) => {
         setIsAuthenticated(authorized)
         setIsLoading(false)
     }
+
+    const onIdle = () => {
+        handleLogout()
+        window.location = '/'
+    }
+
+    const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
+
 
     useEffect(() => {
         setIsLoading(true)
