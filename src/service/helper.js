@@ -76,7 +76,12 @@ export const ENVS = {
         }
         return dict
     },
-    uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1'
+    uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1',
+    searchEnabled: () => process.env.NEXT_PUBLIC_SEARCH_ENABLED === '1',
+    searchIndices: (entity) => {
+        const config = parseJSON(process.env.NEXT_PUBLIC_SEARCH_INDICES)
+        return config[entity]
+    }
 }
 
 let THEME_CONFIG
@@ -167,6 +172,10 @@ export const URLS = {
       }
     },
     ingest: {
+        data: {
+          datasets: () => process.env.NEXT_PUBLIC_DATASET_URL,
+          uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL
+        },
         main: () => process.env.NEXT_PUBLIC_INGEST_BASE,
         view: (uuid, entity = 'dataset') => {
             let path = process.env.NEXT_PUBLIC_INGEST_VIEW_PATH.format(entity, uuid)

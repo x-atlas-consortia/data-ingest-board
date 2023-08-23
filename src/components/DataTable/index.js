@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, getHeadersWith, TABLE} from "../../service/helper";
+import {ENVS, getHeadersWith, TABLE, URLS} from "../../service/helper";
+import Search from "../Search";
 
 
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
-    const [datasetCount, setDatasetCount] = useState(0);
-    const [uploadCount, setUploadCount] = useState(0);
+    const [originalResponse, setOriginalResponse] = useState({})
+    // const [datasetCount, setDatasetCount] = useState(0);
+    // const [uploadCount, setUploadCount] = useState(0);
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
@@ -23,8 +25,6 @@ const DataTable = (props) => {
     const [filters, setFilters] = useState(props.tableFilters);
     const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
-    const datasetUrl = process.env.NEXT_PUBLIC_DATASET_URL;
-    const uploadUrl = process.env.NEXT_PUBLIC_UPLOAD_URL;
 
     useEffect(() => {
         loadData();
@@ -49,10 +49,10 @@ const DataTable = (props) => {
 
         if (useDatasetApi) {
             const filteredDatasets = currentDataSource || [];
-            setDatasetCount(filteredDatasets.length)
+            //setDatasetCount(filteredDatasets.length)
         } else {
             const filteredUploads = currentDataSource || [];
-            setUploadCount(filteredUploads.length);
+            //setUploadCount(filteredUploads.length);
         }
 
         const query = new URLSearchParams(window.location.search);
@@ -127,27 +127,34 @@ const DataTable = (props) => {
         });
     }
 
+    const applyDatasets = (datasetResponse) => {
+        const datasetsWithDescendants = addDescendants(datasetResponse.data);
+        const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
+        setDatasetData(datasetsWithDescendants);
+        //setDatasetCount(primaryDatasets.length);
+        setPrimaryData(primaryDatasets);
+        setOriginalPrimaryData(primaryDatasets);
+    }
+
+    const applyUploads = (uploadResponse) => {
+        //setUploadCount(uploadResponse.data.length);
+        setUploadData(uploadResponse.data);
+    }
+
     const loadData = async () => {
         setLoading(true);
         const options = getHeadersWith(globusToken)
         try {
-            const datasetResponse = await axios.get(datasetUrl, options);
+            const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
 
             let uploadData = []
             if (ENVS.uploadsEnabled()) {
-                const uploadResponse = await axios.get(uploadUrl, options);
-                setUploadCount(uploadResponse.data.length);
-                setUploadData(uploadResponse.data);
+                const uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
+                applyUploads(uploadResponse)
                 uploadData = uploadResponse.data
             }
-
-            const datasetsWithDescendants = addDescendants(datasetResponse.data);
-            const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
-            setDatasetData(datasetsWithDescendants);
-            setDatasetCount(primaryDatasets.length);
-            setPrimaryData(primaryDatasets);
-            setOriginalPrimaryData(primaryDatasets);
-
+            applyDatasets(datasetResponse)
+            setOriginalResponse({datasets: datasetResponse, uploads: {data: uploadData}})
             filterUploads(uploadData, datasetResponse.data, selectUploadId);
         } catch (error) {
         } finally {
@@ -172,8 +179,8 @@ const DataTable = (props) => {
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
-        setDatasetCount(primaryData.length);
-        setUploadCount(uploadData.length);
+        // setDatasetCount(primaryData.length);
+        // setUploadCount(uploadData.length);
     };
 
     const clearAll = () => {
@@ -181,12 +188,17 @@ const DataTable = (props) => {
         toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData);
         setFilters({});
+        if (ENVS.searchEnabled()) {
+            applyDatasets(originalResponse.datasets)
+            applyUploads(originalResponse.uploads)
+            document.getElementById('appSearch').value = ''
+        }
         setSortField(undefined);
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
-        setDatasetCount(primaryData.length);
-        setUploadCount(uploadData.length);
+        // setDatasetCount(primaryData.length);
+        // setUploadCount(uploadData.length);
         setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
 
     };
@@ -229,6 +241,7 @@ const DataTable = (props) => {
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </div>
+            {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} uploads={uploadData} datasets={primaryData} callbacks={{applyDatasets, applyUploads}}  />}
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                 {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>

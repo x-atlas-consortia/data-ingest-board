@@ -3,7 +3,7 @@
 // import { Inter } from 'next/font/google'
 import DataTable from "../components/DataTable";
 import Login from "../components/Login";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import AppContext from "../context/AppContext";
 
 
