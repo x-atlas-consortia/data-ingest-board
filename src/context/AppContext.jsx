@@ -14,7 +14,14 @@ export const AppProvider = ({ children, messages }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
-    
+
+    /**
+     * Translates and formats a message string.
+     * @param key {string} The key in the json file or string literal with interpolation expressions
+     * @param args {any} Values respective of interpolation expressions
+     * @example t('There are {0} results', 10) => There are 10 results
+     * @returns {string} Result string
+     */
     const t = (key, args) => {
         let msg = messages[key] || key
         msg = args ? msg.format(...args) : msg
