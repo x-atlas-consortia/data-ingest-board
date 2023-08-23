@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {INGEST_API} from "../service/apis";
-import {ENVS, THEME, URLS} from "../service/helper";
+import {parseJSON, THEME, URLS} from "../service/helper";
 
 const AppContext = createContext()
 
@@ -15,7 +14,7 @@ export const AppProvider = ({ children, messages }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
-
+    
     const t = (key, args) => {
         let msg = messages[key] || key
         msg = args ? msg.format(...args) : msg
@@ -39,7 +38,7 @@ export const AppProvider = ({ children, messages }) => {
 
     const resolveLocals = () =>  {
         let url = new URL(window.location.href)
-        let info = url.searchParams.get(KEY_INFO)
+        let urlInfo = url.searchParams.get(KEY_INFO)
         let authorized = false
         let globusInfo
 
@@ -47,19 +46,24 @@ export const AppProvider = ({ children, messages }) => {
             authorized = localStorage.getItem(KEY_AUTH) === 'true'
         }
         if (localStorage.getItem(KEY_INFO)) {
-            globusInfo = JSON.parse(localStorage.getItem(KEY_INFO))
+            globusInfo = parseJSON(localStorage.getItem(KEY_INFO))
         }
 
-        if (info && !globusInfo) {
-            window.history.pushState(null, null, `/`);
-            globusInfo = JSON.parse(info)
-            authorized = true
+        if (urlInfo && !globusInfo) {
+            window.history.pushState(null, null, `/`)
+            globusInfo = parseJSON(urlInfo)
+            authorized = globusInfo?.read_privs
         }
 
-        localStorage.setItem(KEY_INFO, info);
-        localStorage.setItem(KEY_AUTH, authorized.toString())
+        if (globusInfo) {
+            localStorage.setItem(KEY_INFO, JSON.stringify(globusInfo))
+            localStorage.setItem(KEY_AUTH, authorized.toString())
+            setGlobusInfo(globusInfo)
+            setGlobusToken(globusInfo?.groups_token)
+        }
+
         setIsAuthenticated(authorized)
-        checkLocals(authorized, globusInfo)
+        setIsLoading(false)
     }
 
     useEffect(() => {
@@ -69,55 +73,7 @@ export const AppProvider = ({ children, messages }) => {
             THEME.cssProps()
             pageLoaded.current = true
         }
-    }, [globusToken, globusInfo, isAuthenticated, isLoading])
-
-    const checkToken = (tokenInfo) => {
-        let user = false;
-        let invalidToken = false;
-
-        return new Promise((resolve, reject) => {
-            try {
-                INGEST_API.privs.userGroups(tokenInfo).then((results) => {
-                    if (results && results.status === 200) {
-                        // TODO: refactor to be a bool check from AuthHelper.has_read_privs
-                        //user = results.results.read_privs
-                        user = results.results.some(obj => obj.displayname === ENVS.privsGroupReadName());
-                    }
-                    if (results && results.status === 401) {
-                        invalidToken = true;
-                    }
-                    resolve({user, invalidToken});
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
-            } catch(error) {
-                console.log(error)
-                reject(error);
-            }
-        });
-    }
-
-    const checkLocals = (authenticated, initialInfo) => {
-        if (initialInfo) {
-            setGlobusInfo(initialInfo);
-            setGlobusToken(initialInfo.groups_token)
-            checkToken(initialInfo.groups_token).then(validate => {
-                setIsAuthenticated(authenticated && validate.user);
-                if (validate.user === false && validate.invalidToken === false) {
-                    setUnauthorized(true);
-                }
-                setIsLoading(false);
-            })
-                .catch(error => {
-                    console.log(error);
-                    setIsLoading(false);
-                })
-
-        } else {
-            setIsLoading(false);
-        }
-    }
+    }, [])
 
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
@@ -126,7 +82,6 @@ export const AppProvider = ({ children, messages }) => {
         isLogout,
         isAuthenticated,
         unauthorized,
-        checkLocals,
         handleLogin, handleLogout,
         t
     }}>{children}</AppContext.Provider>

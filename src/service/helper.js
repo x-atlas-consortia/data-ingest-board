@@ -40,7 +40,7 @@ export const getHeadersWith = (value, key = 'Authorization') => {
     return options
 }
 
-const parseJSON = (obj) => {
+export const parseJSON = (obj) => {
     try {
         return JSON.parse(obj)
     } catch (e) {
@@ -168,12 +168,6 @@ export const URLS = {
         auth: {
           login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
           logout: () => ENVS.urlFormat.ingest.be('/data-ingest-board-logout')
-        },
-        privs: {
-            hasRW: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_HAS_RW_PATH),
-            userGroups: () => ENVS.urlFormat.ingest.be(process.env.NEXT_PUBLIC_PRIVS_GROUP_PATH)
         }
     }
 }
-
-export const ensureTrailingSlash = (url) => url.endsWith('/') ? url : `${url}/`
