@@ -104,16 +104,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             ellipsis: true,
-            filters: [
+            filters: TABLE.getStatusFilters([
                 {text: 'Unreorganized', value: 'Unreorganized'},
-                {text: 'Error', value: 'Error'},
                 {text: 'Valid', value: 'Valid'},
-                {text: 'Invalid', value: 'Invalid'},
-                {text: 'New', value: 'New'},
-                {text: 'Processing', value: 'Processing'},
-                {text: 'Submitted', value: 'Submitted'},
                 {text: 'Reorganized', value: 'Reorganized'},
-            ],
+            ]),
             onFilter: (value, record) => {
                 if (value === 'Unreorganized') {
                     return record.status.toLowerCase() !== 'reorganized';

@@ -101,16 +101,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             ellipsis: true,
-            filters: [
+            filters: TABLE.getStatusFilters( [
                 {text: 'Unpublished', value: 'Unpublished'},
                 {text: 'Published', value: 'Published'},
-                {text: 'QA', value: 'QA'},
-                {text: 'Error', value: 'Error'},
-                {text: 'Invalid', value: 'Invalid'},
-                {text: 'New', value: 'New'},
-                {text: 'Processing', value: 'Processing'},
-                {text: 'Submitted', value: 'Submitted'}
-            ],
+                {text: 'QA', value: 'QA'}
+            ]),
             onFilter: (value, record) => {
                 if (value === 'Unpublished') {
                     return record.status.toLowerCase() !== 'published';

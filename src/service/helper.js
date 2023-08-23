@@ -49,14 +49,11 @@ export const parseJSON = (obj) => {
     return {}
 }
 
-
-
 export const ENVS = {
     ubkg: {
         base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
         sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
     },
-    privsGroupReadName: () => process.env.NEXT_PUBLIC_PRIVS_READ_NAME,
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
@@ -148,6 +145,16 @@ export const TABLE = {
             }
         }
         return msg;
+    },
+    getStatusFilters: (entityTypeFilters) => {
+        const filters = [
+            {text: 'Error', value: 'Error'},
+            {text: 'Invalid', value: 'Invalid'},
+            {text: 'New', value: 'New'},
+            {text: 'Processing', value: 'Processing'},
+            {text: 'Submitted', value: 'Submitted'},
+        ]
+        return filters.concat(entityTypeFilters)
     }
 }
 
