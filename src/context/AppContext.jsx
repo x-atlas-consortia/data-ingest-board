@@ -66,6 +66,7 @@ export const AppProvider = ({ children, messages }) => {
         if (globusInfo) {
             localStorage.setItem(KEY_INFO, JSON.stringify(globusInfo))
             localStorage.setItem(KEY_AUTH, authorized.toString())
+            setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
             setGlobusToken(globusInfo?.groups_token)
         }
