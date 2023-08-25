@@ -36,7 +36,7 @@ export const getRequestOptions = () => {
 
 export const getHeadersWith = (value, key = 'Authorization') => {
     const options = getRequestOptions()
-    options.headers[key] = value
+    options.headers[key] = `Bearer ${value}`
     return options
 }
 
