@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
 import {useIdleTimer} from 'react-idle-timer'
+import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 
 const AppContext = createContext()
 
@@ -39,33 +40,28 @@ export const AppProvider = ({ children, messages }) => {
         setGlobusToken(null);
         setGlobusInfo(null);
         setUnauthorized(false);
-        localStorage.removeItem(KEY_INFO);
-        localStorage.removeItem(KEY_AUTH);
+        deleteCookie(KEY_INFO);
+        deleteCookie(KEY_AUTH);
         setIsAuthenticated(false);
     }
 
     const resolveLocals = () =>  {
-        let url = new URL(window.location.href)
-        let urlInfo = url.searchParams.get(KEY_INFO)
+        let info = getCookie(KEY_INFO)
+
         let authorized = false
         let globusInfo
 
-        if (localStorage.getItem(KEY_AUTH)) {
-            authorized = localStorage.getItem(KEY_AUTH) === 'true'
+        if (getCookie(KEY_AUTH)) {
+            authorized = getCookie(KEY_AUTH) === 'true'
         }
-        if (localStorage.getItem(KEY_INFO)) {
-            globusInfo = parseJSON(localStorage.getItem(KEY_INFO))
-        }
-
-        if (urlInfo && !globusInfo) {
-            window.history.pushState(null, null, `/`)
-            globusInfo = parseJSON(urlInfo)
+        if (info) {
+            info = atob(info)
+            globusInfo = parseJSON(info)
             authorized = globusInfo?.read_privs
         }
 
         if (globusInfo) {
-            localStorage.setItem(KEY_INFO, JSON.stringify(globusInfo))
-            localStorage.setItem(KEY_AUTH, authorized.toString())
+            setCookie(KEY_AUTH, authorized)
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
             setGlobusToken(globusInfo?.groups_token)
