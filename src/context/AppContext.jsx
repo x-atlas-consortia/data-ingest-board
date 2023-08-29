@@ -36,13 +36,13 @@ export const AppProvider = ({ children, messages }) => {
 
     const handleLogout = () => {
         setIsLogout(true)
+        deleteCookie(KEY_INFO)
+        deleteCookie(KEY_AUTH)
+        setGlobusToken(null)
+        setGlobusInfo(null)
+        setUnauthorized(false)
+        setIsAuthenticated(false)
         window.location.href = URLS.ingest.auth.logout()
-        setGlobusToken(null);
-        setGlobusInfo(null);
-        setUnauthorized(false);
-        deleteCookie(KEY_INFO);
-        deleteCookie(KEY_AUTH);
-        setIsAuthenticated(false);
     }
 
     const resolveLocals = () =>  {
