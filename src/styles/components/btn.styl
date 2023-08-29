@@ -1,0 +1,39 @@
+.c-btn
+  font-family inherit
+  padding-top .7em
+  padding-bottom .7em
+  font-weight bolder
+  cursor pointer
+  border-radius 0
+  border solid 1px
+  box-shadow none
+  display inline-block
+  +md-min()
+    right .5rem
+    margin-left .5rem
+  +md-max()
+    margin-top 1rem
+    margin-bottom 1rem
+
+  &--lgt
+    border-color lightblue
+    background-color white
+    color $col-mariner
+    &:hover
+      background-color $col-near-white
+      box-shadow 0 2px 4px rgba(0, 0, 0, 0.2)
+
+  &--primary
+    background-color $col-mariner
+    color white
+    &:hover
+      background-color $col-fun-blue
+      box-shadow 0 2px 4px rgba(0, 0, 0, 0.2)
+
+  &--outline
+    border-color $col-mariner
+    background-color white
+    color $col-mariner
+    &:hover
+      background-color $col-fun-blue
+      color white

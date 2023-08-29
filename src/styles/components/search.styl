@@ -1,0 +1,25 @@
+.c-search
+  margin auto
+  margin-bottom 3em
+  display flex
+  width 95%
+  +md-max()
+    display block
+    width 90% !important
+    padding-left 0
+    padding-right 0
+    margin auto
+  .col
+    flex-shrink 0
+    +md-max()
+      width 100%
+    &-lg-2
+      +lg()
+        padding-left 0
+    &-lg-10
+      +lg()
+        padding-right 0
+  input, button
+    width 100%
+  button
+    margin-left 0
