@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
 import {useIdleTimer} from 'react-idle-timer'
-import {getCookie, setCookie} from 'cookies-next'
+import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
 
 const AppContext = createContext()
@@ -42,10 +42,9 @@ export const AppProvider = ({ children, messages }) => {
         setGlobusToken(null)
         setGlobusInfo(null)
 
-        setCookie(KEY_AUTH, false)
-        document.cookie.split(";").forEach((c) => {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
-        })
+        deleteCookie(KEY_AUTH)
+        // This cookie was set on login, need to specify the domain to match
+        deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
 
         axios.get(URLS.ingest.auth.logout())
             .then( (response) => {

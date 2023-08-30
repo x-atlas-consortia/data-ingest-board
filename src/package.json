@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "all": "npm-run-all --parallel dev css",
-    "dev": "next dev --port 3001",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

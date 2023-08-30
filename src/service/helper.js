@@ -88,7 +88,8 @@ export const ENVS = {
             num = Number(num) || 1000
         } catch (e) {}
         return num * 60 * 60
-    }
+    },
+    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN
 }
 
 let THEME_CONFIG
