@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState, useRef} from 'react'
 import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
 import {useIdleTimer} from 'react-idle-timer'
-import {deleteCookie, getCookie, setCookie} from 'cookies-next'
+import {getCookie, setCookie} from 'cookies-next'
+import axios from "axios";
 
 const AppContext = createContext()
 
@@ -36,13 +37,26 @@ export const AppProvider = ({ children, messages }) => {
 
     const handleLogout = () => {
         setIsLogout(true)
-        deleteCookie(KEY_INFO)
-        deleteCookie(KEY_AUTH)
+        setIsAuthenticated(false)
+        setUnauthorized(false)
         setGlobusToken(null)
         setGlobusInfo(null)
-        setUnauthorized(false)
-        setIsAuthenticated(false)
-        window.location.href = URLS.ingest.auth.logout()
+
+        setCookie(KEY_AUTH, false)
+        document.cookie.split(";").forEach((c) => {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+        })
+
+        axios.get(URLS.ingest.auth.logout())
+            .then( (response) => {
+                console.log(response)
+            })
+            .catch( (error) => {
+                console.error(error);
+            })
+            .finally(() => {
+                window.location.href = '/'
+            })
     }
 
     const resolveLocals = () =>  {
