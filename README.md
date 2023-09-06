@@ -19,7 +19,7 @@ To start the application run the following commands inside `/src`:\
 
 ```
 $ npm install
-$ npm run run
+$ npm run all
 ```
 
 ## Usage 

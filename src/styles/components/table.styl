@@ -1,0 +1,29 @@
+.c-table
+  color $col-trout
+
+  &__title
+    font-size 2rem
+    font-weight 700
+
+  &__btns
+    +md-max()
+      width 90%
+      button
+        flex-shrink 0
+        width 100%
+        max-width 100%
+        padding-right calc(var(--bs-gutter-x) * .5)
+        padding-left calc(var(--bs-gutter-x) * .5)
+        margin-top var(--bs-gutter-y)
+        margin-left 0
+
+  &--data
+    background-color white
+    border-radius 8px
+    margin-top 2rem
+
+  &--main
+    margin-top -3rem
+    position relative
+    bottom 2rem
+    z-index 0
