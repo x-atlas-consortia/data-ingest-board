@@ -35,6 +35,12 @@ export const AppProvider = ({ children, messages }) => {
         window.location.href = URLS.ingest.auth.login()
     };
 
+    const deleteCookies = () => {
+        deleteCookie(KEY_AUTH)
+        // This cookie was set on login, need to specify the domain to match
+        deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
+    }
+
     const handleLogout = () => {
         setIsLogout(true)
         setIsAuthenticated(false)
@@ -42,9 +48,7 @@ export const AppProvider = ({ children, messages }) => {
         setGlobusToken(null)
         setGlobusInfo(null)
 
-        deleteCookie(KEY_AUTH)
-        // This cookie was set on login, need to specify the domain to match
-        deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
+        deleteCookies()
 
         axios.get(URLS.ingest.auth.logout())
             .then( (response) => {
@@ -78,6 +82,8 @@ export const AppProvider = ({ children, messages }) => {
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
             setGlobusToken(globusInfo?.groups_token)
+        } else {
+           deleteCookies()
         }
 
         setIsAuthenticated(authorized)
