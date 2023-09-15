@@ -82,11 +82,12 @@ export const AppProvider = ({ children, messages }) => {
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
             setGlobusToken(globusInfo?.groups_token)
+            setIsAuthenticated(authorized)
         } else {
-           deleteCookies()
+            setIsAuthenticated(false)
+            deleteCookies()
         }
 
-        setIsAuthenticated(authorized)
         setIsLoading(false)
     }
 
