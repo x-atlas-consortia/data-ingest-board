@@ -17,7 +17,8 @@ String.prototype.format = function() {
 };
 
 export const getUBKGName = (o) => {
-    let organTypes = window.UBKG.organTypes
+    if (!window.UBKG) return o
+    let organTypes = window.UBKG?.organTypes
     for (let organ of organTypes) {
         if (organ.rui_code === o) {
             return organ.term
@@ -188,6 +189,9 @@ export const URLS = {
         view: (uuid, entity = 'dataset') => {
             let path = process.env.NEXT_PUBLIC_INGEST_VIEW_PATH.format(entity, uuid)
             return ENVS.urlFormat.ingest.fe(path)
+        },
+        privs: {
+            groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL
         },
         auth: {
           login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
