@@ -103,7 +103,7 @@ export const THEME = {
                 `${themeConfig.cssProps[t]}`
             );
         }
-        document.documentElement.classList.add(`theme--${themeConfig.theme}`)
+        document.documentElement.classList.add(`theme--${themeConfig.theme || 'dark'}`)
     },
     getStatusColor: (status) => {
         status = status.toLowerCase()
@@ -111,8 +111,11 @@ export const THEME = {
             // Store this to avoid constantly parsing during table build
             THEME_CONFIG = ENVS.theme()
         }
-        const statusColors = THEME_CONFIG.statusColors
-        return statusColors[status] || statusColors.default || 'darkgrey'
+        const statusColors = THEME_CONFIG.statusColors || {}
+        const colors =  statusColors[status]?.split(':')
+        const bg = colors ? colors[0] : (statusColors.default || 'darkgrey')
+        const text = colors && colors.length > 1 ? colors[1] : 'white'
+        return {bg, text}
     }
 }
 
@@ -127,7 +130,7 @@ export const TABLE = {
             return cols[k].field || k
         }
     },
-    getStatusDefinition: (status) => {
+    getStatusDefinition: (status, entityType = 'Dataset') => {
         let msg
         if (status) {
             status = status.toUpperCase();
@@ -147,6 +150,9 @@ export const TABLE = {
                 case 'PROCESSING':
                     msg = <span>The data is currently being processed via the ingest pipeline.</span>
                     break;
+                case 'REORGANIZED':
+                    msg = <span>Datasets included in this <code>Upload</code> have been registered and data has been reorganized on the Globus Research Management system.</span>
+                    break;
                 case 'SUBMITTED':
                     msg = <span>The data provider has finished uploading data and the data is ready for validation.</span>
                     break;
@@ -154,7 +160,7 @@ export const TABLE = {
                     msg = <span>The data has been successfully curated and released for public use.</span>
                     break;
                 default:
-                    msg = <span>The <code>Dataset</code> has been {status}.</span>
+                    msg = <span>The <code>{entityType}</code> has been {status}.</span>
                     break;
             }
         }

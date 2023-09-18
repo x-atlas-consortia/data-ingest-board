@@ -114,7 +114,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             },
             render: (status) => (
                 <Tooltip title={TABLE.getStatusDefinition(status)}>
-                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
                         {status}
                     </span>
                 </Tooltip>
