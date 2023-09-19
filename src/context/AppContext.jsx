@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
+import {ENVS, getHeadersWith, parseJSON, THEME, URLS} from "../service/helper";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
@@ -62,6 +62,21 @@ export const AppProvider = ({ children, messages }) => {
             })
     }
 
+    const checkToken = (token, authorized) => {
+        if (!token) {
+            setIsAuthenticated(false)
+        }
+        axios.get(URLS.ingest.privs.groups(), getHeadersWith(token))
+            .then( (response) => {
+                setGlobusToken(token)
+                setIsAuthenticated(authorized)
+            }).catch((error) => {
+                if (error?.response?.status === 401) {
+                    setIsAuthenticated(false)
+                }
+        })
+    }
+
     const resolveLocals = () =>  {
         let info = getCookie(KEY_INFO)
 
@@ -81,8 +96,7 @@ export const AppProvider = ({ children, messages }) => {
             setCookie(KEY_AUTH, authorized)
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
-            setGlobusToken(globusInfo?.groups_token)
-            setIsAuthenticated(authorized)
+            checkToken(globusInfo?.groups_token, authorized)
         } else {
             setIsAuthenticated(false)
             deleteCookies()

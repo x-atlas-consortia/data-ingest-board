@@ -1,4 +1,4 @@
-import {Button, Dropdown, Menu, Table} from "antd";
+import {Button, Dropdown, Menu, Table, Tooltip} from "antd";
 import {CaretDownOutlined, DownloadOutlined, ExportOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
@@ -116,9 +116,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 return record.status.toLowerCase() === value.toLowerCase();
             },
             render: (status) => (
-                <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status)}}>
-                    {status}
-                </span>
+                <Tooltip title={TABLE.getStatusDefinition(status, 'Upload')}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
+                        {status}
+                    </span>
+                </Tooltip>
             )
         },
         {
