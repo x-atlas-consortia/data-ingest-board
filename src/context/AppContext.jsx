@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ENVS, parseJSON, THEME, URLS} from "../service/helper";
+import {ENVS, getHeadersWith, parseJSON, THEME, URLS} from "../service/helper";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
@@ -35,6 +35,12 @@ export const AppProvider = ({ children, messages }) => {
         window.location.href = URLS.ingest.auth.login()
     };
 
+    const deleteCookies = () => {
+        deleteCookie(KEY_AUTH)
+        // This cookie was set on login, need to specify the domain to match
+        deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
+    }
+
     const handleLogout = () => {
         setIsLogout(true)
         setIsAuthenticated(false)
@@ -42,9 +48,7 @@ export const AppProvider = ({ children, messages }) => {
         setGlobusToken(null)
         setGlobusInfo(null)
 
-        deleteCookie(KEY_AUTH)
-        // This cookie was set on login, need to specify the domain to match
-        deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
+        deleteCookies()
 
         axios.get(URLS.ingest.auth.logout())
             .then( (response) => {
@@ -56,6 +60,21 @@ export const AppProvider = ({ children, messages }) => {
             .finally(() => {
                 window.location.href = '/'
             })
+    }
+
+    const checkToken = (token, authorized) => {
+        if (!token) {
+            setIsAuthenticated(false)
+        }
+        axios.get(URLS.ingest.privs.groups(), getHeadersWith(token))
+            .then( (response) => {
+                setGlobusToken(token)
+                setIsAuthenticated(authorized)
+            }).catch((error) => {
+                if (error?.response?.status === 401) {
+                    setIsAuthenticated(false)
+                }
+        })
     }
 
     const resolveLocals = () =>  {
@@ -77,10 +96,12 @@ export const AppProvider = ({ children, messages }) => {
             setCookie(KEY_AUTH, authorized)
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
-            setGlobusToken(globusInfo?.groups_token)
+            checkToken(globusInfo?.groups_token, authorized)
+        } else {
+            setIsAuthenticated(false)
+            deleteCookies()
         }
 
-        setIsAuthenticated(authorized)
         setIsLoading(false)
     }
 
