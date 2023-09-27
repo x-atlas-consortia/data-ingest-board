@@ -1,7 +1,7 @@
 # Parent image
 FROM sennet/api-base-image:1.0.0
 
-LABEL description="HuBMAP Data Ingest Board"
+LABEL description="SenNet Data Ingest Board"
 
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app
