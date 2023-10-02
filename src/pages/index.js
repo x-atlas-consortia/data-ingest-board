@@ -5,6 +5,7 @@ import DataTable from "../components/DataTable";
 import Login from "../components/Login";
 import { useState, useContext } from "react";
 import AppContext from "../context/AppContext";
+import Favicon from "react-favicon";
 
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
@@ -23,6 +24,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
 
     return (
         <div className="App bg--galGrey">
+            <Favicon url={`favicons/${t('hubmap-favicon.ico')}`}/>
             <div className="c-nav">
                 <div className="container">
                     <div className="row">
