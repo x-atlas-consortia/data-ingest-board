@@ -41,7 +41,7 @@ export const AppProvider = ({ children, messages }) => {
         deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
     }
 
-    const handleLogout = () => {
+    const handleLogout = (redirect = true) => {
         setIsLogout(true)
         setIsAuthenticated(false)
         setUnauthorized(false)
@@ -58,7 +58,9 @@ export const AppProvider = ({ children, messages }) => {
                 console.error(error);
             })
             .finally(() => {
-                window.location.href = '/'
+                if (redirect) {
+                    window.location.href = '/'
+                }
             })
     }
 
@@ -70,10 +72,12 @@ export const AppProvider = ({ children, messages }) => {
             .then( (response) => {
                 setGlobusToken(token)
                 setIsAuthenticated(authorized)
+                setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
                     setIsAuthenticated(false)
                 }
+                setIsLoading(false)
         })
     }
 
@@ -99,15 +103,19 @@ export const AppProvider = ({ children, messages }) => {
             checkToken(globusInfo?.groups_token, authorized)
         } else {
             setIsAuthenticated(false)
+            setIsLoading(false)
             deleteCookies()
         }
-
-        setIsLoading(false)
     }
 
     const onIdle = () => {
         handleLogout()
         window.location = '/'
+    }
+
+    const getUserEmail = () => {
+        const info = getCookie('info')
+        return info ? parseJSON(atob(info))?.email : ''
     }
 
     const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
@@ -129,7 +137,7 @@ export const AppProvider = ({ children, messages }) => {
         isLogout,
         isAuthenticated,
         unauthorized,
-        handleLogin, handleLogout,
+        handleLogin, handleLogout, getUserEmail,
         t
     }}>{children}</AppContext.Provider>
 }
