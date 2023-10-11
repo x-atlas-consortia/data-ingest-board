@@ -1,6 +1,28 @@
 .c-nav
   background-color $col-nav-bg
   color white
+  &__imgWrap
+    display inline-block
+    img
+      max-width 150px
   &__title
+    width 75%
+    display inline-block
+    margin-left 15%
+    text-align center
     +md-max()
+      margin-left 5%
       font-size 1.2rem
+    +sm()
+      display block
+      font-size 12px
+      text-align left
+      margin-left 45px
+
+  &__auth
+    text-align right
+    .navbar-nav
+      width 100%
+    .c-logout
+      width 100%
+      display inline-block
