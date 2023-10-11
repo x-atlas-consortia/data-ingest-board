@@ -6,6 +6,8 @@ import Login from "../components/Login";
 import { useState, useContext } from "react";
 import AppContext from "../context/AppContext";
 import Favicon from "react-favicon";
+import {getCookie} from "cookies-next";
+import {parseJSON} from "../service/helper";
 
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
@@ -20,6 +22,11 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
 
     if (initialPage === undefined) {
         setInitialPage(1);
+    }
+
+    const getUserEmail = () => {
+        const info = getCookie('info')
+        return info ? parseJSON(atob(info))?.email : ''
     }
 
     return (
@@ -38,6 +45,7 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
                         </h1>
                         {isAuthenticated && (
                             <span className="col-4 c-logout">
+                                <span className={'p-2 txt-muted-on-dark'}>{getUserEmail()}</span>
                             <button className="c-logout__btn" onClick={handleLogout}>
                                 LOG OUT
                             </button>
