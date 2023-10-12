@@ -40,7 +40,7 @@ const AppLogin = ({ onLogin, unauthorized, onLogout }) => {
     return (
         <div>
             <div className="container">
-                <div className={`c-login row mt-4 ${unauthorized ? 'alert alert-danger' : ''}`}>
+                <div className={`c-login mt-4 ${unauthorized ? 'alert alert-danger' : ''}`}>
                     <h1 className="c-login__head col-6">{t(details.title, [t('HuBMAP')])}</h1>
                     <div className={`c-login__txt ${robotoLight.className}`}>
                         {details.body}
