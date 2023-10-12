@@ -1,4 +1,4 @@
-import {useContext, useEffect, useState} from 'react'
+import {useContext} from 'react'
 import AppContext from "../context/AppContext"
 import {Container, Nav, Navbar} from 'react-bootstrap'
 

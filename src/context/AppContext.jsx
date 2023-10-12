@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ENVS, eq, getHeadersWith, parseJSON, THEME, URLS} from "../service/helper";
+import {ENVS, eq, getHeadersWith, parseJSON, THEME, URLS} from "../lib/helper";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";

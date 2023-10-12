@@ -1,4 +1,4 @@
-import {ENVS, eq, TABLE} from "../service/helper";
+import {ENVS, eq, TABLE} from "../lib/helper";
 
 function Search({ useDatasetApi, callbacks, originalResponse }) {
     let dict = {}

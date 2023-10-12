@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, getHeadersWith, TABLE, URLS} from "../../service/helper";
+import {ENVS, getHeadersWith, TABLE, URLS} from "../../lib/helper";
 import Search from "../Search";
 
 
