@@ -29,10 +29,10 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             <AppNavBar />
             {isLoading || isLogout && <></>}
 
-            {!isLoading && !isAuthenticated && !isLogout &&
+            {!isLoading && (!isAuthenticated || unauthorized) && !isLogout &&
             <AppLogin onLogin={handleLogin} unauthorized={unauthorized} onLogout={handleLogout}/> }
 
-            { isAuthenticated &&
+            { isAuthenticated && !unauthorized &&
                 <DataTable className="c-table--data"
                     entityType={entityType}
                     setEntityType={setEntityType}

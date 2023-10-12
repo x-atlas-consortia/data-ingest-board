@@ -90,7 +90,8 @@ export const ENVS = {
         } catch (e) {}
         return num * 60 * 60
     },
-    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN
+    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+    groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME
 }
 
 let THEME_CONFIG
