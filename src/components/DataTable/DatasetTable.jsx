@@ -237,10 +237,19 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         {
             title: "Has Donor Metadata",
             width: 200,
-            dataIndex: "has_metadata",
+            dataIndex: "has_donor_metadata",
             align: "left",
             defaultSortOrder: defaultSortOrder["has_donor_metadata"] || null,
-            sorter: (a,b) => b.has_metadata.localeCompare(a.has_metadata),
+            sorter: (a,b) => b.has_donor_metadata.localeCompare(a.has_donor_metadata),
+            ellipsis: true,
+        },
+        {
+            title: "Has Data Metadata",
+            width: 200,
+            dataIndex: "has_data_metadata",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["has_data_metadata"] || null,
+            sorter: (a,b) => b.has_data_metadata.localeCompare(a.has_data_metadata),
             ellipsis: true,
         },
         {
