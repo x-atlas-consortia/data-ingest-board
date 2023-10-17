@@ -1,9 +1,9 @@
 import {Button, Dropdown, Menu, Table, Tooltip} from "antd";
-import {CaretDownOutlined, DownloadOutlined, ExportOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {ENVS, TABLE, THEME, URLS} from "../../service/helper";
+import {ENVS, TABLE, THEME, URLS} from "../../lib/helper";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];

@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/i
 import {CSVLink} from "react-csv";
 import React from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../service/helper";
+import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];

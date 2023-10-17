@@ -1,7 +1,6 @@
-import {useContext, useEffect, useState} from 'react'
-import PropTypes from 'prop-types'
+import {useEffect, useState} from 'react'
 import axios from "axios";
-import {ENVS, getRequestOptions} from "../service/helper";
+import {ENVS, getRequestOptions} from "../lib/helper";
 
 function useContent() {
     const [messages, setMessages] = useState({})

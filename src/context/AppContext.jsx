@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ENVS, getHeadersWith, parseJSON, THEME, URLS} from "../service/helper";
+import {ENVS, eq, getHeadersWith, parseJSON, THEME, URLS} from "../lib/helper";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
@@ -41,7 +41,7 @@ export const AppProvider = ({ children, messages }) => {
         deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
     }
 
-    const handleLogout = () => {
+    const handleLogout = (redirect = true) => {
         setIsLogout(true)
         setIsAuthenticated(false)
         setUnauthorized(false)
@@ -58,8 +58,24 @@ export const AppProvider = ({ children, messages }) => {
                 console.error(error);
             })
             .finally(() => {
-                window.location.href = '/'
+                if (redirect) {
+                    window.location.href = '/'
+                }
             })
+    }
+
+    const verifyInReadGroup = (response) => {
+        const groupName = ENVS.groupName()
+        let hasRead = response.read_privs || false
+        if (groupName) {
+            for (let group of response.groups) {
+                if (eq(group.displayname, groupName)) {
+                    hasRead = true
+                    break
+                }
+            }
+        }
+        setUnauthorized(!hasRead)
     }
 
     const checkToken = (token, authorized) => {
@@ -70,10 +86,13 @@ export const AppProvider = ({ children, messages }) => {
             .then( (response) => {
                 setGlobusToken(token)
                 setIsAuthenticated(authorized)
+                verifyInReadGroup(response.data)
+                setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
                     setIsAuthenticated(false)
                 }
+                setIsLoading(false)
         })
     }
 
@@ -99,15 +118,19 @@ export const AppProvider = ({ children, messages }) => {
             checkToken(globusInfo?.groups_token, authorized)
         } else {
             setIsAuthenticated(false)
+            setIsLoading(false)
             deleteCookies()
         }
-
-        setIsLoading(false)
     }
 
     const onIdle = () => {
         handleLogout()
         window.location = '/'
+    }
+
+    const getUserEmail = () => {
+        const info = getCookie('info')
+        return info ? parseJSON(atob(info))?.email : ''
     }
 
     const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
@@ -129,7 +152,7 @@ export const AppProvider = ({ children, messages }) => {
         isLogout,
         isAuthenticated,
         unauthorized,
-        handleLogin, handleLogout,
+        handleLogin, handleLogout, getUserEmail,
         t
     }}>{children}</AppContext.Provider>
 }
