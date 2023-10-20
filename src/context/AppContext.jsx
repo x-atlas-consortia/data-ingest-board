@@ -50,18 +50,7 @@ export const AppProvider = ({ children, messages }) => {
 
         deleteCookies()
 
-        axios.get(URLS.ingest.auth.logout())
-            .then( (response) => {
-                console.log(response)
-            })
-            .catch( (error) => {
-                console.error(error);
-            })
-            .finally(() => {
-                if (redirect) {
-                    window.location.href = '/'
-                }
-            })
+        window.location = URLS.ingest.auth.logout()
     }
 
     const verifyInReadGroup = (response) => {
