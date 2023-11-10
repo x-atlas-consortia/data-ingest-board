@@ -1,6 +1,6 @@
 {
   "name": "data-ingest-board",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": true,
   "scripts": {
     "all": "npm-run-all --parallel dev css",
