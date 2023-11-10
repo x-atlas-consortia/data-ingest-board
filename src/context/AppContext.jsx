@@ -128,6 +128,12 @@ export const AppProvider = ({ children, messages }) => {
     useEffect(() => {
         setIsLoading(true)
         resolveLocals()
+        
+        // Set up Page Title based on Resolved Locals
+        let localeCheck = ENVS.locale().slice(ENVS.locale().indexOf('/') + 1);
+        const capitalized = localeCheck.charAt(0).toUpperCase() + localeCheck.slice(1)
+        document.title = capitalized + " Data Ingest Board"
+        
         if (pageLoaded.current === false) {
             THEME.cssProps()
             pageLoaded.current = true
