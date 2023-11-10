@@ -101,7 +101,7 @@ export const AppProvider = ({ children, messages }) => {
         }
 
         if (globusInfo) {
-            setCookie(KEY_AUTH, authorized)
+            setCookie(KEY_AUTH, authorized,  {sameSite: "Lax"})
             setUnauthorized(!authorized)
             setGlobusInfo(globusInfo)
             checkToken(globusInfo?.groups_token, authorized)
