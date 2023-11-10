@@ -59,6 +59,9 @@ export const ENVS = {
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
+    appContext: () => {
+        return process.env.NEXT_PUBLIC_APP_CONTEXT || 'HuBMAP'
+    },
     urlFormat: {
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
         ingest: {
