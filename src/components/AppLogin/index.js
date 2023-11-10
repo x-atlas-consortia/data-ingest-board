@@ -15,6 +15,11 @@ const AppLogin = ({ onLogin, unauthorized, onLogout }) => {
                 you have registered via the <a href={t('https://profile.hubmapconsortium.org/profile')} className='lnk--ic'>Member Registration Page <UserOutlined /></a>,
                 have provided Globus account information and are logging in with that account.</p>
 
+                <p>You will receive an email from Globus notifying that you have been invited to join
+                    the <strong className={robotoBold.className}>{t('HuBMAP-Read')}</strong> group. You must click the link that says "Click here to apply for
+                    membership" then click "Accept
+                    Invitation" in the browser.</p>
+
                 <p>Once you have confirmed your registration information you can <a href='/login' className='lnk--ic'>log in <LoginOutlined /></a> again.</p>
 
                 <p>If you continue to have issues accessing this site please contact the &nbsp;
