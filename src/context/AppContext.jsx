@@ -128,6 +128,8 @@ export const AppProvider = ({ children, messages }) => {
     useEffect(() => {
         setIsLoading(true)
         resolveLocals()
+        // Set up Page Title based on Resolved Locals
+        document.title = ENVS.appContext() + " Data Ingest Board"
         if (pageLoaded.current === false) {
             THEME.cssProps()
             pageLoaded.current = true

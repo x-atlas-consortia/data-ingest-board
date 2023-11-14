@@ -53,11 +53,14 @@ export const parseJSON = (obj) => {
 export const ENVS = {
     ubkg: {
         base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
-        sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
+        sab: () => process.env.NEXT_PUBLIC_APP_CONTEXT
     },
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
+    },
+    appContext: () => {
+        return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
     urlFormat: {
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
