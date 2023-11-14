@@ -197,6 +197,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         {
             title: "Last Touch",
             width: 225,
+            showSorterTooltip: {
+                title: <span>If the <code>Dataset</code> is published <i>Last Touch</i> returns the date/time that the <code>Dataset</code> was published, otherwise it returns the date/time that the <code>Dataset</code> record was last updated. <small className={'text-muted'}>NOTE: This does not include updates to data via Globus (or otherwise), only updates to metadata stored in the {ENVS.appContext()} provenance database.</small></span>
+            },
             dataIndex: "last_touch",
             align: "left",
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
