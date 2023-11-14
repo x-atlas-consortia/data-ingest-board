@@ -10,6 +10,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = [...new Set(data.map(item => item.data_types))]
+    const uniqueSourceTypes = [...new Set(data.map(item => item.source_type))]
+
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
@@ -131,6 +133,18 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.data_types, value),
+            ellipsis: true,
+        },
+        {
+            title: TABLE.cols.n('source_type', 'Source Type'),
+            width: 150,
+            dataIndex: TABLE.cols.f('source_type'),
+            align: "left",
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
             ellipsis: true,
         },
         {
