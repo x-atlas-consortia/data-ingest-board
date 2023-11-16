@@ -6,11 +6,13 @@ import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
-    const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
+    const filterField = (f) => [...new Set(data.map(item => item[f]))]
+    const uniqueGroupNames = filterField('group_name')
+    const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDataType = [...new Set(data.map(item => item.data_types))]
-    const uniqueSourceTypes = [...new Set(data.map(item => item.source_type))]
+    const uniqueDataType = filterField('data_types')
+    const uniqueSourceTypes = filterField('source_type')
+    const uniqueHasRuiStates = filterField('has_rui_info')
 
     let order = sortOrder;
     let field = sortField;
@@ -277,6 +279,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
+            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
         {
             title: "Has Data",
