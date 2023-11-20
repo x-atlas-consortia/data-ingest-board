@@ -6,7 +6,12 @@ import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const filterField = (f) => [...new Set(data.map(item => item[f]))]
+
+    const excludedColumns = ENVS.excludeTableColumns()
+    const filterField = (f) => {
+        if (excludedColumns[f]) return []
+        return [...new Set(data.map(item => item[f]))]
+    }
     const uniqueGroupNames = filterField('group_name')
     const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
@@ -145,7 +150,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
             sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
             defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
-            filters: uniqueSourceTypes.map(name => ({ text: name, value: name.toLowerCase() })),
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
             ellipsis: true,
         },
@@ -296,7 +301,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     // Exclude named columns in .env from table
     const filteredDatasetColumns = []
-    const excludedColumns = ENVS.excludeTableColumns()
     for (let x = 0; x < datasetColumns.length; x++) {
         if (excludedColumns[datasetColumns[x].dataIndex] === undefined) {
             filteredDatasetColumns.push(datasetColumns[x])
