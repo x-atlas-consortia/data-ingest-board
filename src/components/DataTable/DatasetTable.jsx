@@ -6,10 +6,14 @@ import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
-    const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
+    const filterField = (f) => [...new Set(data.map(item => item[f]))]
+    const uniqueGroupNames = filterField('group_name')
+    const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDataType = [...new Set(data.map(item => item.data_types))]
+    const uniqueDataType = filterField('data_types')
+    const uniqueSourceTypes = filterField('source_type')
+    const uniqueHasRuiStates = filterField('has_rui_info')
+
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
@@ -134,6 +138,18 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
+            title: TABLE.cols.n('source_type', 'Source Type'),
+            width: 150,
+            dataIndex: TABLE.cols.f('source_type'),
+            align: "left",
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
+            ellipsis: true,
+        },
+        {
             title: "Organ Type",
             width: 150,
             dataIndex: "organ",
@@ -183,6 +199,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         {
             title: "Last Touch",
             width: 225,
+            showSorterTooltip: {
+                title: <span>If the <code>Dataset</code> is published <i>Last Touch</i> returns the date/time that the <code>Dataset</code> was published, otherwise it returns the date/time that the <code>Dataset</code> record was last updated. <small className={'text-muted'}>NOTE: This does not include updates to data via Globus (or otherwise), only updates to metadata stored in the {ENVS.appContext()} provenance database.</small></span>
+            },
             dataIndex: "last_touch",
             align: "left",
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
@@ -260,6 +279,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
+            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
         {
             title: "Has Data",
