@@ -125,13 +125,13 @@ export const THEME = {
 
 export const TABLE = {
     cols: {
-        n: (k) => {
+        n: (k, n) => {
             const cols = ENVS.tableColumns()
-            return cols[k].name || k
+            return cols[k]?.name || n || k
         },
         f: (k) => {
             const cols = ENVS.tableColumns()
-            return cols[k].field || k
+            return cols[k]?.field || k
         }
     },
     getStatusDefinition: (status, entityType = 'Dataset') => {
