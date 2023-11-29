@@ -13,6 +13,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return [...new Set(data.map(item => item[f]))]
     }
     const uniqueGroupNames = filterField('group_name')
+    const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
     const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = filterField('data_types')
@@ -102,6 +103,18 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
+            title: "Assigned To Group Name",
+            width: 300,
+            dataIndex: "assigned_to_group_name",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
+        },
+        {
             title: "Status",
             width: 150,
             dataIndex: "status",
@@ -140,6 +153,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["data_types"] || null,
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.data_types, value),
+            ellipsis: true,
+        },
+        {
+            title: "Ingest Task",
+            width: 200,
+            dataIndex: "ingest_task",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
         },
         {
