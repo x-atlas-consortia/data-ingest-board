@@ -1,11 +1,15 @@
-import {Button, Dropdown, Menu, Table, Tooltip} from "antd";
+import {Button, Dropdown, Menu, Modal, Table, Tooltip} from "antd";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React from "react";
+import React, {useState} from "react";
 import Spinner from "../Spinner";
 import {ENVS, TABLE, THEME, URLS} from "../../lib/helper";
+import ModalOver from "../ModalOver";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalBody, setModalBody] = useState(null)
+
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
@@ -144,6 +148,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultSortOrder: defaultSortOrder["ingest_task"] || null,
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
+            render: (task, record) => {
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            }
         },
         {
             title: "Title",
@@ -217,6 +224,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                     />
+                    <Modal
+                        open={modalOpen}
+                        onCancel={()=> {setModalOpen(false)}}
+                        onOk={() => {setModalOpen(false)}}
+                    >
+                        {modalBody}
+                    </Modal>
                 </>
             )}
         </div>
