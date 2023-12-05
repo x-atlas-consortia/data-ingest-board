@@ -225,6 +225,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            rowKey={TABLE.cols.f('id')}
                     />
                     <Modal
+                        cancelButtonProps={{ style: { display: 'none' } }}
                         open={modalOpen}
                         onCancel={()=> {setModalOpen(false)}}
                         onOk={() => {setModalOpen(false)}}
