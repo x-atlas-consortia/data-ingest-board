@@ -1,13 +1,18 @@
-import {Button, Dropdown, Menu, Table, Tooltip} from "antd";
+import {Button, Dropdown, Menu, Modal, Table, Tooltip} from "antd";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React from "react";
+import React, {useState} from "react";
 import Spinner from "../Spinner";
 import {ENVS, TABLE, THEME, URLS} from "../../lib/helper";
+import ModalOver from "../ModalOver";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalBody, setModalBody] = useState(null)
+
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
+    const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
     let defaultFilteredValue = {};
     if (filters.hasOwnProperty("group_name")) {
         defaultFilteredValue["group_name"] = filters["group_name"].split(",");
@@ -124,6 +129,30 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             )
         },
         {
+            title: "Assigned To Group Name",
+            width: 300,
+            dataIndex: "assigned_to_group_name",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
+        },
+        {
+            title: "Ingest Task",
+            width: 200,
+            dataIndex: "ingest_task",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
+            ellipsis: true,
+            render: (task, record) => {
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            }
+        },
+        {
             title: "Title",
             width: '23%',
             dataIndex: "title",
@@ -195,6 +224,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                     />
+                    <Modal
+                        open={modalOpen}
+                        onCancel={()=> {setModalOpen(false)}}
+                        onOk={() => {setModalOpen(false)}}
+                    >
+                        {modalBody}
+                    </Modal>
                 </>
             )}
         </div>

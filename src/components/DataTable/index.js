@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, getHeadersWith, TABLE, URLS} from "../../lib/helper";
+import {ENVS, eq, getHeadersWith, TABLE, URLS} from "../../lib/helper";
 import Search from "../Search";
 
 
@@ -108,7 +108,7 @@ const DataTable = (props) => {
     }
 
     const getPrimaryDatasets = (dataResponse) => {
-        return dataResponse.filter(dataset => dataset.is_primary === "true");
+        return dataResponse.filter(dataset => eq(dataset.is_primary, "true"));
     }
 
     const addDescendants = (datasetResponse) => {
