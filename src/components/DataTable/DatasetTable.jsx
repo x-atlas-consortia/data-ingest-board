@@ -388,6 +388,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     />
 
                     <Modal
+                        cancelButtonProps={{ style: { display: 'none' } }}
                         open={modalOpen}
                         onCancel={()=> {setModalOpen(false)}}
                         onOk={() => {setModalOpen(false)}}

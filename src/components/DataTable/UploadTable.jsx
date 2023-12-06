@@ -76,7 +76,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         {
             title: TABLE.cols.n('id'),
-            width: '15%',
+            width: 180,
             dataIndex: TABLE.cols.f('id'),
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
@@ -225,6 +225,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            rowKey={TABLE.cols.f('id')}
                     />
                     <Modal
+                        cancelButtonProps={{ style: { display: 'none' } }}
                         open={modalOpen}
                         onCancel={()=> {setModalOpen(false)}}
                         onOk={() => {setModalOpen(false)}}
