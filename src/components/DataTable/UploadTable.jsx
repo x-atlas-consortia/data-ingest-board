@@ -6,6 +6,21 @@ import Spinner from "../Spinner";
 import {ENVS, TABLE, THEME, URLS} from "../../service/helper";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const modifiedData = data.map(item => {
+        for (const key in item) {
+            if (Array.isArray(item[key])) {
+                // Convert objects to string representations
+                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element) : element));
+                // Convert other arrays to comma-delimited strings
+                if (item[key].length === 1) {
+                    item[key] = item[key][0].toString();
+                } else {
+                    item[key] = item[key].join(', ');
+                }
+            }
+        }
+        return item;
+    })
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     let defaultFilteredValue = {};
@@ -177,9 +192,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
                                 <span style={{ marginRight: '1rem' }}>
-                                    {countFilteredRecords(data, filters).length} Selected
+                                    {countFilteredRecords(modifiedData, filters).length} Selected
                                 </span>
-                            <CSVLink data={countFilteredRecords(data, filters)} filename="uploads-data.csv" className="ic--download">
+                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="uploads-data.csv" className="ic--download">
                                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
                             </CSVLink>
                         </div>
@@ -187,7 +202,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={uploadColumns}
                            showHeader={!loading}
-                           dataSource={data}
+                           dataSource={modifiedData}
                            bordered={false}
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
