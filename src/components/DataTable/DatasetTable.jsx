@@ -6,10 +6,37 @@ import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../service/helper";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const modifiedData = data.map(item => {
+        for (const key in item) {
+            if (Array.isArray(item[key])) {
+                // Convert objects to string representations
+                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element) : element));
+
+                // Convert other arrays to comma-delimited strings
+                if (item[key].length === 1) {
+                    item[key] = item[key][0].toString();
+                } else {
+                    item[key] = item[key].join(', ');
+                }
+            }
+        }
+        return item;
+    })
     const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
     const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDataType = [...new Set(data.map(item => item.data_types))]
+    const uniqueDataType = [...new Set(modifiedData.flatMap(item => {
+        if (Array.isArray(item.data_types)) {
+            if (item.data_types.length === 1) {
+                // For single-valued lists, convert to string
+                return item.data_types[0];
+            }
+            // Omit multi-valued ones
+            return [];
+        }
+        return item.data_types;
+    }))];
+
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
@@ -324,16 +351,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
                             <span style={{ marginRight: '1rem' }}>
-                                {countFilteredRecords(data, filters).length} Selected
+                                {countFilteredRecords(modifiedData, filters).length} Selected
                             </span>
-                            <CSVLink data={countFilteredRecords(data, filters)} filename="datasets-data.csv" className="ic--download">
+                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
                                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
                             </CSVLink>
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredDatasetColumns}
-                           dataSource={data}
+                           dataSource={modifiedData}
                            showHeader={!loading}
                            bordered={false}
                            loading={loading}
