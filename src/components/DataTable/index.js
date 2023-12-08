@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, getHeadersWith, TABLE, URLS} from "../../lib/helper";
+import {ENVS, eq, getHeadersWith, TABLE, URLS} from "../../lib/helper";
 import Search from "../Search";
 
 
@@ -108,7 +108,7 @@ const DataTable = (props) => {
     }
 
     const getPrimaryDatasets = (dataResponse) => {
-        return dataResponse.filter(dataset => dataset.is_primary === "true");
+        return dataResponse.filter(dataset => eq(dataset.is_primary, "true"));
     }
 
     const addDescendants = (datasetResponse) => {
@@ -170,37 +170,33 @@ const DataTable = (props) => {
         }
     }
 
-    const toggleApi = () => {
+    const clearBasicFilters = () => {
         setInvalidUploadId(false);
-        setUseDatasetApi(!useDatasetApi);
-        toggleHistory(useDatasetApi)
-        setFilters({});
-        setSortField(undefined);
-        setSortOrder(undefined);
-        setPage(1);
-        setPageSize( 10);
-        // setDatasetCount(primaryData.length);
-        // setUploadCount(uploadData.length);
-    };
-
-    const clearAll = () => {
-        setInvalidUploadId(false);
-        toggleHistory(!useDatasetApi)
-        setPrimaryData(originalPrimaryData);
-        setFilters({});
         if (ENVS.searchEnabled()) {
             applyDatasets(originalResponse.datasets)
             applyUploads(originalResponse.uploads)
             document.getElementById('appSearch').value = ''
         }
+        setFilters({});
         setSortField(undefined);
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
         // setDatasetCount(primaryData.length);
         // setUploadCount(uploadData.length);
-        setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
+    }
 
+    const toggleApi = () => {
+        setUseDatasetApi(!useDatasetApi);
+        toggleHistory(useDatasetApi)
+        clearBasicFilters()
+    };
+
+    const clearAll = () => {
+        toggleHistory(!useDatasetApi)
+        setPrimaryData(originalPrimaryData);
+        clearBasicFilters()
+        setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
     };
 
     const uploadTable = ENVS.uploadsEnabled() ? (

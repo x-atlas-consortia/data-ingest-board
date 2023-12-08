@@ -1,18 +1,21 @@
-import {Dropdown, Menu, Table, Tooltip} from "antd";
+import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
 import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React from "react";
+import React, {useState} from "react";
 import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
+import ModalOver from "../ModalOver";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalBody, setModalBody] = useState(null)
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
     }
     const uniqueGroupNames = filterField('group_name')
+    const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
     const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDataType = filterField('data_types')
@@ -141,6 +144,30 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.data_types, value),
             ellipsis: true,
+        },
+        {
+            title: "Assigned To Group Name",
+            width: 300,
+            dataIndex: "assigned_to_group_name",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
+        },
+        {
+            title: "Ingest Task",
+            width: 200,
+            dataIndex: "ingest_task",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
+            ellipsis: true,
+            render: (task, record) => {
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            }
         },
         {
             title: TABLE.cols.n('source_type', 'Source Type'),
@@ -359,6 +386,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                     />
+
+                    <Modal
+                        cancelButtonProps={{ style: { display: 'none' } }}
+                        open={modalOpen}
+                        onCancel={()=> {setModalOpen(false)}}
+                        onOk={() => {setModalOpen(false)}}
+                    >
+                        {modalBody}
+                    </Modal>
                 </>
             )}
         </div>
