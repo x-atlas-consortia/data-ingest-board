@@ -18,7 +18,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
     const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDataType = filterField('data_types')
+    const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
     const uniqueHasRuiStates = filterField('has_rui_info')
 
@@ -134,15 +134,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             )
         },
         {
-            title: "Data Types",
-            width: 150,
-            dataIndex: "data_types",
+            title: "Dataset Type",
+            width: 170,
+            dataIndex: "dataset_type",
             align: "left",
-            defaultSortOrder: defaultSortOrder["data_types"] || null,
-            sorter: (a,b) => a.data_types.localeCompare(b.data_types),
-            defaultFilteredValue: defaultFilteredValue["data_types"] || null,
-            filters: uniqueDataType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.data_types, value),
+            defaultSortOrder: defaultSortOrder["dataset_type"] || null,
+            sorter: (a,b) => a.dataset_type.localeCompare(b.dataset_type),
+            defaultFilteredValue: defaultFilteredValue["dataset_type"] || null,
+            filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record.dataset_type, value),
             ellipsis: true,
         },
         {
