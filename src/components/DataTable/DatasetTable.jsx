@@ -1,9 +1,10 @@
-import {Dropdown, Menu, Table, Tooltip} from "antd";
+import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
 import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React from "react";
+import React, {useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../service/helper";
+import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
+import ModalOver from "../ModalOver";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const modifiedData = data.map(item => {
@@ -22,9 +23,19 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
         return item;
     })
-    const uniqueGroupNames = [...new Set(data.map(item => item.group_name))];
-    const unfilteredOrganTypes = [...new Set(data.map(item => item.organ))];
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalBody, setModalBody] = useState(null)
+    const excludedColumns = ENVS.excludeTableColumns()
+    const filterField = (f) => {
+        if (excludedColumns[f]) return []
+        return [...new Set(data.map(item => item[f]))]
+    }
+    const uniqueGroupNames = filterField('group_name')
+    const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
+    const unfilteredOrganTypes = filterField('organ')
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
+    const uniqueSourceTypes = filterField('source_type')
+    const uniqueHasRuiStates = filterField('has_rui_info')
     const uniqueDataType = [...new Set(modifiedData.flatMap(item => {
         if (Array.isArray(item.data_types)) {
             if (item.data_types.length === 1) {
@@ -161,6 +172,42 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
+            title: "Assigned To Group Name",
+            width: 300,
+            dataIndex: "assigned_to_group_name",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            ellipsis: true,
+        },
+        {
+            title: "Ingest Task",
+            width: 200,
+            dataIndex: "ingest_task",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
+            ellipsis: true,
+            render: (task, record) => {
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            }
+        },
+        {
+            title: TABLE.cols.n('source_type', 'Source Type'),
+            width: 150,
+            dataIndex: TABLE.cols.f('source_type'),
+            align: "left",
+            defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
+            ellipsis: true,
+        },
+        {
             title: "Organ Type",
             width: 150,
             dataIndex: "organ",
@@ -210,6 +257,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         {
             title: "Last Touch",
             width: 225,
+            showSorterTooltip: {
+                title: <span>If the <code>Dataset</code> is published <i>Last Touch</i> returns the date/time that the <code>Dataset</code> was published, otherwise it returns the date/time that the <code>Dataset</code> record was last updated. <small className={'text-muted'}>NOTE: This does not include updates to data via Globus (or otherwise), only updates to metadata stored in the {ENVS.appContext()} provenance database.</small></span>
+            },
             dataIndex: "last_touch",
             align: "left",
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
@@ -271,9 +321,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Has Data Metadata",
+            title: "Has Dataset Metadata",
             width: 200,
-            dataIndex: "has_data_metadata",
+            dataIndex: "has_dataset_metadata",
             align: "left",
             defaultSortOrder: defaultSortOrder["has_data_metadata"] || null,
             sorter: (a,b) => b.has_data_metadata.localeCompare(a.has_data_metadata),
@@ -296,6 +346,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
+            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
+            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
         {
             title: "Has Data",
@@ -310,7 +363,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     // Exclude named columns in .env from table
     const filteredDatasetColumns = []
-    const excludedColumns = ENVS.excludeTableColumns()
     for (let x = 0; x < datasetColumns.length; x++) {
         if (excludedColumns[datasetColumns[x].dataIndex] === undefined) {
             filteredDatasetColumns.push(datasetColumns[x])
@@ -369,6 +421,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                     />
+
+                    <Modal
+                        cancelButtonProps={{ style: { display: 'none' } }}
+                        open={modalOpen}
+                        onCancel={()=> {setModalOpen(false)}}
+                        onOk={() => {setModalOpen(false)}}
+                    >
+                        {modalBody}
+                    </Modal>
                 </>
             )}
         </div>

@@ -1,6 +1,9 @@
 {
   "HuBMAP": "SenNet",
   "HuBMAP Logo" : "SenNet Logo",
+  "HuBMAP-Read" : "SenNet - Read",
   "hubmap-type-white250.png": "sennet-type-white.png",
-  "hubmap-favicon.ico": "sennet-favicon.ico"
+  "hubmap-favicon.ico": "sennet-favicon.ico",
+  "https://profile.hubmapconsortium.org/profile": "https://profile.sennetconsortium.org/profile",
+  "help@hubmapconsortium.org": "help@sennetconsortium.org"
 }

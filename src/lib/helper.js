@@ -53,11 +53,14 @@ export const parseJSON = (obj) => {
 export const ENVS = {
     ubkg: {
         base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
-        sab: () => process.env.NEXT_PUBLIC_UBKG_SAB
+        sab: () => process.env.NEXT_PUBLIC_APP_CONTEXT
     },
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
+    },
+    appContext: () => {
+        return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
     urlFormat: {
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
@@ -90,7 +93,8 @@ export const ENVS = {
         } catch (e) {}
         return num * 60 * 60
     },
-    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN
+    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+    groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME
 }
 
 let THEME_CONFIG
@@ -121,13 +125,13 @@ export const THEME = {
 
 export const TABLE = {
     cols: {
-        n: (k) => {
+        n: (k, n) => {
             const cols = ENVS.tableColumns()
-            return cols[k].name || k
+            return cols[k]?.name || n || k
         },
         f: (k) => {
             const cols = ENVS.tableColumns()
-            return cols[k].field || k
+            return cols[k]?.field || k
         }
     },
     getStatusDefinition: (status, entityType = 'Dataset') => {
