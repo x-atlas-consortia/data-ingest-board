@@ -88,7 +88,7 @@ export const AppProvider = ({ children, messages }) => {
     const resolveLocals = () =>  {
         let info = getCookie(KEY_INFO)
 
-        let authorized = false
+        let authorized = true
         let globusInfo
 
         if (getCookie(KEY_AUTH)) {
