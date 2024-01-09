@@ -11,13 +11,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         for (const key in item) {
             if (Array.isArray(item[key])) {
                 // Convert objects to string representations
-                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, "'") : element));
+                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
 
                 // Convert other arrays to comma-delimited strings
                 if (item[key].length < 2) {
                     item[key] = item[key][0].toString();
                 } else {
-                    item[key] = `"${item[key].join(', ')}"`;
+                    item[key] = `${item[key].join(', ')}`;
                 }
             }
         }
