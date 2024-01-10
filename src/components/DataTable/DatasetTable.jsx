@@ -255,7 +255,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
-            render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
+            render: (date, record) => <span>{(new Date(`${date} UTC`).toLocaleString())}</span>
         },
         {
             title: "Has Contacts",
