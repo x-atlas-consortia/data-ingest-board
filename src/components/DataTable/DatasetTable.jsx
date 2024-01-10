@@ -48,7 +48,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     }
     let defaultFilteredValue = {};
     let defaultSortOrder = {};
-    if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")){
+    if (order && field && (eq(order, "ascend") || eq(order, "descend"))){
         if (ENVS.filterFields().includes(field)) {
             defaultSortOrder[field] = order;
         }
@@ -56,7 +56,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     for (let _field of ENVS.defaultFilterFields()) {
         if (filters.hasOwnProperty(_field)) {
-            defaultFilteredValue[_field] = filters[_field].split(",");
+            defaultFilteredValue[_field] = filters[_field].toLowerCase().split(",");
         }
     }
 
@@ -117,7 +117,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.group_name, value),
             ellipsis: true,
         },
         {
@@ -132,13 +132,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             filters: TABLE.getStatusFilters( [
                 {text: 'Unpublished', value: 'Unpublished'},
                 {text: 'Published', value: 'Published'},
-                {text: 'QA', value: 'QA'}
+                {text: 'QA', value: 'qa'}
             ]),
             onFilter: (value, record) => {
-                if (value === 'Unpublished') {
-                    return record.status.toLowerCase() !== 'published';
+                if (eq(value, 'Unpublished')) {
+                    return !eq(record.status, 'published');
                 }
-                return record.status.toLowerCase() === value.toLowerCase();
+                return eq(record.status, value);
             },
             render: (status) => (
                 <Tooltip title={TABLE.getStatusDefinition(status)}>
@@ -170,7 +170,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
             defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
             filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.assigned_to_group_name, value),
             ellipsis: true,
         },
         {
@@ -362,26 +362,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const dataIndexList = filteredDatasetColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
-        const filteredData = data.filter(item => {
-            for (const key in filters) {
-                if (!dataIndexList.includes(key)) {
-                    continue;
-                }
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
-                if (filterValues.includes("unpublished")) {
-                    if (item[key].toLowerCase() === "published") {
-                        return false;
-                    }
-                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
-                    return false;
-                } else if (!item[key]) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        return filteredData;
+        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
     return (
@@ -402,7 +383,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredDatasetColumns}
-                           dataSource={modifiedData}
+                           dataSource={countFilteredRecords(modifiedData, filters)}
                            showHeader={!loading}
                            bordered={false}
                            loading={loading}
