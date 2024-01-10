@@ -237,7 +237,6 @@ const DataTable = (props) => {
                     {useDatasetApi ? "Datasets" : "Uploads"}
                 </h2>
             </div>
-            {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
             {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
             <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                 {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
@@ -247,6 +246,7 @@ const DataTable = (props) => {
                     {"CLEAR FILTERS"}
                 </button>
             </div>
+            {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
             {table}
         </div>
     )
