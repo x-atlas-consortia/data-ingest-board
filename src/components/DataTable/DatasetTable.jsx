@@ -37,17 +37,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
     const uniqueHasRuiStates = filterField('has_rui_info')
-    const uniqueDataType = [...new Set(modifiedData.flatMap(item => {
-        if (Array.isArray(item.data_types)) {
-            if (item.data_types.length === 1) {
-                // For single-valued lists, convert to string
-                return item.data_types[0];
-            }
-            // Omit multi-valued ones
-            return [];
-        }
-        return item.data_types;
-    }))];
 
     let order = sortOrder;
     let field = sortField;
