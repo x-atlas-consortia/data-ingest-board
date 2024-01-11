@@ -130,8 +130,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             ellipsis: true,
             filters: TABLE.getStatusFilters( [
-                {text: 'Unpublished', value: 'Unpublished'},
-                {text: 'Published', value: 'Published'},
+                {text: 'Unpublished', value: 'unpublished'},
+                {text: 'Published', value: 'published'},
                 {text: 'QA', value: 'qa'}
             ]),
             onFilter: (value, record) => {
