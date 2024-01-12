@@ -7,7 +7,7 @@ function AppBanner({name}) {
     const [banner, setBanner] = useState(null)
     const [showBanner, setShowBanner] = useState(true)
     const [dismissed, setDismissed] = useState(false)
-    const STORE_KEY = storageKey(`dismissed.${name}`)
+    const STORE_KEY = storageKey(`banner.${name}.dismissed`)
 
     const handleCloseBanner = () => {
         if (banner.dismissible) {
