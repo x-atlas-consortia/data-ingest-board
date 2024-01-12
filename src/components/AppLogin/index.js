@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import AppContext from '../../context/AppContext'
 import {MailOutlined, UserOutlined, LoginOutlined} from '@ant-design/icons'
 import {robotoLight, robotoBold } from "../../lib/fonts";
+import AppBanner from "../AppBanner";
 
 const AppLogin = ({ onLogin, unauthorized, onLogout }) => {
 
@@ -44,6 +45,7 @@ const AppLogin = ({ onLogin, unauthorized, onLogout }) => {
     const details = pageData()
     return (
         <div>
+            <AppBanner />
             <div className="container">
                 <div className={`c-login mt-4 ${unauthorized ? 'alert alert-danger' : ''}`}>
                     <h1 className="c-login__head col-lg-6 col-10">{t(details.title, [t('HuBMAP')])}</h1>

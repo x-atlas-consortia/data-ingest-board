@@ -3,6 +3,7 @@ import Favicon from "react-favicon";
 import AppNavBar from "../components/AppNavBar";
 import AppContext from "../context/AppContext";
 import AppLogin from "../components/AppLogin";
+import AppBanner from "../components/AppBanner";
 
 function Login() {
     const {handleLogin, unauthorized, handleLogout, t, isAuthenticated} = useContext(AppContext)
