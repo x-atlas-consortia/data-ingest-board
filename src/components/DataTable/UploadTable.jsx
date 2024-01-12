@@ -3,7 +3,7 @@ import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React, {useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, TABLE, THEME, URLS} from "../../lib/helper";
+import {ENVS, eq, TABLE, THEME, URLS} from "../../lib/helper";
 import ModalOver from "../ModalOver";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
@@ -28,12 +28,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
     let defaultFilteredValue = {};
-    if (filters.hasOwnProperty("group_name")) {
-        defaultFilteredValue["group_name"] = filters["group_name"].split(",");
+
+    for (let _field of ["group_name", "status"]) {
+        if (filters.hasOwnProperty(_field)) {
+            defaultFilteredValue[_field] = filters[_field].toLowerCase().split(",");
+        }
     }
-    if (filters.hasOwnProperty("status")) {
-        defaultFilteredValue["status"] = filters["status"].split(",");
-    }
+
     let order = sortOrder;
     let field = sortField;
     if (typeof sortOrder === "object"){
@@ -43,7 +44,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         field = field[0];
     }
     let defaultSortOrder = {};
-    if (order && field && (order.toLowerCase() === "ascend" || order.toLowerCase() === "descend")) {
+    if (order && field && (eq(order, "ascend") || eq(order, "descend"))) {
         if (ENVS.filterFields().includes(field)) {
             defaultSortOrder[field] = order;
         }
@@ -111,7 +112,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.group_name.localeCompare(b.group_name),
             defaultFilteredValue: defaultFilteredValue["group_name"] || null,
             filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.group_name.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.group_name, value),
             ellipsis: true,
         },
         {
@@ -124,15 +125,15 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             ellipsis: true,
             filters: TABLE.getStatusFilters([
-                {text: 'Unreorganized', value: 'Unreorganized'},
-                {text: 'Valid', value: 'Valid'},
-                {text: 'Reorganized', value: 'Reorganized'},
+                {text: 'Unreorganized', value: 'unreorganized'},
+                {text: 'Valid', value: 'valid'},
+                {text: 'Reorganized', value: 'reorganized'},
             ]),
             onFilter: (value, record) => {
                 if (value === 'Unreorganized') {
-                    return record.status.toLowerCase() !== 'reorganized';
+                    return !eq(record.status, 'reorganized');
                 }
-                return record.status.toLowerCase() === value.toLowerCase();
+                return eq(record.status, value);
             },
             render: (status) => (
                 <Tooltip title={TABLE.getStatusDefinition(status, 'Upload')}>
@@ -151,7 +152,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
             defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
             filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => record.assigned_to_group_name.toLowerCase() === value.toLowerCase(),
+            onFilter: (value, record) => eq(record.assigned_to_group_name, value),
             ellipsis: true,
         },
         {
@@ -189,26 +190,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const dataIndexList = uploadColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
-        const filteredData = data.filter(item => {
-            for (const key in filters) {
-                if (!dataIndexList.includes(key)) {
-                    continue;
-                }
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
-                if (filterValues.includes("unreorganized")) {
-                    if (item[key].toLowerCase() === "reorganized") {
-                        return false;
-                    }
-                } else if (item[key] && !filterValues.some(value => item[key].toLowerCase() === value)) {
-                    return false;
-                } else if (!item[key]) {
-                    return false;
-                }
-            }
-            return true;
-        });
-        return filteredData;
+        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
     }
 
     return (
@@ -230,7 +212,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={uploadColumns}
                            showHeader={!loading}
-                           dataSource={modifiedData}
+                           dataSource={countFilteredRecords(modifiedData, filters)}
                            bordered={false}
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
