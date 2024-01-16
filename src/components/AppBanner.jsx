@@ -10,7 +10,7 @@ function AppBanner({name}) {
     const STORE_KEY = storageKey(`banner.${name}.dismissed`)
 
     const handleCloseBanner = () => {
-        if (banner.dismissible) {
+        if (banner?.dismissible) {
             setShowBanner(false)
             if (banner.keepDismissed) {
                 localStorage.setItem(STORE_KEY, true)
@@ -21,7 +21,7 @@ function AppBanner({name}) {
     useEffect(() => {
         const _banner = ENVS.getBanner(name)
         setBanner(_banner)
-        if (_banner.keepDismissed && localStorage.getItem(STORE_KEY)) {
+        if (_banner?.keepDismissed && localStorage.getItem(STORE_KEY)) {
             setDismissed(true)
         }
     }, [])
