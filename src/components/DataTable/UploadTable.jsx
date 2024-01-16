@@ -234,7 +234,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            bordered={false}
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
-                           scroll={{ x: 1000 }}
+                           scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                     />

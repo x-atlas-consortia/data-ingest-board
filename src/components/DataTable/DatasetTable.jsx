@@ -11,13 +11,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         for (const key in item) {
             if (Array.isArray(item[key])) {
                 // Convert objects to string representations
-                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, "'") : element));
+                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
 
                 // Convert other arrays to comma-delimited strings
                 if (item[key].length < 2) {
                     item[key] = item[key][0].toString();
                 } else {
-                    item[key] = `"${item[key].join(', ')}"`;
+                    item[key] = `${item[key].join(', ')}`;
                 }
             }
         }
@@ -37,17 +37,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
     const uniqueHasRuiStates = filterField('has_rui_info')
-    const uniqueDataType = [...new Set(modifiedData.flatMap(item => {
-        if (Array.isArray(item.data_types)) {
-            if (item.data_types.length === 1) {
-                // For single-valued lists, convert to string
-                return item.data_types[0];
-            }
-            // Omit multi-valued ones
-            return [];
-        }
-        return item.data_types;
-    }))];
 
     let order = sortOrder;
     let field = sortField;
@@ -266,7 +255,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
-            render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
+            render: (date, record) => <span>{(new Date(`${date} UTC`).toLocaleString())}</span>
         },
         {
             title: "Has Contacts",
