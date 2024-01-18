@@ -14,7 +14,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element) : element));
                 // Convert other arrays to comma-delimited strings
                 if (item[key].length === 1) {
-                    item[key] = item[key][0].toString();
+                    item[key] = Array.isArray(item[key]) ? JSON.stringify(item[key]) : item[key];
                 } else {
                     item[key] = item[key].join(', ');
                 }
