@@ -50,6 +50,16 @@ export const parseJSON = (obj) => {
     return {}
 }
 
+export const storageKey = (key = '') => `ingest-board.${key}`
+
+export const deleteFromLocalStorage = (needle, fn = 'startsWith') => {
+    Object.keys(localStorage)
+        .filter(x =>
+            x[fn](needle))
+        .forEach(x =>
+            localStorage.removeItem(x))
+}
+
 export const ENVS = {
     ubkg: {
         base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
@@ -94,7 +104,15 @@ export const ENVS = {
         return num * 60 * 60
     },
     cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
-    groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME
+    groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME,
+    getBanner: (key) => {
+        const banners = {
+            login: process.env.NEXT_PUBLIC_BANNER_LOGIN,
+            searchEntities: process.env.NEXT_PUBLIC_BANNER_SEARCH_ENTITIES,
+        }
+        const banner = key ? banners[key] : null
+        return banner ? parseJSON(banner) : null
+    }
 }
 
 let THEME_CONFIG

@@ -7,6 +7,7 @@ import { useState, useContext } from "react";
 import AppContext from "../context/AppContext";
 import Favicon from "react-favicon";
 import AppNavBar from "../components/AppNavBar";
+import AppBanner from "../components/AppBanner";
 
 
 function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
