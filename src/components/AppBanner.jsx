@@ -31,7 +31,7 @@ function AppBanner({name}) {
             {banner && !dismissed && <div className={`c-AppBanner ${banner.sectionClassName || 'container'}`} role='section' aria-label={banner.ariaLabel}>
                 {banner.beforeBanner && <div className={banner.beforeBannerClassName} dangerouslySetInnerHTML={{__html: banner.beforeBanner}}></div>}
                 <div className={banner.outerWrapperClassName}>
-                    <Alert variant={banner.theme || 'danger'} show={showBanner} onClose={handleCloseBanner} dismissible={banner.dismissible} className={banner.className || 'mt-4'}>
+                    <Alert variant={banner.theme || 'warning'} show={showBanner} onClose={handleCloseBanner} dismissible={banner.dismissible} className={banner.className || 'mt-4'}>
                         <div className={banner.innerClassName}>
                             {banner.title && <Alert.Heading><span dangerouslySetInnerHTML={{__html: banner.title}}></span></Alert.Heading>}
                             <div dangerouslySetInnerHTML={{__html: banner.content}}></div>
