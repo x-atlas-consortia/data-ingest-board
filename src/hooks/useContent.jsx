@@ -5,10 +5,19 @@ import {ENVS, getRequestOptions} from "../lib/helper";
 function useContent() {
     const [messages, setMessages] = useState({})
     const [ubkg, setUbkg] = useState({})
+    const [banners, setBanners] = useState({})
 
     const loadMessages = async () => {
         let res = await axios.get(
             `locale/${ENVS.locale()}.json`,
+            getRequestOptions()
+        )
+        return res.data
+    }
+
+    const loadBanners = async () => {
+        let res = await axios.get(
+            `content/banners/index.json`,
             getRequestOptions()
         )
         return res.data
@@ -25,10 +34,11 @@ function useContent() {
 
     useEffect(() => {
         loadMessages().then((r) => setMessages(r))
+        loadBanners().then((r) => setBanners(r))
         loadUbkg().then((r) => setUbkg(r))
     }, [])
 
-    return {messages, ubkg}
+    return {messages, ubkg, banners}
 }
 
 

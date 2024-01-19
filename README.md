@@ -42,26 +42,48 @@ data.
 
 ## Content Management
 ### Banner 
-Currently, two locations offer adding a banner via the `.env` file without having to rebuild the image. These are:
+Currently, two locations offer adding a banner via updating `public/content/banners/index.json` file without having to rebuild the image. To specify that both locations use the same banner,
+use the key `default` as property name. To use different banners per location, specify the property name `login` and/or `searchEntities`. 
+#### `login` Located before the Login section
 ```
-NEXT_PUBLIC_BANNER_LOGIN # This is located before the Login section
-NEXT_PUBLIC_BANNER_SEARCH_ENTITIES # Located right before the main search results area
+{
+  "login": {
+    "content": "..."
+  }
+}
 ```
-These environment variables take a json object with the following properties:
+
+#### `searchEntities` Located right before the main search results area
+```
+{
+  "searchEntities": {
+    "content": "..."
+  }
+}
+```
+#### `default` This banner will be used for locations not specified.
+```
+{
+  "default": {
+    "content": "..."
+  }
+}
+```
+Configure the json object with the following properties:
 
 | Property                  | Type          | Description                                                                                                         |
 |---------------------------|---------------|---------------------------------------------------------------------------------------------------------------------|
-| **theme**                 | *enum string* | `['info', 'danger', 'warning']`                                                                                     |
+| **theme**                 | *enum string* | `["info", "danger", "warning"]`   Default: `warning`.                                                               |
 | **title**                 | *html string* | A title for the `Alert`, which is the actual banner. (Going forward we will call this just 'banner'.)               |
 | **content**               | *html string* | The main banner content.                                                                                            |
 | **dismissible**           | *boolean*     | Add a close button to the banner.                                                                                   |
 | **keepDismissed**         | *boolean*     | Keep the banner dismissed on close. The banner will show again on refresh if this is set to `false` or `undefined`. |
-| **className**             | *string*      | A class name for the banner.                                                                                        |
+| **className**             | *string*      | A class name for the banner.  Default: `mt-4`.                                                                      |
 | **innerClassName**        | *string*      | A class name for inner wrapper of the banner.                                                                       |
 | **outerWrapperClassName** | *string*      | A class name for the div that wraps the banner.                                                                     |
 | **beforeBanner**          | *html string* | Set some content before the banner.                                                                                 |
 | **beforeBannerClassName** | *string*      | Set a class name on div of `beforeBanner`.                                                                          |
 | **afterBanner**           | *html string* | Set some content after the banner.                                                                                  |
 | **afterBannerClassName**  | *string*      | Set a class name on div of `afterBanner`.                                                                           |
-| **sectionClassName**      | *string*      | A class name for the `c-AppBanner` section.                                                                         |
+| **sectionClassName**      | *string*      | A class name for the `c-AppBanner` section. Default: `container`.                                                   |
 | **ariaLabel**             | *string*      | For accessibility, add a unique label to the `c-AppBanner` section                                                  |
