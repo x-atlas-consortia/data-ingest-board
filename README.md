@@ -42,7 +42,7 @@ data.
 
 ## Content Management
 ### Banner 
-Currently, two locations offer adding a banner via updating `public/content/banners/index.json` file without having to rebuild the image. To specify that both locations use the same banner,
+Currently, two locations offer adding a banner via adding/updating `public/content/banners/index.json` file without having to rebuild the image. (To specify a different filename, use `NEXT_PUBLIC_BANNERS_CONFIG_FILENAME`. Default is `index.json` if nothing is specified.) To specify that both locations use the same banner,
 use the key `default` as property name. To use different banners per location, specify the property name `login` and/or `searchEntities`. 
 #### `login` Located before the Login section
 ```

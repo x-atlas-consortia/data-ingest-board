@@ -16,11 +16,16 @@ function useContent() {
     }
 
     const loadBanners = async () => {
-        let res = await axios.get(
-            `content/banners/index.json`,
-            getRequestOptions()
-        )
-        return res.data
+        try {
+            let res = await axios.get(
+                `content/banners/${ENVS.bannerConfigFile() || 'index.json'}`,
+                getRequestOptions()
+            )
+            return res.data
+        } catch(e) {
+            console.log(`%c No banners config file found.`, `background: #222; color: red`)
+        }
+        return {}
     }
 
     const loadUbkg = async () => {

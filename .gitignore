@@ -52,3 +52,7 @@ yarn-error.log*
 
 # IDE Files
 .vscode*
+
+# Banner config
+src/public/content/banners/index.json
+src/public/content/banners/local*.json
