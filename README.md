@@ -75,7 +75,7 @@ Configure the json object with the following properties:
 |---------------------------|---------------|---------------------------------------------------------------------------------------------------------------------|
 | **theme**                 | *enum string* | `["info", "danger", "warning"]`   Default: `warning`.                                                               |
 | **title**                 | *html string* | A title for the `Alert`, which is the actual banner. (Going forward we will call this just 'banner'.)               |
-| **content**               | *html string* | The main banner content.                                                                                            |
+| **content**               | *html string* | Required. The main banner content.                                                                                  |
 | **dismissible**           | *boolean*     | Add a close button to the banner.                                                                                   |
 | **keepDismissed**         | *boolean*     | Keep the banner dismissed on close. The banner will show again on refresh if this is set to `false` or `undefined`. |
 | **className**             | *string*      | A class name for the banner.  Default: `mt-4`.                                                                      |
