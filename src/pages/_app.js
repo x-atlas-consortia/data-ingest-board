@@ -10,11 +10,11 @@ const roboto = Roboto({
 })
 
 export default function App({ Component, pageProps }) {
-    const { messages } = useContent()
+    const { messages, banners } = useContent()
 
     return (
         <main className={roboto.className}>
-            <AppProvider messages={messages}>
+            <AppProvider messages={messages} banners={banners}>
                 <Component {...pageProps} />
             </AppProvider>
         </main>

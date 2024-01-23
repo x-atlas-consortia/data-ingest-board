@@ -23,6 +23,8 @@ services:
     volumes:
       # Mount the logging to container
       - "../log:/usr/src/app/log"
+      # For configurable banner message
+      - "../src/public/content/banners/index.json:/usr/src/app/src/public/content/banners/index.json"
     networks:
       - gateway_hubmap
 

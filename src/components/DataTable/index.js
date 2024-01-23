@@ -4,6 +4,7 @@ import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
 import {ENVS, eq, getHeadersWith, TABLE, URLS} from "../../lib/helper";
 import Search from "../Search";
+import AppBanner from "../AppBanner";
 
 
 const DataTable = (props) => {
@@ -231,24 +232,29 @@ const DataTable = (props) => {
     ) : uploadTable;
 
     return (
-        <div className="c-table c-table--data container">
-            <div className="row">
-                <h2 className="c-table__title col text-center m-5">
-                    {useDatasetApi ? "Datasets" : "Uploads"}
-                </h2>
+        <>
+            <AppBanner name={'searchEntities'} />
+            <div className="c-table c-table--data container">
+                <div className='c-table__wrap'>
+                    <div className="row">
+                        <h2 className="c-table__title col text-center m-5">
+                            {useDatasetApi ? "Datasets" : "Uploads"}
+                        </h2>
+                    </div>
+                    {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
+                    {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
+                    <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
+                        {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
+                            {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
+                        </button>}
+                        <button className="c-btn c-btn--lgt col-md-6 col-lg-3" onClick={clearAll}>
+                            {"CLEAR FILTERS"}
+                        </button>
+                    </div>
+                    {table}
+                </div>
             </div>
-            {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
-            {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-            <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
-                {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
-                    {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
-                </button>}
-                <button className="c-btn c-btn--lgt col-md-6 col-lg-3" onClick={clearAll}>
-                    {"CLEAR FILTERS"}
-                </button>
-            </div>
-            {table}
-        </div>
+        </>
     )
 }
 
