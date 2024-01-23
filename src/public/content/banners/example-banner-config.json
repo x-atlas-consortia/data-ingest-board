@@ -1,0 +1,5 @@
+{
+  "default": {
+    "content": "This banner matches the width of the Login section. Can include html tags in any property marked as type <code>html str</code> in the documentation. Like: <a href='https://github.com/x-atlas-consortia/data-ingest-board?tab=readme-ov-file#content-management'>Git Hub Docs</a>"
+  }
+}

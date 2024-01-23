@@ -105,14 +105,6 @@ export const ENVS = {
     },
     cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
     groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME,
-    getBanner: (key) => {
-        const banners = {
-            login: process.env.NEXT_PUBLIC_BANNER_LOGIN,
-            searchEntities: process.env.NEXT_PUBLIC_BANNER_SEARCH_ENTITIES,
-        }
-        const banner = key ? banners[key] : null
-        return banner ? parseJSON(banner) : null
-    }
 }
 
 let THEME_CONFIG

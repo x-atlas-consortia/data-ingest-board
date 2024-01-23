@@ -5,6 +5,7 @@ import {ENVS, getRequestOptions} from "../lib/helper";
 function useContent() {
     const [messages, setMessages] = useState({})
     const [ubkg, setUbkg] = useState({})
+    const [banners, setBanners] = useState({})
 
     const loadMessages = async () => {
         let res = await axios.get(
@@ -12,6 +13,19 @@ function useContent() {
             getRequestOptions()
         )
         return res.data
+    }
+
+    const loadBanners = async () => {
+        try {
+            let res = await axios.get(
+                `content/banners/index.json`,
+                getRequestOptions()
+            )
+            return res.data
+        } catch(e) {
+            console.log(`%c No banners config file found.`, `background: #222; color: red`)
+        }
+        return {}
     }
 
     const loadUbkg = async () => {
@@ -25,10 +39,11 @@ function useContent() {
 
     useEffect(() => {
         loadMessages().then((r) => setMessages(r))
+        loadBanners().then((r) => setBanners(r))
         loadUbkg().then((r) => setUbkg(r))
     }, [])
 
-    return {messages, ubkg}
+    return {messages, ubkg, banners}
 }
 
 

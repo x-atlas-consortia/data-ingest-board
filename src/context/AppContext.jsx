@@ -6,7 +6,7 @@ import axios from "axios";
 
 const AppContext = createContext()
 
-export const AppProvider = ({ children, messages }) => {
+export const AppProvider = ({ children, messages, banners }) => {
     const KEY_AUTH = 'isAuthenticated'
     const KEY_INFO = 'info'
 
@@ -144,6 +144,7 @@ export const AppProvider = ({ children, messages }) => {
         isLogout,
         isAuthenticated,
         unauthorized,
+        banners,
         handleLogin, handleLogout, getUserEmail,
         t
     }}>{children}</AppContext.Provider>
