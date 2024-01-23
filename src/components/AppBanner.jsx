@@ -21,7 +21,9 @@ function AppBanner({name}) {
     }
 
     useEffect(() => {
-        const _banner = banners[name] || banners.default
+        const defaultBanner = banners.default || {}
+        let _banner = banners[name] || defaultBanner
+        _banner = Object.assign(_banner, defaultBanner)
         setBanner(_banner)
         if (_banner?.keepDismissed && localStorage.getItem(STORE_KEY)) {
             setDismissed(true)

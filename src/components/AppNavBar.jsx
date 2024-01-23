@@ -20,19 +20,17 @@ function AppNavBar() {
                         <span className='d-inline-block'>Data Ingest Board</span>
                     </h1>
                 </Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-                <Navbar.Collapse className={'w-25 c-nav__auth'}>
+                {isAuthenticated && <Navbar.Toggle aria-controls="basic-navbar-nav"/>}
+                {isAuthenticated && <Navbar.Collapse className={'w-25 c-nav__auth'}>
                     <Nav className={'me-auto'}>
-                        {isAuthenticated && (
-                            <span className="c-logout">
-                                    <span className={'p-2 txt-muted-on-dark'}>{getUserEmail()}</span>
-                                    <button className="c-logout__btn" onClick={handleLogout}>
-                                        LOG OUT
-                                    </button>
-                                </span>
-                        )}
+                        <span className="c-logout">
+                            <span className={'p-2 txt-muted-on-dark'}>{getUserEmail()}</span>
+                            <button className="c-logout__btn" onClick={handleLogout}>
+                                LOG OUT
+                            </button>
+                        </span>
                     </Nav>
-                </Navbar.Collapse>
+                </Navbar.Collapse>}
             </Container>
         </Navbar>
     )
