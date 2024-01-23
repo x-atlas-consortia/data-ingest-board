@@ -1,12 +1,12 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {ENVS, eq, getHeadersWith, parseJSON, THEME, URLS} from "../lib/helper";
+import {deleteFromLocalStorage, ENVS, eq, getHeadersWith, parseJSON, storageKey, THEME, URLS} from "../lib/helper";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
 
 const AppContext = createContext()
 
-export const AppProvider = ({ children, messages }) => {
+export const AppProvider = ({ children, messages, banners }) => {
     const KEY_AUTH = 'isAuthenticated'
     const KEY_INFO = 'info'
 
@@ -39,6 +39,7 @@ export const AppProvider = ({ children, messages }) => {
         deleteCookie(KEY_AUTH)
         // This cookie was set on login, need to specify the domain to match
         deleteCookie(KEY_INFO, {path: '/', domain: ENVS.cookieDomain()})
+        deleteFromLocalStorage(storageKey())
     }
 
     const handleLogout = (redirect = true) => {
@@ -143,6 +144,7 @@ export const AppProvider = ({ children, messages }) => {
         isLogout,
         isAuthenticated,
         unauthorized,
+        banners,
         handleLogin, handleLogout, getUserEmail,
         t
     }}>{children}</AppContext.Provider>
