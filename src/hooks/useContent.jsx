@@ -18,7 +18,7 @@ function useContent() {
     const loadBanners = async () => {
         try {
             let res = await axios.get(
-                `content/banners/${ENVS.bannerConfigFile() || 'index.json'}`,
+                `content/banners/index.json`,
                 getRequestOptions()
             )
             return res.data

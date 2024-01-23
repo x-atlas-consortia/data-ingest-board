@@ -55,4 +55,3 @@ yarn-error.log*
 
 # Banner config
 src/public/content/banners/index.json
-src/public/content/banners/local*.json
