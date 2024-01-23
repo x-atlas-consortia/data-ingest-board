@@ -182,13 +182,35 @@ export const TABLE = {
     },
     getStatusFilters: (entityTypeFilters) => {
         const filters = [
-            {text: 'Error', value: 'Error'},
-            {text: 'Invalid', value: 'Invalid'},
-            {text: 'New', value: 'New'},
-            {text: 'Processing', value: 'Processing'},
-            {text: 'Submitted', value: 'Submitted'},
+            {text: 'Error', value: 'error'},
+            {text: 'Invalid', value: 'invalid'},
+            {text: 'New', value: 'new'},
+            {text: 'Processing', value: 'processing'},
+            {text: 'Submitted', value: 'submitted'},
         ]
         return filters.concat(entityTypeFilters)
+    },
+    countFilteredRecords: (data, filters, dataIndexList, special) => {
+        const filteredData = data.filter(item => {
+            for (const key in filters) {
+                if (!dataIndexList.includes(key) || !filters[key]) {
+                    continue;
+                }
+                const filterValue = filters[key].toLowerCase();
+                const filterValues = filterValue.split(",");
+                if (filterValues.includes(special.case1)) {
+                    if (eq(item[key], special.case2)) {
+                        return false;
+                    }
+                } else if (item[key] && !filterValues.some(value => eq(item[key], value))) {
+                    return false;
+                } else if (!item[key]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        return filteredData;
     }
 }
 

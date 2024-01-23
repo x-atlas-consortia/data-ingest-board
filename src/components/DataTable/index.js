@@ -10,8 +10,6 @@ import AppBanner from "../AppBanner";
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
     const [originalResponse, setOriginalResponse] = useState({})
-    // const [datasetCount, setDatasetCount] = useState(0);
-    // const [uploadCount, setUploadCount] = useState(0);
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
@@ -31,13 +29,19 @@ const DataTable = (props) => {
         loadData();
     }, []);
 
-    const handleTableChange = (pagination, filters, sorter, { currentDataSource }) => {
+    const handleTableChange = (pagination, _filters, sorter, {}) => {
+        const query = new URLSearchParams(window.location.search)
+
         setPage(pagination.current)
         setPageSize(pagination.pageSize)
-        let correctedFilters = {};
-        for (let filter in filters) {
-            if (filters[filter]) {
-                correctedFilters[filter] = filters[filter];
+        let correctedFilters = {}
+        let filtersToRemove = {}
+
+        for (let filter in _filters) {
+            if (_filters[filter]) {
+                correctedFilters[filter] = _filters[filter];
+            } else {
+                filtersToRemove[filter] = true
             }
         }
 
@@ -46,17 +50,9 @@ const DataTable = (props) => {
                 correctedFilters[correctedFilter] = correctedFilters[correctedFilter].join(',');
             }
         }
-        setFilters(correctedFilters);
 
-        if (useDatasetApi) {
-            const filteredDatasets = currentDataSource || [];
-            //setDatasetCount(filteredDatasets.length)
-        } else {
-            const filteredUploads = currentDataSource || [];
-            //setUploadCount(filteredUploads.length);
-        }
+        setFilters(correctedFilters)
 
-        const query = new URLSearchParams(window.location.search);
         if (sorter.field) {
             query.set('sort_field', sorter.field);
             if (sorter.order) {
@@ -69,13 +65,19 @@ const DataTable = (props) => {
             query.delete('sort_field');
             query.delete('sort_order');
         }
-        Object.keys(filters).forEach(key => {
-            if (filters[key]) {
-                query.set(key, filters[key].join(','));
+        Object.keys(correctedFilters).forEach(key => {
+            if (correctedFilters[key]) {
+                let val = Array.isArray(correctedFilters[key]) ? correctedFilters[key] : [correctedFilters[key]]
+                query.set(key, val.join(','));
             } else {
                 query.delete(key);
             }
         });
+
+        Object.keys(filtersToRemove).forEach(key => {
+            query.delete(key);
+        });
+
         if (pagination.current && pagination.current !== 1) {
             query.set('page', pagination.current);
         } else {
@@ -132,13 +134,11 @@ const DataTable = (props) => {
         const datasetsWithDescendants = addDescendants(datasetResponse.data);
         const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
         setDatasetData(datasetsWithDescendants);
-        //setDatasetCount(primaryDatasets.length);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
     }
 
     const applyUploads = (uploadResponse) => {
-        //setUploadCount(uploadResponse.data.length);
         setUploadData(uploadResponse.data);
     }
 
@@ -183,8 +183,6 @@ const DataTable = (props) => {
         setSortOrder(undefined);
         setPage(1);
         setPageSize( 10);
-        // setDatasetCount(primaryData.length);
-        // setUploadCount(uploadData.length);
     }
 
     const toggleApi = () => {
@@ -241,7 +239,6 @@ const DataTable = (props) => {
                             {useDatasetApi ? "Datasets" : "Uploads"}
                         </h2>
                     </div>
-                    {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
                     {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
                     <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                         {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
@@ -251,6 +248,7 @@ const DataTable = (props) => {
                             {"CLEAR FILTERS"}
                         </button>
                     </div>
+                    {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
                     {table}
                 </div>
             </div>
