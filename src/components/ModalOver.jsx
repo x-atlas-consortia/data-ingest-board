@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import {Popover} from "antd";
+import {ENVS} from "../lib/helper";
 
 function ModalOver({content, displayMax, setModalBody, setModalOpen}) {
     if (content.length < displayMax) {
@@ -18,7 +19,7 @@ function ModalOver({content, displayMax, setModalBody, setModalOpen}) {
 }
 
 ModalOver.defaultProps = {
-    displayMax: 50
+    displayMax: ENVS.modalColMax()
 }
 
 ModalOver.propTypes = {
