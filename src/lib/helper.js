@@ -105,7 +105,6 @@ export const ENVS = {
     },
     cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
     groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME,
-    modalColMax: () => process.env.NEXT_PUBLIC_MODAL_COL_MAX || 21,
 }
 
 let THEME_CONFIG
