@@ -12,13 +12,13 @@ function ModalOver({content, displayMax, setModalBody, setModalOpen}) {
                 setModalBody(content)
                 setModalOpen(true)
             }
-            }>{`${content.substring(0, displayMax)}...`}</span></Popover>
+            }>{content}</span></Popover>
         </>
     )
 }
 
 ModalOver.defaultProps = {
-    displayMax: 50
+    displayMax: 24
 }
 
 ModalOver.propTypes = {

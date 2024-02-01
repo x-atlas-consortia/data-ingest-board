@@ -163,11 +163,11 @@ const DataTable = (props) => {
         }
     };
 
-    const toggleHistory = (condition) => {
+    const toggleHistory = (condition, params = '') => {
         if (condition) {
-            window.history.pushState(null, null, `/?entity_type=uploads`)
+            window.history.pushState(null, null, `/?entity_type=uploads${params}`)
         } else {
-            window.history.pushState(null, null, `/`)
+            window.history.pushState(null, null, `/${params}`)
         }
     }
 
@@ -248,7 +248,7 @@ const DataTable = (props) => {
                             {"CLEAR FILTERS"}
                         </button>
                     </div>
-                    {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads}}  />}
+                    {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads, toggleHistory}}  />}
                     {table}
                 </div>
             </div>
