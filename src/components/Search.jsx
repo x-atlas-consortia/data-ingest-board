@@ -1,7 +1,19 @@
 import {ENVS, eq, TABLE} from "../lib/helper";
+import {useEffect} from "react";
 
 function Search({ useDatasetApi, callbacks, originalResponse }) {
     let dict = {}
+
+    const $searchInputField = () => document.getElementById('appSearch')
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const query = params.get('q')
+        if (query && Object.keys(originalResponse).length) {
+            $searchInputField().value = query
+            onSearch(null)
+        }
+    }, [originalResponse])
 
     const prepareIndices = (data, entity) => {
         if (dict[entity]) return
@@ -15,7 +27,7 @@ function Search({ useDatasetApi, callbacks, originalResponse }) {
     }
 
     const onSearch = (e) => {
-        let val = document.getElementById('appSearch').value.toLowerCase()
+        let val = $searchInputField().value.toLowerCase()
         const entity = useDatasetApi ? 'Datasets' : 'Uploads'
         const cb = `apply${entity}`
 
@@ -36,6 +48,9 @@ function Search({ useDatasetApi, callbacks, originalResponse }) {
             }
         }
         callbacks[`${cb}`]({data: results})
+        const pre = useDatasetApi ? `?` : `&`
+        let query = `${pre}q=${val}`
+        callbacks.toggleHistory(!useDatasetApi, query)
     }
 
     return (
