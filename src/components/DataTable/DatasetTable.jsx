@@ -1,28 +1,22 @@
 import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
 import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 import ModalOver from "../ModalOver";
+import ModalOverData from "../ModalOverData";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const modifiedData = data.map(item => {
-        for (const key in item) {
-            if (Array.isArray(item[key])) {
-                // Convert objects to string representations
-                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
+    const [rawData, setRawData] = useState([])
+    const [modifiedData, setModifiedData] = useState([])
 
-                // Convert other arrays to comma-delimited strings
-                if (item[key].length < 2) {
-                    item[key] = Array.isArray(item[key]) ? JSON.stringify(item[key]) : item[key];
-                } else {
-                    item[key] = `${item[key].join(', ')}`;
-                }
-            }
-        }
-        return item;
-    })
+    useEffect(() => {
+        setRawData(JSON.parse(JSON.stringify(data)))
+        setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
+    }, [data])
+
+
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
     const excludedColumns = ENVS.excludeTableColumns()
@@ -120,35 +114,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             onFilter: (value, record) => eq(record.group_name, value),
             ellipsis: true,
         },
-        {
-            title: "Status",
-            width: 150,
-            dataIndex: "status",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["status"] || null,
-            sorter: (a,b) => a.status.localeCompare(b.status),
-            defaultFilteredValue: defaultFilteredValue["status"] || null,
-            ellipsis: true,
-            filters: TABLE.getStatusFilters( [
-                {text: 'Unpublished', value: 'unpublished'},
-                {text: 'Published', value: 'published'},
-                {text: 'QA', value: 'qa'}
-            ]),
-            onFilter: (value, record) => {
-                if (eq(value, 'Unpublished')) {
-                    return !eq(record.status, 'published');
-                }
-                return eq(record.status, value);
-            },
-            render: (status) => (
-                <Tooltip title={TABLE.getStatusDefinition(status)}>
-                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
-                        {status}
-                    </span>
-                </Tooltip>
-
-            )
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).status,
         {
             title: "Dataset Type",
             width: 170,
@@ -160,6 +126,19 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.dataset_type, value),
             ellipsis: true,
+        },
+        {
+            title: "Has Derived Datasets",
+            width: 220,
+            dataIndex: "descendant_datasets",
+            align: "left",
+            defaultSortOrder: defaultSortOrder["descendant_datasets"] || null,
+            sorter: (a,b) => a.descendant_datasets.length > b.descendant_datasets.length,
+            defaultFilteredValue: defaultFilteredValue["descendant_datasets"] || null,
+            ellipsis: true,
+            render: (descendant_datasets, record) => {
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={descendant_datasets} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            }
         },
         {
             title: "Assigned To Group Name",
@@ -255,7 +234,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
-            render: (date, record) => <span>{(new Date(`${date} UTC`).toLocaleString())}</span>
+            render: (date, record) => <span>{(new Date(`${date}`).toLocaleString())}</span>
         },
         {
             title: "Has Contacts",
@@ -383,7 +362,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredDatasetColumns}
-                           dataSource={countFilteredRecords(modifiedData, filters)}
+                           dataSource={countFilteredRecords(rawData, filters)}
                            showHeader={!loading}
                            bordered={false}
                            loading={loading}
@@ -394,6 +373,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     />
 
                     <Modal
+                        width={700}
                         cancelButtonProps={{ style: { display: 'none' } }}
                         closable={false}
                         open={modalOpen}

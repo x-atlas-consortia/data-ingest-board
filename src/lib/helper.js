@@ -1,3 +1,6 @@
+import {Tooltip} from "antd";
+import React from "react";
+
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
     if (insensitive && s1 !== undefined && s2 !== undefined) {
@@ -211,6 +214,57 @@ export const TABLE = {
             return true;
         });
         return filteredData;
+    },
+    flattenDataForCSV: (data) => {
+        return data.map(item => {
+            for (const key in item) {
+                if (Array.isArray(item[key])) {
+                    // Convert objects to string representations
+                    item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
+
+                    // Convert other arrays to comma-delimited strings
+                    if (item[key].length < 2) {
+                        item[key] = Array.isArray(item[key]) ? JSON.stringify(item[key]) : item[key];
+                    } else {
+                        item[key] = `${item[key].join(', ')}`;
+                    }
+                }
+            }
+            return item;
+        })
+    },
+    reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
+        return {
+            status: {
+                title: "Status",
+                width: 150,
+                dataIndex: "status",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["status"] || null,
+                sorter: (a,b) => a.status.localeCompare(b.status),
+                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                ellipsis: true,
+                filters: TABLE.getStatusFilters( [
+                    {text: 'Unpublished', value: 'unpublished'},
+                    {text: 'Published', value: 'published'},
+                    {text: 'QA', value: 'qa'}
+                ]),
+                onFilter: (value, record) => {
+                    if (eq(value, 'Unpublished')) {
+                        return !eq(record.status, 'published');
+                    }
+                    return eq(record.status, value);
+                },
+                render: (status) => (
+                    <Tooltip title={TABLE.getStatusDefinition(status)}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
+                        {status}
+                    </span>
+                    </Tooltip>
+
+                )
+            }
+        }
     }
 }
 
