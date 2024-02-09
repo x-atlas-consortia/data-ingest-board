@@ -41,7 +41,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, popoverText, 
                 </div>)
                 setModalOpen(true)
             }
-            }>{content[0][TABLE.cols.f('id')]}...({content.length})</span></Popover>
+            }>{content[0][TABLE.cols.f('id')]} {content.length > 1 ? `...(${content.length})` : ''}</span></Popover>
         </>
     )
 }
