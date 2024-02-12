@@ -1,5 +1,6 @@
-import {Tooltip} from "antd";
+import {Dropdown, Tooltip} from "antd";
 import React from "react";
+import {CaretDownOutlined} from "@ant-design/icons";
 
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
@@ -238,8 +239,54 @@ export const TABLE = {
             return item;
         })
     },
+    renderDropdownContent: (record) => {
+        const items = [
+            {
+                key: '1',
+                label: (
+                    <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                )
+            }
+        ]
+
+        if (!eq(URLS.portal.main(), URLS.ingest.main())) {
+            items.push(
+                {
+                    key: '2',
+                    label: (
+                        <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
+                    )
+                }
+            )
+        }
+
+        items.push(
+            {
+                key: '3',
+                label: (
+                    <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+                )
+            }
+        )
+
+        return items
+    },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
         return {
+            id: {
+                title: TABLE.cols.n('id'),
+                width: 190,
+                dataIndex: TABLE.cols.f('id'),
+                align: "left",
+                defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
+                sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
+                ellipsis: true,
+                render: (id, record) => (
+                    <Dropdown menu={{items: TABLE.renderDropdownContent(record)}} trigger={['click']}>
+                        <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                    </Dropdown>
+                )
+            },
             status: {
                 title: "Status",
                 width: 150,

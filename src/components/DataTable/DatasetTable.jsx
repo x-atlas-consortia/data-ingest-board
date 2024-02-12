@@ -54,54 +54,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
     }
 
-    const renderDropdownContent = (record) => {
-        const items = [
-            {
-                key: '1',
-                label: (
-                    <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
-                )
-            }
-        ]
-
-        if (!eq(URLS.portal.main(), URLS.ingest.main())) {
-            items.push(
-                {
-                    key: '2',
-                    label: (
-                        <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
-                    )
-                }
-            )
-        }
-
-        items.push(
-            {
-                key: '3',
-                label: (
-                    <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
-                )
-            }
-        )
-
-        return items
-    };
 
     const datasetColumns = [
-        {
-            title: TABLE.cols.n('id'),
-            width: 180,
-            dataIndex: TABLE.cols.f('id'),
-            align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
-            ellipsis: true,
-            render: (id, record) => (
-                <Dropdown menu={{items: renderDropdownContent(record)}} trigger={['click']}>
-                    <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
-                </Dropdown>
-            )
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id,
         {
             title: "Group Name",
             width: 300,
@@ -128,8 +83,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Has Derived Datasets",
-            width: 220,
+            title: "Derived Datasets",
+            width: 180,
             dataIndex: "descendant_datasets",
             align: "left",
             defaultSortOrder: defaultSortOrder["descendant_datasets"] || null,

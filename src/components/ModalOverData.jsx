@@ -6,21 +6,13 @@ import {ExportOutlined} from "@ant-design/icons";
 
 function ModalOverData({content, cols, setModalBody, setModalOpen, popoverText, args}) {
     if (!content.length || !Array.isArray(content)) {
-        return <span>False</span>
+        return <span>0</span>
     }
 
     const getColumns = () => {
         if (cols.length) return cols;
         return [
-            {
-                title: TABLE.cols.n('id'),
-                dataIndex: TABLE.cols.f('id'),
-                key: TABLE.cols.f('id'),
-                defaultSortOrder: args.defaultSortOrder[TABLE.cols.f('id')] || null,
-                sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
-                ellipsis: true,
-                render: (id, record) => <a className={'lnk--ic'} href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">{id} <ExportOutlined /></a>
-            },
+            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).id,
             TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).status,
             {
                 title: 'Creation Date',
@@ -36,12 +28,12 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, popoverText, 
         <>
             <Popover content={popoverText} placement={'left'}><span onClick={() => {
                 setModalBody(<div>
-                    <h5 className='text-center mb-5'>Derived Datasets of {args.record[TABLE.cols.f('id')]}</h5>
+                    <h5 className='text-center mb-5'>{content.length} Derived Dataset{content.length > 1 ? 's': ''}</h5>
                     <Table rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
                 </div>)
                 setModalOpen(true)
             }
-            }>{content[0][TABLE.cols.f('id')]} {content.length > 1 ? `...(${content.length})` : ''}</span></Popover>
+            }>{content.length}</span></Popover>
         </>
     )
 }
