@@ -225,7 +225,6 @@ export const TABLE = {
                 if (Array.isArray(item[key])) {
                     if (eq(key, 'descendant_datasets')) {
                         item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
-                        console.log(item[key])
                     }
                     // Convert objects to string representations
                     item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
