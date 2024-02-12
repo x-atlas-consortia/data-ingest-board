@@ -219,13 +219,15 @@ export const TABLE = {
         return data.map(item => {
             for (const key in item) {
                 if (Array.isArray(item[key])) {
+                    if (eq(key, 'descendant_datasets')) {
+                        item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
+                        console.log(item[key])
+                    }
                     // Convert objects to string representations
                     item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
 
                     // Convert other arrays to comma-delimited strings
-                    if (item[key].length < 2) {
-                        item[key] = Array.isArray(item[key]) ? JSON.stringify(item[key]) : item[key];
-                    } else {
+                    if (Array.isArray(item[key])) {
                         item[key] = `${item[key].join(', ')}`;
                     }
                 }
