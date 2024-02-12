@@ -133,11 +133,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             dataIndex: "descendant_datasets",
             align: "left",
             defaultSortOrder: defaultSortOrder["descendant_datasets"] || null,
-            sorter: (a,b) => a.descendant_datasets.length > b.descendant_datasets.length,
+            sorter: (a,b) => {
+                let a1 = eq(typeof a.descendant_datasets, 'string') ? 0 : a.descendant_datasets.length
+                let b1 = eq(typeof b.descendant_datasets, 'string') ? 0 : b.descendant_datasets.length
+                return a1 - b1
+            },
             defaultFilteredValue: defaultFilteredValue["descendant_datasets"] || null,
             ellipsis: true,
             render: (descendant_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={descendant_datasets} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={eq(typeof descendant_datasets, 'string') ? [] : descendant_datasets} setModalOpen={setModalOpen} setModalBody={setModalBody} />
             }
         },
         {
