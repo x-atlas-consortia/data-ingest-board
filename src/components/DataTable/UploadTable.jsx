@@ -1,27 +1,20 @@
 import {Button, Dropdown, Menu, Modal, Table, Tooltip} from "antd";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {ENVS, eq, TABLE, THEME, URLS} from "../../lib/helper";
 import ModalOver from "../ModalOver";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const modifiedData = data.map(item => {
-        for (const key in item) {
-            if (Array.isArray(item[key])) {
-                // Convert objects to string representations
-                item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element) : element));
-                // Convert other arrays to comma-delimited strings
-                if (item[key].length === 1) {
-                    item[key] = Array.isArray(item[key]) ? JSON.stringify(item[key]) : item[key];
-                } else {
-                    item[key] = item[key].join(', ');
-                }
-            }
-        }
-        return item;
-    })
+    const [rawData, setRawData] = useState([])
+    const [modifiedData, setModifiedData] = useState([])
+
+    useEffect(() => {
+        setRawData(JSON.parse(JSON.stringify(data)))
+        setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
+    }, [data])
+
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -212,7 +205,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={uploadColumns}
                            showHeader={!loading}
-                           dataSource={countFilteredRecords(modifiedData, filters)}
+                           dataSource={countFilteredRecords(rawData, filters)}
                            bordered={false}
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}

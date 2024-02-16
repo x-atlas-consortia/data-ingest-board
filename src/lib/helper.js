@@ -1,3 +1,7 @@
+import {Dropdown, Tooltip} from "antd";
+import React from "react";
+import {CaretDownOutlined} from "@ant-design/icons";
+
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
     if (insensitive && s1 !== undefined && s2 !== undefined) {
@@ -215,6 +219,104 @@ export const TABLE = {
             return true;
         });
         return filteredData;
+    },
+    flattenDataForCSV: (data) => {
+        return data.map(item => {
+            for (const key in item) {
+                if (Array.isArray(item[key])) {
+                    if (eq(key, 'descendant_datasets')) {
+                        item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
+                    }
+                    // Convert objects to string representations
+                    item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
+
+                    // Convert other arrays to comma-delimited strings
+                    if (Array.isArray(item[key])) {
+                        item[key] = `${item[key].join(', ')}`;
+                    }
+                }
+            }
+            return item;
+        })
+    },
+    renderDropdownContent: (record) => {
+        const items = [
+            {
+                key: '1',
+                label: (
+                    <a href={URLS.portal.view(record.uuid)} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                )
+            }
+        ]
+
+        if (!eq(URLS.portal.main(), URLS.ingest.main())) {
+            items.push(
+                {
+                    key: '2',
+                    label: (
+                        <a href={URLS.ingest.view(record.uuid)} target="_blank" rel="noopener noreferrer">Ingest Portal</a>
+                    )
+                }
+            )
+        }
+
+        items.push(
+            {
+                key: '3',
+                label: (
+                    <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
+                )
+            }
+        )
+
+        return items
+    },
+    reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
+        return {
+            id: {
+                title: TABLE.cols.n('id'),
+                width: 190,
+                dataIndex: TABLE.cols.f('id'),
+                align: "left",
+                defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
+                sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
+                ellipsis: true,
+                render: (id, record) => (
+                    <Dropdown menu={{items: TABLE.renderDropdownContent(record)}} trigger={['click']}>
+                        <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                    </Dropdown>
+                )
+            },
+            status: {
+                title: "Status",
+                width: 150,
+                dataIndex: "status",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["status"] || null,
+                sorter: (a,b) => a.status.localeCompare(b.status),
+                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                ellipsis: true,
+                filters: TABLE.getStatusFilters( [
+                    {text: 'Unpublished', value: 'unpublished'},
+                    {text: 'Published', value: 'published'},
+                    {text: 'QA', value: 'qa'}
+                ]),
+                onFilter: (value, record) => {
+                    if (eq(value, 'Unpublished')) {
+                        return !eq(record.status, 'published');
+                    }
+                    return eq(record.status, value);
+                },
+                render: (status) => (
+                    <Tooltip title={TABLE.getStatusDefinition(status)}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
+                        {status}
+                    </span>
+                    </Tooltip>
+
+                )
+            }
+        }
     }
 }
 

@@ -116,7 +116,7 @@ const DataTable = (props) => {
 
     const addDescendants = (datasetResponse) => {
         return datasetResponse.map(dataset => {
-            const descendantsArray = dataset.descendant_datasets ? dataset.descendant_datasets.split(",") : [];
+            const descendantsArray = dataset.descendant_datasets
             let descendant = "";
             if (descendantsArray.length === 1) {
                 descendant = descendantsArray[0];
