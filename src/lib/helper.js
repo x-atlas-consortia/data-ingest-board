@@ -10,6 +10,21 @@ export function eq(s1, s2, insensitive = true) {
     return res
 }
 
+export function toDateString(timestamp) {
+    const date = new Date(timestamp);
+    let options = { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short' }
+    return date.toUTCString()
+}
+
+Object.assign(Array.prototype, {
+    comprises(needle, insensitive = true) {
+        return this.some((i) => eq(i, needle, insensitive))
+    }
+})
+
 String.prototype.format = function() {
     let args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) {
@@ -77,6 +92,7 @@ export const ENVS = {
         return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
     urlFormat: {
+        entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_BASE}${path}`,
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
         ingest: {
             be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
@@ -223,8 +239,12 @@ export const TABLE = {
     flattenDataForCSV: (data) => {
         return data.map(item => {
             for (const key in item) {
+                if (['last_touch', 'created_timestamp', 'published_timestamp'].comprises(key)) {
+                    item[key] = toDateString(item[key])
+                }
+
                 if (Array.isArray(item[key])) {
-                    if (eq(key, 'descendant_datasets')) {
+                    if (eq(key, 'derived_datasets')) {
                         item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
                     }
                     // Convert objects to string representations
@@ -327,6 +347,12 @@ export const URLS = {
           let path = process.env.NEXT_PUBLIC_PORTAL_VIEW_PATH.format(entity, uuid)
           return ENVS.urlFormat.portal(path)
       }
+    },
+    entity: {
+       revisions: (uuid) => {
+           let path = process.env.NEXT_PUBLIC_REVISIONS_PATH.format(uuid)
+           return ENVS.urlFormat.entity(path)
+       }
     },
     ingest: {
         data: {

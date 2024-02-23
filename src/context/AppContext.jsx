@@ -17,6 +17,8 @@ export const AppProvider = ({ children, messages, banners }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const pageLoaded = useRef(false)
+    const revisionsData = useRef({})
+
 
     /**
      * Translates and formats a message string.
@@ -146,7 +148,8 @@ export const AppProvider = ({ children, messages, banners }) => {
         unauthorized,
         banners,
         handleLogin, handleLogout, getUserEmail,
-        t
+        t,
+        revisionsData
     }}>{children}</AppContext.Provider>
 }
 

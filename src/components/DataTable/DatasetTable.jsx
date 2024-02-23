@@ -3,7 +3,7 @@ import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/i
 import {CSVLink} from "react-csv";
 import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
+import {ENVS, eq, getUBKGName, TABLE, URLS} from "../../lib/helper";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 
@@ -19,6 +19,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
+    const [modalWidth, setModalWidth] = useState(700)
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
@@ -85,18 +86,18 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         {
             title: "Derived Datasets",
             width: 180,
-            dataIndex: "descendant_datasets",
+            dataIndex: "derived_datasets",
             align: "left",
-            defaultSortOrder: defaultSortOrder["descendant_datasets"] || null,
+            defaultSortOrder: defaultSortOrder["derived_datasets"] || null,
             sorter: (a,b) => {
-                let a1 = eq(typeof a.descendant_datasets, 'string') ? 0 : a.descendant_datasets.length
-                let b1 = eq(typeof b.descendant_datasets, 'string') ? 0 : b.descendant_datasets.length
+                let a1 = Array.isArray(a.derived_datasets) ? a.derived_datasets.length : 0
+                let b1 = Array.isArray(b.derived_datasets) ? b.derived_datasets.length : 0
                 return a1 - b1
             },
-            defaultFilteredValue: defaultFilteredValue["descendant_datasets"] || null,
+            defaultFilteredValue: defaultFilteredValue["derived_datasets"] || null,
             ellipsis: true,
-            render: (descendant_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={eq(typeof descendant_datasets, 'string') ? [] : descendant_datasets} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            render: (derived_datasets, record) => {
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(derived_datasets) ? derived_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
             }
         },
         {
@@ -120,7 +121,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
             }
         },
         {
@@ -193,7 +194,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
-            render: (date, record) => <span>{(new Date(`${date}`).toLocaleString())}</span>
+            render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
         },
         {
             title: "Has Contacts",
@@ -332,7 +333,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     />
 
                     <Modal
-                        width={700}
+                        width={modalWidth}
                         cancelButtonProps={{ style: { display: 'none' } }}
                         closable={false}
                         open={modalOpen}

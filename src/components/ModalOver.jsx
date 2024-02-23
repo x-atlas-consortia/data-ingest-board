@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import {Popover} from "antd";
 
-function ModalOver({content, displayMax, setModalBody, setModalOpen}) {
+function ModalOver({content, displayMax, setModalBody, setModalOpen, setModalWidth}) {
     if (content.length < displayMax) {
         return <span>{content}</span>
     }
@@ -9,6 +9,7 @@ function ModalOver({content, displayMax, setModalBody, setModalOpen}) {
     return (
         <>
             <Popover content={'Click to view full task content.'} placement={'left'}><span onClick={() => {
+                setModalWidth(700)
                 setModalBody(content)
                 setModalOpen(true)
             }
@@ -25,7 +26,8 @@ ModalOver.propTypes = {
     content: PropTypes.string.isRequired,
     displayMax: PropTypes.number,
     setModalBody: PropTypes.func.isRequired,
-    setModalOpen: PropTypes.func.isRequired
+    setModalOpen: PropTypes.func.isRequired,
+    setModalWidth: PropTypes.func.isRequired
 }
 
 export default ModalOver
