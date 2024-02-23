@@ -243,10 +243,10 @@ export const TABLE = {
                     item[key] = toDateString(item[key])
                 }
 
+                if (['derived_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
+                    delete item[key]
+                }
                 if (Array.isArray(item[key])) {
-                    if (eq(key, 'derived_datasets')) {
-                        item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
-                    }
                     // Convert objects to string representations
                     item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
 
