@@ -56,7 +56,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
 
     return (
         <>
-            <Popover content={popoverText} placement={'left'}><span onClick={async ()  => {
+            <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={async ()  => {
                 // setModalWidth(800)
                 setModalBody(<Spinner />)
                 setModalOpen(true)
@@ -86,7 +86,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                     <h5 className='text-center mb-5'>
                         {content.length} Processed Dataset{content.length > 1 ? 's': ''} for &nbsp;
                         <Dropdown menu={{items: TABLE.renderDropdownContent(args.record)}} trigger={['click']}>
-                            <a className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                            <span className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></span>
                         </Dropdown>
                     </h5>
                     <CSVLink data={getCSVData()} filename="derived-datasets-data.csv" className="ic--download">
