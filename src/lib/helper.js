@@ -129,6 +129,46 @@ export const ENVS = {
 
 let THEME_CONFIG
 export const THEME = {
+    colors: () => {
+      return THEME.lightColors().concat(THEME.darkColors())
+    },
+    lightColors: () => {
+        return [
+            '#68bdf6', // light blue
+            '#6dce9e', // green #1
+            '#faafc2', // light pink
+            '#f2baf6', // purple
+            '#ff928c', // light red
+            '#fcea7e', // light yellow
+            '#ffc766', // light orange
+            '#78cecb', // green #2,
+            '#b88cbb', // dark purple
+        ];
+    },
+    darkColors: () => {
+       return [
+           // DARK COLORS
+           '#405f9e', // navy blue
+           '#e84646', // dark red
+           '#fa5f86', // dark pink
+           '#ffab1a', // dark orange
+           '#fcda19', // dark yellow
+           '#c9d96f', // pistacchio
+           '#47991f', // green #3
+           '#ff75ea'  // pink
+       ];
+    },
+    isLightColor: (r, g, b) => {
+        let hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+        return hsp > 127.5
+    },
+    randomColor: () => {
+        let hexTab = "5555556789ABCDEF";
+        let r = hexTab[ Math.floor( Math.random() * 16) ];
+        let g = hexTab[ Math.floor( Math.random() * 16) ];
+        let b = hexTab[ Math.floor( Math.random() * 16) ];
+        return {color: "#" + r + g + b, light: THEME.isLightColor(r, g, b)};
+    },
     cssProps: () => {
         const themeConfig = ENVS.theme()
         for (let t in themeConfig.cssProps) {

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import {Dropdown, Popover, Table} from "antd";
-import {getHeadersWith, TABLE, toDateString, URLS} from "../lib/helper";
+import {getHeadersWith, TABLE, THEME, toDateString, URLS} from "../lib/helper";
 import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
@@ -11,6 +11,10 @@ import Spinner from "./Spinner";
 function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth, popoverText, args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
+    let usedColors = {}
+    let dataIndices = {}
+    let revisionsDict = {}
+    let colorIndex = 0
     if (!content.length || !Array.isArray(content)) {
         return <span>0</span>
     }
@@ -22,19 +26,26 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
             TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).status,
             {
                 title: 'Creation Date',
+                width: 170,
                 dataIndex: 'created_timestamp',
                 key: 'created_timestamp',
                 sorter: (a,b) => new Date(a.created_timestamp) - new Date(b.created_timestamp),
                 render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
             },
-            // {
-            //     title: 'Revision',
-            //     width: 100,
-            //     dataIndex: 'revision_number',
-            //     key: 'revision_number',
-            //     sorter: (a,b) => a.revision_number - b.revision_number,
-            //     render: (revision, record) => <span>{revision ? `Version ${revision}`: ''}</span>
-            // }
+            {
+                title: 'Revision',
+                width: 140,
+                dataIndex: 'revision_number',
+                key: 'revision_number',
+                sorter: (a,b) => a.revision_number - b.revision_number,
+                render: (revision, record) => {
+                    let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white'}
+                    return <span className='revision-number'
+                                 style={style}>
+                                {revision ? `Version ${revision}`: ''}
+                           </span>
+                }
+            }
         ]
     }
 
@@ -54,34 +65,70 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
         return results
     }
 
+    const getGroupColor = () => {
+        let groupColor;
+        if (colorIndex < THEME.colors().length) {
+            let color = THEME.colors()[colorIndex]
+            let light = colorIndex < THEME.lightColors().length
+            groupColor = {color, light}
+            colorIndex++;
+        } else {
+            do {
+                groupColor = THEME.randomColor()
+                if (!usedColors[groupColor.color]) {
+                    usedColors[groupColor.color] = true;
+                }
+            } while (!usedColors[groupColor.color])
+        }
+        return groupColor;
+    }
+
+    const buildIndices = () => {
+        for (let i = 0; i < content.length; i++) {
+            dataIndices[content[i].uuid] = i;
+        }
+    }
+
+    const getRevisions = async (record) => {
+
+        let groupColor = getGroupColor()
+        let res = revisionsData.current[record.uuid]
+        let revisions = res
+        if (res === undefined) {
+            res = await axios.get(
+                URLS.entity.revisions(record.uuid),
+                getHeadersWith(globusToken)
+            )
+            revisionsData.current[record.uuid] = res.data
+            revisions = res.data
+        }
+
+        for (let r of revisions) {
+            for (let m of r.uuids) {
+                if (!revisionsDict[m]) {
+                    revisionsDict[m] = r.revision_number
+                    content[dataIndices[m]]['revision_number'] = r.revision_number
+                    content[dataIndices[m]]['group_color'] = groupColor
+                }
+            }
+        }
+    }
+
+    const handleRevisions = async () => {
+        for (let i = 0; i < content.length; i++) {
+            await getRevisions(content[i])
+        }
+    }
+
     return (
         <>
             <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={async ()  => {
-                // setModalWidth(800)
+                setModalWidth(800)
                 setModalBody(<Spinner />)
                 setModalOpen(true)
                 // TODO: disable logic of revisions until #166
-                // let res = revisionsData.current[content[0].uuid]
-                // let revisions = res
-                // if (res === undefined) {
-                //     res = await axios.get(
-                //         URLS.entity.revisions(content[0].uuid),
-                //         getHeadersWith(globusToken)
-                //     )
-                //     revisionsData.current[content[0].uuid] = res.data
-                //     revisions = res.data
-                // }
-                //
-                // let dict = {}
-                // for (let r of revisions) {
-                //     dict[r.uuid] = r.revision_number
-                // }
-                //
-                // for (let c of content) {
-                //     if (dict[c.uuid]) {
-                //         c['revision_number'] = dict[c.uuid]
-                //     }
-                // }
+                buildIndices()
+                await handleRevisions()
                 setModalBody(<div>
                     <h5 className='text-center mb-5'>
                         {content.length} Processed Dataset{content.length > 1 ? 's': ''} for &nbsp;
@@ -92,7 +139,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                     <CSVLink data={getCSVData()} filename="derived-datasets-data.csv" className="ic--download">
                          <DownloadOutlined title="Export Data as CSV" style={{ fontSize: '24px' }}/>
                     </CSVLink>
-                    <Table rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
+                    <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
                 </div>)
                 setModalOpen(true)
             }
