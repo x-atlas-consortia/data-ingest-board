@@ -26,7 +26,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, popoverText, 
 
     return (
         <>
-            <Popover content={popoverText} placement={'left'}><span onClick={() => {
+            <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={() => {
                 setModalBody(<div>
                     <h5 className='text-center mb-5'>{content.length} Derived Dataset{content.length > 1 ? 's': ''}</h5>
                     <Table rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
