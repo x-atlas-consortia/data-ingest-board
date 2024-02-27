@@ -27,14 +27,14 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                 sorter: (a,b) => new Date(a.created_timestamp) - new Date(b.created_timestamp),
                 render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
             },
-            {
-                title: 'Revision',
-                width: 100,
-                dataIndex: 'revision_number',
-                key: 'revision_number',
-                sorter: (a,b) => a.revision_number - b.revision_number,
-                render: (revision, record) => <span>{revision ? `Version ${revision}`: ''}</span>
-            }
+            // {
+            //     title: 'Revision',
+            //     width: 100,
+            //     dataIndex: 'revision_number',
+            //     key: 'revision_number',
+            //     sorter: (a,b) => a.revision_number - b.revision_number,
+            //     render: (revision, record) => <span>{revision ? `Version ${revision}`: ''}</span>
+            // }
         ]
     }
 
@@ -57,33 +57,34 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
     return (
         <>
             <Popover content={popoverText} placement={'left'}><span onClick={async ()  => {
-                setModalWidth(800)
+                // setModalWidth(800)
                 setModalBody(<Spinner />)
                 setModalOpen(true)
-                let res = revisionsData.current[content[0].uuid]
-                let revisions = res
-                if (res === undefined) {
-                    res = await axios.get(
-                        URLS.entity.revisions(content[0].uuid),
-                        getHeadersWith(globusToken)
-                    )
-                    revisionsData.current[content[0].uuid] = res.data
-                    revisions = res.data
-                }
-
-                let dict = {}
-                for (let r of revisions) {
-                    dict[r.uuid] = r.revision_number
-                }
-
-                for (let c of content) {
-                    if (dict[c.uuid]) {
-                        c['revision_number'] = dict[c.uuid]
-                    }
-                }
+                // TODO: disable logic of revisions until #166
+                // let res = revisionsData.current[content[0].uuid]
+                // let revisions = res
+                // if (res === undefined) {
+                //     res = await axios.get(
+                //         URLS.entity.revisions(content[0].uuid),
+                //         getHeadersWith(globusToken)
+                //     )
+                //     revisionsData.current[content[0].uuid] = res.data
+                //     revisions = res.data
+                // }
+                //
+                // let dict = {}
+                // for (let r of revisions) {
+                //     dict[r.uuid] = r.revision_number
+                // }
+                //
+                // for (let c of content) {
+                //     if (dict[c.uuid]) {
+                //         c['revision_number'] = dict[c.uuid]
+                //     }
+                // }
                 setModalBody(<div>
                     <h5 className='text-center mb-5'>
-                        {content.length} Derived Dataset{content.length > 1 ? 's': ''} for &nbsp;
+                        {content.length} Processed Dataset{content.length > 1 ? 's': ''} for &nbsp;
                         <Dropdown menu={{items: TABLE.renderDropdownContent(args.record)}} trigger={['click']}>
                             <a className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                         </Dropdown>

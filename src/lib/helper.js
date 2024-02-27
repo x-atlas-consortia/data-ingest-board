@@ -243,7 +243,7 @@ export const TABLE = {
                     item[key] = toDateString(item[key])
                 }
 
-                if (['derived_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
+                if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
                     delete item[key]
                 }
                 if (Array.isArray(item[key])) {

@@ -84,20 +84,20 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Derived Datasets",
+            title: "Processed Datasets",
             width: 180,
-            dataIndex: "derived_datasets",
+            dataIndex: "processed_datasets",
             align: "left",
-            defaultSortOrder: defaultSortOrder["derived_datasets"] || null,
+            defaultSortOrder: defaultSortOrder["processed_datasets"] || null,
             sorter: (a,b) => {
-                let a1 = Array.isArray(a.derived_datasets) ? a.derived_datasets.length : 0
-                let b1 = Array.isArray(b.derived_datasets) ? b.derived_datasets.length : 0
+                let a1 = Array.isArray(a.processed_datasets) ? a.processed_datasets.length : 0
+                let b1 = Array.isArray(b.processed_datasets) ? b.processed_datasets.length : 0
                 return a1 - b1
             },
-            defaultFilteredValue: defaultFilteredValue["derived_datasets"] || null,
+            defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
             ellipsis: true,
-            render: (derived_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(derived_datasets) ? derived_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
+            render: (processed_datasets, record) => {
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
             }
         },
         {
