@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types'
-import {Popover, Table} from "antd";
-import {getHeadersWith, getRequestOptions, TABLE, toDateString, URLS} from "../lib/helper";
-import React, {useContext, useState} from "react";
+import {Dropdown, Popover, Table} from "antd";
+import {getHeadersWith, TABLE, toDateString, URLS} from "../lib/helper";
+import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
 import {CSVLink} from "react-csv";
-import {DownloadOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
 function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth, popoverText, args}) {
@@ -82,7 +82,12 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                     }
                 }
                 setModalBody(<div>
-                    <h5 className='text-center mb-5'>{content.length} Derived Dataset{content.length > 1 ? 's': ''}</h5>
+                    <h5 className='text-center mb-5'>
+                        {content.length} Derived Dataset{content.length > 1 ? 's': ''} for &nbsp;
+                        <Dropdown menu={{items: TABLE.renderDropdownContent(args.record)}} trigger={['click']}>
+                            <a className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                        </Dropdown>
+                    </h5>
                     <CSVLink data={getCSVData()} filename="derived-datasets-data.csv" className="ic--download">
                          <DownloadOutlined title="Export Data as CSV" style={{ fontSize: '24px' }}/>
                     </CSVLink>
