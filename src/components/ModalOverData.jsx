@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import {Dropdown, Popover, Table} from "antd";
-import {getHeadersWith, TABLE, THEME, toDateString, URLS} from "../lib/helper";
+import {ENVS, getHeadersWith, TABLE, THEME, toDateString, URLS} from "../lib/helper";
 import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
@@ -37,6 +37,9 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                 width: 140,
                 dataIndex: 'revision_number',
                 key: 'revision_number',
+                showSorterTooltip: {
+                    title: <span>Greyed revisions have no associated revisions. All other revisions of the same color belong to the same revision group.</span>
+                },
                 sorter: (a,b) => a.revision_number - b.revision_number,
                 render: (revision, record) => {
                     let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white'}
@@ -91,7 +94,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
 
     const getRevisions = async (record) => {
 
-        let groupColor = getGroupColor()
+        let groupColor;
         let res = revisionsData.current[record.uuid]
         let revisions = res
         if (res === undefined) {
@@ -101,6 +104,12 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
             )
             revisionsData.current[record.uuid] = res.data
             revisions = res.data
+        }
+
+        if (revisions.length === 1 && revisions[0].uuids.length === 1) {
+            groupColor = {color: '#797b80', light: false}
+        } else {
+            groupColor = getGroupColor()
         }
 
         for (let r of revisions) {

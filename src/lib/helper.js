@@ -158,7 +158,14 @@ export const THEME = {
            '#ff75ea'  // pink
        ];
     },
-    isLightColor: (r, g, b) => {
+    isLightColor: (color) => {
+        color = +("0x" + color.slice(1).replace(
+        color.length < 5 && /./g, '$&$&'));
+
+        let r = color >> 16;
+        let g = color >> 8 & 255;
+        let b = color & 255;
+
         let hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
         return hsp > 127.5
     },
@@ -167,7 +174,8 @@ export const THEME = {
         let r = hexTab[ Math.floor( Math.random() * 16) ];
         let g = hexTab[ Math.floor( Math.random() * 16) ];
         let b = hexTab[ Math.floor( Math.random() * 16) ];
-        return {color: "#" + r + g + b, light: THEME.isLightColor(r, g, b)};
+        let color = "#" + r + g + b
+        return {color, light: THEME.isLightColor(color)};
     },
     cssProps: () => {
         const themeConfig = ENVS.theme()
