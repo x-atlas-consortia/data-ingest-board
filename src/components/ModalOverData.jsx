@@ -135,7 +135,6 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                 setModalWidth(800)
                 setModalBody(<Spinner />)
                 setModalOpen(true)
-                // TODO: disable logic of revisions until #166
                 buildIndices()
                 await handleRevisions()
                 setModalBody(<div>
