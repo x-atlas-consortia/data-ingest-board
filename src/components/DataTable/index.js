@@ -114,26 +114,9 @@ const DataTable = (props) => {
         return dataResponse.filter(dataset => eq(dataset.is_primary, "true"));
     }
 
-    const addDescendants = (datasetResponse) => {
-        return datasetResponse.map(dataset => {
-            const descendantsArray = dataset.descendant_datasets
-            let descendant = "";
-            if (descendantsArray.length === 1) {
-                descendant = descendantsArray[0];
-            } else if (descendantsArray.length > 1) {
-                descendant = descendantsArray.length.toString();
-            }
-            return {
-                ...dataset,
-                descendants: descendant
-            };
-        });
-    }
-
     const applyDatasets = (datasetResponse) => {
-        const datasetsWithDescendants = addDescendants(datasetResponse.data);
-        const primaryDatasets = getPrimaryDatasets(datasetsWithDescendants);
-        setDatasetData(datasetsWithDescendants);
+        const primaryDatasets = getPrimaryDatasets(datasetResponse.data);
+        setDatasetData(datasetResponse.data);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
     }
