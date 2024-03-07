@@ -1,6 +1,7 @@
 import {Dropdown, Tooltip} from "antd";
 import React from "react";
-import {CaretDownOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
+import axios from "axios";
 
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
@@ -43,6 +44,19 @@ export const getHeadersWith = (value, key = 'Authorization') => {
     const options = getRequestOptions()
     options.headers[key] = `Bearer ${value}`
     return options
+}
+
+export const callService = async (url, payload = {}, method = 'put') => {
+    try {
+        return await axios({
+            method: method,
+            url: url,
+            data: payload
+        })
+    } catch(e) {
+        console.error(`${e}`)
+        return {...e.response, raw: e}
+    }
 }
 
 export const parseJSON = (obj) => {
@@ -239,6 +253,16 @@ export const TABLE = {
             return item;
         })
     },
+    bulkSelectionDropdown: (items = []) => {
+        let _items = [
+            {
+                label: 'Download CSV Data',
+                key: '1',
+                icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
+            }
+        ]
+        return _items.concat(items);
+    },
     renderDropdownContent: (record) => {
         const items = [
             {
@@ -332,6 +356,9 @@ export const URLS = {
         data: {
           datasets: () => process.env.NEXT_PUBLIC_DATASET_URL,
           uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL
+        },
+        bulk: {
+          submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL
         },
         main: () => process.env.NEXT_PUBLIC_INGEST_BASE,
         view: (uuid, entity = 'dataset') => {

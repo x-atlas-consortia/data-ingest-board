@@ -1,15 +1,18 @@
-import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
-import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
+import {Dropdown, Menu, Modal, Popover, Space, Table, Tooltip} from "antd";
+import {DownloadOutlined, ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
+import {callService, ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
+    const [checkedRows, setCheckedRows] = useState([])
+    const [checkedModifiedData, setCheckedModifiedData] = useState([])
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -19,6 +22,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
+    const [modalClassName, setModalClassName] = useState('')
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
@@ -303,6 +307,67 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
+    const rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            if (!selectedRows.length) {
+                setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
+            } else {
+                setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
+            }
+            setCheckedRows(selectedRows)
+            setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selectedRows))))
+        },
+        getCheckboxProps: (record) => ({
+            disabled: ['Error', 'Invalid'].indexOf(record.status) !== -1,
+        }),
+    };
+
+    const handleMenuClick = (e) => {
+        if (e.key === '1') {
+            document.querySelector('.ic--download').click()
+        }
+
+        if (e.key === '2') {
+            callService(URLS.ingest.bulk.submit(), checkedRows.map(item => item.uuid)).then((res) => {
+                setModalOpen(true)
+                setModalClassName('alert alert-success')
+                const isOk =  eq(res.statusText, 'ok')
+                if (!isOk) {
+                    setModalClassName('alert alert-danger')
+                }
+                const preTitle = isOk ? 'SUCCESS' : 'FAIL'
+                setModalBody(<div>
+                    <center>
+                        <h5>
+                            {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
+                            {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
+                        </h5>
+                    </center>
+                    <div>
+                        <p className={'mt-4'}>RESPONSE:</p>
+                        <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{res.data}</code></div>
+                    </div>
+
+                </div>)
+            })
+
+        }
+    }
+
+    const items = TABLE.bulkSelectionDropdown([
+        {
+            label: 'Submit For Processing',
+            key: '2',
+            icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
+            disabled: disabledMenuItems['bulkSubmit']
+        }
+    ]);
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
+
     return (
         <div>
             {loading ? (
@@ -311,12 +376,17 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            <span style={{ marginRight: '1rem' }}>
-                                {countFilteredRecords(modifiedData, filters).length} Selected
+                            <Space wrap>
+                                <Dropdown.Button menu={menuProps}>
+                                    {checkedRows.length ? 'Selected': 'Showing'} {checkedRows.length ? checkedRows.length : countFilteredRecords(modifiedData, filters).length} Dataset(s)
+                                </Dropdown.Button>
+                            </Space>
+
+                            <span style={{opacity: 0}}>
+                                <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
+                                    <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
+                                </CSVLink>
                             </span>
-                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
-                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-                            </CSVLink>
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -329,9 +399,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
+                           rowSelection={{
+                               type: 'checkbox',
+                               ...rowSelection,
+                           }}
                     />
 
                     <Modal
+                        className={modalClassName}
                         width={700}
                         cancelButtonProps={{ style: { display: 'none' } }}
                         closable={false}
