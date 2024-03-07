@@ -168,7 +168,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                             <span className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></span>
                         </Dropdown>
                     </h5>
-                    <CSVLink data={getCSVData()} filename="derived-datasets-data.csv" className="ic--download">
+                    <CSVLink data={getCSVData()} filename="processed-datasets-data.csv" className="ic--download">
                          <DownloadOutlined title="Export Data as CSV" style={{ fontSize: '24px' }}/>
                     </CSVLink>
                     <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
