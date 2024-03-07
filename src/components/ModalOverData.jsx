@@ -15,6 +15,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
     let dataIndices = {}
     let revisionsDict = {}
     let colorIndex = 0
+    let levelColorIndex = THEME.colors().length - 1
     if (!content.length || !Array.isArray(content)) {
         return <span>0</span>
     }
@@ -38,11 +39,12 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                 dataIndex: 'revision_number',
                 key: 'revision_number',
                 showSorterTooltip: {
-                    title: <span>Greyed revisions have no associated revisions. All other revisions of the same color belong to the same revision group.</span>
+                    title: <span>Greyed revisions have no associated revisions. All other revisions of the same color belong to the same revision group. Multiple revisions of the same level are marked with the same border color.</span>
                 },
                 sorter: (a,b) => a.revision_number - b.revision_number,
                 render: (revision, record) => {
-                    let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white'}
+                    let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white',
+                        border: 'solid 2px transparent', borderColor: record.border_color?.color || 'transparent'}
                     return <span className='revision-number'
                                  style={style}>
                                 {revision ? `Version ${revision}`: ''}
@@ -61,27 +63,45 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                     [`primary_dataset_${TABLE.cols.f('id')}`]: args.record[TABLE.cols.f('id')],
                     status: d.status,
                     created_timestamp: toDateString(d.created_timestamp),
-                    revision_number: d.revision_number,
                 }
             )
         }
         return results
     }
 
-    const getGroupColor = () => {
+    const randomColor = () => {
+        let col;
+        do {
+            col = THEME.randomColor()
+            if (!usedColors[col.color]) {
+                usedColors[col.color] = true;
+            }
+        } while (!usedColors[col.color])
+        return col;
+    }
+
+    const getLevelColor = () => {
+        let levelColor;
+        if (levelColorIndex > -1) {
+            let color = THEME.colors()[levelColorIndex]
+            let light = levelColorIndex < THEME.lightColors().length
+            levelColor = {color, light}
+            levelColorIndex--;
+        } else {
+            levelColor = randomColor()
+        }
+        return levelColor;
+    }
+
+    const getGroupColor = (fromRandom = false) => {
         let groupColor;
-        if (colorIndex < THEME.colors().length) {
+        if (colorIndex < THEME.colors().length && !fromRandom) {
             let color = THEME.colors()[colorIndex]
             let light = colorIndex < THEME.lightColors().length
             groupColor = {color, light}
             colorIndex++;
         } else {
-            do {
-                groupColor = THEME.randomColor()
-                if (!usedColors[groupColor.color]) {
-                    usedColors[groupColor.color] = true;
-                }
-            } while (!usedColors[groupColor.color])
+            groupColor = randomColor()
         }
         return groupColor;
     }
@@ -113,11 +133,15 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
         }
 
         for (let r of revisions) {
+            let levelColor = getLevelColor()
             for (let m of r.uuids) {
                 if (!revisionsDict[m]) {
                     revisionsDict[m] = r.revision_number
                     content[dataIndices[m]]['revision_number'] = r.revision_number
                     content[dataIndices[m]]['group_color'] = groupColor
+                    if (r.uuids.length > 1) {
+                        content[dataIndices[m]]['border_color'] = levelColor
+                    }
                 }
             }
         }
