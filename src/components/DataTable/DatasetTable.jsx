@@ -23,6 +23,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
     const [modalClassName, setModalClassName] = useState('')
+    const [modalWidth, setModalWidth] = useState(700)
+
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
@@ -87,20 +89,20 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
         },
         {
-            title: "Derived Datasets",
+            title: "Processed Datasets",
             width: 180,
-            dataIndex: "descendant_datasets",
+            dataIndex: "processed_datasets",
             align: "left",
-            defaultSortOrder: defaultSortOrder["descendant_datasets"] || null,
+            defaultSortOrder: defaultSortOrder["processed_datasets"] || null,
             sorter: (a,b) => {
-                let a1 = eq(typeof a.descendant_datasets, 'string') ? 0 : a.descendant_datasets.length
-                let b1 = eq(typeof b.descendant_datasets, 'string') ? 0 : b.descendant_datasets.length
+                let a1 = Array.isArray(a.processed_datasets) ? a.processed_datasets.length : 0
+                let b1 = Array.isArray(b.processed_datasets) ? b.processed_datasets.length : 0
                 return a1 - b1
             },
-            defaultFilteredValue: defaultFilteredValue["descendant_datasets"] || null,
+            defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
             ellipsis: true,
-            render: (descendant_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={eq(typeof descendant_datasets, 'string') ? [] : descendant_datasets} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+            render: (processed_datasets, record) => {
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
             }
         },
         {
@@ -124,7 +126,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
             }
         },
         {
@@ -197,7 +199,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
-            render: (date, record) => <span>{(new Date(`${date}`).toLocaleString())}</span>
+            render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
         },
         {
             title: "Has Contacts",
@@ -407,7 +409,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
                     <Modal
                         className={modalClassName}
-                        width={700}
+                        width={modalWidth}
                         cancelButtonProps={{ style: { display: 'none' } }}
                         closable={false}
                         open={modalOpen}
