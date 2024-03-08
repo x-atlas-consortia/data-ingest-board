@@ -3,8 +3,12 @@ import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
 import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, TABLE, THEME, URLS} from "../../lib/helper";
+import {eq} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
+import TABLE from "../../lib/helpers/table";
+import URLS from "../../lib/helpers/urls";
+import ENVS from "../../lib/helpers/envs";
+import THEME from "../../lib/helpers/theme";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])

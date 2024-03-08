@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, eq, getHeadersWith, TABLE, URLS} from "../../lib/helper";
+import {eq, getHeadersWith} from "../../lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
+import ENVS from "../../lib/helpers/envs";
+import URLS from "../../lib/helpers/urls";
+import TABLE from "../../lib/helpers/table";
 
 
 const DataTable = (props) => {

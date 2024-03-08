@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import axios from "axios";
-import {ENVS, getRequestOptions} from "../lib/helper";
+import {getRequestOptions} from "../lib/helpers/general";
+import ENVS from "../lib/helpers/envs";
 
 function useContent() {
     const [messages, setMessages] = useState({})

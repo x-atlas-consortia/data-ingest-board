@@ -1,8 +1,11 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {deleteFromLocalStorage, ENVS, eq, getHeadersWith, parseJSON, storageKey, THEME, URLS} from "../lib/helper";
+import {deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
+import URLS from "../lib/helpers/urls";
+import ENVS from "../lib/helpers/envs";
+import THEME from "../lib/helpers/theme";
 
 const AppContext = createContext()
 

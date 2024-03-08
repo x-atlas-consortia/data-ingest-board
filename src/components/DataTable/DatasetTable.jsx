@@ -3,7 +3,10 @@ import {DownloadOutlined, ExportOutlined, ThunderboltOutlined, CheckCircleOutlin
 import {CSVLink} from "react-csv";
 import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {callService, ENVS, eq, getUBKGName, TABLE, THEME, URLS} from "../../lib/helper";
+import ENVS from "../../lib/helpers/envs";
+import TABLE from "../../lib/helpers/table";
+import URLS from "../../lib/helpers/urls";
+import {callService, eq, getUBKGName} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 
