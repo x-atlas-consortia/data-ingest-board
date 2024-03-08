@@ -35,8 +35,12 @@ function Search({ useDatasetApi, callbacks, originalResponse }) {
             callbacks[`${cb}`](originalResponse[entity.toLowerCase()])
             return
         }
-        prepareIndices(originalResponse.datasets.data, 'datasets')
-        prepareIndices(originalResponse.uploads.data, 'uploads')
+        if (originalResponse.datasets) {
+            prepareIndices(originalResponse.datasets.data, 'datasets')
+        }
+        if (originalResponse.uploads) {
+            prepareIndices(originalResponse.uploads.data, 'uploads')
+        }
         let found = {}
         let results = []
         let data = dict[entity.toLowerCase()]

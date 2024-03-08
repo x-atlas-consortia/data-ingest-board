@@ -10,6 +10,21 @@ export function eq(s1, s2, insensitive = true) {
     return res
 }
 
+export function toDateString(timestamp) {
+    const date = new Date(timestamp);
+    let options = { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short' }
+    return date.toUTCString()
+}
+
+Object.assign(Array.prototype, {
+    comprises(needle, insensitive = true) {
+        return this.some((i) => eq(i, needle, insensitive))
+    }
+})
+
 String.prototype.format = function() {
     let args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) {
@@ -77,6 +92,7 @@ export const ENVS = {
         return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
     urlFormat: {
+        entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_BASE}${path}`,
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
         ingest: {
             be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
@@ -113,6 +129,54 @@ export const ENVS = {
 
 let THEME_CONFIG
 export const THEME = {
+    colors: () => {
+      return THEME.lightColors().concat(THEME.darkColors())
+    },
+    lightColors: () => {
+        return [
+            '#68bdf6', // light blue
+            '#6dce9e', // green #1
+            '#faafc2', // light pink
+            '#f2baf6', // purple
+            '#ff928c', // light red
+            '#fcea7e', // light yellow
+            '#ffc766', // light orange
+            '#78cecb', // green #2,
+            '#b88cbb', // dark purple
+        ];
+    },
+    darkColors: () => {
+       return [
+           // DARK COLORS
+           '#405f9e', // navy blue
+           '#e84646', // dark red
+           '#fa5f86', // dark pink
+           '#ffab1a', // dark orange
+           '#fcda19', // dark yellow
+           '#c9d96f', // pistacchio
+           '#47991f', // green #3
+           '#ff75ea'  // pink
+       ];
+    },
+    isLightColor: (color) => {
+        color = +("0x" + color.slice(1).replace(
+        color.length < 5 && /./g, '$&$&'));
+
+        let r = color >> 16;
+        let g = color >> 8 & 255;
+        let b = color & 255;
+
+        let hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+        return hsp > 127.5
+    },
+    randomColor: () => {
+        let hexTab = "5555556789ABCDEF";
+        let r = hexTab[ Math.floor( Math.random() * 16) ];
+        let g = hexTab[ Math.floor( Math.random() * 16) ];
+        let b = hexTab[ Math.floor( Math.random() * 16) ];
+        let color = "#" + r + g + b
+        return {color, light: THEME.isLightColor(color)};
+    },
     cssProps: () => {
         const themeConfig = ENVS.theme()
         for (let t in themeConfig.cssProps) {
@@ -223,10 +287,14 @@ export const TABLE = {
     flattenDataForCSV: (data) => {
         return data.map(item => {
             for (const key in item) {
+                if (['last_touch', 'created_timestamp', 'published_timestamp'].comprises(key)) {
+                    item[key] = toDateString(item[key])
+                }
+
+                if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
+                    delete item[key]
+                }
                 if (Array.isArray(item[key])) {
-                    if (eq(key, 'descendant_datasets')) {
-                        item[key] = item[key].map((i) => i[TABLE.cols.f('id')])
-                    }
                     // Convert objects to string representations
                     item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));
 
@@ -327,6 +395,12 @@ export const URLS = {
           let path = process.env.NEXT_PUBLIC_PORTAL_VIEW_PATH.format(entity, uuid)
           return ENVS.urlFormat.portal(path)
       }
+    },
+    entity: {
+       revisions: (uuid) => {
+           let path = process.env.NEXT_PUBLIC_REVISIONS_PATH.format(uuid)
+           return ENVS.urlFormat.entity(path)
+       }
     },
     ingest: {
         data: {
