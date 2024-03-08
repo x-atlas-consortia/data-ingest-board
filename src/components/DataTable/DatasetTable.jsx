@@ -312,20 +312,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
-    const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            if (!selectedRows.length) {
-                setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
-            } else {
-                setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
-            }
-            setCheckedRows(selectedRows)
-            setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selectedRows))))
-        },
-        getCheckboxProps: (record) => ({
-            disabled: ['Error', 'Invalid'].indexOf(record.status) !== -1,
-        }),
-    };
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
@@ -381,17 +368,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            <Space wrap>
-                                <Dropdown.Button menu={menuProps}>
-                                    {checkedRows.length ? 'Selected': 'Showing'} {checkedRows.length ? checkedRows.length : countFilteredRecords(modifiedData, filters).length} Dataset(s)
-                                </Dropdown.Button>
-                            </Space>
-
-                            <span style={{opacity: 0}}>
-                                <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
-                                    <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-                                </CSVLink>
-                            </span>
+                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters})}
+                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}

@@ -1,10 +1,11 @@
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
-import {Dropdown, Tooltip} from "antd";
+import {Dropdown, Space, Tooltip} from "antd";
 import React from "react";
 import {eq, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
+import {CSVLink} from "react-csv";
 
 const TABLE = {
     cols: {
@@ -199,6 +200,36 @@ const TABLE = {
 
                 )
             }
+        }
+    },
+    csvDownloadButton: ({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        return <span style={{opacity: 0}}>
+            <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
+            </CSVLink>
+        </span>
+    },
+    rowSelectionDropdown: ({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
+      return <Space wrap>
+          <Dropdown.Button menu={menuProps}>
+              {checkedRows.length ? 'Selected': 'Showing'} {checkedRows.length ? checkedRows.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
+          </Dropdown.Button>
+      </Space>
+    },
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData, disabledRows = ['Error', 'Invalid']}) => {
+        return {
+            onChange: (selectedRowKeys, selectedRows) => {
+                if (!selectedRows.length) {
+                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
+                } else {
+                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
+                }
+                setCheckedRows(selectedRows)
+                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selectedRows))))
+            },
+            getCheckboxProps: (record) => ({
+                disabled: disabledRows.comprises(record.status),
+            })
         }
     }
 }
