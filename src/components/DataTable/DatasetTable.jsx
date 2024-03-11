@@ -323,10 +323,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
         if (e.key === '2') {
             const headers = getHeadersWith(globusToken)
-            callService(URLS.ingest.bulk.submit(), headers, checkedRows.map(item => item.uuid)).then((res) => {
+            callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
                 setModalOpen(true)
                 setModalClassName('alert alert-success')
-                const isOk =  eq(res.statusText, 'ok')
+                console.log(res)
+                const isOk =  ['accepted', 'ok'].comprises(res.statusText)
                 if (!isOk) {
                     setModalClassName('alert alert-danger')
                 }
