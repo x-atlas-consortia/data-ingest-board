@@ -202,8 +202,14 @@ const TABLE = {
             }
         }
     },
+    handleCSVDownload: () => {
+        const $el = document.querySelector('.js-csvDownload')
+        $el.style.display = 'block'
+        document.querySelector('.ic--download').click()
+        $el.style.display = 'none'
+    },
     csvDownloadButton: ({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
-        return <span style={{opacity: 0}}>
+        return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
             <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
@@ -216,7 +222,7 @@ const TABLE = {
           </Dropdown.Button>
       </Space>
     },
-    rowSelection: ({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData, disabledRows = ['Error', 'Invalid']}) => {
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData, disabledRows = ['Published']}) => {
         return {
             onChange: (selectedRowKeys, selectedRows) => {
                 if (!selectedRows.length) {

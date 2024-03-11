@@ -316,7 +316,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            document.querySelector('.ic--download').click()
+            TABLE.handleCSVDownload()
         }
 
         if (e.key === '2') {
@@ -337,7 +337,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     </center>
                     <div>
                         <p className={'mt-4'}>RESPONSE:</p>
-                        <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{res.data}</code></div>
+                        <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
                     </div>
 
                 </div>)

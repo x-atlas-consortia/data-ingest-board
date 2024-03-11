@@ -201,7 +201,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            document.querySelector('.ic--download').click()
+            TABLE.handleCSVDownload()
         }
     }
 
@@ -222,7 +222,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                         <div className="col-12 col-md-3 count mt-md-3">
                             {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
                             {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
-
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
