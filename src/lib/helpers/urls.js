@@ -28,7 +28,8 @@ const URLS = {
             return ENVS.urlFormat.ingest.fe(path)
         },
         privs: {
-            groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL
+            groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL,
+            admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL
         },
         auth: {
             login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),

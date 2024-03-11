@@ -59,10 +59,11 @@ export const getHeadersWith = (value, key = 'Authorization') => {
     return options
 }
 
-export const callService = async (url, payload = {}, method = 'put') => {
+export const callService = async (url, headers, payload = {}, method = 'put') => {
     try {
         return await axios({
             method: method,
+            headers: headers,
             url: url,
             data: payload
         })

@@ -1,16 +1,18 @@
 import {Dropdown, Menu, Modal, Popover, Space, Table, Tooltip} from "antd";
 import {DownloadOutlined, ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import ENVS from "../../lib/helpers/envs";
 import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
-import {callService, eq, getUBKGName} from "../../lib/helpers/general";
+import {callService, eq, getHeadersWith, getUBKGName} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
+import AppContext from "../../context/AppContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const {globusToken, hasDataAdminPrivs} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedRows, setCheckedRows] = useState([])
@@ -320,7 +322,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
 
         if (e.key === '2') {
-            callService(URLS.ingest.bulk.submit(), checkedRows.map(item => item.uuid)).then((res) => {
+            const headers = getHeadersWith(globusToken)
+            callService(URLS.ingest.bulk.submit(), headers, checkedRows.map(item => item.uuid)).then((res) => {
                 setModalOpen(true)
                 setModalClassName('alert alert-success')
                 const isOk =  eq(res.statusText, 'ok')
@@ -346,14 +349,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
     }
 
-    const items = TABLE.bulkSelectionDropdown([
+    const items = TABLE.bulkSelectionDropdown(hasDataAdminPrivs ? [
         {
             label: 'Submit For Processing',
             key: '2',
             icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
             disabled: disabledMenuItems['bulkSubmit']
         }
-    ]);
+    ] : []);
 
     const menuProps = {
         items,
