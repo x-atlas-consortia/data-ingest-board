@@ -326,7 +326,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
                 setModalOpen(true)
                 setModalClassName('alert alert-success')
-                console.log(res)
                 const isOk =  ['202', '200'].comprises(res.status.toString())
                 if (!isOk) {
                     setModalClassName('alert alert-danger')
