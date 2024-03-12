@@ -16,5 +16,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 20
-    - run: npm install
+    - name: Install dependencies
+      run: npm install
+      working-directory: src
     - run: npm run build
