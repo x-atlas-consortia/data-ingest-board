@@ -19,4 +19,6 @@ jobs:
     - name: Install dependencies
       run: npm install
       working-directory: src
-    - run: npm run build
+    - name: Build Project
+      run: npm run build
+      working-directory: src
