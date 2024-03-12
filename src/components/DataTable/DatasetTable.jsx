@@ -327,7 +327,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 setModalOpen(true)
                 setModalClassName('alert alert-success')
                 console.log(res)
-                const isOk =  ['accepted', 'ok'].comprises(res.statusText)
+                const isOk =  ['202', '200'].comprises(res.status.toString())
                 if (!isOk) {
                     setModalClassName('alert alert-danger')
                 }
