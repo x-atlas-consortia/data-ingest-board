@@ -1,14 +1,22 @@
-import {Button, Dropdown, Menu, Modal, Table, Tooltip} from "antd";
-import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
-import {CSVLink} from "react-csv";
+import {Button, Dropdown, Modal, Table, Tooltip} from "antd";
+import {
+    CaretDownOutlined,
+} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, TABLE, THEME, URLS} from "../../lib/helper";
+import {eq} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
+import TABLE from "../../lib/helpers/table";
+import URLS from "../../lib/helpers/urls";
+import ENVS from "../../lib/helpers/envs";
+import THEME from "../../lib/helpers/theme";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
+    const [checkedRows, setCheckedRows] = useState([])
+    const [checkedModifiedData, setCheckedModifiedData] = useState([])
+    const [disabledMenuItems, setDisabledMenuItems] = useState({})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -17,6 +25,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
+    const [modalClassName, setModalClassName] = useState('')
+
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
@@ -84,7 +94,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         {
             title: TABLE.cols.n('id'),
-            width: 180,
+            width: 190,
             dataIndex: TABLE.cols.f('id'),
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
@@ -110,7 +120,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: "Status",
-            width: '12%',
+            width: '15%',
             dataIndex: "status",
             align: "left",
             defaultSortOrder: defaultSortOrder["status"] || null,
@@ -186,6 +196,22 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
     }
 
+
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
+
+    const handleMenuClick = (e) => {
+        if (e.key === '1') {
+            TABLE.handleCSVDownload()
+        }
+    }
+
+    const items = TABLE.bulkSelectionDropdown();
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
+
     return (
         <div>
             {loading ? (
@@ -194,12 +220,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                                <span style={{ marginRight: '1rem' }}>
-                                    {countFilteredRecords(modifiedData, filters).length} Selected
-                                </span>
-                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="uploads-data.csv" className="ic--download">
-                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px', transition: 'fill 0.3s', fill: '#000000'}}/>
-                            </CSVLink>
+                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
+                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -212,6 +234,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
+                           rowSelection={{
+                               type: 'checkbox',
+                               ...rowSelection,
+                           }}
                     />
                     <Modal
                         cancelButtonProps={{ style: { display: 'none' } }}

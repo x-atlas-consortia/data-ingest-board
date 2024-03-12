@@ -1,15 +1,23 @@
-import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
-import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
+import {Dropdown, Menu, Modal, Popover, Space, Table, Tooltip} from "antd";
+import {DownloadOutlined, ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined} from "@ant-design/icons";
 import {CSVLink} from "react-csv";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, URLS} from "../../lib/helper";
+import ENVS from "../../lib/helpers/envs";
+import TABLE from "../../lib/helpers/table";
+import URLS from "../../lib/helpers/urls";
+import {callService, eq, getHeadersWith, getUBKGName} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
+import AppContext from "../../context/AppContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const {globusToken, hasDataAdminPrivs} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
+    const [checkedRows, setCheckedRows] = useState([])
+    const [checkedModifiedData, setCheckedModifiedData] = useState([])
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -19,7 +27,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
+    const [modalClassName, setModalClassName] = useState('')
     const [modalWidth, setModalWidth] = useState(700)
+
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
@@ -304,6 +314,56 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
+
+    const handleMenuClick = (e) => {
+        if (e.key === '1') {
+            TABLE.handleCSVDownload()
+        }
+
+        if (e.key === '2') {
+            const headers = getHeadersWith(globusToken)
+            callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
+                setModalOpen(true)
+                setModalClassName('alert alert-success')
+                console.log(res)
+                const isOk =  ['accepted', 'ok'].comprises(res.statusText)
+                if (!isOk) {
+                    setModalClassName('alert alert-danger')
+                }
+                const preTitle = isOk ? 'SUCCESS' : 'FAIL'
+                setModalBody(<div>
+                    <center>
+                        <h5>
+                            {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
+                            {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
+                        </h5>
+                    </center>
+                    <div>
+                        <p className={'mt-4'}>RESPONSE:</p>
+                        <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
+                    </div>
+
+                </div>)
+            })
+
+        }
+    }
+
+    const items = TABLE.bulkSelectionDropdown(hasDataAdminPrivs ? [
+        {
+            label: 'Submit For Processing',
+            key: '2',
+            icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
+            disabled: disabledMenuItems['bulkSubmit']
+        }
+    ] : []);
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
+
     return (
         <div>
             {loading ? (
@@ -312,12 +372,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            <span style={{ marginRight: '1rem' }}>
-                                {countFilteredRecords(modifiedData, filters).length} Selected
-                            </span>
-                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
-                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-                            </CSVLink>
+                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters})}
+                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -330,9 +386,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
+                           rowSelection={{
+                               type: 'checkbox',
+                               ...rowSelection,
+                           }}
                     />
 
                     <Modal
+                        className={modalClassName}
                         width={modalWidth}
                         cancelButtonProps={{ style: { display: 'none' } }}
                         closable={false}

@@ -1,8 +1,11 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {deleteFromLocalStorage, ENVS, eq, getHeadersWith, parseJSON, storageKey, THEME, URLS} from "../lib/helper";
+import {deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
+import URLS from "../lib/helpers/urls";
+import ENVS from "../lib/helpers/envs";
+import THEME from "../lib/helpers/theme";
 
 const AppContext = createContext()
 
@@ -16,6 +19,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const [globusInfo, setGlobusInfo] = useState(null);
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
+    const [hasDataAdminPrivs, setHasDataAdminPrivs] = useState(false)
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
 
@@ -70,6 +74,16 @@ export const AppProvider = ({ children, messages, banners }) => {
         setUnauthorized(!hasRead)
     }
 
+    const checkInAdminGroup = (token) => {
+        axios.get(URLS.ingest.privs.admin(), getHeadersWith(token))
+            .then( (response) => {
+                setHasDataAdminPrivs(response.data.has_data_admin_privs)
+            }).catch((error) => {
+            setHasDataAdminPrivs(false)
+            console.error(error)
+        })
+    }
+
     const checkToken = (token, authorized) => {
         if (!token) {
             setIsAuthenticated(false)
@@ -79,6 +93,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 setGlobusToken(token)
                 setIsAuthenticated(authorized)
                 verifyInReadGroup(response.data)
+                checkInAdminGroup(token)
                 setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
@@ -147,6 +162,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         isAuthenticated,
         unauthorized,
         banners,
+        hasDataAdminPrivs,
         handleLogin, handleLogout, getUserEmail,
         t,
         revisionsData

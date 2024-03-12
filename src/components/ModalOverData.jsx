@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types'
 import {Dropdown, Popover, Table} from "antd";
-import {ENVS, getHeadersWith, TABLE, THEME, toDateString, URLS} from "../lib/helper";
+import {getHeadersWith, toDateString} from "../lib/helpers/general";
+import THEME from "../lib/helpers/theme";
+import TABLE from "../lib/helpers/table";
+import URLS from "../lib/helpers/urls";
 import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
