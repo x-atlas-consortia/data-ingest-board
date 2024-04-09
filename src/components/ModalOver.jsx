@@ -9,7 +9,9 @@ function ModalOver({content, displayMax, setModalBody, setModalOpen, setModalWid
     return (
         <>
             <Popover content={'Click to view full task content.'} placement={'left'}><span onClick={() => {
-                setModalWidth(700)
+                if (setModalWidth) {
+                    setModalWidth(700)
+                }
                 setModalBody(content)
                 setModalOpen(true)
             }
