@@ -11,7 +11,8 @@ import {CSVLink} from "react-csv";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
-function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth, popoverText, args}) {
+function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth,
+                           setModalCancelCSS, setModalClassName, popoverText, args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     let usedColors = {}
@@ -160,6 +161,8 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
         <>
             <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={async ()  => {
                 setModalWidth(800)
+                setModalCancelCSS('none')
+                setModalClassName('')
                 setModalBody(<Spinner />)
                 setModalOpen(true)
                 buildIndices()

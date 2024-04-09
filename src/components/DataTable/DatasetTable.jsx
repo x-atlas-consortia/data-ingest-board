@@ -29,6 +29,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [modalBody, setModalBody] = useState(null)
     const [modalClassName, setModalClassName] = useState('')
     const [modalWidth, setModalWidth] = useState(700)
+    const [modalCancelCSS, setModalCancelCSS] = useState('none')
+    const [modalOkCallback, setModalOkCallback] = useState(null)
 
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
@@ -107,7 +109,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
+                                      setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} setModalClassName={setModalClassName}
+                                      setModalCancelCSS={setModalCancelCSS} />
             }
         },
         {
@@ -131,7 +135,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
+                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalClassName={setModalClassName}
+                                  setModalWidth={setModalWidth} setModalCancelCSS={setModalCancelCSS} />
             }
         },
         {
@@ -316,36 +321,67 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
 
+    const confirmBulkProcess = () => {
+        const headers = getHeadersWith(globusToken)
+        callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
+            setModalOpen(true)
+            setModalOkCallback(null)
+            setModalCancelCSS('none')
+            setModalClassName('alert alert-success')
+            const isOk =  ['202', '200'].comprises(res.status.toString())
+            if (!isOk) {
+                setModalClassName('alert alert-danger')
+            }
+            const preTitle = isOk ? 'SUCCESS' : 'FAIL'
+            setModalBody(<div>
+                <center>
+                    <h5>
+                        {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
+                        {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
+                    </h5>
+                </center>
+                <div>
+                    <p className={'mt-4'}>RESPONSE:</p>
+                    <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
+                </div>
+
+            </div>)
+        })
+    }
+
+    const showConfirmModalOfSelectedDatasets  = () => {
+        let columns = [
+            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id,
+            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).status,
+        ]
+        setModalBody(<div>
+            <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
+            <p>{checkedRows.length} Datasets selected</p>
+            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={checkedRows} columns={columns} />
+        </div>)
+        setModalClassName('')
+        setModalOkCallback('confirmBulkProcess')
+        setModalCancelCSS('initial')
+        setModalOpen(true)
+    }
+
     const handleMenuClick = (e) => {
         if (e.key === '1') {
             TABLE.handleCSVDownload()
         }
 
         if (e.key === '2') {
-            const headers = getHeadersWith(globusToken)
-            callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
-                setModalOpen(true)
-                setModalClassName('alert alert-success')
-                const isOk =  ['202', '200'].comprises(res.status.toString())
-                if (!isOk) {
-                    setModalClassName('alert alert-danger')
-                }
-                const preTitle = isOk ? 'SUCCESS' : 'FAIL'
-                setModalBody(<div>
-                    <center>
-                        <h5>
-                            {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
-                            {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
-                        </h5>
-                    </center>
-                    <div>
-                        <p className={'mt-4'}>RESPONSE:</p>
-                        <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
-                    </div>
+            showConfirmModalOfSelectedDatasets()
+        }
+    }
 
-                </div>)
-            })
-
+    const handleModalOk = () => {
+        if (modalOkCallback) {
+            if (eq(modalOkCallback, 'confirmBulkProcess')) {
+                confirmBulkProcess()
+            }
+        } else {
+            setModalOpen(false)
         }
     }
 
@@ -362,6 +398,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         items,
         onClick: handleMenuClick,
     };
+
+    const handleTableFilters = (pagination, _filters, sorter, {}) => {
+        setCheckedRows([])
+        handleTableChange(pagination, _filters, sorter, {})
+    }
 
     return (
         <div>
@@ -383,7 +424,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
+                           onChange={handleTableFilters}
                            rowKey={TABLE.cols.f('id')}
                            rowSelection={{
                                type: 'checkbox',
@@ -394,11 +435,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     <Modal
                         className={modalClassName}
                         width={modalWidth}
-                        cancelButtonProps={{ style: { display: 'none' } }}
+                        cancelButtonProps={{ style: { display: modalCancelCSS } }}
                         closable={false}
                         open={modalOpen}
                         onCancel={()=> {setModalOpen(false)}}
-                        onOk={() => {setModalOpen(false)}}
+                        onOk={handleModalOk}
                     >
                         {modalBody}
                     </Modal>

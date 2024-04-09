@@ -212,6 +212,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         onClick: handleMenuClick,
     };
 
+    const handleTableFilters = (pagination, _filters, sorter, {}) => {
+        setCheckedRows([])
+        handleTableChange(pagination, _filters, sorter, {})
+    }
+
     return (
         <div>
             {loading ? (
@@ -232,7 +237,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
+                           onChange={handleTableFilters}
                            rowKey={TABLE.cols.f('id')}
                            rowSelection={{
                                type: 'checkbox',
@@ -241,6 +246,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     />
                     <Modal
                         cancelButtonProps={{ style: { display: 'none' } }}
+                        closable={false}
                         open={modalOpen}
                         onCancel={()=> {setModalOpen(false)}}
                         onOk={() => {setModalOpen(false)}}
