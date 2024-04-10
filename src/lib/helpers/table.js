@@ -235,30 +235,43 @@ const TABLE = {
         document.querySelector('.ic--download').click()
         $el.style.display = 'none'
     },
-    csvDownloadButton: ({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+    csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+            <CSVLink data={selectedEntities.current.size ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
         </span>
     },
-    rowSelectionDropdown: ({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
+    rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
       return <Space wrap>
           <Dropdown.Button menu={menuProps}>
-              {checkedRows.length ? 'Selected': 'Showing'} {checkedRows.length ? checkedRows.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
+              {selectedEntities.current.size ? 'Selected': 'Showing'} {selectedEntities.current.size ? selectedEntities.current.size : countFilteredRecords(modifiedData, filters).length} {entity}(s)
           </Dropdown.Button>
       </Space>
     },
-    rowSelection: ({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData, disabledRows = ['Published']}) => {
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
         return {
-            onChange: (selectedRowKeys, selectedRows) => {
+            preserveSelectedRowKeys: true,
+            onSelect: (record, selected, selectedRows, nativeEvent) => {
+                if (!selected) {
+                    selectedEntities.current.forEach(x => x.uuid === record.uuid ? selectedEntities.current.delete(x) : x)
+                }
+            },
+            onSelectAll: (selected, selectedRows, changeRows) => {
+                if (!selected) {
+                    for (let record of changeRows) {
+                        selectedEntities.current.forEach(x => x.uuid === record.uuid ? selectedEntities.current.delete(x) : x)
+                    }
+                }
+            },
+            onChange: (selectedRowKeys, selectedRows, e, a) => {
                 if (!selectedRows.length) {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
                 } else {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
                 }
-                setCheckedRows(selectedRows)
-                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selectedRows))))
+                selectedRows.forEach(item => selectedEntities.current.add(item))
+                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(Array.from(selectedEntities.current)))))
             },
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),

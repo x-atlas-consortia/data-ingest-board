@@ -1,8 +1,5 @@
-import {Button, Dropdown, Modal, Table, Tooltip} from "antd";
-import {
-    CaretDownOutlined,
-} from "@ant-design/icons";
-import React, {useEffect, useState} from "react";
+import {Button,Modal, Table, Tooltip} from "antd";
+import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {eq} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
@@ -10,13 +7,14 @@ import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
 import ENVS from "../../lib/helpers/envs";
 import THEME from "../../lib/helpers/theme";
+import AppContext from "../../context/AppContext";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
-    const [checkedRows, setCheckedRows] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
+    const {selectedEntities} = useContext(AppContext)
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -162,7 +160,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
 
 
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData})
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
@@ -177,11 +175,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         onClick: handleMenuClick,
     };
 
-    const handleTableFilters = (pagination, _filters, sorter, {}) => {
-        setCheckedRows([])
-        handleTableChange(pagination, _filters, sorter, {})
-    }
-
     return (
         <div>
             {loading ? (
@@ -190,8 +183,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
+                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
+                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -202,7 +195,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableFilters}
+                           onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                            rowSelection={{
                                type: 'checkbox',

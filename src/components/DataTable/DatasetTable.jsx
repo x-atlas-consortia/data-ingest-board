@@ -12,10 +12,9 @@ import ModalOverData from "../ModalOverData";
 import AppContext from "../../context/AppContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
-    const [checkedRows, setCheckedRows] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
 
@@ -297,11 +296,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData})
 
     const confirmBulkProcess = () => {
         const headers = getHeadersWith(globusToken)
-        callService(URLS.ingest.bulk.submit(), headers.headers, checkedRows.map(item => item.uuid)).then((res) => {
+        callService(URLS.ingest.bulk.submit(), headers.headers, Array.from(selectedEntities.current).map(item => item.uuid)).then((res) => {
             setModalOpen(true)
             setModalOkCallback(null)
             setModalCancelCSS('none')
@@ -329,14 +328,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     const showConfirmModalOfSelectedDatasets  = () => {
         let columns = [
-            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(),
-            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames),
-            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).status,
+            TABLE.reusableColumns(defaultSortOrder, {}).id(),
+            TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(defaultSortOrder, {}).status,
         ]
         setModalBody(<div>
             <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
-            <p>{checkedRows.length} Datasets selected</p>
-            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={checkedRows} columns={columns} />
+            <p>{selectedEntities.current.size} Datasets selected</p>
+            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={Array.from(selectedEntities.current)} columns={columns} />
         </div>)
         setModalClassName('')
         setModalOkCallback('confirmBulkProcess')
@@ -378,11 +377,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         onClick: handleMenuClick,
     };
 
-    const handleTableFilters = (pagination, _filters, sorter, {}) => {
-        setCheckedRows([])
-        handleTableChange(pagination, _filters, sorter, {})
-    }
-
     return (
         <div>
             {loading ? (
@@ -391,8 +385,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters})}
-                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
+                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
+                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -403,12 +397,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            loading={loading}
                            pagination={{ position: ["topRight", "bottomRight"], current: page, defaultPageSize: pageSize}}
                            scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableFilters}
+                           onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
                            rowSelection={{
                                type: 'checkbox',
                                ...rowSelection,
                            }}
+
                     />
 
                     <Modal
