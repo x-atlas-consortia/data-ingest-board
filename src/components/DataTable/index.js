@@ -174,14 +174,14 @@ const DataTable = (props) => {
     }
 
     const toggleApi = () => {
-        setSelectedEntities(new Set())
+        setSelectedEntities([])
         setUseDatasetApi(!useDatasetApi);
         toggleHistory(useDatasetApi)
         clearBasicFilters()
     };
 
     const clearAll = () => {
-        setSelectedEntities(new Set())
+        setSelectedEntities([])
         toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData);
         clearBasicFilters()

@@ -22,7 +22,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const [hasDataAdminPrivs, setHasDataAdminPrivs] = useState(false)
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
-    const [selectedEntities, setSelectedEntities] = useState(new Set())
+    const [selectedEntities, setSelectedEntities] = useState([])
 
 
     /**

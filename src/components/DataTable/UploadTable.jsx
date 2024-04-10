@@ -15,7 +15,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
     const {selectedEntities, setSelectedEntities} = useContext(AppContext)
-    const [modalRowSelection, setModalRowSelection] = useState([])
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -162,7 +161,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
     }
 
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
