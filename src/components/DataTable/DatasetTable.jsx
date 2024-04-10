@@ -1,6 +1,5 @@
-import {Dropdown, Menu, Modal, Popover, Space, Table, Tooltip} from "antd";
-import {DownloadOutlined, ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined} from "@ant-design/icons";
-import {CSVLink} from "react-csv";
+import {Modal, Table} from "antd";
+import {ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined, CloseOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import ENVS from "../../lib/helpers/envs";
@@ -12,11 +11,12 @@ import ModalOverData from "../ModalOverData";
 import AppContext from "../../context/AppContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
+    const [modalRowSelection, setModalRowSelection] = useState([])
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -28,8 +28,15 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [modalBody, setModalBody] = useState(null)
     const [modalClassName, setModalClassName] = useState('')
     const [modalWidth, setModalWidth] = useState(700)
+    const [modalKey, setModalKey] = useState(null)
     const [modalCancelCSS, setModalCancelCSS] = useState('none')
     const [modalOkCallback, setModalOkCallback] = useState(null)
+
+    useEffect(() => {
+        if (modalOpen && modalKey === 'bulkProcess') {
+            showConfirmModalOfSelectedDatasets()
+        }
+    }, [modalRowSelection])
 
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
@@ -296,11 +303,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection})
 
     const confirmBulkProcess = () => {
         const headers = getHeadersWith(globusToken)
-        callService(URLS.ingest.bulk.submit(), headers.headers, Array.from(selectedEntities.current).map(item => item.uuid)).then((res) => {
+        callService(URLS.ingest.bulk.submit(), headers.headers, Array.from(selectedEntities).map(item => item.uuid)).then((res) => {
             setModalOpen(true)
             setModalOkCallback(null)
             setModalCancelCSS('none')
@@ -325,17 +332,27 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             </div>)
         })
     }
+    const handleRemove = (record) => {
+        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setModalRowSelection)
+    }
 
     const showConfirmModalOfSelectedDatasets  = () => {
         let columns = [
             TABLE.reusableColumns(defaultSortOrder, {}).id(),
             TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
             TABLE.reusableColumns(defaultSortOrder, {}).status,
+            {
+                title: 'Delete',
+                width: 100,
+                render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
+            },
         ]
+        setModalKey('bulkProcess')
+        setModalWidth(1000)
         setModalBody(<div>
             <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
-            <p>{selectedEntities.current.size} Datasets selected</p>
-            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={Array.from(selectedEntities.current)} columns={columns} />
+            <p>{modalRowSelection.length} Datasets selected</p>
+            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={modalRowSelection} columns={columns} />
         </div>)
         setModalClassName('')
         setModalOkCallback('confirmBulkProcess')

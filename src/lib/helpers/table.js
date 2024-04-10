@@ -155,6 +155,13 @@ const TABLE = {
 
         return items
     },
+    removeFromSelection: (record, selectedEntities, setSelectedEntities, setModalRowSelection) => {
+        let selected = selectedEntities
+        selected.forEach(x => x.uuid === record.uuid ? selected.delete(x) : x)
+        setSelectedEntities(selected)
+        console.log('REM', Array.from(selected))
+        setModalRowSelection(Array.from(selected))
+    },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
         return {
             id: (renderDropdownContent) => ({
@@ -237,7 +244,7 @@ const TABLE = {
     },
     csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={selectedEntities.current.size ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+            <CSVLink data={selectedEntities.size ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
         </span>
@@ -245,22 +252,28 @@ const TABLE = {
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
       return <Space wrap>
           <Dropdown.Button menu={menuProps}>
-              {selectedEntities.current.size ? 'Selected': 'Showing'} {selectedEntities.current.size ? selectedEntities.current.size : countFilteredRecords(modifiedData, filters).length} {entity}(s)
+              {selectedEntities.size ? 'Selected': 'Showing'} {selectedEntities.size ? selectedEntities.size : countFilteredRecords(modifiedData, filters).length} {entity}(s)
           </Dropdown.Button>
       </Space>
     },
-    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
+    getSelectedRows: (selectedEntities) => {
+        const r = Array.from(selectedEntities)
+        const selectedRowKeys = r.map((item) => item[TABLE.cols.f('id')])
+        console.log('SSO', selectedRowKeys)
+        return selectedRowKeys
+    },
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection, disabledRows = ['Published']}) => {
         return {
-            preserveSelectedRowKeys: true,
+            selectedRowKeys: TABLE.getSelectedRows(selectedEntities),
             onSelect: (record, selected, selectedRows, nativeEvent) => {
                 if (!selected) {
-                    selectedEntities.current.forEach(x => x.uuid === record.uuid ? selectedEntities.current.delete(x) : x)
+                    TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setModalRowSelection)
                 }
             },
             onSelectAll: (selected, selectedRows, changeRows) => {
                 if (!selected) {
                     for (let record of changeRows) {
-                        selectedEntities.current.forEach(x => x.uuid === record.uuid ? selectedEntities.current.delete(x) : x)
+                        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setModalRowSelection)
                     }
                 }
             },
@@ -270,8 +283,11 @@ const TABLE = {
                 } else {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
                 }
-                selectedRows.forEach(item => selectedEntities.current.add(item))
-                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(Array.from(selectedEntities.current)))))
+                let _selectedEntities = selectedEntities
+                selectedRows.forEach(item => _selectedEntities.add(item))
+                setSelectedEntities(_selectedEntities)
+                setModalRowSelection(Array.from(_selectedEntities))
+                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(Array.from(_selectedEntities)))))
             },
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),

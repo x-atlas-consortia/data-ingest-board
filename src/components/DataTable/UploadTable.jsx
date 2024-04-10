@@ -14,7 +14,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities} = useContext(AppContext)
+    const {selectedEntities, setSelectedEntities} = useContext(AppContext)
+    const [modalRowSelection, setModalRowSelection] = useState([])
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -160,7 +161,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
 
 
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setCheckedModifiedData})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection})
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
