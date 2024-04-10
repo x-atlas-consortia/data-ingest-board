@@ -23,17 +23,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
-
-    const [modalOpen, setModalOpen] = useState(false)
-    const [modalBody, setModalBody] = useState(null)
-    const [modalClassName, setModalClassName] = useState('')
-    const [modalWidth, setModalWidth] = useState(700)
-    const [modalKey, setModalKey] = useState(null)
-    const [modalCancelCSS, setModalCancelCSS] = useState('none')
-    const [modalOkCallback, setModalOkCallback] = useState(null)
+    const [modal, setModal] = useState({cancelCSS: 'none', okText: 'OK'})
 
     useEffect(() => {
-        if (modalOpen && modalKey === 'bulkProcess') {
+        if (modal.open && eq(modal.key, 'bulkProcess')) {
             showConfirmModalOfSelectedDatasets()
         }
     }, [modalRowSelection])
@@ -105,8 +98,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             ellipsis: true,
             render: (processed_datasets, record) => {
                 return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
-                                      setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} setModalClassName={setModalClassName}
-                                      setModalCancelCSS={setModalCancelCSS} />
+                                      modal={modal} setModal={setModal} />
             }
         },
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
@@ -119,8 +111,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalClassName={setModalClassName}
-                                  setModalWidth={setModalWidth} setModalCancelCSS={setModalCancelCSS} />
+                return <ModalOver content={task} modal={modal} setModal={setModal} />
             }
         },
         {
@@ -308,16 +299,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const confirmBulkProcess = () => {
         const headers = getHeadersWith(globusToken)
         callService(URLS.ingest.bulk.submit(), headers.headers, Array.from(selectedEntities).map(item => item.uuid)).then((res) => {
-            setModalOpen(true)
-            setModalOkCallback(null)
-            setModalCancelCSS('none')
-            setModalClassName('alert alert-success')
+            let className = 'alert alert-success'
             const isOk =  ['202', '200'].comprises(res.status.toString())
             if (!isOk) {
-                setModalClassName('alert alert-danger')
+                className = 'alert alert-danger'
             }
             const preTitle = isOk ? 'SUCCESS' : 'FAIL'
-            setModalBody(<div>
+            const modalBody = (<div>
                 <center>
                     <h5>
                         {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
@@ -330,6 +318,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 </div>
 
             </div>)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
     const handleRemove = (record) => {
@@ -347,17 +336,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
             },
         ]
-        setModalKey('bulkProcess')
-        setModalWidth(1000)
-        setModalBody(<div>
+
+        const modalBody = (<div>
             <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
             <p>{modalRowSelection.length} Datasets selected</p>
             <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={modalRowSelection} columns={columns} />
         </div>)
-        setModalClassName('')
-        setModalOkCallback('confirmBulkProcess')
-        setModalCancelCSS('initial')
-        setModalOpen(true)
+
+        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess', width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody})
     }
 
     const handleMenuClick = (e) => {
@@ -370,13 +356,19 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
     }
 
+    const closeModal = () => {
+        setModal({...modal, okText: 'OK', open: false})
+    }
+
     const handleModalOk = () => {
-        if (modalOkCallback) {
-            if (eq(modalOkCallback, 'confirmBulkProcess')) {
-                confirmBulkProcess()
+        if (modal.okCallback) {
+            if (eq(modal.okCallback, 'confirmBulkProcess')) {
+                if (selectedEntities.size) {
+                    confirmBulkProcess()
+                }
             }
         } else {
-            setModalOpen(false)
+            closeModal()
         }
     }
 
@@ -424,15 +416,16 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                     />
 
                     <Modal
-                        className={modalClassName}
-                        width={modalWidth}
-                        cancelButtonProps={{ style: { display: modalCancelCSS } }}
+                        className={modal.className}
+                        width={modal.width}
+                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
                         closable={false}
-                        open={modalOpen}
-                        onCancel={()=> {setModalOpen(false)}}
+                        open={modal.open}
+                        okText={modal.okText}
+                        onCancel={closeModal}
                         onOk={handleModalOk}
                     >
-                        {modalBody}
+                        {modal.body}
                     </Modal>
                 </>
             )}

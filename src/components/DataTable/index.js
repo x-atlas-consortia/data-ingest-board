@@ -28,7 +28,7 @@ const DataTable = (props) => {
     const [filters, setFilters] = useState(props.tableFilters);
     const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
-    const {selectedEntities} = useContext(AppContext)
+    const {setSelectedEntities} = useContext(AppContext)
 
     useEffect(() => {
         loadData();
@@ -174,13 +174,14 @@ const DataTable = (props) => {
     }
 
     const toggleApi = () => {
+        setSelectedEntities(new Set())
         setUseDatasetApi(!useDatasetApi);
         toggleHistory(useDatasetApi)
         clearBasicFilters()
     };
 
     const clearAll = () => {
-        selectedEntities.current = new Set()
+        setSelectedEntities(new Set())
         toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData);
         clearBasicFilters()

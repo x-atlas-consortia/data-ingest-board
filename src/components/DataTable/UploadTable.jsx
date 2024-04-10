@@ -22,6 +22,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
+    const [modal, setModal] = useState({cancelCSS: 'none'})
+
     const [modalOpen, setModalOpen] = useState(false)
     const [modalBody, setModalBody] = useState(null)
     const [modalClassName, setModalClassName] = useState('')
@@ -92,7 +94,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     };
     const uploadColumns = [
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(renderDropdownContent),
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames),
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames, '25%'),
         {
             title: "Status",
             width: '15%',
@@ -131,7 +133,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+                return <ModalOver content={task} modal={modal} setModal={setModal} />
             }
         },
         {
@@ -160,7 +162,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
     }
 
-
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection})
 
     const handleMenuClick = (e) => {
@@ -175,6 +176,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         items,
         onClick: handleMenuClick,
     };
+    const closeModal = () => {
+        setModal({...modal, open: false})
+    }
 
     return (
         <div>
@@ -204,13 +208,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            }}
                     />
                     <Modal
-                        cancelButtonProps={{ style: { display: 'none' } }}
+                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
                         closable={false}
-                        open={modalOpen}
-                        onCancel={()=> {setModalOpen(false)}}
-                        onOk={() => {setModalOpen(false)}}
+                        open={modal.open}
+                        onCancel={closeModal}
+                        onOk={closeModal}
                     >
-                        {modalBody}
+                        {modal.body}
                     </Modal>
                 </>
             )}

@@ -159,7 +159,6 @@ const TABLE = {
         let selected = selectedEntities
         selected.forEach(x => x.uuid === record.uuid ? selected.delete(x) : x)
         setSelectedEntities(selected)
-        console.log('REM', Array.from(selected))
         setModalRowSelection(Array.from(selected))
     },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
@@ -181,9 +180,9 @@ const TABLE = {
                     )
                 }
             }),
-            groupName: (uniqueGroupNames) => ({
+            groupName: (uniqueGroupNames, width) => ({
                 title: "Group Name",
-                width: 300,
+                width: width || 300,
                 dataIndex: "group_name",
                 align: "left",
                 defaultSortOrder: defaultSortOrder["group_name"] || null,
@@ -243,8 +242,9 @@ const TABLE = {
         $el.style.display = 'none'
     },
     csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        console.log('CSV', checkedModifiedData.length)
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={selectedEntities.size ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+            <CSVLink data={selectedEntities.size ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
         </span>
@@ -258,9 +258,7 @@ const TABLE = {
     },
     getSelectedRows: (selectedEntities) => {
         const r = Array.from(selectedEntities)
-        const selectedRowKeys = r.map((item) => item[TABLE.cols.f('id')])
-        console.log('SSO', selectedRowKeys)
-        return selectedRowKeys
+        return r.map((item) => item[TABLE.cols.f('id')])
     },
     rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, setModalRowSelection, disabledRows = ['Published']}) => {
         return {
