@@ -23,10 +23,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const [modal, setModal] = useState({cancelCSS: 'none'})
 
-    const [modalOpen, setModalOpen] = useState(false)
-    const [modalBody, setModalBody] = useState(null)
-    const [modalClassName, setModalClassName] = useState('')
-
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
