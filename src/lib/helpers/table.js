@@ -157,7 +157,7 @@ const TABLE = {
     },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
         return {
-            id: {
+            id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),
                 width: 190,
                 dataIndex: TABLE.cols.f('id'),
@@ -165,12 +165,39 @@ const TABLE = {
                 defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
                 sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
                 ellipsis: true,
-                render: (id, record) => (
-                    <Dropdown menu={{items: TABLE.renderDropdownContent(record)}} trigger={['click']}>
-                        <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
-                    </Dropdown>
-                )
-            },
+                render: (id, record) => {
+                    const dropdownMethod = renderDropdownContent || TABLE.renderDropdownContent
+                    return (
+                        <Dropdown menu={{items: dropdownMethod(record)}} trigger={['click']}>
+                            <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                        </Dropdown>
+                    )
+                }
+            }),
+            groupName: (uniqueGroupNames) => ({
+                title: "Group Name",
+                width: 300,
+                dataIndex: "group_name",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["group_name"] || null,
+                sorter: (a,b) => a.group_name.localeCompare(b.group_name),
+                defaultFilteredValue: defaultFilteredValue["group_name"] || null,
+                filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+                onFilter: (value, record) => eq(record.group_name, value),
+                ellipsis: true,
+            }),
+            assignedToGroupName: (uniqueAssignedToGroupNames) =>({
+                title: "Assigned To Group Name",
+                width: 300,
+                dataIndex: "assigned_to_group_name",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+                sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+                defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+                filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+                onFilter: (value, record) => eq(record.assigned_to_group_name, value),
+                ellipsis: true,
+            }),
             status: {
                 title: "Status",
                 width: 150,

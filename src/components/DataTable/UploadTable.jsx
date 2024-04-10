@@ -92,32 +92,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return items
     };
     const uploadColumns = [
-        {
-            title: TABLE.cols.n('id'),
-            width: 190,
-            dataIndex: TABLE.cols.f('id'),
-            align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
-            ellipsis: true,
-            render: (id, record) => (
-                <Dropdown menu={{items: renderDropdownContent(record)}} trigger={['click']}>
-                    <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
-                </Dropdown>
-            )
-        },
-        {
-            title: "Group Name",
-            width: '25%',
-            dataIndex: "group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["group_name"] || null,
-            sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-            defaultFilteredValue: defaultFilteredValue["group_name"] || null,
-            filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(renderDropdownContent),
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames),
         {
             title: "Status",
             width: '15%',
@@ -146,18 +122,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 </Tooltip>
             )
         },
-        {
-            title: "Assigned To Group Name",
-            width: 300,
-            dataIndex: "assigned_to_group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
-            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
-            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
-            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.assigned_to_group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
             width: 200,
