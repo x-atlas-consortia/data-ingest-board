@@ -155,10 +155,6 @@ const TABLE = {
 
         return items
     },
-    removeFromSelection: (record, selectedEntities, setSelectedEntities) => {
-        let selected = selectedEntities.filter(x => x.uuid !== record.uuid)
-        setSelectedEntities(selected)
-    },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
         return {
             id: (renderDropdownContent) => ({
@@ -256,36 +252,54 @@ const TABLE = {
     getSelectedRows: (selectedEntities) => {
         return selectedEntities.map((item) => item[TABLE.cols.f('id')])
     },
-    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
+    updateSelectionStates: (selected, setSelectedEntities, setCheckedModifiedData) => {
+        setSelectedEntities(selected)
+        setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selected))))
+    },
+    removeFromSelection: (record, selectedEntities, setSelectedEntities, setCheckedModifiedData, update = true) => {
+        let selected = selectedEntities.filter(x => x.uuid !== record.uuid)
+        if (update) {
+            TABLE.updateSelectionStates(selected, setSelectedEntities, setCheckedModifiedData)
+        }
+        return selected
+    },
+    addToSelection: (record, selectedEntities, setSelectedEntities, setCheckedModifiedData, update = true) => {
+        let selectedRowKeys = TABLE.getSelectedRows(selectedEntities)
+        let selected = Array.from(selectedEntities)
+        if (selectedRowKeys.indexOf(record[TABLE.cols.f('id')]) === -1) {
+            selected.push(record)
+        }
+        if (update) {
+            TABLE.updateSelectionStates(selected, setSelectedEntities, setCheckedModifiedData)
+        }
+        return selected
+    },
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities,
+                       setSelectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
         return {
             selectedRowKeys: TABLE.getSelectedRows(selectedEntities),
-            onSelect: (record, selected, selectedRows, nativeEvent) => {
-                if (!selected) {
-                    TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities)
-                }
+            onSelect: (record, hasSelected, selectedRows, nativeEvent) => {
+                const method = hasSelected ? TABLE.addToSelection : TABLE.removeFromSelection
+                method(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
             },
-            onSelectAll: (selected, selectedRows, changeRows) => {
-                if (!selected) {
-                    for (let record of changeRows) {
-                        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities)
+            onSelectAll: (hasSelected, selectedRows, changeRows) => {
+                const method = hasSelected ? TABLE.addToSelection : TABLE.removeFromSelection
+                let i = 0
+                let selected = Array.from(selectedEntities)
+                for (let record of changeRows) {
+                    selected = method(record, selected, setSelectedEntities, setCheckedModifiedData, false)
+                    if (i === changeRows.length - 1) {
+                        TABLE.updateSelectionStates(selected, setSelectedEntities, setCheckedModifiedData)
                     }
+                    i++
                 }
             },
-            onChange: (selectedRowKeys, selectedRows, e, a) => {
+            onChange: (newSelectedRowKeys, selectedRows, e, a) => {
                 if (!selectedRows.length) {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
                 } else {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
                 }
-                let selectedRowIDs = TABLE.getSelectedRows(selectedEntities)
-                let _selectedEntities = Array.from(selectedEntities)
-                for (let row of selectedRows) {
-                    if (selectedRowIDs.indexOf(row[TABLE.cols.f('id')]) === -1) {
-                        _selectedEntities.push(row)
-                    }
-                }
-                setSelectedEntities(_selectedEntities)
-                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(_selectedEntities))))
             },
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),

@@ -16,6 +16,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
+    const [selectedEntityKeys, setSelectedEntityKeys] = useState([])
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -321,7 +322,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         })
     }
     const handleRemove = (record) => {
-        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities)
+        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
     const showConfirmModalOfSelectedDatasets  = () => {
@@ -342,7 +343,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
         </div>)
 
-        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess', width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody})
+        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess',
+            width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
     }
 
     const handleMenuClick = (e) => {
@@ -423,6 +425,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                         okText={modal.okText}
                         onCancel={closeModal}
                         onOk={handleModalOk}
+                        okButtonProps={modal.okButtonProps}
                     >
                         {modal.body}
                     </Modal>
