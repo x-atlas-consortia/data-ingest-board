@@ -16,7 +16,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
-    const [selectedEntityKeys, setSelectedEntityKeys] = useState([])
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
