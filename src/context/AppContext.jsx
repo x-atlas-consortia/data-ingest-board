@@ -22,6 +22,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const [hasDataAdminPrivs, setHasDataAdminPrivs] = useState(false)
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
+    const [selectedEntities, setSelectedEntities] = useState([])
 
 
     /**
@@ -152,7 +153,7 @@ export const AppProvider = ({ children, messages, banners }) => {
             THEME.cssProps()
             pageLoaded.current = true
         }
-    }, [])
+    }, [selectedEntities])
 
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
@@ -165,7 +166,8 @@ export const AppProvider = ({ children, messages, banners }) => {
         hasDataAdminPrivs,
         handleLogin, handleLogout, getUserEmail,
         t,
-        revisionsData
+        revisionsData,
+        selectedEntities, setSelectedEntities
     }}>{children}</AppContext.Provider>
 }
 

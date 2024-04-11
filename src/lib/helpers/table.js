@@ -155,9 +155,13 @@ const TABLE = {
 
         return items
     },
+    removeFromSelection: (record, selectedEntities, setSelectedEntities) => {
+        let selected = selectedEntities.filter(x => x.uuid !== record.uuid)
+        setSelectedEntities(selected)
+    },
     reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
         return {
-            id: {
+            id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),
                 width: 190,
                 dataIndex: TABLE.cols.f('id'),
@@ -165,12 +169,39 @@ const TABLE = {
                 defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
                 sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
                 ellipsis: true,
-                render: (id, record) => (
-                    <Dropdown menu={{items: TABLE.renderDropdownContent(record)}} trigger={['click']}>
-                        <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
-                    </Dropdown>
-                )
-            },
+                render: (id, record) => {
+                    const dropdownMethod = renderDropdownContent || TABLE.renderDropdownContent
+                    return (
+                        <Dropdown menu={{items: dropdownMethod(record)}} trigger={['click']}>
+                            <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                        </Dropdown>
+                    )
+                }
+            }),
+            groupName: (uniqueGroupNames, width) => ({
+                title: "Group Name",
+                width: width || 300,
+                dataIndex: "group_name",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["group_name"] || null,
+                sorter: (a,b) => a.group_name.localeCompare(b.group_name),
+                defaultFilteredValue: defaultFilteredValue["group_name"] || null,
+                filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+                onFilter: (value, record) => eq(record.group_name, value),
+                ellipsis: true,
+            }),
+            assignedToGroupName: (uniqueAssignedToGroupNames) =>({
+                title: "Assigned To Group Name",
+                width: 300,
+                dataIndex: "assigned_to_group_name",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
+                sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
+                defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+                filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+                onFilter: (value, record) => eq(record.assigned_to_group_name, value),
+                ellipsis: true,
+            }),
             status: {
                 title: "Status",
                 width: 150,
@@ -208,30 +239,53 @@ const TABLE = {
         document.querySelector('.ic--download').click()
         $el.style.display = 'none'
     },
-    csvDownloadButton: ({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+    csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={checkedRows.length ? countFilteredRecords(checkedModifiedData, filters) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+            <CSVLink data={selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
         </span>
     },
-    rowSelectionDropdown: ({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
+    rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
       return <Space wrap>
           <Dropdown.Button menu={menuProps}>
-              {checkedRows.length ? 'Selected': 'Showing'} {checkedRows.length ? checkedRows.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
+              {selectedEntities.length ? 'Selected': 'Showing'} {selectedEntities.length ? selectedEntities.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
           </Dropdown.Button>
       </Space>
     },
-    rowSelection: ({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData, disabledRows = ['Published']}) => {
+    getSelectedRows: (selectedEntities) => {
+        return selectedEntities.map((item) => item[TABLE.cols.f('id')])
+    },
+    rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
         return {
-            onChange: (selectedRowKeys, selectedRows) => {
+            selectedRowKeys: TABLE.getSelectedRows(selectedEntities),
+            onSelect: (record, selected, selectedRows, nativeEvent) => {
+                if (!selected) {
+                    TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities)
+                }
+            },
+            onSelectAll: (selected, selectedRows, changeRows) => {
+                if (!selected) {
+                    for (let record of changeRows) {
+                        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities)
+                    }
+                }
+            },
+            onChange: (selectedRowKeys, selectedRows, e, a) => {
                 if (!selectedRows.length) {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
                 } else {
                     setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
                 }
-                setCheckedRows(selectedRows)
-                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(selectedRows))))
+                let selectedRowIDs = TABLE.getSelectedRows(selectedEntities)
+                let _selectedEntities = Array.from(selectedEntities)
+                for (let row of selectedRows) {
+                    if (selectedRowIDs.indexOf(row[TABLE.cols.f('id')]) === -1) {
+                        _selectedEntities.push(row)
+                    }
+                }
+                setSelectedEntities(_selectedEntities)
+                setCheckedModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(_selectedEntities))))
             },
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),

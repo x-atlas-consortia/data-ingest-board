@@ -1,8 +1,5 @@
-import {Button, Dropdown, Modal, Table, Tooltip} from "antd";
-import {
-    CaretDownOutlined,
-} from "@ant-design/icons";
-import React, {useEffect, useState} from "react";
+import {Button,Modal, Table, Tooltip} from "antd";
+import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {eq} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
@@ -10,22 +7,21 @@ import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
 import ENVS from "../../lib/helpers/envs";
 import THEME from "../../lib/helpers/theme";
+import AppContext from "../../context/AppContext";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
-    const [checkedRows, setCheckedRows] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
+    const {selectedEntities, setSelectedEntities} = useContext(AppContext)
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
-    const [modalOpen, setModalOpen] = useState(false)
-    const [modalBody, setModalBody] = useState(null)
-    const [modalClassName, setModalClassName] = useState('')
+    const [modal, setModal] = useState({cancelCSS: 'none'})
 
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
@@ -92,32 +88,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return items
     };
     const uploadColumns = [
-        {
-            title: TABLE.cols.n('id'),
-            width: 190,
-            dataIndex: TABLE.cols.f('id'),
-            align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('id')].localeCompare(b[TABLE.cols.f('id')]),
-            ellipsis: true,
-            render: (id, record) => (
-                <Dropdown menu={{items: renderDropdownContent(record)}} trigger={['click']}>
-                    <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
-                </Dropdown>
-            )
-        },
-        {
-            title: "Group Name",
-            width: '25%',
-            dataIndex: "group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["group_name"] || null,
-            sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-            defaultFilteredValue: defaultFilteredValue["group_name"] || null,
-            filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(renderDropdownContent),
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames, '25%'),
         {
             title: "Status",
             width: '15%',
@@ -146,18 +118,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 </Tooltip>
             )
         },
-        {
-            title: "Assigned To Group Name",
-            width: 300,
-            dataIndex: "assigned_to_group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
-            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
-            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
-            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.assigned_to_group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
             width: 200,
@@ -167,7 +128,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} />
+                return <ModalOver content={task} modal={modal} setModal={setModal} />
             }
         },
         {
@@ -196,8 +157,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
     }
 
-
-    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, setCheckedRows, setCheckedModifiedData})
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
@@ -211,6 +171,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         items,
         onClick: handleMenuClick,
     };
+    const closeModal = () => {
+        setModal({...modal, open: false})
+    }
 
     return (
         <div>
@@ -220,8 +183,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            {TABLE.rowSelectionDropdown({menuProps, checkedRows, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                            {TABLE.csvDownloadButton({checkedRows, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
+                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
+                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -240,12 +203,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            }}
                     />
                     <Modal
-                        cancelButtonProps={{ style: { display: 'none' } }}
-                        open={modalOpen}
-                        onCancel={()=> {setModalOpen(false)}}
-                        onOk={() => {setModalOpen(false)}}
+                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
+                        closable={false}
+                        open={modal.open}
+                        onCancel={closeModal}
+                        onOk={closeModal}
                     >
-                        {modalBody}
+                        {modal.body}
                     </Modal>
                 </>
             )}
