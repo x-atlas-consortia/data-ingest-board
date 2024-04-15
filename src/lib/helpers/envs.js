@@ -1,0 +1,51 @@
+import {parseJSON} from "./general";
+
+const ENVS = {
+    ubkg: {
+        base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
+        sab: () => process.env.NEXT_PUBLIC_APP_CONTEXT
+    },
+    theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
+    locale: () => {
+        return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
+    },
+    appContext: () => {
+        return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
+    },
+    urlFormat: {
+        entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_BASE}${path}`,
+        portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
+        ingest: {
+            be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
+            fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_BASE}${path}`,
+        }
+    },
+    tableColumns: () => parseJSON(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
+    filterFields: () => parseJSON(process.env.NEXT_PUBLIC_FILTER_FIELDS),
+    defaultFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
+    excludeTableColumns: ()=> {
+        let cols = parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
+        const dict = {}
+        for (let col of cols) {
+            dict[col] = true
+        }
+        return dict
+    },
+    uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1',
+    searchEnabled: () => process.env.NEXT_PUBLIC_SEARCH_ENABLED === '1',
+    searchIndices: (entity) => {
+        const config = parseJSON(process.env.NEXT_PUBLIC_SEARCH_INDICES)
+        return config[entity]
+    },
+    idleTimeout: () => {
+        let num = process.env.NEXT_PUBLIC_IDLE_TIME
+        try {
+            num = Number(num) || 1000
+        } catch (e) {}
+        return num * 60 * 60
+    },
+    cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+    groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME,
+}
+
+export default ENVS

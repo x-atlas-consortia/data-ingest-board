@@ -1,25 +1,35 @@
-import {Dropdown, Menu, Modal, Popover, Table, Tooltip} from "antd";
-import {DownloadOutlined, ExportOutlined, CaretDownOutlined} from "@ant-design/icons";
-import {CSVLink} from "react-csv";
-import React, {useEffect, useState} from "react";
+import {Modal, Table} from "antd";
+import {ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined, CloseOutlined} from "@ant-design/icons";
+import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {ENVS, eq, getUBKGName, TABLE, URLS} from "../../lib/helper";
+import ENVS from "../../lib/helpers/envs";
+import TABLE from "../../lib/helpers/table";
+import URLS from "../../lib/helpers/urls";
+import {callService, eq, getHeadersWith, getUBKGName} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
+import AppContext from "../../context/AppContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
+    const [checkedModifiedData, setCheckedModifiedData] = useState([])
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
+    const [modal, setModal] = useState({cancelCSS: 'none', okText: 'OK'})
 
-    const [modalOpen, setModalOpen] = useState(false)
-    const [modalBody, setModalBody] = useState(null)
-    const [modalWidth, setModalWidth] = useState(700)
+    useEffect(() => {
+        if (modal.open && eq(modal.key, 'bulkProcess')) {
+            showConfirmModalOfSelectedDatasets()
+        }
+    }, [selectedEntities])
+
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
@@ -57,19 +67,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
 
     const datasetColumns = [
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id,
-        {
-            title: "Group Name",
-            width: 300,
-            dataIndex: "group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["group_name"] || null,
-            sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-            defaultFilteredValue: defaultFilteredValue["group_name"] || null,
-            filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(),
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames),
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).status,
         {
             title: "Dataset Type",
@@ -97,21 +96,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
+                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
+                                      modal={modal} setModal={setModal} />
             }
         },
-        {
-            title: "Assigned To Group Name",
-            width: 300,
-            dataIndex: "assigned_to_group_name",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
-            sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
-            defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
-            filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.assigned_to_group_name, value),
-            ellipsis: true,
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
             width: 200,
@@ -121,7 +110,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} setModalOpen={setModalOpen} setModalBody={setModalBody} setModalWidth={setModalWidth} />
+                return <ModalOver content={task} modal={modal} setModal={setModal} />
             }
         },
         {
@@ -304,6 +293,99 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
     }
 
+    const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
+
+    const confirmBulkProcess = () => {
+        const headers = getHeadersWith(globusToken)
+        callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
+            let className = 'alert alert-success'
+            const isOk =  ['202', '200'].comprises(res.status.toString())
+            if (!isOk) {
+                className = 'alert alert-danger'
+            }
+            const preTitle = isOk ? 'SUCCESS' : 'FAIL'
+            const modalBody = (<div>
+                <center>
+                    <h5>
+                        {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
+                        {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
+                    </h5>
+                </center>
+                <div>
+                    <p className={'mt-4'}>RESPONSE:</p>
+                    <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
+                </div>
+
+            </div>)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
+        })
+    }
+    const handleRemove = (record) => {
+        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
+    }
+
+    const showConfirmModalOfSelectedDatasets  = () => {
+        let columns = [
+            TABLE.reusableColumns(defaultSortOrder, {}).id(),
+            TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(defaultSortOrder, {}).status,
+            {
+                title: 'Delete',
+                width: 100,
+                render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
+            },
+        ]
+
+        const modalBody = (<div>
+            <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
+            <p>{selectedEntities.length} Datasets selected</p>
+            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
+        </div>)
+
+        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess',
+            width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
+    }
+
+    const handleMenuClick = (e) => {
+        if (e.key === '1') {
+            TABLE.handleCSVDownload()
+        }
+
+        if (e.key === '2') {
+            showConfirmModalOfSelectedDatasets()
+        }
+    }
+
+    const closeModal = () => {
+        setModal({...modal, okText: 'OK', open: false})
+    }
+
+    const handleModalOk = () => {
+        if (modal.okCallback) {
+            if (eq(modal.okCallback, 'confirmBulkProcess')) {
+                if (selectedEntities.length) {
+                    confirmBulkProcess()
+                }
+            }
+        } else {
+            closeModal()
+        }
+    }
+
+    const items = TABLE.bulkSelectionDropdown(hasDataAdminPrivs ? [
+        {
+            label: 'Submit For Processing',
+            key: '2',
+            icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
+            disabled: disabledMenuItems['bulkSubmit']
+        }
+    ] : []);
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
+
     return (
         <div>
             {loading ? (
@@ -312,12 +394,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
-                            <span style={{ marginRight: '1rem' }}>
-                                {countFilteredRecords(modifiedData, filters).length} Selected
-                            </span>
-                            <CSVLink data={countFilteredRecords(modifiedData, filters)} filename="datasets-data.csv" className="ic--download">
-                                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-                            </CSVLink>
+                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
+                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
                         </div>
                     </div>
                     <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
@@ -330,17 +408,25 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                            scroll={{ x: 1500, y: 1500 }}
                            onChange={handleTableChange}
                            rowKey={TABLE.cols.f('id')}
+                           rowSelection={{
+                               type: 'checkbox',
+                               ...rowSelection,
+                           }}
+
                     />
 
                     <Modal
-                        width={modalWidth}
-                        cancelButtonProps={{ style: { display: 'none' } }}
+                        className={modal.className}
+                        width={modal.width}
+                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
                         closable={false}
-                        open={modalOpen}
-                        onCancel={()=> {setModalOpen(false)}}
-                        onOk={() => {setModalOpen(false)}}
+                        open={modal.open}
+                        okText={modal.okText}
+                        onCancel={closeModal}
+                        onOk={handleModalOk}
+                        okButtonProps={modal.okButtonProps}
                     >
-                        {modalBody}
+                        {modal.body}
                     </Modal>
                 </>
             )}

@@ -1,5 +1,7 @@
-import {ENVS, eq, TABLE} from "../lib/helper";
+import {eq} from "../lib/helpers/general";
 import {useEffect} from "react";
+import ENVS from "../lib/helpers/envs";
+import TABLE from "../lib/helpers/table";
 
 function Search({ useDatasetApi, callbacks, originalResponse }) {
     let dict = {}

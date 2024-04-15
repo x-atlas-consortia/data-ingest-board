@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useContext} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {ENVS, eq, getHeadersWith, TABLE, URLS} from "../../lib/helper";
+import {eq, getHeadersWith} from "../../lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
+import ENVS from "../../lib/helpers/envs";
+import URLS from "../../lib/helpers/urls";
+import TABLE from "../../lib/helpers/table";
+import AppContext from "../../context/AppContext";
 
 
 const DataTable = (props) => {
@@ -24,6 +28,7 @@ const DataTable = (props) => {
     const [filters, setFilters] = useState(props.tableFilters);
     const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
+    const {setSelectedEntities} = useContext(AppContext)
 
     useEffect(() => {
         loadData();
@@ -169,12 +174,14 @@ const DataTable = (props) => {
     }
 
     const toggleApi = () => {
+        setSelectedEntities([])
         setUseDatasetApi(!useDatasetApi);
         toggleHistory(useDatasetApi)
         clearBasicFilters()
     };
 
     const clearAll = () => {
+        setSelectedEntities([])
         toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData);
         clearBasicFilters()

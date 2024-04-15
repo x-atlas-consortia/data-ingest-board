@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types'
 import {Dropdown, Popover, Table} from "antd";
-import {ENVS, getHeadersWith, TABLE, THEME, toDateString, URLS} from "../lib/helper";
+import {getHeadersWith, toDateString} from "../lib/helpers/general";
+import THEME from "../lib/helpers/theme";
+import TABLE from "../lib/helpers/table";
+import URLS from "../lib/helpers/urls";
 import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
@@ -8,7 +11,7 @@ import {CSVLink} from "react-csv";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
-function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth, popoverText, args}) {
+function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     let usedColors = {}
@@ -23,7 +26,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
     const getColumns = () => {
         if (cols.length) return cols;
         return [
-            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).id,
+            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).id(),
             TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).status,
             {
                 title: 'Creation Date',
@@ -156,12 +159,11 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
     return (
         <>
             <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={async ()  => {
-                setModalWidth(800)
-                setModalBody(<Spinner />)
-                setModalOpen(true)
+                setModal({width: 800, cancelCSS: 'none', className: '', body: <Spinner />, open: true})
                 buildIndices()
                 await handleRevisions()
-                setModalBody(<div>
+
+                const modalBody = (<div>
                     <h5 className='text-center mb-5'>
                         {content.length} Processed Dataset{content.length > 1 ? 's': ''} for &nbsp;
                         <Dropdown menu={{items: TABLE.renderDropdownContent(args.record)}} trigger={['click']}>
@@ -173,7 +175,7 @@ function ModalOverData({content, cols, setModalBody, setModalOpen, setModalWidth
                     </CSVLink>
                     <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
                 </div>)
-                setModalOpen(true)
+                setModal({width: 1000, cancelCSS: 'none', className: '', open: true, body: modalBody})
             }
             }>{content.length}</span></Popover>
         </>
@@ -189,9 +191,7 @@ ModalOverData.propTypes = {
     content: PropTypes.array.isRequired,
     cols: PropTypes.array,
     args: PropTypes.object.isRequired,
-    setModalBody: PropTypes.func.isRequired,
-    setModalOpen: PropTypes.func.isRequired,
-    setModalWidth: PropTypes.func.isRequired,
+    setModal: PropTypes.func.isRequired
 }
 
 export default ModalOverData

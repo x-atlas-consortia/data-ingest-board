@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Alert} from 'react-bootstrap'
-import {ENVS, storageKey} from "../lib/helper";
+import {storageKey} from "../lib/helpers/general";
 import AppContext from "../context/AppContext";
 
 function AppBanner({name}) {
