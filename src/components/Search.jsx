@@ -66,7 +66,7 @@ function Search({ useDatasetApi, callbacks, originalResponse }) {
                     onSearch(e)
                 }
             }} /></div>
-            <div className='col col-lg-2 col-md-6'><button className={'c-btn c-btn--outline'} type={'submit'} onClick={(e) => onSearch(e)}>Search</button></div>
+            <div className='col col-lg-2 col-md-6'><button className={'c-btn c-btn--outline js-gtm--btn-cta-search'} type={'submit'} onClick={(e) => onSearch(e)}>Search</button></div>
         </div>
     )
 }
