@@ -230,8 +230,8 @@ const DataTable = (props) => {
                         </h2>
                     </div>
                     {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
-                    <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center js-gtm--btn-cta-switch' : 'pull-right mx-3'}`}>
-                        {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3" onClick={toggleApi}>
+                    <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
+                        {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3 js-gtm--btn-cta-switchgs" onClick={toggleApi}>
                             {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
                         </button>}
                         <button className="c-btn c-btn--lgt col-md-6 col-lg-3 js-gtm--btn--cta-clearFilters" onClick={clearAll}>
