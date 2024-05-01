@@ -6,6 +6,9 @@ import axios from "axios";
 import URLS from "../lib/helpers/urls";
 import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
+import GoogleTagManager from "../lib/GoogleTagManager";
+import $ from 'jquery'
+import AddonsIndex from "../lib/AddonsIndex";
 
 const AppContext = createContext()
 
@@ -154,6 +157,12 @@ export const AppProvider = ({ children, messages, banners }) => {
             pageLoaded.current = true
         }
     }, [selectedEntities])
+
+    useEffect(() => {
+        if (globusInfo) {
+            AddonsIndex('init', globusInfo)
+        }
+    }, [globusInfo])
 
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
