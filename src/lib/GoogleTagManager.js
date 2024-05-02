@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import Addon from "./Addon";
+import {eq} from "./helpers/general";
 class GoogleTagManager extends Addon {
 
     constructor(ops, app) {
@@ -21,8 +22,12 @@ class GoogleTagManager extends Addon {
         if (pos !== -1) {
             const parts = classNames.substr(pos).split(' ') // remove anything after
             const action = parts[0].split(this.prefixes.action)[1]
+            let info = this.currentTarget(e).attr('data-gtm-info')
+            if (eq(action, 'search')) {
+                info = 'keyword: ' + this.currentTarget(e).parents('.c-search').find('input').val()
+            }
             if (action && action.length) {
-                this.gtm({action})
+                this.gtm({action, info})
             }
         }
     }
