@@ -169,7 +169,7 @@ const TABLE = {
                     const dropdownMethod = renderDropdownContent || TABLE.renderDropdownContent
                     return (
                         <Dropdown menu={{items: dropdownMethod(record)}} trigger={['click']}>
-                            <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                            <a href="#" onClick={(e) => e.preventDefault()} data-gtm-info={record.uuid} className='lnk--ic js-gtm--btn-cta-entityDropdown'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                         </Dropdown>
                     )
                 }
