@@ -1,4 +1,3 @@
-import $ from "jquery";
 
 class Addon {
 
@@ -12,7 +11,7 @@ class Addon {
     }
 
     static isLocal() {
-        return (location.host.indexOf('localhost') !== -1)
+        return (location.host.indexOf('localhost') !== -1) || (location.host.indexOf('dev') !== -1)
     }
 
     static localLog(msg, fn = 'log', color = '#bada55') {
