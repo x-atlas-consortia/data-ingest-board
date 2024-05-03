@@ -46,6 +46,7 @@ const ENVS = {
     },
     cookieDomain: () => process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
     groupName: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_NAME,
+    getGoogleTagManagerId: () => process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER
 }
 
 export default ENVS

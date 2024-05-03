@@ -158,7 +158,7 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
 
     return (
         <>
-            <Popover content={popoverText} placement={'left'}><span className='txt-lnk' onClick={async ()  => {
+            <Popover content={popoverText} placement={'left'}><span className='txt-lnk js-gtm--btn-cta-viewProcessed' data-gtm-info={args.record.uuid} onClick={async ()  => {
                 setModal({width: 800, cancelCSS: 'none', className: '', body: <Spinner />, open: true})
                 buildIndices()
                 await handleRevisions()
@@ -170,7 +170,7 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
                             <span className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></span>
                         </Dropdown>
                     </h5>
-                    <CSVLink data={getCSVData()} filename="processed-datasets-data.csv" className="ic--download">
+                    <CSVLink data={getCSVData()} filename="processed-datasets-data.csv" data-gtm-info={args.record.uuid} className="ic--download js-gtm--btn-cta-csvDownloadProcessed">
                          <DownloadOutlined title="Export Data as CSV" style={{ fontSize: '24px' }}/>
                     </CSVLink>
                     <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />

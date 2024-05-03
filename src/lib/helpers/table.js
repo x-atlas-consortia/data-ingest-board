@@ -169,7 +169,7 @@ const TABLE = {
                     const dropdownMethod = renderDropdownContent || TABLE.renderDropdownContent
                     return (
                         <Dropdown menu={{items: dropdownMethod(record)}} trigger={['click']}>
-                            <a href="#" onClick={(e) => e.preventDefault()} className='lnk--ic'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
+                            <a href="#" onClick={(e) => e.preventDefault()} data-gtm-info={record.uuid} className='lnk--ic js-gtm--btn-cta-entityDropdown'>{id} <CaretDownOutlined style={{verticalAlign: 'middle'}} /></a>
                         </Dropdown>
                     )
                 }
@@ -237,7 +237,7 @@ const TABLE = {
     },
     csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download">
+            <CSVLink data={selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download js-gtm--btn-cta-csvDownload">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
             </CSVLink>
         </span>
