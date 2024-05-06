@@ -36,24 +36,24 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
                 sorter: (a,b) => new Date(a.created_timestamp) - new Date(b.created_timestamp),
                 render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
             },
-            {
-                title: 'Revision',
-                width: 140,
-                dataIndex: 'revision_number',
-                key: 'revision_number',
-                showSorterTooltip: {
-                    title: <span>Greyed revisions have no associated revisions. All other revisions of the same color belong to the same revision group. Multiple revisions of the same level are marked with the same border color.</span>
-                },
-                sorter: (a,b) => a.revision_number - b.revision_number,
-                render: (revision, record) => {
-                    let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white',
-                        border: 'solid 2px transparent', borderColor: record.border_color?.color || 'transparent'}
-                    return <span className='revision-number'
-                                 style={style}>
-                                {revision ? `Version ${revision}`: ''}
-                           </span>
-                }
-            }
+            // {
+            //     title: 'Revision',
+            //     width: 140,
+            //     dataIndex: 'revision_number',
+            //     key: 'revision_number',
+            //     showSorterTooltip: {
+            //         title: <span>Greyed revisions have no associated revisions. All other revisions of the same color belong to the same revision group. Multiple revisions of the same level are marked with the same border color.</span>
+            //     },
+            //     sorter: (a,b) => a.revision_number - b.revision_number,
+            //     render: (revision, record) => {
+            //         let style = {backgroundColor: `${record.group_color.color}`, color: record.group_color.light ? 'black': 'white',
+            //             border: 'solid 2px transparent', borderColor: record.border_color?.color || 'transparent'}
+            //         return <span className='revision-number'
+            //                      style={style}>
+            //                     {revision ? `Version ${revision}`: ''}
+            //                </span>
+            //     }
+            // }
         ]
     }
 
@@ -161,7 +161,7 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
             <Popover content={popoverText} placement={'left'}><span className='txt-lnk js-gtm--btn-cta-viewProcessed' data-gtm-info={args.record.uuid} onClick={async ()  => {
                 setModal({width: 800, cancelCSS: 'none', className: '', body: <Spinner />, open: true})
                 buildIndices()
-                await handleRevisions()
+                // await handleRevisions()
 
                 const modalBody = (<div>
                     <h5 className='text-center mb-5'>
