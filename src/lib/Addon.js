@@ -1,38 +1,28 @@
-import $ from "jquery";
+const Addon = {
 
-class Addon {
+    constructor: (ops, app) => {
+        Addon.ops = ops
+        Addon.localLog(`Addon ${app}`)
+    },
 
-    constructor(ops, app) {
-        this.ops = ops
-        this.localLog(`Addon ${app}`)
-    }
-
-    currentTarget(e) {
+    currentTarget: (e) => {
         return $(e.currentTarget)
-    }
+    },
 
-    static isLocal() {
+    isLocal: () => {
         return (location.host.indexOf('localhost') !== -1)
-    }
+    },
 
-    static localLog(msg, fn = 'log', color = '#bada55') {
+    localLog: (msg, fn = 'log', color = '#bada55') => {
         if (Addon.isLocal()) {
             Addon.log(msg, fn, color)
         }
-    }
+    },
 
-    localLog(msg, fn = 'log', color = '#bada55') {
-        Addon.localLog(msg, fn, color)
-    }
-
-    static log(msg, fn = 'log', color = '#bada55') {
+    log: (msg, fn = 'log', color = '#bada55') => {
         if (Addon.isLocal()) {
             console[fn](`%c ${msg}`, `background: #222; color: ${color}`)
         }
-    }
-
-    log(msg, fn = 'log') {
-        Addon.log(msg, fn)
     }
 }
 

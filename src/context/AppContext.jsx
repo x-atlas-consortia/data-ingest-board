@@ -6,8 +6,6 @@ import axios from "axios";
 import URLS from "../lib/helpers/urls";
 import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
-import GoogleTagManager from "../lib/GoogleTagManager";
-import $ from 'jquery'
 import AddonsIndex from "../lib/AddonsIndex";
 
 const AppContext = createContext()
