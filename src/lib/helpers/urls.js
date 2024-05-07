@@ -29,7 +29,8 @@ const URLS = {
         },
         privs: {
             groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL,
-            admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL
+            admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL,
+            writeGroups: () => process.env.NEXT_PUBLIC_PRIVS_WRITE_GROUPS
         },
         auth: {
             login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),

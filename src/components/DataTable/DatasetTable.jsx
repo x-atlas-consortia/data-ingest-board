@@ -9,13 +9,16 @@ import {callService, eq, getHeadersWith, getUBKGName} from "../../lib/helpers/ge
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 import AppContext from "../../context/AppContext";
+import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import {STATUS} from "../../lib/constants";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
+    const [bulkEditValues, setBulkEditValues] = useState({})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -320,11 +323,17 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
+
+    const confirmBulkEdit = () => {
+        const headers = getHeadersWith(globusToken)
+        callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
+        })
+    }
     const handleRemove = (record) => {
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
-    const showConfirmModalOfSelectedDatasets  = () => {
+    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
         let columns = [
             TABLE.reusableColumns(defaultSortOrder, {}).id(),
             TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
@@ -340,11 +349,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
             <p>{selectedEntities.length} Datasets selected</p>
             <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
+            {afterTableComponent}
         </div>)
 
-        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess',
+        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: callback,
             width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
     }
+
+
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
@@ -352,7 +364,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
 
         if (e.key === '2') {
-            showConfirmModalOfSelectedDatasets()
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess'})
+        }
+
+        if (e.key === '3') {
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkEdit',
+                afterTableComponent: UI_BLOCKS.getBulkEditForm({statuses: TABLE.getStatusFilters(STATUS.datasets),
+                    writeGroups, bulkEditValues, setBulkEditValues})})
         }
     }
 
@@ -372,14 +390,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
     }
 
-    const items = TABLE.bulkSelectionDropdown(hasDataAdminPrivs ? [
+    const items = TABLE.bulkSelectionDropdown((hasDataAdminPrivs ? [
         {
             label: 'Submit For Processing',
             key: '2',
             icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
             disabled: disabledMenuItems['bulkSubmit']
         }
-    ] : []);
+    ] : []), {hasDataAdminPrivs, disabledMenuItems});
 
     const menuProps = {
         items,

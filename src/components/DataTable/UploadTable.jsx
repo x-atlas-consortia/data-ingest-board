@@ -8,6 +8,7 @@ import URLS from "../../lib/helpers/urls";
 import ENVS from "../../lib/helpers/envs";
 import THEME from "../../lib/helpers/theme";
 import AppContext from "../../context/AppContext";
+import {STATUS} from "../../lib/constants";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
@@ -99,11 +100,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.status.localeCompare(b.status),
             defaultFilteredValue: defaultFilteredValue["status"] || null,
             ellipsis: true,
-            filters: TABLE.getStatusFilters([
-                {text: 'Unreorganized', value: 'unreorganized'},
-                {text: 'Valid', value: 'valid'},
-                {text: 'Reorganized', value: 'reorganized'},
-            ]),
+            filters: TABLE.getStatusFilters(STATUS.uploads),
             onFilter: (value, record) => {
                 if (value === 'Unreorganized') {
                     return !eq(record.status, 'reorganized');
