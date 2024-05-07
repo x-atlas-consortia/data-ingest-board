@@ -1,5 +1,4 @@
 import Addon from "./Addon";
-import $ from "jquery";
 import GoogleTagManager from "./GoogleTagManager";
 
 function AddonsIndex(source, globusInfo) {

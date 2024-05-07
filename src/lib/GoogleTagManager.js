@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import Addon from "./Addon";
 import {eq} from "./helpers/general";
 class GoogleTagManager extends Addon {
@@ -111,7 +110,9 @@ class GoogleTagManager extends Addon {
             user_id: this.getPerson(true),
             ...args
         }
-        console.log(data)
+        if (Addon.isLocal()) {
+            console.log(data)
+        }
         dataLayer.push(data)
     }
 }
