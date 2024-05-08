@@ -1,4 +1,4 @@
-import {Modal, Table} from "antd";
+import {Form, Modal, Table} from "antd";
 import {ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined, CloseOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
@@ -11,6 +11,7 @@ import ModalOverData from "../ModalOverData";
 import AppContext from "../../context/AppContext";
 import UI_BLOCKS from "../../lib/helpers/uiBlocks";
 import {STATUS} from "../../lib/constants";
+import BulkEditForm from "../BulkEditForm";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups} = useContext(AppContext)
@@ -19,6 +20,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
     const [bulkEditValues, setBulkEditValues] = useState({})
+    const [confirmModalArgs, setConfirmModalArgs] = useState({})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -29,7 +31,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     useEffect(() => {
         if (modal.open && eq(modal.key, 'bulkProcess')) {
-            showConfirmModalOfSelectedDatasets()
+            showConfirmModalOfSelectedDatasets(confirmModalArgs)
         }
     }, [selectedEntities])
 
@@ -301,39 +303,34 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const confirmBulkProcess = () => {
         const headers = getHeadersWith(globusToken)
         callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
-            let className = 'alert alert-success'
-            const isOk =  ['202', '200'].comprises(res.status.toString())
-            if (!isOk) {
-                className = 'alert alert-danger'
-            }
-            const preTitle = isOk ? 'SUCCESS' : 'FAIL'
-            const modalBody = (<div>
-                <center>
-                    <h5>
-                        {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
-                        {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
-                    </h5>
-                </center>
-                <div>
-                    <p className={'mt-4'}>RESPONSE:</p>
-                    <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
-                </div>
-
-            </div>)
+            let mainTitle = 'Dataset(s) Submitted For Processing'
+            const {modalBody} = UI_BLOCKS.modalResponse.modal(res, mainTitle)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
 
     const confirmBulkEdit = () => {
         const headers = getHeadersWith(globusToken)
-        callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
+        callService(URLS.ingest.bulk.edit(), headers.headers, selectedEntities.map(item => {
+            return {...bulkEditValues, uuid: item.uuid}
+        })).then((res) => {
+            let mainTitle = 'Dataset(s) Submitted For Bulk Editing'
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
+
+    const modalCallbacks = {
+        confirmBulkProcess,
+        confirmBulkEdit
+    }
+
     const handleRemove = (record) => {
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
     const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
+        setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(defaultSortOrder, {}).id(),
             TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
@@ -346,7 +343,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         ]
 
         const modalBody = (<div>
-            <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
+            <h5 className='text-center mb-5'>Confirm selectiongit</h5>
             <p>{selectedEntities.length} Datasets selected</p>
             <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
             {afterTableComponent}
@@ -355,8 +352,6 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         setModal({key: 'bulkProcess', okText: 'Submit', okCallback: callback,
             width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
     }
-
-
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
@@ -369,8 +364,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
         if (e.key === '3') {
             showConfirmModalOfSelectedDatasets({callback: 'confirmBulkEdit',
-                afterTableComponent: UI_BLOCKS.getBulkEditForm({statuses: TABLE.getStatusFilters(STATUS.datasets),
-                    writeGroups, bulkEditValues, setBulkEditValues})})
+                afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
+                                                       writeGroups={writeGroups} setBulkEditValues={setBulkEditValues} />})
         }
     }
 
@@ -379,11 +374,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     }
 
     const handleModalOk = () => {
-        if (modal.okCallback) {
-            if (eq(modal.okCallback, 'confirmBulkProcess')) {
-                if (selectedEntities.length) {
-                    confirmBulkProcess()
-                }
+        if (modal.okCallback && modalCallbacks[modal.okCallback]) {
+            if (selectedEntities.length) {
+                modalCallbacks[modal.okCallback]()
             }
         } else {
             closeModal()

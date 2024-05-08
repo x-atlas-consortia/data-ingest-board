@@ -20,7 +20,8 @@ const URLS = {
             uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL
         },
         bulk: {
-            submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL
+            submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL,
+            edit: () => process.env.NEXT_PUBLIC_INGEST_BULK_EDIT_URL
         },
         main: () => process.env.NEXT_PUBLIC_INGEST_BASE,
         view: (uuid, entity = 'dataset') => {
