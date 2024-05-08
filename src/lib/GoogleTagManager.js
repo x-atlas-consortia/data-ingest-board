@@ -1,63 +1,65 @@
 import Addon from "./Addon";
 import {eq} from "./helpers/general";
-class GoogleTagManager extends Addon {
+const GoogleTagManager  = {
 
-    constructor(ops, app) {
-        super(ops, app)
-        this.prefixes = {
+    constructor: (ops, app) => {
+        Addon.constructor(ops, app)
+        GoogleTagManager.ops = ops
+        GoogleTagManager.prefixes = {
             action: 'js-gtm--btn-cta-'
         }
-        this.events()
-    }
+        GoogleTagManager.events()
+    },
 
-    currentTarget(e) {
+    currentTarget: (e) => {
         return $(e.currentTarget)
-    }
+    },
 
-    handleCta(e) {
-        this.event = 'cta'
-        const classNames = this.currentTarget(e).attr('class')
-        const pos = classNames.indexOf(this.prefixes.action)
+    handleCta: (e) => {
+        GoogleTagManager.event = 'cta'
+        const classNames = Addon.currentTarget(e).attr('class')
+        const pos = classNames.indexOf(GoogleTagManager.prefixes.action)
         if (pos !== -1) {
             const parts = classNames.substr(pos).split(' ') // remove anything after
-            const action = parts[0].split(this.prefixes.action)[1]
-            let info = this.currentTarget(e).attr('data-gtm-info')
+            const action = parts[0].split(GoogleTagManager.prefixes.action)[1]
+            let info = Addon.currentTarget(e).attr('data-gtm-info')
             if (eq(action, 'search')) {
-                info = 'keyword: ' + this.currentTarget(e).parents('.c-search').find('input').val()
+                info = 'keyword: ' + Addon.currentTarget(e).parents('.c-search').find('input').val()
             }
             if (action && action.length) {
-                this.gtm({action, info})
+                GoogleTagManager.gtm({action, info})
             }
         }
-    }
-    handleFilter(e) {
-        this.event = 'filter'
-        if (this.currentTarget(e).is(':checked')) {
-            const filter = this.currentTarget(e).parents('.ant-dropdown-menu-title-content').find('> span').text()
-            this.gtm({filter})
-        }
-    }
+    },
 
-    handleMenuItem(e) {
+    handleFilter: (e) => {
+        GoogleTagManager.event = 'filter'
+        if (Addon.currentTarget(e).is(':checked')) {
+            const filter = Addon.currentTarget(e).parents('.ant-dropdown-menu-title-content').find('> span').text()
+            GoogleTagManager.gtm({filter})
+        }
+    },
+
+    handleMenuItem: (e) => {
         e.stopPropagation()
-        this.event = 'cta'
-        const txt = this.currentTarget(e).text()
+        GoogleTagManager.event = 'cta'
+        const txt = Addon.currentTarget(e).text()
         if (txt === 'Submit For Processing') {
-            this.gtm({filter: 'initiate-submit-for-processing'})
+            GoogleTagManager.gtm({filter: 'initiate-submit-for-processing'})
         }
-    }
+    },
 
-    handleModalCta(e) {
-        this.event = 'cta'
-        const txt = this.currentTarget(e).text()
+    handleModalCta: (e) => {
+        GoogleTagManager.event = 'cta'
+        const txt = Addon.currentTarget(e).text()
         if (txt === 'Submit') {
-            this.gtm({filter: 'submit-for-processing'})
+            GoogleTagManager.gtm({filter: 'submit-for-processing'})
         }
-    }
+    },
 
-    events() {
-        const _t = this
-        $('body').on('click', `[class*="${this.prefixes.action}"]`, (e)=>{
+    events: () => {
+        const _t = GoogleTagManager
+        $('body').on('click', `[class*="${_t.prefixes.action}"]`, (e)=>{
             _t.handleCta(e)
         })
 
@@ -66,48 +68,45 @@ class GoogleTagManager extends Addon {
         })
 
         $('body').on('click', '.ant-dropdown-menu-item .ant-dropdown-menu-title-content', (e)=> {
-            debugger
             _t.handleMenuItem(e)
         })
 
         $('body').on('click', '.ant-modal-footer .ant-btn-primary', (e)=> {
             _t.handleModalCta(e)
         })
+    },
 
-
-    }
-
-    getPath() {
+    getPath: () => {
         const href = window.location.href
         return href.length > 70 ? window.location.pathname : href;
-    }
+    },
 
-    hasUser() {
-        return (this.ops?.email !== null)
-    }
+    hasUser: () => {
+        return (GoogleTagManager.ops?.email !== null)
+    },
 
-    getContext() {
-        if (!this.hasUser()) return null
+    getContext: () => {
+        if (!GoogleTagManager.hasUser()) return null
         return window.location.href.includes('entity_type=uploads') ? 'uploads' : 'datasets'
-    }
+    },
 
-    getPerson(bto = false) {
-        if (!this.hasUser()) return 'anonymous'
-        const id = this.ops.email
+    getPerson: (bto = false) => {
+        if (!GoogleTagManager.hasUser()) return 'anonymous'
+        const id = GoogleTagManager.ops.email
         let result
         if (id) {
             result = bto ? btoa(id.replace('@', '*')) : `${id.split('@')[0]}***`
         }
         return result
-    }
+    },
 
-    gtm(args) {
+    gtm: (args) => {
         let data = {
-            event: this.event,
-            context: this.getContext(),
-            path: this.getPath(),
-            person: this.getPerson(),
-            user_id: this.getPerson(true),
+            event: GoogleTagManager.event,
+            context: GoogleTagManager.getContext(),
+            path: GoogleTagManager.getPath(),
+            person: GoogleTagManager.getPerson(),
+            user_id: GoogleTagManager.getPerson(true),
             ...args
         }
         if (Addon.isLocal()) {
