@@ -158,11 +158,11 @@ export const AppProvider = ({ children, messages, banners }) => {
     const confirmBulkEdit = ({url, setModal, bulkEditValues, entityName = 'Dataset'}) => {
         const headers = getHeadersWith(globusToken)
 
-        // TODO: configure for uploads
         callService(url, headers.headers, selectedEntities.map(item => {
             return {...bulkEditValues, uuid: item.uuid}
         })).then((res) => {
             let mainTitle = `${entityName}(s) Submitted For Bulk Editing`
+            const {className} = UI_BLOCKS.modalResponse.styling(res)
             const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
