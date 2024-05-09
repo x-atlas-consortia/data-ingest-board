@@ -14,7 +14,7 @@ import {STATUS} from "../../lib/constants";
 import BulkEditForm from "../BulkEditForm";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -309,20 +309,13 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         })
     }
 
-    const confirmBulkEdit = () => {
-        const headers = getHeadersWith(globusToken)
-        callService(URLS.ingest.bulk.edit(), headers.headers, selectedEntities.map(item => {
-            return {...bulkEditValues, uuid: item.uuid}
-        })).then((res) => {
-            let mainTitle = 'Dataset(s) Submitted For Bulk Editing'
-            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
-            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
-        })
+    const confirmBulkDatasetEdit = () => {
+        confirmBulkEdit({url: URLS.ingest.bulk.edit(), setModal, bulkEditValues})
     }
 
     const modalCallbacks = {
         confirmBulkProcess,
-        confirmBulkEdit
+        confirmBulkDatasetEdit
     }
 
     const handleRemove = (record) => {
@@ -335,22 +328,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             TABLE.reusableColumns(defaultSortOrder, {}).id(),
             TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
             TABLE.reusableColumns(defaultSortOrder, {}).status,
-            {
-                title: 'Delete',
-                width: 100,
-                render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
-            },
+            TABLE.reusableColumns(defaultSortOrder, {}).deleteAction(handleRemove)
         ]
-
-        const modalBody = (<div>
-            <h5 className='text-center mb-5'>Confirm selectiongit</h5>
-            <p>{selectedEntities.length} Datasets selected</p>
-            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
-            {afterTableComponent}
-        </div>)
-
-        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: callback,
-            width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
+        UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
+        columns, selectedEntities, setModal})
     }
 
     const handleMenuClick = (e) => {
@@ -363,7 +344,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
 
         if (e.key === '3') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkEdit',
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
                                                        writeGroups={writeGroups} setBulkEditValues={setBulkEditValues} />})
         }

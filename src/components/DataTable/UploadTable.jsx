@@ -1,21 +1,24 @@
 import {Button,Modal, Table, Tooltip} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {eq} from "../../lib/helpers/general";
+import {callService, eq, getHeadersWith} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
 import ENVS from "../../lib/helpers/envs";
-import THEME from "../../lib/helpers/theme";
 import AppContext from "../../context/AppContext";
 import {STATUS} from "../../lib/constants";
+import BulkEditForm from "../BulkEditForm";
+import UI_BLOCKS from "../../lib/helpers/uiBlocks";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities, setSelectedEntities} = useContext(AppContext)
+    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, writeGroups, globusToken, confirmBulkEdit} = useContext(AppContext)
+    const [bulkEditValues, setBulkEditValues] = useState({})
+    const [confirmModalArgs, setConfirmModalArgs] = useState({})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -91,30 +94,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uploadColumns = [
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(renderDropdownContent),
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames, '25%'),
-        {
-            title: "Status",
-            width: '15%',
-            dataIndex: "status",
-            align: "left",
-            defaultSortOrder: defaultSortOrder["status"] || null,
-            sorter: (a,b) => a.status.localeCompare(b.status),
-            defaultFilteredValue: defaultFilteredValue["status"] || null,
-            ellipsis: true,
-            filters: TABLE.getStatusFilters(STATUS.uploads),
-            onFilter: (value, record) => {
-                if (value === 'Unreorganized') {
-                    return !eq(record.status, 'reorganized');
-                }
-                return eq(record.status, value);
-            },
-            render: (status) => (
-                <Tooltip title={TABLE.getStatusDefinition(status, 'Upload')}>
-                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
-                        {status}
-                    </span>
-                </Tooltip>
-            )
-        },
+        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).statusUpload,
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
@@ -156,13 +136,40 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
+    const handleRemove = (record) => {
+        TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
+    }
+
+    const showConfirmModalOfSelectedUploads  = ({callback, afterTableComponent}) => {
+        setConfirmModalArgs({callback, afterTableComponent})
+        let columns = [
+            TABLE.reusableColumns(defaultSortOrder, {}).id(),
+            TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).statusUpload,
+            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).deleteAction(handleRemove)
+        ]
+        UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
+            columns, selectedEntities, setModal, entityName: 'Uploads'})
+    }
+
     const handleMenuClick = (e) => {
         if (e.key === '1') {
             TABLE.handleCSVDownload()
         }
+
+        if (e.key === '3') {
+            showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
+                afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}
+                                                   writeGroups={writeGroups} setBulkEditValues={setBulkEditValues} />})
+        }
     }
 
-    const items = TABLE.bulkSelectionDropdown();
+    const confirmBulkUploadEdit = () => {
+        // TODO: configure for uploads
+        confirmBulkEdit({url: URLS.ingest.bulk.edit(), setModal, bulkEditValues, entityName: 'Upload'})
+    }
+
+    const items = TABLE.bulkSelectionDropdown([], {hasDataAdminPrivs, disabledMenuItems});
 
     const menuProps = {
         items,
@@ -170,6 +177,20 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     };
     const closeModal = () => {
         setModal({...modal, open: false})
+    }
+
+    const modalCallbacks = {
+        confirmBulkUploadEdit
+    }
+
+    const handleModalOk = () => {
+        if (modal.okCallback && modalCallbacks[modal.okCallback]) {
+            if (selectedEntities.length) {
+                modalCallbacks[modal.okCallback]()
+            }
+        } else {
+            closeModal()
+        }
     }
 
     return (
@@ -201,10 +222,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     />
                     <Modal
                         cancelButtonProps={{ style: { display: modal.cancelCSS } }}
+                        width={modal.width}
                         closable={false}
                         open={modal.open}
                         onCancel={closeModal}
-                        onOk={closeModal}
+                        onOk={handleModalOk}
                     >
                         {modal.body}
                     </Modal>

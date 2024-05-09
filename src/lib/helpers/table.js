@@ -1,4 +1,4 @@
-import {CaretDownOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
 import {Dropdown, Space, Tooltip} from "antd";
 import React from "react";
 import {eq, toDateString} from "./general";
@@ -234,6 +234,37 @@ const TABLE = {
                     </Tooltip>
 
                 )
+            },
+            statusUpload: {
+                title: "Status",
+                width: '15%',
+                dataIndex: "status",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["status"] || null,
+                sorter: (a,b) => a.status.localeCompare(b.status),
+                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                ellipsis: true,
+                filters: TABLE.getStatusFilters(STATUS.uploads),
+                onFilter: (value, record) => {
+                    if (value === 'Unreorganized') {
+                        return !eq(record.status, 'reorganized');
+                    }
+                    return eq(record.status, value);
+                },
+                render: (status) => (
+                    <Tooltip title={TABLE.getStatusDefinition(status, 'Upload')}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
+                        {status}
+                    </span>
+                    </Tooltip>
+                )
+            },
+            deleteAction: (handleRemove) => {
+                return {
+                    title: 'Delete',
+                    width: 100,
+                    render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
+                }
             }
         }
     },

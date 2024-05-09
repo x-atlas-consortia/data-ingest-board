@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
+import {callService, deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
@@ -7,6 +7,7 @@ import URLS from "../lib/helpers/urls";
 import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
 import AddonsIndex from "../lib/AddonsIndex";
+import UI_BLOCKS from "../lib/helpers/uiBlocks";
 
 const AppContext = createContext()
 
@@ -154,6 +155,19 @@ export const AppProvider = ({ children, messages, banners }) => {
         return info ? parseJSON(atob(info))?.email : ''
     }
 
+    const confirmBulkEdit = ({url, setModal, bulkEditValues, entityName = 'Dataset'}) => {
+        const headers = getHeadersWith(globusToken)
+
+        // TODO: configure for uploads
+        callService(url, headers.headers, selectedEntities.map(item => {
+            return {...bulkEditValues, uuid: item.uuid}
+        })).then((res) => {
+            let mainTitle = `${entityName}(s) Submitted For Bulk Editing`
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
+        })
+    }
+
     const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
 
 
@@ -185,6 +199,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         hasDataAdminPrivs,
         handleLogin, handleLogout, getUserEmail,
         t,
+        confirmBulkEdit,
         writeGroups,
         revisionsData,
         selectedEntities, setSelectedEntities
