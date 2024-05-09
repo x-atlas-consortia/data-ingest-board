@@ -13,7 +13,8 @@ function AddonsIndex(source, globusInfo) {
     const addons = [GoogleTagManager]
     $(document).ready(() => {
         for (let addon of addons) {
-            new addon(globusInfo, addon.name)
+            console.log(addon.name)
+            addon.constructor(globusInfo, addon.name)
         }
 
     })
