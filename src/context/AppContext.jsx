@@ -163,7 +163,12 @@ export const AppProvider = ({ children, messages, banners }) => {
         })).then((res) => {
             let mainTitle = `${entityName}(s) Submitted For Bulk Editing`
             const {className} = UI_BLOCKS.modalResponse.styling(res)
-            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
+            const otherDetails = (
+                <p>
+                    Please note the updates to the {entityName}s will not be immediately visible.
+                </p>
+            )
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle, otherDetails)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }

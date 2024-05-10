@@ -15,7 +15,7 @@ const UI_BLOCKS = {
           const preTitle = isOk ? 'SUCCESS' : 'FAIL'
           return {isOk, className, preTitle}
       },
-      body: (res, mainTitle) => {
+      body: (res, mainTitle, otherDetails) => {
           let {className, isOk, preTitle} = UI_BLOCKS.modalResponse.styling(res)
           const modalBody = (<div>
               <center>
@@ -27,6 +27,7 @@ const UI_BLOCKS = {
               <div>
                   <p className={'mt-4'}>RESPONSE:</p>
                   <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
+                  {otherDetails && <div>{otherDetails}</div>}
               </div>
 
           </div>)
