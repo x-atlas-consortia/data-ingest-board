@@ -122,7 +122,7 @@ const TABLE = {
                 icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
         ]
-        if (hasDataAdminPrivs) {
+        if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
             _items.push(
                 {
                     label: 'Bulk Edit',
