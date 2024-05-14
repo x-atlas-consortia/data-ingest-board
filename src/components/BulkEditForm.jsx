@@ -2,34 +2,49 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
 
-function BulkEditForm({statuses, writeGroups, setBulkEditValues}) {
+function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitiesStatuses}) {
     const [bulkEditForm] = Form.useForm()
+    const [values, setValues] = useState({})
+    const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
+
+    const updateResetField = (field, checked) => {
+        const resetField = `${field}_clear`
+        setResetValues({...resetValues, [resetField]: checked})
+    }
     const updateBulk = (field, value) => {
         const update = {...values, [field]: value}
+
+        if (value !== '' && value !== undefined) {
+            updateResetField(field, false)
+        }
         setValues(update)
         setBulkEditValues(update)
-        console.log(field, value)
     }
     const ingestTask = Form.useWatch((values) => {
         updateBulk('ingest_task', values.ingest_task)
     }, bulkEditForm)
 
-    const [values, setValues] = useState({})
-
     let statusOptions = []
+    let notToIncludeStatues = selectedEntitiesStatuses.concat(['unpublished', 'published'])
     for (let s of statuses) {
-        statusOptions.push(<Select.Option key={`status__${s.value}`} value={s.value}>{s.text}</Select.Option>)
+        if (!notToIncludeStatues.comprises(s.value)) {
+            statusOptions.push(<Select.Option key={`status__${s.value}`} value={s.value}>{s.text}</Select.Option>)
+        }
     }
     let groupOptions = []
     for (let w of writeGroups) {
         groupOptions.push(<Select.Option key={`assigned_to_group_name__${w.uuid}`} value={w.displayname}>{w.displayname}</Select.Option>)
     }
     const handleOptionsChange = (value, e) => {
-        const field = e.key.split('__')[0]
-        updateBulk(field, value)
+        if (e.key) {
+            const field = e.key.split('__')[0]
+            updateBulk(field, value)
+        }
     }
 
     const handleResetChecked = (field) => {
+        bulkEditForm.setFieldValue(field, null)
+        updateResetField(field, true)
         updateBulk(field, "")
     }
 
@@ -45,12 +60,13 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues}) {
                         {groupOptions}
                     </Select>
                 </Form.Item>
-                <Checkbox onChange={()=>handleResetChecked('assigned_to_group_name')}>Clear assigned to group name values on selected </Checkbox>
+                <Checkbox checked={resetValues.assigned_to_group_name_clear} name="assigned_to_group_name_clear" onChange={()=>handleResetChecked('assigned_to_group_name')}>Clear assigned to group name values on selected </Checkbox>
+
 
                 <Form.Item name="ingest_task" label="Ingest Task" className={'mt-3 mb-0'}>
                     <Input />
                 </Form.Item>
-                <Checkbox onChange={()=>handleResetChecked('ingest_task')}>Clear ingest task values on selected </Checkbox>
+                <Checkbox checked={resetValues.ingest_task_clear} onChange={()=>handleResetChecked('ingest_task')}>Clear ingest task values on selected </Checkbox>
 
                 <Form.Item name="status" label="Status" className={'mt-3'}>
                     <Select

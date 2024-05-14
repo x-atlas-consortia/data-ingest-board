@@ -347,7 +347,8 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (e.key === '3') {
             showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
-                                                       writeGroups={writeGroups} setBulkEditValues={setBulkEditValues} />})
+                                                       writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
+                                                   selectedEntitiesStatuses={selectedEntities.map((e) => e.status)} />})
         }
     }
 
