@@ -165,8 +165,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
 
     const confirmBulkUploadEdit = () => {
-        // TODO: configure for uploads
-        confirmBulkEdit({url: URLS.ingest.bulk.edit(), setModal, bulkEditValues, entityName: 'Upload'})
+        confirmBulkEdit({url: URLS.ingest.bulk.edit.uploads(), setModal, bulkEditValues, entityName: 'Upload'})
     }
 
     const items = TABLE.bulkSelectionDropdown([], {hasDataAdminPrivs, disabledMenuItems});

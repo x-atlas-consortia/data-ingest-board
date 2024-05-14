@@ -311,7 +311,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     }
 
     const confirmBulkDatasetEdit = () => {
-        confirmBulkEdit({url: URLS.ingest.bulk.edit(), setModal, bulkEditValues})
+        confirmBulkEdit({url: URLS.ingest.bulk.edit.datasets(), setModal, bulkEditValues})
     }
 
     const modalCallbacks = {
