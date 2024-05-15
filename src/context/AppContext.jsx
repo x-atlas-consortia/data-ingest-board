@@ -90,6 +90,7 @@ export const AppProvider = ({ children, messages, banners }) => {
 
 
     const fetchWriteGroups = (token) => {
+        if (!URLS.ingest.privs.writeGroups()) return
         axios.get(URLS.ingest.privs.writeGroups(), getHeadersWith(token))
             .then( (response) => {
                 setWriteGroups(response.data.user_write_groups)
