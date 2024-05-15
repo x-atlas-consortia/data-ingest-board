@@ -161,7 +161,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}
                                                    writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
-                                                   selectedEntitiesStatuses={selectedEntities.map((e) => e.status)} />})
+                                                   selectedEntitiesStatuses={selectedEntities.map((e) => e.status)} entityName={'uploads'} />})
         }
     }
 

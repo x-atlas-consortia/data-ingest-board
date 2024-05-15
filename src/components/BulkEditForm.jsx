@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
 
-function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitiesStatuses}) {
+function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitiesStatuses, entityName = 'datasets'}) {
     const [bulkEditForm] = Form.useForm()
     const [values, setValues] = useState({})
     const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
@@ -60,13 +60,17 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitie
                         {groupOptions}
                     </Select>
                 </Form.Item>
-                <Checkbox checked={resetValues.assigned_to_group_name_clear} name="assigned_to_group_name_clear" onChange={()=>handleResetChecked('assigned_to_group_name')}>Clear assigned to group name values on selected </Checkbox>
+                <Checkbox checked={resetValues.assigned_to_group_name_clear} name="assigned_to_group_name_clear" onChange={()=>handleResetChecked('assigned_to_group_name')}>
+                    Clear assigned to group name values on selected {entityName}
+                </Checkbox>
 
 
                 <Form.Item name="ingest_task" label="Ingest Task" className={'mt-3 mb-0'}>
                     <Input />
                 </Form.Item>
-                <Checkbox checked={resetValues.ingest_task_clear} onChange={()=>handleResetChecked('ingest_task')}>Clear ingest task values on selected </Checkbox>
+                <Checkbox checked={resetValues.ingest_task_clear} onChange={()=>handleResetChecked('ingest_task')}>
+                    Clear ingest task values on selected {entityName}
+                </Checkbox>
 
                 <Form.Item name="status" label="Status" className={'mt-3'}>
                     <Select
