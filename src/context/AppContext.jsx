@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useRef} from 'react'
-import {deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
+import {callService, deleteFromLocalStorage, eq, getHeadersWith, parseJSON, storageKey} from "../lib/helpers/general";
 import {useIdleTimer} from 'react-idle-timer'
 import {deleteCookie, getCookie, setCookie} from 'cookies-next'
 import axios from "axios";
@@ -7,6 +7,7 @@ import URLS from "../lib/helpers/urls";
 import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
 import AddonsIndex from "../lib/AddonsIndex";
+import UI_BLOCKS from "../lib/helpers/uiBlocks";
 
 const AppContext = createContext()
 
@@ -24,6 +25,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
     const [selectedEntities, setSelectedEntities] = useState([])
+    const [writeGroups, setWriteGroups] = useState(null)
 
 
     /**
@@ -86,6 +88,17 @@ export const AppProvider = ({ children, messages, banners }) => {
         })
     }
 
+
+    const fetchWriteGroups = (token) => {
+        if (!URLS.ingest.privs.writeGroups()) return
+        axios.get(URLS.ingest.privs.writeGroups(), getHeadersWith(token))
+            .then( (response) => {
+                setWriteGroups(response.data.user_write_groups)
+            }).catch((error) => {
+            console.error(error)
+        })
+    }
+
     const checkToken = (token, authorized) => {
         if (!token) {
             setIsAuthenticated(false)
@@ -96,6 +109,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 setIsAuthenticated(authorized)
                 verifyInReadGroup(response.data)
                 checkInAdminGroup(token)
+                fetchWriteGroups(token)
                 setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
@@ -142,6 +156,24 @@ export const AppProvider = ({ children, messages, banners }) => {
         return info ? parseJSON(atob(info))?.email : ''
     }
 
+    const confirmBulkEdit = ({url, setModal, bulkEditValues, entityName = 'Dataset'}) => {
+        const headers = getHeadersWith(globusToken)
+
+        callService(url, headers.headers, selectedEntities.map(item => {
+            return {...bulkEditValues, uuid: item.uuid}
+        })).then((res) => {
+            let mainTitle = `${entityName}(s) Submitted For Bulk Editing`
+            const {className} = UI_BLOCKS.modalResponse.styling(res)
+            const otherDetails = (
+                <p>
+                    Please note the updates to the {entityName}s will not be immediately visible.
+                </p>
+            )
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle, otherDetails)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
+        })
+    }
+
     const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
 
 
@@ -173,6 +205,8 @@ export const AppProvider = ({ children, messages, banners }) => {
         hasDataAdminPrivs,
         handleLogin, handleLogout, getUserEmail,
         t,
+        confirmBulkEdit,
+        writeGroups,
         revisionsData,
         selectedEntities, setSelectedEntities
     }}>{children}</AppContext.Provider>

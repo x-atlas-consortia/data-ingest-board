@@ -1,4 +1,4 @@
-import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
 import {Dropdown, Space, Tooltip} from "antd";
 import React from "react";
 import {eq, toDateString} from "./general";
@@ -6,6 +6,7 @@ import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
 import {CSVLink} from "react-csv";
+import {STATUS} from "../constants";
 
 const TABLE = {
     cols: {
@@ -113,7 +114,7 @@ const TABLE = {
             return item;
         })
     },
-    bulkSelectionDropdown: (items = []) => {
+    bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [
             {
                 label: 'Download CSV Data',
@@ -121,6 +122,17 @@ const TABLE = {
                 icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
         ]
+        if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
+            _items.push(
+                {
+                    label: 'Bulk Edit',
+                    key: '3',
+                    icon: <EditOutlined />,
+                    disabled: disabledMenuItems['bulkSubmit']
+                }
+            )
+        }
+
         return _items.concat(items);
     },
     renderDropdownContent: (record) => {
@@ -207,11 +219,7 @@ const TABLE = {
                 sorter: (a,b) => a.status.localeCompare(b.status),
                 defaultFilteredValue: defaultFilteredValue["status"] || null,
                 ellipsis: true,
-                filters: TABLE.getStatusFilters( [
-                    {text: 'Unpublished', value: 'unpublished'},
-                    {text: 'Published', value: 'published'},
-                    {text: 'QA', value: 'qa'}
-                ]),
+                filters: TABLE.getStatusFilters(STATUS.datasets),
                 onFilter: (value, record) => {
                     if (eq(value, 'Unpublished')) {
                         return !eq(record.status, 'published');
@@ -226,6 +234,37 @@ const TABLE = {
                     </Tooltip>
 
                 )
+            },
+            statusUpload: {
+                title: "Status",
+                width: '15%',
+                dataIndex: "status",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["status"] || null,
+                sorter: (a,b) => a.status.localeCompare(b.status),
+                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                ellipsis: true,
+                filters: TABLE.getStatusFilters(STATUS.uploads),
+                onFilter: (value, record) => {
+                    if (value === 'Unreorganized') {
+                        return !eq(record.status, 'reorganized');
+                    }
+                    return eq(record.status, value);
+                },
+                render: (status) => (
+                    <Tooltip title={TABLE.getStatusDefinition(status, 'Upload')}>
+                    <span className={`c-badge c-badge--${status.toLowerCase()}`} style={{backgroundColor: THEME.getStatusColor(status).bg, color: THEME.getStatusColor(status).text}}>
+                        {status}
+                    </span>
+                    </Tooltip>
+                )
+            },
+            deleteAction: (handleRemove) => {
+                return {
+                    title: 'Delete',
+                    width: 100,
+                    render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
+                }
             }
         }
     },

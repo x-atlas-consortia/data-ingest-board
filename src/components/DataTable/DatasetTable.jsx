@@ -1,5 +1,5 @@
-import {Modal, Table} from "antd";
-import {ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined, CloseOutlined} from "@ant-design/icons";
+import {Form, Modal, Table} from "antd";
+import {ExportOutlined, ThunderboltOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import ENVS from "../../lib/helpers/envs";
@@ -9,13 +9,18 @@ import {callService, eq, getHeadersWith, getUBKGName} from "../../lib/helpers/ge
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 import AppContext from "../../context/AppContext";
+import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import {STATUS} from "../../lib/constants";
+import BulkEditForm from "../BulkEditForm";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
+    const [bulkEditValues, setBulkEditValues] = useState({})
+    const [confirmModalArgs, setConfirmModalArgs] = useState({})
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -26,7 +31,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     useEffect(() => {
         if (modal.open && eq(modal.key, 'bulkProcess')) {
-            showConfirmModalOfSelectedDatasets()
+            showConfirmModalOfSelectedDatasets(confirmModalArgs)
         }
     }, [selectedEntities])
 
@@ -298,52 +303,36 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const confirmBulkProcess = () => {
         const headers = getHeadersWith(globusToken)
         callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
-            let className = 'alert alert-success'
-            const isOk =  ['202', '200'].comprises(res.status.toString())
-            if (!isOk) {
-                className = 'alert alert-danger'
-            }
-            const preTitle = isOk ? 'SUCCESS' : 'FAIL'
-            const modalBody = (<div>
-                <center>
-                    <h5>
-                        {isOk && <CheckCircleOutlined style={{color: '#52c41a'}} />}
-                        {!isOk && <IssuesCloseOutlined style={{color: 'red'}} />} {preTitle}: Dataset(s) Submitted For Processing
-                    </h5>
-                </center>
-                <div>
-                    <p className={'mt-4'}>RESPONSE:</p>
-                    <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
-                </div>
-
-            </div>)
+            const {className} = UI_BLOCKS.modalResponse.styling(res)
+            let mainTitle = 'Dataset(s) Submitted For Processing'
+            const {modalBody} = UI_BLOCKS.modalResponse.modal(res, mainTitle)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
+
+    const confirmBulkDatasetEdit = () => {
+        confirmBulkEdit({url: URLS.ingest.bulk.edit.datasets(), setModal, bulkEditValues})
+    }
+
+    const modalCallbacks = {
+        confirmBulkProcess,
+        confirmBulkDatasetEdit
+    }
+
     const handleRemove = (record) => {
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
-    const showConfirmModalOfSelectedDatasets  = () => {
+    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
+        setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(defaultSortOrder, {}).id(),
             TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
             TABLE.reusableColumns(defaultSortOrder, {}).status,
-            {
-                title: 'Delete',
-                width: 100,
-                render: (date, record) => <span className={'mx-4'} aria-label={`Delete ${TABLE.cols.f('id')} from selection`} onClick={()=> handleRemove(record)}><CloseOutlined style={{color: 'red', cursor: 'pointer'}} /></span>
-            },
+            TABLE.reusableColumns(defaultSortOrder, {}).deleteAction(handleRemove)
         ]
-
-        const modalBody = (<div>
-            <h5 className='text-center mb-5'>Confirm selection for bulk processing</h5>
-            <p>{selectedEntities.length} Datasets selected</p>
-            <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
-        </div>)
-
-        setModal({key: 'bulkProcess', okText: 'Submit', okCallback: 'confirmBulkProcess',
-            width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
+        UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
+        columns, selectedEntities, setModal})
     }
 
     const handleMenuClick = (e) => {
@@ -352,7 +341,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         }
 
         if (e.key === '2') {
-            showConfirmModalOfSelectedDatasets()
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess'})
+        }
+
+        if (e.key === '3') {
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
+                afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
+                                                       writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
+                                                   />})
         }
     }
 
@@ -361,25 +357,23 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     }
 
     const handleModalOk = () => {
-        if (modal.okCallback) {
-            if (eq(modal.okCallback, 'confirmBulkProcess')) {
-                if (selectedEntities.length) {
-                    confirmBulkProcess()
-                }
+        if (modal.okCallback && modalCallbacks[modal.okCallback]) {
+            if (selectedEntities.length) {
+                modalCallbacks[modal.okCallback]()
             }
         } else {
             closeModal()
         }
     }
 
-    const items = TABLE.bulkSelectionDropdown(hasDataAdminPrivs ? [
+    const items = TABLE.bulkSelectionDropdown((hasDataAdminPrivs ? [
         {
             label: 'Submit For Processing',
             key: '2',
             icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
             disabled: disabledMenuItems['bulkSubmit']
         }
-    ] : []);
+    ] : []), {hasDataAdminPrivs, disabledMenuItems});
 
     const menuProps = {
         items,
