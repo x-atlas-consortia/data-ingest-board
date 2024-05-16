@@ -1,11 +1,29 @@
-import React, {useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
+import AppContext from "../context/AppContext";
 
-function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitiesStatuses, entityName = 'datasets'}) {
+function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'datasets'}) {
+    const {selectedEntities} = useContext(AppContext)
     const [bulkEditForm] = Form.useForm()
     const [values, setValues] = useState({})
     const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
+    const [statusOptions, setStatusOptions] = useState([])
+
+    const buildStatusOptions = () => {
+        let options = []
+        const selectedEntitiesStatuses = selectedEntities.map((e) => e.status)
+        let notToIncludeStatues = selectedEntitiesStatuses.concat(['unpublished', 'published'])
+        for (let s of statuses) {
+            if (!notToIncludeStatues.comprises(s.value)) {
+                options.push(<Select.Option key={`status__${s.value}`} value={s.value}>{s.text}</Select.Option>)
+            }
+        }
+        setStatusOptions(options)
+    }
+    useEffect(() => {
+        buildStatusOptions()
+    }, [selectedEntities])
 
     const updateResetField = (field, checked) => {
         const resetField = `${field}_clear`
@@ -24,13 +42,6 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, selectedEntitie
         updateBulk('ingest_task', values.ingest_task)
     }, bulkEditForm)
 
-    let statusOptions = []
-    let notToIncludeStatues = selectedEntitiesStatuses.concat(['unpublished', 'published'])
-    for (let s of statuses) {
-        if (!notToIncludeStatues.comprises(s.value)) {
-            statusOptions.push(<Select.Option key={`status__${s.value}`} value={s.value}>{s.text}</Select.Option>)
-        }
-    }
     let groupOptions = []
     for (let w of writeGroups) {
         groupOptions.push(<Select.Option key={`assigned_to_group_name__${w.uuid}`} value={w.displayname}>{w.displayname}</Select.Option>)

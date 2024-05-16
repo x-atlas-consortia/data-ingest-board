@@ -25,6 +25,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
+    useEffect(() => {
+        if (modal.open && eq(modal.key, 'bulkProcess')) {
+            showConfirmModalOfSelectedUploads(confirmModalArgs)
+        }
+    }, [selectedEntities])
+
     const [modal, setModal] = useState({cancelCSS: 'none'})
 
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
@@ -161,7 +167,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}
                                                    writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
-                                                   selectedEntitiesStatuses={selectedEntities.map((e) => e.status)} entityName={'uploads'} />})
+                                                   entityName={'uploads'} />})
         }
     }
 

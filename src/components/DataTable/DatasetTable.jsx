@@ -1,5 +1,5 @@
 import {Form, Modal, Table} from "antd";
-import {ExportOutlined, ThunderboltOutlined, CheckCircleOutlined, IssuesCloseOutlined, CloseOutlined} from "@ant-design/icons";
+import {ExportOutlined, ThunderboltOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import ENVS from "../../lib/helpers/envs";
@@ -348,7 +348,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
                                                        writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
-                                                   selectedEntitiesStatuses={selectedEntities.map((e) => e.status)} />})
+                                                   />})
         }
     }
 
