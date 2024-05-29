@@ -238,7 +238,7 @@ const DataTable = (props) => {
                     <div className="row">
                         <h2 className="c-table__title col text-center m-5">
                             {useDatasetApi ? "Datasets" : "Uploads"}
-                            {hasDataLoaded() && <span className={'h6 txt-muted-light txt-sm-light d-block'}><small>Last updated: {getLastUpdated()}</small></span>}
+                            {hasDataLoaded() && <span className={'h6 txt-muted-light txt-sm-light d-block'}><small>Last refreshed: {getLastUpdated()}</small></span>}
                         </h2>
                     </div>
                     {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
