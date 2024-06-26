@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {eq, getHeadersWith} from "../../lib/helpers/general";
+import {eq, getHeadersWith, toDateString} from "../../lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
 import ENVS from "../../lib/helpers/envs";
@@ -137,14 +137,15 @@ const DataTable = (props) => {
             const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
 
             let uploadData = []
+            let uploadResponse
             if (ENVS.uploadsEnabled()) {
-                const uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
+                uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
                 applyUploads(uploadResponse)
-                uploadData = uploadResponse.data
+                uploadData = uploadResponse.data.data
             }
-            applyDatasets(datasetResponse)
-            setOriginalResponse({datasets: datasetResponse, uploads: {data: uploadData}})
-            filterUploads(uploadData, datasetResponse.data, selectUploadId);
+            applyDatasets(datasetResponse.data)
+            setOriginalResponse({datasets: datasetResponse.data, uploads: uploadResponse.data})
+            filterUploads(uploadData, datasetResponse.data.data, selectUploadId);
         } catch (error) {
         } finally {
         setLoading(false);
@@ -219,6 +220,16 @@ const DataTable = (props) => {
         />
     ) : uploadTable;
 
+    const getLastUpdated = () => {
+        let key = useDatasetApi ? 'datasets' : 'uploads'
+        return (new Date(originalResponse[key].last_updated).toLocaleString())
+    }
+
+    const hasDataLoaded = () => {
+        let key = useDatasetApi ? 'datasets' : 'uploads'
+        return originalResponse[key]?.data !== undefined
+    }
+
     return (
         <>
             <AppBanner name={'searchEntities'} />
@@ -227,6 +238,7 @@ const DataTable = (props) => {
                     <div className="row">
                         <h2 className="c-table__title col text-center m-5">
                             {useDatasetApi ? "Datasets" : "Uploads"}
+                            {hasDataLoaded() && <span className={'h6 txt-muted-light txt-sm-light d-block'}><small>Last refreshed: {getLastUpdated()}</small></span>}
                         </h2>
                     </div>
                     {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}

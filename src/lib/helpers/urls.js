@@ -20,7 +20,11 @@ const URLS = {
             uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL
         },
         bulk: {
-            submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL
+            submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL,
+            edit: {
+                datasets: () => process.env.NEXT_PUBLIC_INGEST_BULK_EDIT_DATASETS_URL,
+                uploads: () => process.env.NEXT_PUBLIC_INGEST_BULK_EDIT_UPLOADS_URL,
+            }
         },
         main: () => process.env.NEXT_PUBLIC_INGEST_BASE,
         view: (uuid, entity = 'dataset') => {
@@ -29,7 +33,8 @@ const URLS = {
         },
         privs: {
             groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL,
-            admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL
+            admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL,
+            writeGroups: () => process.env.NEXT_PUBLIC_PRIVS_WRITE_GROUPS
         },
         auth: {
             login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
