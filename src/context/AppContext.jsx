@@ -6,7 +6,7 @@ import axios from "axios";
 import URLS from "../lib/helpers/urls";
 import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
-import AddonsIndex from "../lib/AddonsIndex";
+import AddonsIndex from "../lib/addons/AddonsIndex";
 import UI_BLOCKS from "../lib/helpers/uiBlocks";
 
 const AppContext = createContext()

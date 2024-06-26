@@ -1,8 +1,5 @@
-import Addon from "./Addon";
-import GoogleTagManager from "./GoogleTagManager";
-
 function AddonsIndex(source, globusInfo) {
-    Addon.log('Addons started ...', 'log',  'white')
+    Addon.log('Addons started ...', {color: 'white'})
 
     window.addons = window.addons || {}
     if (window.addons[source] !== undefined) {
@@ -13,8 +10,8 @@ function AddonsIndex(source, globusInfo) {
     const addons = [GoogleTagManager]
     $(document).ready(() => {
         for (let addon of addons) {
-            console.log(addon.name)
-            addon.constructor(globusInfo, addon.name)
+            Addon.log(`Addons app: ${addon.name}`, {color: 'green'})
+            new addon(globusInfo, addon.name)
         }
 
     })

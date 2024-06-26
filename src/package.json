@@ -3,12 +3,14 @@
   "version": "1.3.3",
   "private": true,
   "scripts": {
-    "all": "npm-run-all --parallel dev css",
+    "all": "npm-run-all --parallel dev css addons",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css"
+    "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css",
+    "addons": "./node_modules/.bin/babel lib/addons/core/__polyfill.js lib/addons/core/Addon.js lib/addons/core/*.js --presets minify --out-file public/js/addons.js",
+    "addons-watch": "watch 'npm run addons' ./lib/addons/core"
   },
   "prettier": {
     "singleQuote": true,
@@ -34,5 +36,13 @@
     "react-favicon": "^2.0.3",
     "react-idle-timer": "^5.7.2",
     "stylus": "^0.59.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.7",
+    "@babel/core": "^7.24.7",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.24.7",
+    "babel-preset-minify": "^0.5.2",
+    "watch": "^1.0.2"
   }
 }
