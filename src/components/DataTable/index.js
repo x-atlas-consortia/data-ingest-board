@@ -140,7 +140,7 @@ const DataTable = (props) => {
             let uploadResponse
             if (ENVS.uploadsEnabled()) {
                 uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
-                applyUploads(uploadResponse)
+                applyUploads(uploadResponse.data)
                 uploadData = uploadResponse.data.data
             }
             applyDatasets(datasetResponse.data)
