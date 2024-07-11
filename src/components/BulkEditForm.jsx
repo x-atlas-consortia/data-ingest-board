@@ -8,6 +8,7 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
     const [bulkEditForm] = Form.useForm()
     const values = useRef({})
     const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
+    const resetValuesRetainer = useRef({assigned_to_group_name_clear: false, ingest_task_clear: false})
     const [statusOptions, setStatusOptions] = useState([])
 
     const buildStatusOptions = () => {
@@ -25,16 +26,18 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
         buildStatusOptions()
     }, [selectedEntities])
 
+    const getResetFieldName = (field) => `${field}_clear`
     const updateResetField = (field, checked) => {
-        const resetField = `${field}_clear`
-        setResetValues({...resetValues, [resetField]: checked})
+        const resetField = getResetFieldName(field)
+        setResetValues({...resetValuesRetainer.current, [resetField]: checked})
+        resetValuesRetainer.current[resetField] = checked
     }
     const updateBulk = (field, value) => {
-        values.current = {...values.current, [field]: value}
-        if (value !== '' && value !== undefined) {
-            updateResetField(field, false)
+        if (value == null) {
+            delete values.current[field]
+        } else {
+            values.current[field] = value
         }
-
         setBulkEditValues(values.current)
     }
     const ingestTask = Form.useWatch((values) => {
@@ -53,9 +56,10 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
     }
 
     const handleResetChecked = (field) => {
-        bulkEditForm.setFieldValue(field, null)
-        updateResetField(field, true)
-        updateBulk(field, "")
+        bulkEditForm.setFieldValue(field, '')
+        const newChecked = !resetValuesRetainer.current[getResetFieldName(field)]
+        updateResetField(field, newChecked)
+        updateBulk(field, newChecked ? '' : null)
     }
 
     return (
