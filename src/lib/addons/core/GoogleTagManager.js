@@ -64,7 +64,6 @@ class GoogleTagManager extends Addon {
         })
 
         $('body').on('click', '.ant-dropdown-menu-item .ant-dropdown-menu-title-content', (e)=> {
-            debugger
             _t.handleMenuItem(e)
         })
 

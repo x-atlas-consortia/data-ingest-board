@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
 import AppContext from "../context/AppContext";
@@ -6,8 +6,9 @@ import AppContext from "../context/AppContext";
 function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'datasets'}) {
     const {selectedEntities} = useContext(AppContext)
     const [bulkEditForm] = Form.useForm()
-    const [values, setValues] = useState({})
+    const values = useRef({})
     const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
+    const resetValuesRetainer = useRef({assigned_to_group_name_clear: false, ingest_task_clear: false})
     const [statusOptions, setStatusOptions] = useState([])
 
     const buildStatusOptions = () => {
@@ -25,18 +26,19 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
         buildStatusOptions()
     }, [selectedEntities])
 
+    const getResetFieldName = (field) => `${field}_clear`
     const updateResetField = (field, checked) => {
-        const resetField = `${field}_clear`
-        setResetValues({...resetValues, [resetField]: checked})
+        const resetField = getResetFieldName(field)
+        setResetValues({...resetValuesRetainer.current, [resetField]: checked})
+        resetValuesRetainer.current[resetField] = checked
     }
     const updateBulk = (field, value) => {
-        const update = {...values, [field]: value}
-
-        if (value !== '' && value !== undefined) {
-            updateResetField(field, false)
+        if (value == null) {
+            delete values.current[field]
+        } else {
+            values.current[field] = value
         }
-        setValues(update)
-        setBulkEditValues(update)
+        setBulkEditValues(values.current)
     }
     const ingestTask = Form.useWatch((values) => {
         updateBulk('ingest_task', values.ingest_task)
@@ -54,9 +56,10 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
     }
 
     const handleResetChecked = (field) => {
-        bulkEditForm.setFieldValue(field, null)
-        updateResetField(field, true)
-        updateBulk(field, "")
+        bulkEditForm.setFieldValue(field, '')
+        const newChecked = !resetValuesRetainer.current[getResetFieldName(field)]
+        updateResetField(field, newChecked)
+        updateBulk(field, newChecked ? '' : null)
     }
 
     return (
