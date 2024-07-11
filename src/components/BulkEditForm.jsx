@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
 import AppContext from "../context/AppContext";
@@ -6,7 +6,7 @@ import AppContext from "../context/AppContext";
 function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'datasets'}) {
     const {selectedEntities} = useContext(AppContext)
     const [bulkEditForm] = Form.useForm()
-    const [values, setValues] = useState({})
+    const values = useRef({})
     const [resetValues, setResetValues] = useState({assigned_to_group_name_clear: false, ingest_task_clear: false})
     const [statusOptions, setStatusOptions] = useState([])
 
@@ -30,13 +30,12 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
         setResetValues({...resetValues, [resetField]: checked})
     }
     const updateBulk = (field, value) => {
-        const update = {...values, [field]: value}
-
+        values.current = {...values.current, [field]: value}
         if (value !== '' && value !== undefined) {
             updateResetField(field, false)
         }
-        setValues(update)
-        setBulkEditValues(update)
+
+        setBulkEditValues(values.current)
     }
     const ingestTask = Form.useWatch((values) => {
         updateBulk('ingest_task', values.ingest_task)
