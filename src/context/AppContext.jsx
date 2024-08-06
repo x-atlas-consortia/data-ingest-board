@@ -93,7 +93,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         if (!URLS.ingest.privs.writeGroups()) return
         axios.get(URLS.ingest.privs.writeGroups(), getHeadersWith(token))
             .then( (response) => {
-                setWriteGroups(response.data.user_write_groups)
+                setWriteGroups(response.data.user_write_groups || response.data.groups)
             }).catch((error) => {
             console.error(error)
         })
