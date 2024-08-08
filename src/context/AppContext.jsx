@@ -166,7 +166,8 @@ export const AppProvider = ({ children, messages, banners }) => {
             const {className} = UI_BLOCKS.modalResponse.styling(res)
             const otherDetails = (
                 <p>
-                    Please note the updates to the {entityName}s will not be immediately visible.
+                    Please note the submitted changes to the {entityName}s are being handled by a different service and may not update successfully.
+                    These changes will also not appear on the Data Ingest Board until its hourly refresh has completed. To verify that these changes are complete please visit the Portal/Ingest UI.
                 </p>
             )
             const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle, otherDetails)
