@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {Form, Input, Select, Checkbox} from "antd";
 import AppContext from "../context/AppContext";
 
-function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'datasets'}) {
+function BulkEditForm({statuses, dataProviderGroups, setBulkEditValues, entityName = 'datasets'}) {
     const {selectedEntities} = useContext(AppContext)
     const [bulkEditForm] = Form.useForm()
     const values = useRef({})
@@ -45,7 +45,7 @@ function BulkEditForm({statuses, writeGroups, setBulkEditValues, entityName = 'd
     }, bulkEditForm)
 
     let groupOptions = []
-    for (let w of writeGroups) {
+    for (let w of dataProviderGroups) {
         groupOptions.push(<Select.Option key={`assigned_to_group_name__${w.uuid}`} value={w.displayname}>{w.displayname}</Select.Option>)
     }
     const handleOptionsChange = (value, e) => {

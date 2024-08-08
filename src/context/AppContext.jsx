@@ -25,7 +25,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
     const [selectedEntities, setSelectedEntities] = useState([])
-    const [writeGroups, setWriteGroups] = useState(null)
+    const [dataProviderGroups, setDataProviderGroups] = useState(null)
 
 
     /**
@@ -89,11 +89,11 @@ export const AppProvider = ({ children, messages, banners }) => {
     }
 
 
-    const fetchWriteGroups = (token) => {
-        if (!URLS.ingest.privs.writeGroups()) return
-        axios.get(URLS.ingest.privs.writeGroups(), getHeadersWith(token))
+    const fetchDataProviderGroups = (token) => {
+        if (!URLS.ingest.privs.dataProviderGroups()) return
+        axios.get(URLS.ingest.privs.dataProviderGroups(), getHeadersWith(token))
             .then( (response) => {
-                setWriteGroups(response.data.user_write_groups || response.data.groups)
+                setDataProviderGroups(response.data.groups)
             }).catch((error) => {
             console.error(error)
         })
@@ -109,7 +109,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 setIsAuthenticated(authorized)
                 verifyInReadGroup(response.data)
                 checkInAdminGroup(token)
-                fetchWriteGroups(token)
+                fetchDataProviderGroups(token)
                 setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
@@ -207,7 +207,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         handleLogin, handleLogout, getUserEmail,
         t,
         confirmBulkEdit,
-        writeGroups,
+        dataProviderGroups,
         revisionsData,
         selectedEntities, setSelectedEntities
     }}>{children}</AppContext.Provider>
