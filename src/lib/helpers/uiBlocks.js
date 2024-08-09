@@ -12,7 +12,7 @@ const UI_BLOCKS = {
           if (!isOk) {
               className = 'alert alert-danger'
           }
-          const preTitle = isOk ? 'SUCCESS' : 'FAIL'
+          const preTitle = isOk ? (res.status === '200' ? 'SUCCESS' : 'ACCEPTED') : 'FAIL'
           return {isOk, className, preTitle}
       },
       body: (res, mainTitle, otherDetails) => {
