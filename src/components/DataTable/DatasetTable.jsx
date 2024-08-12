@@ -14,7 +14,7 @@ import {STATUS} from "../../lib/constants";
 import BulkEditForm from "../BulkEditForm";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, writeGroups, confirmBulkEdit} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -305,7 +305,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
             const {className} = UI_BLOCKS.modalResponse.styling(res)
             let mainTitle = 'Dataset(s) Submitted For Processing'
-            const {modalBody} = UI_BLOCKS.modalResponse.modal(res, mainTitle)
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
     }
@@ -347,7 +347,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (e.key === '3') {
             showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
-                                                       writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
+                                                       dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    />})
         }
     }
