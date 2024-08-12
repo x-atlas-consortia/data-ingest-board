@@ -227,6 +227,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            }}
                     />
                     <Modal
+                        className={modal.className}
                         cancelButtonProps={{ style: { display: modal.cancelCSS } }}
                         width={modal.width}
                         closable={false}
