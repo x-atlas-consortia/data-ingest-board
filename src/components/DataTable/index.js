@@ -251,7 +251,7 @@ const DataTable = (props) => {
                         </button>
                     </div>
                     {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads, toggleHistory}}  />}
-                    {table}
+                    {!loading && table}
                 </div>
             </div>
         </>

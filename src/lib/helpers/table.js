@@ -69,14 +69,14 @@ const TABLE = {
         ]
         return filters.concat(entityTypeFilters)
     },
-    countFilteredRecords: (data, filters, dataIndexList, special) => {
+    countFilteredRecords: (data, filters, dataIndexList, special, filterGroupings = {}) => {
         const filteredData = data.filter(item => {
             for (const key in filters) {
                 if (!dataIndexList.includes(key) || !filters[key]) {
                     continue;
                 }
                 const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
+                const filterValues = filterGroupings[filterValue] || filterValue.split(",");
                 if (filterValues.includes(special.case1)) {
                     if (eq(item[key], special.case2)) {
                         return false;

@@ -1,4 +1,3 @@
-import React from "react";
 import axios from "axios";
 
 export function eq(s1, s2, insensitive = true) {

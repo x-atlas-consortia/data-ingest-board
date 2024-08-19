@@ -21,6 +21,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
+    const hierarchyGroupings = {}
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -40,9 +41,31 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
     }
+
+    const getHierarchy = (str) => {
+        const r = new RegExp(/.+?(?=\()/)
+        let res = str.match(r)
+        return (res && res.length) ? res[0].trim() : str
+    }
+
+    const makeHierarchyFilters = (items) => {
+        const hierarchyNames = new Set()
+        for (let i of items) {
+            let groupName = getHierarchy(i)
+            if (!eq(i, groupName)) {
+                const normalized = groupName.toLowerCase()
+                if (hierarchyGroupings[normalized] === undefined) {
+                    hierarchyGroupings[normalized] = []
+                }
+                hierarchyGroupings[normalized].push(i)
+            }
+            hierarchyNames.add(groupName)
+        }
+        return Array.from(hierarchyNames)
+    }
     const uniqueGroupNames = filterField('group_name')
     const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
-    const unfilteredOrganTypes = filterField('organ')
+    const unfilteredOrganTypes = makeHierarchyFilters(filterField('organ'))
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
@@ -66,10 +89,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     for (let _field of ENVS.defaultFilterFields()) {
         if (filters.hasOwnProperty(_field)) {
-            defaultFilteredValue[_field] = filters[_field].toLowerCase().split(",");
+            let value = filters[_field]
+            defaultFilteredValue[_field] = hierarchyGroupings[value.toLowerCase()] || value.toLowerCase().split(",");
         }
     }
-
 
     const datasetColumns = [
         TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(),
@@ -82,7 +105,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             align: "left",
             defaultSortOrder: defaultSortOrder["dataset_type"] || null,
             sorter: (a,b) => a.dataset_type.localeCompare(b.dataset_type),
-            defaultFilteredValue: defaultFilteredValue["dataset_type"] || null,
+            filteredValue: defaultFilteredValue["dataset_type"] || null,
             filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.dataset_type, value),
             ellipsis: true,
@@ -98,7 +121,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 let b1 = Array.isArray(b.processed_datasets) ? b.processed_datasets.length : 0
                 return a1 - b1
             },
-            defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
+            filteredValue: defaultFilteredValue["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
                 return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
@@ -125,7 +148,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             align: "left",
             defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
             sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
-            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
+            filteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
             filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
             ellipsis: true,
@@ -137,9 +160,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             align: "left",
             defaultSortOrder: defaultSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            defaultFilteredValue: defaultFilteredValue["organ"] || null,
+            filteredValue: defaultFilteredValue["organ"] ? [getHierarchy(defaultFilteredValue["organ"][0]).toLowerCase()] : null,
             filters: uniqueOrganType.map(name => ({ text: getUBKGName(name), value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.organ, value),
+            onFilter: (value, record) => eq(record.organ, value) || hierarchyGroupings[value]?.includes(record.organ),
             ellipsis: true,
             render: (organType, record) => {
                 if (!organType) return null
@@ -269,7 +292,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
-            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
+            filteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
             filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
@@ -295,7 +318,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const dataIndexList = filteredDatasetColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
-        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
+        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'}, hierarchyGroupings)
     }
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
