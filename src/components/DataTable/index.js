@@ -9,6 +9,7 @@ import ENVS from "../../lib/helpers/envs";
 import URLS from "../../lib/helpers/urls";
 import TABLE from "../../lib/helpers/table";
 import AppContext from "../../context/AppContext";
+import Spinner from "../Spinner";
 
 
 const DataTable = (props) => {
@@ -252,6 +253,7 @@ const DataTable = (props) => {
                     </div>
                     {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads, toggleHistory}}  />}
                     {!loading && table}
+                    {loading && <Spinner />}
                 </div>
             </div>
         </>
