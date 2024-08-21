@@ -16,7 +16,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, writeGroups, globusToken, confirmBulkEdit} = useContext(AppContext)
+    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, globusToken, confirmBulkEdit} = useContext(AppContext)
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
 
@@ -166,7 +166,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         if (e.key === '3') {
             showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}
-                                                   writeGroups={writeGroups} setBulkEditValues={setBulkEditValues}
+                                                   dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    entityName={'uploads'} />})
         }
     }
@@ -227,6 +227,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                            }}
                     />
                     <Modal
+                        className={modal.className}
                         cancelButtonProps={{ style: { display: modal.cancelCSS } }}
                         width={modal.width}
                         closable={false}
