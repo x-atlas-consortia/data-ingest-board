@@ -26,8 +26,8 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
     const getColumns = () => {
         if (cols.length) return cols;
         return [
-            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).id(),
-            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).status,
+            TABLE.reusableColumns(args.urlSortOrder, args.urlParamFilters).id(),
+            TABLE.reusableColumns(args.urlSortOrder, args.urlParamFilters).status,
             {
                 title: 'Creation Date',
                 width: 170,

@@ -124,7 +124,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             filteredValue: urlParamFilters["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue: urlParamFilters, defaultSortOrder: urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
+                return <ModalOverData args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
                                       modal={modal} setModal={setModal} />
             }
         },

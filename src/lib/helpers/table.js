@@ -167,7 +167,7 @@ const TABLE = {
 
         return items
     },
-    reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
+    reusableColumns: (defaultSortOrder, urlParamFilters) => {
         return {
             id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),
@@ -193,7 +193,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["group_name"] || null,
                 sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-                filteredValue: defaultFilteredValue["group_name"] || null,
+                filteredValue: urlParamFilters["group_name"] || null,
                 filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.group_name, value),
                 ellipsis: true,
@@ -205,7 +205,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
                 sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
-                filteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+                filteredValue: urlParamFilters["assigned_to_group_name"] || null,
                 filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.assigned_to_group_name, value),
                 ellipsis: true,
@@ -217,7 +217,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["status"] || null,
                 sorter: (a,b) => a.status.localeCompare(b.status),
-                filteredValue: defaultFilteredValue["status"] || null,
+                filteredValue: urlParamFilters["status"] || null,
                 ellipsis: true,
                 filters: TABLE.getStatusFilters(STATUS.datasets),
                 onFilter: (value, record) => {
@@ -242,7 +242,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["status"] || null,
                 sorter: (a,b) => a.status.localeCompare(b.status),
-                filteredValue: defaultFilteredValue["status"] || null,
+                filteredValue: urlParamFilters["status"] || null,
                 ellipsis: true,
                 filters: TABLE.getStatusFilters(STATUS.uploads),
                 onFilter: (value, record) => {
