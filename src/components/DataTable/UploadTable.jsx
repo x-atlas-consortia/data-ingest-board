@@ -36,11 +36,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
     const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
     const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
-    let defaultFilteredValue = {};
+    let urlParamFilters = {};
 
     for (let _field of ["group_name", "status"]) {
         if (filters.hasOwnProperty(_field)) {
-            defaultFilteredValue[_field] = filters[_field].toLowerCase().split(",");
+            urlParamFilters[_field] = filters[_field].toLowerCase().split(",");
         }
     }
 
@@ -52,10 +52,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     if (typeof sortField === "object"){
         field = field[0];
     }
-    let defaultSortOrder = {};
+    let urlSortOrder = {};
     if (order && field && (eq(order, "ascend") || eq(order, "descend"))) {
         if (ENVS.filterFields().includes(field)) {
-            defaultSortOrder[field] = order;
+            urlSortOrder[field] = order;
         }
     }
 
@@ -98,16 +98,16 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         return items
     };
     const uploadColumns = [
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(renderDropdownContent),
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames, '25%'),
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).statusUpload,
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).id(renderDropdownContent),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames, '25%'),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
             width: 200,
             dataIndex: "ingest_task",
             align: "left",
-            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            defaultSortOrder: urlSortOrder["ingest_task"] || null,
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
@@ -119,7 +119,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             width: '23%',
             dataIndex: "title",
             align: "left",
-            defaultSortOrder: defaultSortOrder["title"] || null,
+            defaultSortOrder: urlSortOrder["title"] || null,
             sorter: (a,b) => a.title.localeCompare(b.title),
             ellipsis: true,
         },
@@ -128,7 +128,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             width: '25%',
             dataIndex: "uuid",
             align: "left",
-            defaultSortOrder: defaultSortOrder["uuid"] || null,
+            defaultSortOrder: urlSortOrder["uuid"] || null,
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
             ellipsis: true,
         },
@@ -149,10 +149,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const showConfirmModalOfSelectedUploads  = ({callback, afterTableComponent}) => {
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
-            TABLE.reusableColumns(defaultSortOrder, {}).id(),
-            TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
-            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).statusUpload,
-            TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).deleteAction(handleRemove)
+            TABLE.reusableColumns(urlSortOrder, {}).id(),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
+            TABLE.reusableColumns(urlSortOrder, urlParamFilters).deleteAction(handleRemove)
         ]
         UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
             columns, selectedEntities, setModal, entityName: 'Uploads'})
