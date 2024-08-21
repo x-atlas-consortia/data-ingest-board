@@ -11,7 +11,7 @@ import {CSVLink} from "react-csv";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
-function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
+function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Click to view all processed datasets.', args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     let usedColors = {}
@@ -180,11 +180,6 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
             }>{content.length}</span></Popover>
         </>
     )
-}
-
-ModalOverData.defaultProps = {
-    popoverText: 'Click to view all processed datasets.',
-    cols: []
 }
 
 ModalOverData.propTypes = {

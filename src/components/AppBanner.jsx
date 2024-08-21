@@ -4,7 +4,7 @@ import {Alert} from 'react-bootstrap'
 import {storageKey} from "../lib/helpers/general";
 import AppContext from "../context/AppContext";
 
-function AppBanner({name}) {
+function AppBanner({name = 'login'}) {
     const {banners} = useContext(AppContext)
     const [banner, setBanner] = useState(null)
     const [showBanner, setShowBanner] = useState(true)
@@ -46,10 +46,6 @@ function AppBanner({name}) {
             </div>}
         </>
     )
-}
-
-AppBanner.defaultProps = {
-    name: 'login'
 }
 
 AppBanner.propTypes = {
