@@ -75,8 +75,12 @@ const TABLE = {
                 if (!dataIndexList.includes(key) || !filters[key]) {
                     continue;
                 }
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterGroupings[filterValue] || filterValue.split(",");
+                const filterValuesRaw = filters[key].toLowerCase().split(",");
+                let filterValues = [];
+                for (let v of filterValuesRaw) {
+                    // append either the values for a particular group or just the filter itself
+                    filterValues = filterValues.concat(filterGroupings[v] || [v]);
+                }
                 if (filterValues.includes(special.case1)) {
                     if (eq(item[key], special.case2)) {
                         return false;

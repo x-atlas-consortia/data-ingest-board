@@ -89,8 +89,14 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
 
     for (let _field of ENVS.defaultFilterFields()) {
         if (filters.hasOwnProperty(_field)) {
-            let value = filters[_field]
-            urlParamFilters[_field] = hierarchyGroupings[value.toLowerCase()] || value.toLowerCase().split(",");
+            let values = filters[_field].toLowerCase().split(",")
+            for (let v of values) {
+                if (urlParamFilters[_field] === undefined) {
+                    urlParamFilters[_field] = []
+                }
+                // append either the values for a particular group or just the filter itself
+                urlParamFilters[_field] = urlParamFilters[_field].concat(hierarchyGroupings[v.toLowerCase()] || [v]);
+            }
         }
     }
 
@@ -160,7 +166,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             align: "left",
             defaultSortOrder: urlSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            filteredValue: urlParamFilters["organ"] ? [getHierarchy(urlParamFilters["organ"][0]).toLowerCase()] : null,
+            filteredValue: urlParamFilters["organ"] ? filters['organ'].toLowerCase().split(",") : null,
             filters: uniqueOrganType.map(name => ({ text: getUBKGName(name), value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.organ, value) || hierarchyGroupings[value]?.includes(record.organ),
             ellipsis: true,

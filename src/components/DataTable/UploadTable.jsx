@@ -1,7 +1,7 @@
-import {Button,Modal, Table, Tooltip} from "antd";
+import {Button,Modal, Table} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {callService, eq, getHeadersWith} from "../../lib/helpers/general";
+import {eq} from "../../lib/helpers/general";
 import ModalOver from "../ModalOver";
 import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
