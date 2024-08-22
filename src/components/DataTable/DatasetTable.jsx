@@ -21,6 +21,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
+    const hierarchyGroupings = {}
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -40,9 +41,31 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
     }
+
+    const getHierarchy = (str) => {
+        const r = new RegExp(/.+?(?=\()/)
+        let res = str.match(r)
+        return (res && res.length) ? res[0].trim() : str
+    }
+
+    const makeHierarchyFilters = (items) => {
+        const hierarchyNames = new Set()
+        for (let i of items) {
+            let groupName = getHierarchy(i)
+            if (!eq(i, groupName)) {
+                const normalized = groupName.toLowerCase()
+                if (hierarchyGroupings[normalized] === undefined) {
+                    hierarchyGroupings[normalized] = []
+                }
+                hierarchyGroupings[normalized].push(i)
+            }
+            hierarchyNames.add(groupName)
+        }
+        return Array.from(hierarchyNames)
+    }
     const uniqueGroupNames = filterField('group_name')
     const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
-    const unfilteredOrganTypes = filterField('organ')
+    const unfilteredOrganTypes = makeHierarchyFilters(filterField('organ'))
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
@@ -56,33 +79,39 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     if (typeof sortField === "object"){
         field = field[0];
     }
-    let defaultFilteredValue = {};
-    let defaultSortOrder = {};
+    let urlParamFilters = {};
+    let urlSortOrder = {};
     if (order && field && (eq(order, "ascend") || eq(order, "descend"))){
         if (ENVS.filterFields().includes(field)) {
-            defaultSortOrder[field] = order;
+            urlSortOrder[field] = order;
         }
     }
 
     for (let _field of ENVS.defaultFilterFields()) {
         if (filters.hasOwnProperty(_field)) {
-            defaultFilteredValue[_field] = filters[_field].toLowerCase().split(",");
+            let values = filters[_field].toLowerCase().split(",")
+            for (let v of values) {
+                if (urlParamFilters[_field] === undefined) {
+                    urlParamFilters[_field] = []
+                }
+                // append either the values for a particular group or just the filter itself
+                urlParamFilters[_field] = urlParamFilters[_field].concat(hierarchyGroupings[v.toLowerCase()] || [v]);
+            }
         }
     }
 
-
     const datasetColumns = [
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).id(),
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).groupName(uniqueGroupNames),
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue).status,
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).id(),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).status,
         {
             title: "Dataset Type",
             width: 170,
             dataIndex: "dataset_type",
             align: "left",
-            defaultSortOrder: defaultSortOrder["dataset_type"] || null,
+            defaultSortOrder: urlSortOrder["dataset_type"] || null,
             sorter: (a,b) => a.dataset_type.localeCompare(b.dataset_type),
-            defaultFilteredValue: defaultFilteredValue["dataset_type"] || null,
+            filteredValue: urlParamFilters["dataset_type"] || null,
             filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.dataset_type, value),
             ellipsis: true,
@@ -92,26 +121,26 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 180,
             dataIndex: "processed_datasets",
             align: "left",
-            defaultSortOrder: defaultSortOrder["processed_datasets"] || null,
+            defaultSortOrder: urlSortOrder["processed_datasets"] || null,
             sorter: (a,b) => {
                 let a1 = Array.isArray(a.processed_datasets) ? a.processed_datasets.length : 0
                 let b1 = Array.isArray(b.processed_datasets) ? b.processed_datasets.length : 0
                 return a1 - b1
             },
-            defaultFilteredValue: defaultFilteredValue["processed_datasets"] || null,
+            filteredValue: urlParamFilters["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
-                return <ModalOverData args={{defaultFilteredValue, defaultSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
+                return <ModalOverData args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
                                       modal={modal} setModal={setModal} />
             }
         },
-        TABLE.reusableColumns(defaultSortOrder, defaultFilteredValue, {}).assignedToGroupName(uniqueAssignedToGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueAssignedToGroupNames),
         {
             title: "Ingest Task",
             width: 200,
             dataIndex: "ingest_task",
             align: "left",
-            defaultSortOrder: defaultSortOrder["ingest_task"] || null,
+            defaultSortOrder: urlSortOrder["ingest_task"] || null,
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
@@ -123,9 +152,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: TABLE.cols.f('source_type'),
             align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('source_type')] || null,
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('source_type')] || null,
             sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
-            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('source_type')] || null,
+            filteredValue: urlParamFilters[TABLE.cols.f('source_type')] || null,
             filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
             ellipsis: true,
@@ -135,11 +164,11 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: "organ",
             align: "left",
-            defaultSortOrder: defaultSortOrder["organ"] || null,
+            defaultSortOrder: urlSortOrder["organ"] || null,
             sorter: (a,b) => a.organ.localeCompare(b.organ),
-            defaultFilteredValue: defaultFilteredValue["organ"] || null,
+            filteredValue: urlParamFilters["organ"] ? filters['organ'].toLowerCase().split(",") : null,
             filters: uniqueOrganType.map(name => ({ text: getUBKGName(name), value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.organ, value),
+            onFilter: (value, record) => eq(record.organ, value) || hierarchyGroupings[value]?.includes(record.organ),
             ellipsis: true,
             render: (organType, record) => {
                 if (!organType) return null
@@ -153,7 +182,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 180,
             dataIndex: TABLE.cols.f('organ_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('organ_id')] || null,
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('organ_id')] || null,
             sorter: (a,b) => a[TABLE.cols.f('organ_id')].localeCompare(b[TABLE.cols.f('organ_id')]),
             ellipsis: true,
             render: (organId, record) => {
@@ -173,7 +202,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 200,
             dataIndex: "provider_experiment_id",
             align: "left",
-            defaultSortOrder: defaultSortOrder["provider_experiment_id"] || null,
+            defaultSortOrder: urlSortOrder["provider_experiment_id"] || null,
             sorter: (a,b) => a.provider_experiment_id.localeCompare(b.provider_experiment_id),
             ellipsis: true,
         },
@@ -185,7 +214,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             },
             dataIndex: "last_touch",
             align: "left",
-            defaultSortOrder: defaultSortOrder["last_touch"] || null,
+            defaultSortOrder: urlSortOrder["last_touch"] || null,
             sorter: (a,b) => new Date(a.last_touch) - new Date(b.last_touch),
             ellipsis: true,
             render: (date, record) => <span>{(new Date(date).toLocaleString())}</span>
@@ -195,7 +224,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: "has_contacts",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_contacts"] || null,
+            defaultSortOrder: urlSortOrder["has_contacts"] || null,
             sorter: (a,b) => b.has_contacts.localeCompare(a.has_contacts),
             ellipsis: true,
         },
@@ -204,7 +233,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 175,
             dataIndex: "has_contributors",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_contributors"] || null,
+            defaultSortOrder: urlSortOrder["has_contributors"] || null,
             sorter: (a,b) => b.has_contributors.localeCompare(a.has_contributors),
             ellipsis: true,
         },
@@ -213,7 +242,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 175,
             dataIndex: TABLE.cols.f('donor_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_id')] || null,
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_id')] || null,
             sorter: (a,b) => a[TABLE.cols.f('donor_id')].localeCompare(b[TABLE.cols.f('donor_id')]),
             ellipsis: true,
         },{
@@ -221,7 +250,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 200,
             dataIndex: TABLE.cols.f('donor_submission_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_submission_id')] || null,
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_submission_id')] || null,
             sorter: (a,b) => a[TABLE.cols.f('donor_submission_id')].localeCompare(b[TABLE.cols.f('donor_submission_id')]),
             ellipsis: true,
         },
@@ -230,7 +259,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: TABLE.cols.f('donor_lab_id'),
             align: "left",
-            defaultSortOrder: defaultSortOrder[TABLE.cols.f('donor_lab_id')] || null,
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_lab_id')] || null,
             sorter: (a,b) => a[TABLE.cols.f('donor_lab_id')].localeCompare(b[TABLE.cols.f('donor_lab_id')]),
             ellipsis: true,
         },
@@ -239,7 +268,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 200,
             dataIndex: "has_donor_metadata",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_donor_metadata"] || null,
+            defaultSortOrder: urlSortOrder["has_donor_metadata"] || null,
             sorter: (a,b) => b.has_donor_metadata.localeCompare(a.has_donor_metadata),
             ellipsis: true,
         },
@@ -248,7 +277,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 200,
             dataIndex: "has_dataset_metadata",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_data_metadata"] || null,
+            defaultSortOrder: urlSortOrder["has_data_metadata"] || null,
             sorter: (a,b) => b.has_data_metadata.localeCompare(a.has_data_metadata),
             ellipsis: true,
         },
@@ -257,7 +286,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 175,
             dataIndex: "upload",
             align: "left",
-            defaultSortOrder: defaultSortOrder["upload"] || null,
+            defaultSortOrder: urlSortOrder["upload"] || null,
             sorter: (a,b) => a.upload.localeCompare(b.upload),
             ellipsis: true,
         },
@@ -266,10 +295,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 150,
             dataIndex: "has_rui_info",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_rui_info"] || null,
+            defaultSortOrder: urlSortOrder["has_rui_info"] || null,
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
-            defaultFilteredValue: defaultFilteredValue[TABLE.cols.f('has_rui_info')] || null,
+            filteredValue: urlParamFilters[TABLE.cols.f('has_rui_info')] || null,
             filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
@@ -278,7 +307,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             width: 125,
             dataIndex: "has_data",
             align: "left",
-            defaultSortOrder: defaultSortOrder["has_data"] || null,
+            defaultSortOrder: urlSortOrder["has_data"] || null,
             sorter: (a,b) => b.has_data.localeCompare(a.has_data),
             ellipsis: true,
         },
@@ -295,7 +324,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const dataIndexList = filteredDatasetColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
-        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'})
+        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'}, hierarchyGroupings)
     }
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
@@ -326,10 +355,10 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
     const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
-            TABLE.reusableColumns(defaultSortOrder, {}).id(),
-            TABLE.reusableColumns(defaultSortOrder, {}).groupName(uniqueGroupNames),
-            TABLE.reusableColumns(defaultSortOrder, {}).status,
-            TABLE.reusableColumns(defaultSortOrder, {}).deleteAction(handleRemove)
+            TABLE.reusableColumns(urlSortOrder, {}).id(),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).status,
+            TABLE.reusableColumns(urlSortOrder, {}).deleteAction(handleRemove)
         ]
         UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
         columns, selectedEntities, setModal})

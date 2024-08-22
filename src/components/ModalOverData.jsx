@@ -11,7 +11,7 @@ import {CSVLink} from "react-csv";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
-function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
+function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Click to view all processed datasets.', args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     let usedColors = {}
@@ -26,8 +26,8 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
     const getColumns = () => {
         if (cols.length) return cols;
         return [
-            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).id(),
-            TABLE.reusableColumns(args.defaultSortOrder, args.defaultFilteredValue).status,
+            TABLE.reusableColumns(args.urlSortOrder, args.urlParamFilters).id(),
+            TABLE.reusableColumns(args.urlSortOrder, args.urlParamFilters).status,
             {
                 title: 'Creation Date',
                 width: 170,
@@ -180,11 +180,6 @@ function ModalOverData({content, cols, modal, setModal, popoverText, args}) {
             }>{content.length}</span></Popover>
         </>
     )
-}
-
-ModalOverData.defaultProps = {
-    popoverText: 'Click to view all processed datasets.',
-    cols: []
 }
 
 ModalOverData.propTypes = {
