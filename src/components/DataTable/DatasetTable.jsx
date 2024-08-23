@@ -161,7 +161,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Organ Type",
-            width: 150,
+            width: 180,
             dataIndex: "organ",
             align: "left",
             defaultSortOrder: urlSortOrder["organ"] || null,
@@ -173,7 +173,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
             render: (organType, record) => {
                 if (!organType) return null
                 return (
-                    <span>{getUBKGName(organType)}</span>
+                    <span className='txt-break-spaces'>{getUBKGName(organType)}</span>
                 )
             }
         },
@@ -199,12 +199,17 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
         },
         {
             title: "Provider Experiment ID",
-            width: 200,
+            width: 250,
             dataIndex: "provider_experiment_id",
             align: "left",
             defaultSortOrder: urlSortOrder["provider_experiment_id"] || null,
             sorter: (a,b) => a.provider_experiment_id.localeCompare(b.provider_experiment_id),
             ellipsis: true,
+            render: (experimentId, record) => {
+                return (
+                    <span className='txt-break-spaces'>{experimentId}</span>
+                )
+            }
         },
         {
             title: "Last Touch",
