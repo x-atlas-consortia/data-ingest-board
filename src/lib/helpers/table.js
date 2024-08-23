@@ -1,7 +1,7 @@
 import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
 import {Dropdown, Space, Tooltip} from "antd";
 import React from "react";
-import {eq, getUBKGName, toDateString} from "./general";
+import {eq, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
