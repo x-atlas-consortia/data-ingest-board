@@ -1,7 +1,7 @@
 import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
 import {Dropdown, Space, Tooltip} from "antd";
 import React from "react";
-import {eq, toDateString} from "./general";
+import {eq, getUBKGName, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
@@ -175,7 +175,7 @@ const TABLE = {
         return {
             id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),
-                width: 190,
+                width: 210,
                 dataIndex: TABLE.cols.f('id'),
                 align: "left",
                 defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
@@ -201,6 +201,11 @@ const TABLE = {
                 filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.group_name, value),
                 ellipsis: true,
+                render: (groupName, record) => {
+                    return (
+                        <span className='txt-break-spaces'>{groupName}</span>
+                    )
+                }
             }),
             assignedToGroupName: (uniqueAssignedToGroupNames) =>({
                 title: "Assigned To Group Name",
@@ -213,6 +218,11 @@ const TABLE = {
                 filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.assigned_to_group_name, value),
                 ellipsis: true,
+                render: (groupName, record) => {
+                    return (
+                        <span className='txt-break-spaces'>{groupName}</span>
+                    )
+                }
             }),
             status: {
                 title: "Status",
