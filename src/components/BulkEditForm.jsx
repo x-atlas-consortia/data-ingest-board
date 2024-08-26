@@ -100,8 +100,6 @@ function BulkEditForm({statuses, dataProviderGroups, setBulkEditValues, entityNa
     )
 }
 
-BulkEditForm.defaultProps = {}
-
 BulkEditForm.propTypes = {
     children: PropTypes.node
 }

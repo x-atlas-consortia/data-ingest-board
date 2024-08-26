@@ -69,14 +69,18 @@ const TABLE = {
         ]
         return filters.concat(entityTypeFilters)
     },
-    countFilteredRecords: (data, filters, dataIndexList, special) => {
+    countFilteredRecords: (data, filters, dataIndexList, special, filterGroupings = {}) => {
         const filteredData = data.filter(item => {
             for (const key in filters) {
                 if (!dataIndexList.includes(key) || !filters[key]) {
                     continue;
                 }
-                const filterValue = filters[key].toLowerCase();
-                const filterValues = filterValue.split(",");
+                const filterValuesRaw = filters[key].toLowerCase().split(",");
+                let filterValues = [];
+                for (let v of filterValuesRaw) {
+                    // append either the values for a particular group or just the filter itself
+                    filterValues = filterValues.concat(filterGroupings[v] || [v]);
+                }
                 if (filterValues.includes(special.case1)) {
                     if (eq(item[key], special.case2)) {
                         return false;
@@ -167,11 +171,11 @@ const TABLE = {
 
         return items
     },
-    reusableColumns: (defaultSortOrder, defaultFilteredValue) => {
+    reusableColumns: (defaultSortOrder, urlParamFilters) => {
         return {
             id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),
-                width: 190,
+                width: 210,
                 dataIndex: TABLE.cols.f('id'),
                 align: "left",
                 defaultSortOrder: defaultSortOrder[TABLE.cols.f('id')] || null,
@@ -193,10 +197,15 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["group_name"] || null,
                 sorter: (a,b) => a.group_name.localeCompare(b.group_name),
-                defaultFilteredValue: defaultFilteredValue["group_name"] || null,
+                filteredValue: urlParamFilters["group_name"] || null,
                 filters: uniqueGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.group_name, value),
                 ellipsis: true,
+                render: (groupName, record) => {
+                    return (
+                        <span className='txt-break-spaces'>{groupName}</span>
+                    )
+                }
             }),
             assignedToGroupName: (uniqueAssignedToGroupNames) =>({
                 title: "Assigned To Group Name",
@@ -205,10 +214,15 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
                 sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
-                defaultFilteredValue: defaultFilteredValue["assigned_to_group_name"] || null,
+                filteredValue: urlParamFilters["assigned_to_group_name"] || null,
                 filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.assigned_to_group_name, value),
                 ellipsis: true,
+                render: (groupName, record) => {
+                    return (
+                        <span className='txt-break-spaces'>{groupName}</span>
+                    )
+                }
             }),
             status: {
                 title: "Status",
@@ -217,7 +231,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["status"] || null,
                 sorter: (a,b) => a.status.localeCompare(b.status),
-                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                filteredValue: urlParamFilters["status"] || null,
                 ellipsis: true,
                 filters: TABLE.getStatusFilters(STATUS.datasets),
                 onFilter: (value, record) => {
@@ -242,7 +256,7 @@ const TABLE = {
                 align: "left",
                 defaultSortOrder: defaultSortOrder["status"] || null,
                 sorter: (a,b) => a.status.localeCompare(b.status),
-                defaultFilteredValue: defaultFilteredValue["status"] || null,
+                filteredValue: urlParamFilters["status"] || null,
                 ellipsis: true,
                 filters: TABLE.getStatusFilters(STATUS.uploads),
                 onFilter: (value, record) => {
