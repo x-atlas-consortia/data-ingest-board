@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "**/.next",
+        "**/dist",
+        "**/log",
+        "**/node_modules",
+        "**/hubmap-docker",
+        "**/sennet-docker"
+    ]
+}
