@@ -1,9 +1,9 @@
-import '../styles/main.css'
+import '@/styles/main.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Roboto } from 'next/font/google'
-import { AppProvider } from '../context/AppContext'
-import useContent from "../hooks/useContent";
-import useGoogleTagManager from "../hooks/useGoogleTagMananger";
+import { AppProvider } from '@/context/AppContext'
+import useContent from "@/hooks/useContent";
+import useGoogleTagManager from "@/hooks/useGoogleTagMananger";
 
 const roboto = Roboto({
     weight: '500',
