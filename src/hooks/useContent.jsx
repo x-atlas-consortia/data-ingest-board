@@ -34,7 +34,11 @@ function useContent() {
             `${ENVS.ubkg.base()}/organs?application_context=${ENVS.ubkg.sab()}`,
             getRequestOptions()
         )
-        window.UBKG = {organTypes: organTypes.data}
+        let organsDict = {}
+        for (let o of organTypes.data) {
+            organsDict[o.term.trim()] = o.category?.term.trim() || o.term.trim()
+        }
+        window.UBKG = {organTypes: organTypes.data, organTypesGroups: organsDict}
         return window.UBKG
     }
 
