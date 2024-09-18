@@ -36,7 +36,7 @@ function useContent() {
         )
         let organsDict = {}
         for (let o of organTypes.data) {
-            organsDict[o.term.trim()] = o.category?.term.trim() || o.term.trim()
+            organsDict[o.term.trim()] = o.category?.term?.trim() || o.term?.trim()
         }
         window.UBKG = {organTypes: organTypes.data, organTypesGroups: organsDict}
         return window.UBKG
