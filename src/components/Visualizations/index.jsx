@@ -15,23 +15,23 @@ function Visualizations({children}) {
 
     const items = [
         {
-            label: '1st menu item',
+            label: 'Group Name',
             key: '1',
             icon: <AreaChartOutlined />,
         },
         {
-            label: '2nd menu item',
+            label: 'Status',
             key: '2',
             icon: <PieChartOutlined />,
         },
         {
-            label: '3rd menu item',
+            label: 'Dataset Type',
             key: '3',
             icon: <BarChartOutlined />,
             danger: true,
         },
         {
-            label: '4rd menu item',
+            label: 'Organ Type',
             key: '4',
             icon: <LineChartOutlined />,
             danger: true,
@@ -51,7 +51,7 @@ function Visualizations({children}) {
                 items={[
                     {
                         key: '1',
-                        label: 'Visualizations',
+                        label: <div><PieChartOutlined /> <span className={'h6 mx-2'}>Visualizations</span></div>,
                         children: <Row>
                             <Col span={18} push={6}>
                                 col-18 col-push-6
