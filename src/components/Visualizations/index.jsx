@@ -12,6 +12,7 @@ import Bar from "@/components/Visualizations/Charts/Bar";
 import Legend from "@/components/Visualizations/Legend";
 import TABLE from "@/lib/helpers/table";
 import THEME from "@/lib/helpers/theme";
+import FilmStrip from "@/components/Visualizations/FilmStrip";
 
 function Visualizations({ data, defaultColumn = 'group_name' }) {
 
@@ -21,20 +22,21 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
     const [chartData, setChartData] = useState([])
 
 
-    const filterChartData = () => {
+    const filterChartData = (col) => {
         let dict = {}
         for (let d of data) {
-            let key = d[column]
+            let key = d[col]
             if (dict[key] === undefined) {
                 dict[key] = {label: key, value: 0}
             }
             dict[key].value++
         }
-        setChartData(Object.values(dict))
+        console.log(dict)
+        return Object.values(dict)
     }
 
     useEffect(() => {
-        filterChartData()
+        setChartData(filterChartData(column))
     }, [data, column])
 
     const getStatusColor = (label) => {
@@ -86,13 +88,14 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
         },
         {
             label: 'Organ Type',
-            key: 'organ_type',
+            key: 'organ',
             disabled: true,
         },
     ];
 
-    const getColumnName = () => {
-        const c = columns.filter((c) => c.key === column)
+    const getColumnName = ( col ) => {
+        col = col || column
+        const c = columns.filter((c) => c.key === col)
         return c[0].label
     }
 
@@ -104,6 +107,11 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
     const chartMenuProps = {
         items: charts,
         onClick: handleChartMenuClick,
+    }
+
+    const baseStyle = {
+        width: '25%',
+
     }
 
     return (
@@ -159,6 +167,18 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
                                             />
                                         </Row>
                                     </Col>
+                                </Row>
+                                <Row>
+                                    <div className='container mt-5'>
+                                        <FilmStrip>
+                                            {columns.map((c, i) => (
+                                                <div onClick={() => handleColumnMenuClick(c)} key={i} style={{ ...baseStyle }} className={c.key === column ? 'is-active' : ''} >
+                                                    <Bar data={filterChartData(c.key)} column={c.key} chartId={i.toString()} colorMethods={{'status': getStatusColor}} />
+                                                    <div className='text-center'><small>{getColumnName(c.key)}</small></div>
+                                                </div>
+                                            ))}
+                                        </FilmStrip>
+                                    </div>
                                 </Row>
                             </div>
                         )

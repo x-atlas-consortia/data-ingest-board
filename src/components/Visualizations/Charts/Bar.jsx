@@ -3,20 +3,24 @@ import {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import THEME from "@/lib/helpers/theme";
 
-function Bar({ setLegend, column,  data = [], colorMethods = {} }) {
+function Bar({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main' }) {
 
     const colors = {}
     const usedColors = {}
+    let currentColorPointer = 1
+    let currentColorIndex = 0
 
     const randomColor = () => {
-        let col;
-        do {
-            col = THEME.randomColor()
-            if (!usedColors[col.color]) {
-                usedColors[col.color] = true;
-            }
-        } while (!usedColors[col.color])
-        return col;
+        let colors = THEME.lightColors()
+
+        let color = THEME.lightenDarkenColor(colors[currentColorIndex].substr(1), currentColorPointer * -5);
+        currentColorPointer++
+        currentColorIndex++
+        if (currentColorPointer >= colors.length) {
+            currentColorPointer = 1
+            currentColorIndex = 0
+        }
+        return {color: '#'+color}
     }
 
     const buildChart = ()  => {
@@ -88,12 +92,15 @@ function Bar({ setLegend, column,  data = [], colorMethods = {} }) {
     }
 
     useEffect(() => {
-        $('#c-visualizations__bar').html(buildChart())
-        setLegend(colors)
+        $(`#c-visualizations__bar--${chartId}`).html(buildChart())
+        if (setLegend) {
+            setLegend(colors)
+        }
+
     }, [data])
 
     return (
-        <div className={`c-visualizations__bar c-Bar`} id={'c-visualizations__bar'}></div>
+        <div className={`c-visualizations__bar c-Bar`} id={`c-visualizations__bar--${chartId}`}></div>
     )
 }
 
