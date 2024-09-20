@@ -13,7 +13,7 @@ function Legend({legend, setLegend}) {
             res.push(
                 <li className='c-legend__item' key={l.label}>
                     <span className={'c-legend__item__col mx-2'} style={{backgroundColor: l.color}}></span>
-                    <span><span>{l.label}</span> ({l.value})</span>
+                    <span><span className='c-legend__item__label'>{l.label}</span> ({l.value})</span>
                 </li>
             )
         }

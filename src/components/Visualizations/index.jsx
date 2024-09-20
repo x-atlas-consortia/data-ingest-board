@@ -1,4 +1,4 @@
-import {useContext, useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {
     AreaChartOutlined,
@@ -11,16 +11,17 @@ import {Col, Collapse, Row, Dropdown, Button} from "antd";
 import Bar from "@/components/Visualizations/Charts/Bar";
 import Legend from "@/components/Visualizations/Legend";
 import TABLE from "@/lib/helpers/table";
+import THEME from "@/lib/helpers/theme";
 
-function Visualizations({ data }) {
+function Visualizations({ data, defaultColumn = 'group_name' }) {
 
     const [legend, setLegend] = useState([])
-    const [column, setColumn] = useState('group_name')
+    const [column, setColumn] = useState(defaultColumn)
     const [chart, setChart] = useState('chart')
     const [chartData, setChartData] = useState([])
 
+
     const filterChartData = () => {
-        console.log(data)
         let dict = {}
         for (let d of data) {
             let key = d[column]
@@ -29,13 +30,16 @@ function Visualizations({ data }) {
             }
             dict[key].value++
         }
-        console.log(Object.values(dict))
         setChartData(Object.values(dict))
     }
 
     useEffect(() => {
         filterChartData()
     }, [data, column])
+
+    const getStatusColor = (label) => {
+        return THEME.getStatusColor(label).bg
+    }
 
     const handleColumnMenuClick = (e) => {
         console.log('click', e);
@@ -144,7 +148,7 @@ function Visualizations({ data }) {
                                 </Row>
                                 <Row>
                                     <Col span={18} push={6}>
-                                        <Bar setLegend={setLegend} data={chartData} />
+                                        <Bar setLegend={setLegend} data={chartData} column={column} colorMethods={{'status': getStatusColor}} />
                                     </Col>
                                     <Col span={6} pull={18}>
 

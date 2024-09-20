@@ -1,10 +1,9 @@
 import * as d3 from "d3";
-
-import {useContext, useEffect, useState} from 'react'
+import {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import THEME from "@/lib/helpers/theme";
 
-function Bar({ setLegend, data = [] }) {
+function Bar({ setLegend, column,  data = [], colorMethods = {} }) {
 
     const colors = {}
     const usedColors = {}
@@ -60,7 +59,7 @@ function Bar({ setLegend, data = [] }) {
             .join("rect")
             .attr("x", (d) => x(labelShortName(d.label)))
             .attr("fill", function (d) {
-                const color = randomColor().color;
+                const color = colorMethods[column] ? colorMethods[column](d.label) : randomColor().color;
                 colors[d.label] = {color, value: d.value, label: d.label};
                 return color; })
             .attr("y", (d) => y(d.value))
