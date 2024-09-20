@@ -1,12 +1,12 @@
 import * as d3 from "d3";
-import {useEffect} from 'react'
+import {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import THEME from "@/lib/helpers/theme";
 
-function Bar({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main' }) {
+function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartId = 'main', reload = true }) {
 
+    const hasLoaded = useRef(false)
     const colors = {}
-    const usedColors = {}
     let currentColorPointer = 1
     let currentColorIndex = 0
 
@@ -43,6 +43,11 @@ function Bar({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main
             .range([marginLeft, width - marginRight])
             .padding(0.1);
 
+        // Create the color scale.
+        const colorS = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length))
+
         // Declare the y (vertical position) scale.
         const y = d3.scaleLinear()
             .domain([0, d3.max(data, (d) => d.value)])
@@ -63,12 +68,21 @@ function Bar({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main
             .join("rect")
             .attr("x", (d) => x(labelShortName(d.label)))
             .attr("fill", function (d) {
-                const color = colorMethods[column] ? colorMethods[column](d.label) : randomColor().color;
+                const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
                 colors[d.label] = {color, value: d.value, label: d.label};
                 return color; })
-            .attr("y", (d) => y(d.value))
-            .attr("height", (d) => y(0) - y(d.value))
+            .attr("y", (d) => y(0))
+            .attr("height", (d) => y(0) - y(0))
             .attr("width", x.bandwidth());
+
+        // Animation
+        svg.selectAll("rect")
+            .transition()
+            .duration(800)
+            .attr("y", (d) => y(d.value))
+            .attr("height", function(d) { return y(0) - y(d.value); })
+            .delay(function(d,i){return(i*100)})
+
 
         // Add the x-axis and label.
         svg.append("g")
@@ -91,16 +105,26 @@ function Bar({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main
         return svg.node();
     }
 
-    useEffect(() => {
+    const updateTable = () => {
         $(`#c-visualizations__bar--${chartId}`).html(buildChart())
         if (setLegend) {
             setLegend(colors)
         }
+    }
+    useEffect(() => {
+        if (reload || !hasLoaded.current) {
+            hasLoaded.current = true
+            updateTable()
+        }
 
     }, [data])
 
+    useEffect(() => {
+        updateTable()
+    }, [filters])
+
     return (
-        <div className={`c-visualizations__bar c-Bar`} id={`c-visualizations__bar--${chartId}`}></div>
+        <div className={`c-visualizations__bar c-bar`} id={`c-visualizations__bar--${chartId}`}></div>
     )
 }
 

@@ -13,12 +13,13 @@ import Legend from "@/components/Visualizations/Legend";
 import TABLE from "@/lib/helpers/table";
 import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
+import Pie from "@/components/Visualizations/Charts/Pie";
 
-function Visualizations({ data, defaultColumn = 'group_name' }) {
+function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
 
     const [legend, setLegend] = useState([])
     const [column, setColumn] = useState(defaultColumn)
-    const [chart, setChart] = useState('chart')
+    const [chart, setChart] = useState('bar')
     const [chartData, setChartData] = useState([])
 
 
@@ -27,11 +28,10 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
         for (let d of data) {
             let key = d[col]
             if (dict[key] === undefined) {
-                dict[key] = {label: key, value: 0}
+                dict[key] = {label: key, value: 0, id: d.uuid}
             }
             dict[key].value++
         }
-        console.log(dict)
         return Object.values(dict)
     }
 
@@ -62,10 +62,10 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
             label:  (<span><PieChartOutlined /> Pie Chart</span>),
             key: 'pie'
         },
-        {
-            label: (<span><LineChartOutlined /> Line Chart</span>),
-            key: 'line'
-        },
+        // {
+        //     label: (<span><LineChartOutlined /> Line Chart</span>),
+        //     key: 'line'
+        // },
     ];
 
     const columns = [
@@ -111,9 +111,14 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
 
     const baseStyle = {
         width: '25%',
-
     }
 
+    const isBar = () => chart === 'bar'
+    const isPie = () => chart === 'pie'
+
+    const colorMethods = {
+        'status': getStatusColor
+    }
     return (
         <div className={'c-visualizations my-3'}>
             <Collapse
@@ -156,7 +161,8 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
                                 </Row>
                                 <Row>
                                     <Col span={18} push={6}>
-                                        <Bar setLegend={setLegend} data={chartData} column={column} colorMethods={{'status': getStatusColor}} />
+                                        {isBar() && <Bar setLegend={setLegend} data={chartData} column={column} colorMethods={colorMethods} />}
+                                        {isPie() && <Pie setLegend={setLegend} data={chartData} column={column} colorMethods={colorMethods} />}
                                     </Col>
                                     <Col span={6} pull={18}>
 
@@ -173,7 +179,8 @@ function Visualizations({ data, defaultColumn = 'group_name' }) {
                                         <FilmStrip>
                                             {columns.map((c, i) => (
                                                 <div onClick={() => handleColumnMenuClick(c)} key={i} style={{ ...baseStyle }} className={c.key === column ? 'is-active' : ''} >
-                                                    <Bar data={filterChartData(c.key)} column={c.key} chartId={i.toString()} colorMethods={{'status': getStatusColor}} />
+                                                    {isBar() && <Bar data={filterChartData(c.key)} filters={filters} column={c.key} chartId={i.toString()} colorMethods={colorMethods} reload={false} />}
+                                                    {isPie() && <Pie data={filterChartData(c.key)} column={c.key} chartId={i.toString()} colorMethods={colorMethods} />}
                                                     <div className='text-center'><small>{getColumnName(c.key)}</small></div>
                                                 </div>
                                             ))}
