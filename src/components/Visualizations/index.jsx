@@ -119,6 +119,52 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
     const colorMethods = {
         'status': getStatusColor
     }
+    
+    const getMiniCharts = () => {
+        let charts = []
+        let i = 0
+        for (let c of columns) {
+            let _data = filterChartData(c.key)
+            if (_data.length > 1) {
+                charts.push(
+                    <div
+                        onClick={() => handleColumnMenuClick(c)}
+                        key={i}
+                        style={{ ...baseStyle }}
+                        className={c.key === column ? 'is-active' : ''}
+                    >
+                        {isBar() && (
+                            <Bar
+                                data={_data}
+                                filters={filters}
+                                column={c.key}
+                                chartId={i.toString()}
+                                colorMethods={colorMethods}
+                                reload={false}
+                            />
+                        )}
+                        {isPie() && (
+                            <Pie
+                                data={filterChartData(c.key)}
+                                column={c.key}
+                                chartId={i.toString()}
+                                colorMethods={colorMethods}
+                            />
+                        )}
+                        <div className='text-center'>
+                            <small>{getColumnName(c.key)}</small>
+                        </div>
+                    </div>
+                )
+            }
+
+            i++
+        }
+        return charts
+    }
+
+    const hasMeaningfulData = () => chartData.length > 1
+
     return (
         <div className={'c-visualizations my-3'}>
             <Collapse
@@ -138,52 +184,89 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                             <div>
                                 <Row>
                                     <Col span={6}>
-
-                                        <Dropdown className={'c-visualizations__columnDropdown'} menu={columnMenuProps} placement="bottomLeft" arrow>
-                                            <Button>Select a data column</Button>
+                                        <Dropdown
+                                            className={
+                                                'c-visualizations__columnDropdown'
+                                            }
+                                            menu={columnMenuProps}
+                                            placement='bottomLeft'
+                                            arrow
+                                        >
+                                            <Button>
+                                                Select a data column
+                                            </Button>
                                         </Dropdown>
 
-                                        <Dropdown className={'c-visualizations__chartDropdown'} menu={chartMenuProps} placement="bottomRight" arrow>
-                                            <Button><AreaChartOutlined /></Button>
+                                        <Dropdown
+                                            className={
+                                                'c-visualizations__chartDropdown'
+                                            }
+                                            menu={chartMenuProps}
+                                            placement='bottomRight'
+                                            arrow
+                                        >
+                                            <Button>
+                                                <AreaChartOutlined />
+                                            </Button>
                                         </Dropdown>
                                     </Col>
                                     <Col span={3} offset={15}>
-                                        <Button block icon={<ExpandAltOutlined />} size={'large'} >
+                                        <Button
+                                            block
+                                            icon={<ExpandAltOutlined />}
+                                            size={'large'}
+                                        >
                                             Fullscreen
                                         </Button>
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <div style={{width: '100%'}} className={'text-center'}>
-                                        <h4>{TABLE.cols.n(column, getColumnName())}</h4>
-                                        <span></span>
+                                    <div
+                                        style={{ width: '100%' }}
+                                        className={'text-center'}
+                                    >
+                                        <h4>
+                                            {TABLE.cols.n(
+                                                column,
+                                                getColumnName()
+                                            )}
+                                        </h4>
+                                        {!hasMeaningfulData() && <div className={'mt-4'}>There is not enough data to present a meaningful chart visualization.</div>}
                                     </div>
                                 </Row>
                                 <Row>
                                     <Col span={18} push={6}>
-                                        {isBar() && <Bar setLegend={setLegend} data={chartData} column={column} colorMethods={colorMethods} />}
-                                        {isPie() && <Pie setLegend={setLegend} data={chartData} column={column} colorMethods={colorMethods} />}
+                                        {isBar() && hasMeaningfulData() && (
+                                            <Bar
+                                                setLegend={setLegend}
+                                                data={chartData}
+                                                column={column}
+                                                colorMethods={colorMethods}
+                                            />
+                                        )}
+                                        {isPie() && hasMeaningfulData() && (
+                                            <Pie
+                                                setLegend={setLegend}
+                                                data={chartData}
+                                                column={column}
+                                                colorMethods={colorMethods}
+                                            />
+                                        )}
+
                                     </Col>
                                     <Col span={6} pull={18}>
-
                                         <Row>
-                                            <Legend
+                                            {hasMeaningfulData() && <Legend
                                                 setLegend={setLegend}
                                                 legend={legend}
-                                            />
+                                            />}
                                         </Row>
                                     </Col>
                                 </Row>
                                 <Row>
                                     <div className='container mt-5'>
                                         <FilmStrip>
-                                            {columns.map((c, i) => (
-                                                <div onClick={() => handleColumnMenuClick(c)} key={i} style={{ ...baseStyle }} className={c.key === column ? 'is-active' : ''} >
-                                                    {isBar() && <Bar data={filterChartData(c.key)} filters={filters} column={c.key} chartId={i.toString()} colorMethods={colorMethods} reload={false} />}
-                                                    {isPie() && <Pie data={filterChartData(c.key)} column={c.key} chartId={i.toString()} colorMethods={colorMethods} />}
-                                                    <div className='text-center'><small>{getColumnName(c.key)}</small></div>
-                                                </div>
-                                            ))}
+                                            {getMiniCharts()}
                                         </FilmStrip>
                                     </div>
                                 </Row>
