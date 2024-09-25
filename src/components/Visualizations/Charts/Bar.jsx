@@ -9,7 +9,6 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
     const {
         getChartSelector,
         toolTipHandlers,
-        Tooltip,
         appendTooltip } = useContext(ChartContext)
 
     const colors = {}

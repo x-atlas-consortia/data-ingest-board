@@ -1,9 +1,16 @@
-import {useEffect} from "react";
+import {useContext, useEffect} from "react";
 import * as d3 from "d3";
+import ChartContext from "@/context/ChartContext";
 
-export default function Pie({ setLegend, column,  data = [], colorMethods = {}, chartId = 'main' }) {
+export default function Pie({ setLegend, column,  data = [], colorMethods = {}, chartId = 'modal' }) {
 
     const colors = {}
+
+    const {
+        getChartSelector,
+        toolTipHandlers,
+        selectors,
+        appendTooltip } = useContext(ChartContext)
 
     const buildChart = ()  => {
 
@@ -49,7 +56,6 @@ export default function Pie({ setLegend, column,  data = [], colorMethods = {}, 
         svg.append("g")
             .attr("stroke", "white")
             .on("mouseover", function(d) {
-
                 d3.select(this).select(`.${d.srcElement.className.animVal}`).transition()
                     .duration(1000)
                     .attr("d", arcOver);
@@ -83,18 +89,26 @@ export default function Pie({ setLegend, column,  data = [], colorMethods = {}, 
             .call(text => text.append("tspan")
                 .attr("y", "-0.4em")
                 .attr("font-weight", "bold")
-                .text(d => data.length < 8 ? d.data.label : '' ))
+                //.text(d => data.length < 8 ? d.data.label : '' )
+                )
             .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25).append("tspan")
                 .attr("x", 0)
                 .attr("y", "0.7em")
                 .attr("fill-opacity", 0.7)
                 .text(d => '')); //d.data.value.toLocaleString("en-US")
 
+        svg.selectAll('path')
+            .on("mouseover", toolTipHandlers(chartId).mouseover)
+            .on("mousemove", toolTipHandlers(chartId, 'pie').mousemove)
+            .on("mouseleave", toolTipHandlers(chartId).mouseleave)
+
         return svg.node();
     }
 
     useEffect(() => {
-        $(`#c-visualizations__pie--${chartId}`).html(buildChart())
+        $(getChartSelector(chartId, 'pie')).html('')
+        appendTooltip(chartId, 'pie')
+        $(getChartSelector(chartId, 'pie')).append(buildChart())
         if (setLegend) {
             setLegend(colors)
         }
@@ -102,6 +116,6 @@ export default function Pie({ setLegend, column,  data = [], colorMethods = {}, 
     }, [data])
 
     return (
-        <div className={`c-visualizations__pie c-pie`} id={`c-visualizations__pie--${chartId}`}></div>
+        <div className={`${selectors.base}chart ${selectors.base}pie c-pie`} id={`${selectors.base}pie--${chartId}`}></div>
     )
 }

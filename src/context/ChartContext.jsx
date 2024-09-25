@@ -13,7 +13,7 @@ export const ChartProvider = ({ children }) => {
         base: 'c-visualizations__'
     }
 
-    const getChartSelector = (chartId, withHash = true) => `${withHash ? '#' : ''}${selectors.base}bar--${chartId}`
+    const getChartSelector = (chartId, chart = 'bar', withHash = true) => `${withHash ? '#' : ''}${selectors.base}${chart}--${chartId}`
 
     const randomColor = () => {
         let colors = THEME.lightColors()
@@ -28,18 +28,20 @@ export const ChartProvider = ({ children }) => {
         return {color: '#'+color}
     }
 
-    const appendTooltip = (id) => {
+    const appendTooltip = (id, chart = 'bar') => {
         chartId.current = id
-        d3.select(getChartSelector(id))
+        d3.select(getChartSelector(id, chart))
             .append('div')
             .attr('id', `${selectors.base}tooltip--${id}`)
             .style('opacity', 0)
             .attr('class', `${selectors.base}tooltip`)
     }
 
+    const isBar = (chart) => chart === 'bar'
+
     const getTooltip = (id) => d3.select(`#${selectors.base}tooltip--${id}`)
 
-    const toolTipHandlers = (id) => {
+    const toolTipHandlers = (id, chart = 'bar') => {
         return {
             mouseover: function(d) {
                 getTooltip(id)
@@ -49,11 +51,13 @@ export const ChartProvider = ({ children }) => {
                     .style('cursor', 'pointer')
             },
             mousemove: function(e, d) {
-                const scale = (id === 'modal' ? 1.5 : 5)
+                const isModal = id === 'modal'
+                const scale = (isModal ? (isBar(chart) ? 1.5 : 1) : 5)
+                const x = isBar(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
                 getTooltip(id)
-                    .html(`<span>${d.label}</span>: ${d.value}`)
-                    .style('left', d3.pointer(e)[0] / scale + 'px')
-                    .style('bottom', d3.pointer(e)[1] /scale   + 'px')
+                    .html(`<span>${d.label || d.data?.label}</span>: ${d.value || d.data?.value}`)
+                    .style('left', x / scale + 'px')
+                    .style(isBar(chart) ? 'bottom' : 'top', isBar(chart) ? (d3.pointer(e)[1] /scale) : 0   + 'px')
             },
             mouseleave: function(d) {
                 getTooltip(id)
@@ -66,19 +70,11 @@ export const ChartProvider = ({ children }) => {
         };
     }
 
-
-    const addHandlers = (id, tag = 'rect') => {
-        d3.select(getChartSelector(id)).selectAll(tag)
-            .on("mouseover", toolTipHandlers.mouseover)
-            .on("mousemove", toolTipHandlers.mousemove)
-            .on("mouseleave", toolTipHandlers.mouseleave)
-    }
-
     return <ChartContext.Provider value={{
         getChartSelector,
-        addHandlers,
         toolTipHandlers,
         appendTooltip,
+        selectors
     }}>{children}</ChartContext.Provider>
 }
 

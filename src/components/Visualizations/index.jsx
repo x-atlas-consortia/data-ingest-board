@@ -12,7 +12,6 @@ import TABLE from "@/lib/helpers/table";
 import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
-import ChartContext, {ChartProvider} from "@/context/ChartContext";
 
 function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
 
@@ -85,7 +84,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
         {
             label: 'Organ Type',
             key: 'organ',
-            disabled: true,
+            //disabled: true,
         },
     ];
 
