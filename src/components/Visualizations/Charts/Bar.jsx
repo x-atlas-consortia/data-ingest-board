@@ -1,27 +1,19 @@
 import * as d3 from "d3";
-import {useEffect, useRef} from 'react'
+import {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
-import THEME from "@/lib/helpers/theme";
+import ChartContext from "@/context/ChartContext";
 
-function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartId = 'main', reload = true }) {
+function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartId = 'modal', reload = true }) {
 
     const hasLoaded = useRef(false)
+    const {
+        getChartSelector,
+        toolTipHandlers,
+        Tooltip,
+        appendTooltip } = useContext(ChartContext)
+
     const colors = {}
-    let currentColorPointer = 1
-    let currentColorIndex = 0
 
-    const randomColor = () => {
-        let colors = THEME.lightColors()
-
-        let color = THEME.lightenDarkenColor(colors[currentColorIndex].substr(1), currentColorPointer * -5);
-        currentColorPointer++
-        currentColorIndex++
-        if (currentColorPointer >= colors.length) {
-            currentColorPointer = 1
-            currentColorIndex = 0
-        }
-        return {color: '#'+color}
-    }
 
     const buildChart = ()  => {
         // Declare the chart dimensions and margins.
@@ -66,6 +58,7 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
             .selectAll()
             .data(data)
             .join("rect")
+            .attr("class", d => `bar--${d.id}`)
             .attr("x", (d) => x(labelShortName(d.label)))
             .attr("fill", function (d) {
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
@@ -83,6 +76,10 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
             .attr("height", function(d) { return y(0) - y(d.value); })
             .delay(function(d,i){return(i*100)})
 
+        svg.selectAll("rect")
+            .on("mouseover", toolTipHandlers(chartId).mouseover)
+            .on("mousemove", toolTipHandlers(chartId).mousemove)
+            .on("mouseleave", toolTipHandlers(chartId).mouseleave)
 
         // Add the x-axis and label.
         svg.append("g")
@@ -106,7 +103,10 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
     }
 
     const updateTable = () => {
-        $(`#c-visualizations__bar--${chartId}`).html(buildChart())
+        $(getChartSelector(chartId)).html('')
+        appendTooltip(chartId)
+        $(getChartSelector(chartId)).append(buildChart())
+
         if (setLegend) {
             setLegend(colors)
         }
@@ -124,7 +124,7 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
     }, [filters])
 
     return (
-        <div className={`c-visualizations__bar c-bar`} id={`c-visualizations__bar--${chartId}`}></div>
+        <div className={`c-visualizations__chart c-visualizations__bar c-bar`} id={`c-visualizations__bar--${chartId}`}></div>
     )
 }
 

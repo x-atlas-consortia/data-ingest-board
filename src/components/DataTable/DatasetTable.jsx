@@ -13,6 +13,7 @@ import UI_BLOCKS from "../../lib/helpers/uiBlocks";
 import {STATUS} from "../../lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
+import {ChartProvider} from "@/context/ChartContext";
 
 const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
     const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
@@ -421,7 +422,7 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <Spinner />
             ) : (
                 <>
-                    <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} />
+                    <ChartProvider><Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} /></ChartProvider>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
                             {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}

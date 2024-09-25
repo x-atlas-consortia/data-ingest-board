@@ -4,8 +4,6 @@ import {
     AreaChartOutlined,
     PieChartOutlined,
     BarChartOutlined,
-    LineChartOutlined,
-    ExpandAltOutlined
 } from '@ant-design/icons';
 import {Col, Collapse, Row, Dropdown, Button, Modal} from "antd";
 import Bar from "@/components/Visualizations/Charts/Bar";
@@ -14,6 +12,7 @@ import TABLE from "@/lib/helpers/table";
 import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
+import ChartContext, {ChartProvider} from "@/context/ChartContext";
 
 function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
 
@@ -63,10 +62,6 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
             label:  (<span><PieChartOutlined /> Pie Chart</span>),
             key: 'pie'
         },
-        // {
-        //     label: (<span><LineChartOutlined /> Line Chart</span>),
-        //     key: 'line'
-        // },
     ];
 
     const columns = [
@@ -261,7 +256,6 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                                             colorMethods={colorMethods}
                                                         />
                                                     )}
-
                                                 </Col>
                                                 <Col span={6} pull={18}>
                                                     <Row>
