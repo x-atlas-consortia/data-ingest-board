@@ -7,7 +7,7 @@ import {
     LineChartOutlined,
     ExpandAltOutlined
 } from '@ant-design/icons';
-import {Col, Collapse, Row, Dropdown, Button} from "antd";
+import {Col, Collapse, Row, Dropdown, Button, Modal} from "antd";
 import Bar from "@/components/Visualizations/Charts/Bar";
 import Legend from "@/components/Visualizations/Legend";
 import TABLE from "@/lib/helpers/table";
@@ -21,6 +21,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
     const [column, setColumn] = useState(defaultColumn)
     const [chart, setChart] = useState('bar')
     const [chartData, setChartData] = useState([])
+    const [showModal, setShowModal] = useState(false)
 
 
     const filterChartData = (col) => {
@@ -119,6 +120,11 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
     const colorMethods = {
         'status': getStatusColor
     }
+
+    const openMiniChartInModal = (c) => {
+        handleColumnMenuClick(c)
+        setShowModal(true)
+    }
     
     const getMiniCharts = () => {
         let charts = []
@@ -128,7 +134,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
             if (_data.length > 1) {
                 charts.push(
                     <div
-                        onClick={() => handleColumnMenuClick(c)}
+                        onClick={() => openMiniChartInModal(c)}
                         key={i}
                         style={{ ...baseStyle }}
                         className={c.key === column ? 'is-active' : ''}
@@ -169,6 +175,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
         <div className={'c-visualizations my-3'}>
             <Collapse
                 size='large'
+                defaultActiveKey={['1']}
                 items={[
                     {
                         key: '1',
@@ -183,86 +190,92 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                         children: (
                             <div>
                                 <Row>
-                                    <Col span={6}>
-                                        <Dropdown
-                                            className={
-                                                'c-visualizations__columnDropdown'
-                                            }
-                                            menu={columnMenuProps}
-                                            placement='bottomLeft'
-                                            arrow
-                                        >
-                                            <Button>
-                                                Select a data column
-                                            </Button>
-                                        </Dropdown>
 
-                                        <Dropdown
-                                            className={
-                                                'c-visualizations__chartDropdown'
-                                            }
-                                            menu={chartMenuProps}
-                                            placement='bottomRight'
-                                            arrow
-                                        >
-                                            <Button>
-                                                <AreaChartOutlined />
-                                            </Button>
-                                        </Dropdown>
-                                    </Col>
                                     <Col span={3} offset={15}>
-                                        <Button
-                                            block
-                                            icon={<ExpandAltOutlined />}
-                                            size={'large'}
-                                        >
-                                            Fullscreen
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <div
-                                        style={{ width: '100%' }}
-                                        className={'text-center'}
-                                    >
-                                        <h4>
-                                            {TABLE.cols.n(
+
+                                        <Modal
+                                            title={TABLE.cols.n(
                                                 column,
                                                 getColumnName()
                                             )}
-                                        </h4>
-                                        {!hasMeaningfulData() && <div className={'mt-4'}>There is not enough data to present a meaningful chart visualization.</div>}
-                                    </div>
-                                </Row>
-                                <Row>
-                                    <Col span={18} push={6}>
-                                        {isBar() && hasMeaningfulData() && (
-                                            <Bar
-                                                setLegend={setLegend}
-                                                data={chartData}
-                                                column={column}
-                                                colorMethods={colorMethods}
-                                            />
-                                        )}
-                                        {isPie() && hasMeaningfulData() && (
-                                            <Pie
-                                                setLegend={setLegend}
-                                                data={chartData}
-                                                column={column}
-                                                colorMethods={colorMethods}
-                                            />
-                                        )}
+                                            centered
+                                            open={showModal}
+                                            onOk={() => setShowModal(false)}
+                                            onCancel={() => setShowModal(false)}
+                                            cancelButtonProps={{ style: { display: 'none' } }}
+                                            width={1000}
+                                        >
+                                            <Row>
+                                                <Col span={6}>
+                                                    <Dropdown
+                                                        className={
+                                                            'c-visualizations__columnDropdown'
+                                                        }
+                                                        menu={columnMenuProps}
+                                                        placement='bottomLeft'
+                                                        arrow
+                                                    >
+                                                        <Button>
+                                                            Select a data column
+                                                        </Button>
+                                                    </Dropdown>
 
-                                    </Col>
-                                    <Col span={6} pull={18}>
-                                        <Row>
-                                            {hasMeaningfulData() && <Legend
-                                                setLegend={setLegend}
-                                                legend={legend}
-                                            />}
-                                        </Row>
+                                                    <Dropdown
+                                                        className={
+                                                            'c-visualizations__chartDropdown'
+                                                        }
+                                                        menu={chartMenuProps}
+                                                        placement='bottomRight'
+                                                        arrow
+                                                    >
+                                                        <Button>
+                                                            <AreaChartOutlined />
+                                                        </Button>
+                                                    </Dropdown>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <div
+                                                    style={{ width: '100%' }}
+                                                    className={'text-center'}
+                                                >
+
+                                                    {!hasMeaningfulData() && <div className={'mt-4'}>There is not enough data to present a meaningful chart visualization.</div>}
+                                                </div>
+                                            </Row>
+                                            <Row>
+                                                <Col span={18} push={6}>
+                                                    {isBar() && hasMeaningfulData() && (
+                                                        <Bar
+                                                            setLegend={setLegend}
+                                                            data={chartData}
+                                                            column={column}
+                                                            colorMethods={colorMethods}
+                                                        />
+                                                    )}
+                                                    {isPie() && hasMeaningfulData() && (
+                                                        <Pie
+                                                            setLegend={setLegend}
+                                                            data={chartData}
+                                                            column={column}
+                                                            colorMethods={colorMethods}
+                                                        />
+                                                    )}
+
+                                                </Col>
+                                                <Col span={6} pull={18}>
+                                                    <Row>
+                                                        {hasMeaningfulData() && <Legend
+                                                            setLegend={setLegend}
+                                                            legend={legend}
+                                                        />}
+                                                    </Row>
+                                                </Col>
+                                            </Row>
+                                        </Modal>
                                     </Col>
                                 </Row>
+
                                 <Row>
                                     <div className='container mt-5'>
                                         <FilmStrip>
