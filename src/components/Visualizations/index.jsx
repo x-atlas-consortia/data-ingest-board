@@ -184,9 +184,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                         children: (
                             <div>
                                 <Row>
-
                                     <Col span={3} offset={15}>
-
                                         <Modal
                                             title={TABLE.cols.n(
                                                 column,
@@ -198,6 +196,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                             onCancel={() => setShowModal(false)}
                                             cancelButtonProps={{ style: { display: 'none' } }}
                                             width={1000}
+                                            okText='Close'
                                         >
                                             <Row>
                                                 <Col span={6}>
