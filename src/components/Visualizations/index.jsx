@@ -140,6 +140,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                 column={c.key}
                                 chartId={i.toString()}
                                 colorMethods={colorMethods}
+                                showXLabels={false}
                                 reload={false}
                             />
                         )}
@@ -186,6 +187,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                 <Row>
                                     <Col span={3} offset={15}>
                                         <Modal
+                                            className='c-chart-modal'
                                             title={TABLE.cols.n(
                                                 column,
                                                 getColumnName()
@@ -244,6 +246,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                                             data={chartData}
                                                             column={column}
                                                             colorMethods={colorMethods}
+                                                            showXLabels={true}
                                                         />
                                                     )}
                                                     {isPie() && hasMeaningfulData() && (

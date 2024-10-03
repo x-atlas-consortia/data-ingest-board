@@ -1,9 +1,19 @@
-import * as d3 from "d3";
+import * as d3 from 'd3';
 import {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
-import ChartContext from "@/context/ChartContext";
+import ChartContext from '@/context/ChartContext';
 
-function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartId = 'modal', reload = true }) {
+function Bar({
+    setLegend,
+    column,
+    filters,
+    data = [],
+    colorMethods = {},
+    chartId = 'modal',
+    reload = true,
+    showXLabels = true,
+    onSectionClick
+}) {
 
     const hasLoaded = useRef(false)
     const {
@@ -13,24 +23,41 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
 
     const colors = {}
 
-
     const buildChart = ()  => {
-        // Declare the chart dimensions and margins.
-        const width = 928;
-        const height = 500;
-        const marginTop = 30;
-        const marginRight = 0;
-        const marginBottom = 30;
-        const marginLeft = 40;
-
-        const labelShortName = (g) => g.substr(0, 3)
         data.sort((a, b) => b.value - a.value)
         const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
-        const shortNames = groups.map((g) => labelShortName(g))
+        const names = groups.map((g) => g)
+
+        // Declare the chart dimensions and margins.
+        const width = 928;
+        let height = 500;
+        const marginTop = 30;
+        const marginRight = 0;
+        let marginBottom = 30;
+        const marginLeft = 40;
+
+        if (showXLabels) {
+            // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
+            const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden"); 
+            let maxLabelWidth = 0;
+            names.forEach(name => {
+                const textElement = tempSvg.append("text").text(name).style("font-size", "10px");
+                const bbox = textElement.node().getBBox();
+                if (bbox.width > maxLabelWidth) {
+                    maxLabelWidth = bbox.width;
+                }
+                textElement.remove();
+            });
+            tempSvg.remove();
+
+            // Adjust the bottom margin and height to not cut off the labels.
+            marginBottom = marginBottom + maxLabelWidth * Math.sin(Math.PI / 4);
+            height = height + maxLabelWidth * Math.sin(Math.PI / 4);
+        }
 
         // Declare the x (horizontal position) scale.
         const x = d3.scaleBand()
-            .domain(shortNames) // descending value
+            .domain(names) // descending value
             .range([marginLeft, width - marginRight])
             .padding(0.1);
 
@@ -52,20 +79,24 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
             .attr("style", "max-width: 100%; height: auto;");
 
         // Add a rect for each bar.
-
         svg.append("g")
             .selectAll()
             .data(data)
             .join("rect")
             .attr("class", d => `bar--${d.id}`)
-            .attr("x", (d) => x(labelShortName(d.label)))
+            .attr("x", (d) => x(d.label))
             .attr("fill", function (d) {
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
                 colors[d.label] = {color, value: d.value, label: d.label};
                 return color; })
             .attr("y", (d) => y(0))
             .attr("height", (d) => y(0) - y(0))
-            .attr("width", x.bandwidth());
+            .attr("width", x.bandwidth())
+            .on("click", function(event, d) {
+                if (onSectionClick) {
+                    onSectionClick(d.label)
+                }
+            });
 
         // Animation
         svg.selectAll("rect")
@@ -83,7 +114,14 @@ function Bar({ setLegend, column, filters,  data = [], colorMethods = {}, chartI
         // Add the x-axis and label.
         svg.append("g")
             .attr("transform", `translate(0,${height - marginBottom})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .selectAll("text")
+            .style("display", showXLabels ? "block" : "none")
+            .style("text-anchor", "end")
+            .style("font-size", "10px")
+            .attr("dx", "-0.8em")
+            .attr("dy", "0.15em")
+            .attr("transform", "rotate(-45)");
 
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
