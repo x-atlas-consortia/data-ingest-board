@@ -55,16 +55,6 @@ export default function Pie({ setLegend, column,  data = [], colorMethods = {}, 
         // Add a sector path for each value.
         svg.append("g")
             .attr("stroke", "white")
-            .on("mouseover", function(d) {
-                d3.select(this).select(`.${d.srcElement.className.animVal}`).transition()
-                    .duration(1000)
-                    .attr("d", arcOver);
-            })
-            .on("mouseout", function(d) {
-                d3.select(this).select(`.${d.srcElement.className.animVal}`).transition()
-                    .duration(1000)
-                    .attr("d", arc);
-            })
             .selectAll()
             .data(arcs)
             .join("path")
