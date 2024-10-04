@@ -30,7 +30,7 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
     }
 
     return (
-        <div className='c-legend my-4'>
+        <div className='c-legend mb-4'>
             <div className='c-legend__title'>
                 <h5>Legend</h5>
                 <Tooltip title='Click a legend item or graph section to filter results'>

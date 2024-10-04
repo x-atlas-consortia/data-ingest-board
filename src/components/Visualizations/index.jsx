@@ -188,7 +188,7 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
     const hasMeaningfulData = () => chartData.length > 1
 
     return (
-        <div className={'c-visualizations my-3'}>
+        <div className='c-visualizations my-3'>
             <Collapse
                 size='large'
                 defaultActiveKey={['1']}
@@ -223,43 +223,36 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
                                             okButtonProps={{ disabled: selectedFilterValues.length === 0 }}
                                         >
                                             <Row>
-                                                <Col span={6}>
-                                                    <Dropdown
-                                                        className='c-visualizations__columnDropdown'
-                                                        menu={columnMenuProps}
-                                                        placement='bottomLeft'
-                                                        arrow
-                                                    >
-                                                        <Button>
-                                                            Select a data column
-                                                        </Button>
-                                                    </Dropdown>
-
-                                                    <Dropdown
-                                                        className={
-                                                            'c-visualizations__chartDropdown'
-                                                        }
-                                                        menu={chartMenuProps}
-                                                        placement='bottomRight'
-                                                        arrow
-                                                    >
-                                                        <Button>
-                                                            <AreaChartOutlined />
-                                                        </Button>
-                                                    </Dropdown>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <div
-                                                    style={{ width: '100%' }}
-                                                    className={'text-center'}
+                                                <Dropdown
+                                                    className='c-visualizations__columnDropdown'
+                                                    menu={columnMenuProps}
+                                                    placement='bottomLeft'
+                                                    arrow
                                                 >
+                                                    <Button>
+                                                        Select a data column
+                                                    </Button>
+                                                </Dropdown>
 
-                                                    {!hasMeaningfulData() && <div className={'mt-4'}>There is not enough data to present a meaningful chart visualization.</div>}
-                                                </div>
+                                                <Dropdown
+                                                    className='c-visualizations__chartDropdown'
+                                                    menu={chartMenuProps}
+                                                    placement='bottomRight'
+                                                    arrow
+                                                >
+                                                    <Button>
+                                                        <AreaChartOutlined />
+                                                    </Button>
+                                                </Dropdown>
                                             </Row>
                                             <Row>
-                                                <Col span={18} push={6}>
+                                                {!hasMeaningfulData() && (
+                                                    <div className='text-center w-100 my-4' >
+                                                        There is not enough data to present a meaningful chart visualization.
+                                                    </div>
+                                                )}
+
+                                                <Col className='mt-4' lg={{ span: 18, push: 6}} md={{ span: 24 }}>
                                                     {isBar() && hasMeaningfulData() && (
                                                         <Bar
                                                             setLegend={setLegend}
@@ -280,7 +273,8 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
                                                         />
                                                     )}
                                                 </Col>
-                                                <Col span={6} pull={18}>
+
+                                                <Col className='mt-4' lg={{ span: 6, pull: 18 }} md={{ span: 24 }}>
                                                     <Row>
                                                         {hasMeaningfulData() && <Legend
                                                             legend={legend}
@@ -290,6 +284,7 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
                                                         />}
                                                     </Row>
                                                 </Col>
+
                                             </Row>
                                         </Modal>
                                     </Col>
