@@ -13,14 +13,13 @@ import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
 
-function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
-
+function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name' }) {
     const [legend, setLegend] = useState([])
     const [column, setColumn] = useState(defaultColumn)
     const [chart, setChart] = useState('bar')
     const [chartData, setChartData] = useState([])
     const [showModal, setShowModal] = useState(false)
-
+    const [selectedFilterValues, setSelectedFilterValues] = useState([])
 
     const filterChartData = (col) => {
         let dict = {}
@@ -50,6 +49,28 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
     const handleChartMenuClick = (e) => {
         console.log('click', e)
         setChart(e.key)
+    }
+
+    const handleChartItemClick = (label) => {
+        // Used for both the legend and chart items
+        if (selectedFilterValues.includes(label)) {
+            setSelectedFilterValues((selectedFilterValues) => selectedFilterValues.filter((v) => v !== label))
+        } else {
+            setSelectedFilterValues((selectedFilterValues) => [...selectedFilterValues, label])
+        }
+    }
+
+    const handleModalClose = (applyFilters) => {
+        if (selectedFilterValues.length > 0 && applyFilters) {
+            // This overrides any existing filters
+            const filtersToApply = {
+                [column]: selectedFilterValues.join(',')
+            }
+            setFilters(filtersToApply)
+        }
+
+        setSelectedFilterValues([])
+        setShowModal(false)
     }
 
     const charts = [
@@ -119,7 +140,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
         handleColumnMenuClick(c)
         setShowModal(true)
     }
-    
+
     const getMiniCharts = () => {
         let charts = []
         let i = 0
@@ -194,18 +215,17 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                             )}
                                             centered
                                             open={showModal}
-                                            onOk={() => setShowModal(false)}
-                                            onCancel={() => setShowModal(false)}
-                                            cancelButtonProps={{ style: { display: 'none' } }}
+                                            onOk={() => handleModalClose(true)}
+                                            onCancel={() => handleModalClose(false)}
                                             width={1000}
-                                            okText='Close'
+                                            okText='Set filters and close'
+                                            cancelText='Close'
+                                            okButtonProps={{ disabled: selectedFilterValues.length === 0 }}
                                         >
                                             <Row>
                                                 <Col span={6}>
                                                     <Dropdown
-                                                        className={
-                                                            'c-visualizations__columnDropdown'
-                                                        }
+                                                        className='c-visualizations__columnDropdown'
                                                         menu={columnMenuProps}
                                                         placement='bottomLeft'
                                                         arrow
@@ -247,6 +267,7 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                                             column={column}
                                                             colorMethods={colorMethods}
                                                             showXLabels={true}
+                                                            onSectionClick={handleChartItemClick}
                                                         />
                                                     )}
                                                     {isPie() && hasMeaningfulData() && (
@@ -255,14 +276,17 @@ function Visualizations({ data, filters, defaultColumn = 'group_name' }) {
                                                             data={chartData}
                                                             column={column}
                                                             colorMethods={colorMethods}
+                                                            onSectionClick={handleChartItemClick}
                                                         />
                                                     )}
                                                 </Col>
                                                 <Col span={6} pull={18}>
                                                     <Row>
                                                         {hasMeaningfulData() && <Legend
-                                                            setLegend={setLegend}
                                                             legend={legend}
+                                                            setLegend={setLegend}
+                                                            selectedValues={selectedFilterValues}
+                                                            onItemClick={handleChartItemClick}
                                                         />}
                                                     </Row>
                                                 </Col>

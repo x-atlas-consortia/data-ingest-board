@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {eq, getHeadersWith, toDateString} from "../../lib/helpers/general";
+import {eq, getHeadersWith} from "../../lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
 import ENVS from "../../lib/helpers/envs";
@@ -10,8 +10,6 @@ import URLS from "../../lib/helpers/urls";
 import TABLE from "../../lib/helpers/table";
 import AppContext from "../../context/AppContext";
 import Spinner from "../Spinner";
-import Visualizations from "@/components/Visualizations";
-
 
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
@@ -219,6 +217,7 @@ const DataTable = (props) => {
             sortField={sortField}
             sortOrder={sortOrder}
             filters={filters}
+            setFilters={setFilters}
         />
     ) : uploadTable;
 

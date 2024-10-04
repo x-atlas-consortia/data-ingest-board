@@ -2,8 +2,14 @@ import {useContext, useEffect} from "react";
 import * as d3 from "d3";
 import ChartContext from "@/context/ChartContext";
 
-export default function Pie({ setLegend, column,  data = [], colorMethods = {}, chartId = 'modal' }) {
-
+export default function Pie({
+    setLegend,
+    column,
+    data = [],
+    colorMethods = {},
+    chartId = 'modal',
+    onSectionClick
+}) {
     const colors = {}
 
     const {
@@ -65,6 +71,11 @@ export default function Pie({ setLegend, column,  data = [], colorMethods = {}, 
                 return color
             })
             .attr("d", arc)
+            .on("click", function(event, d) {
+                if (onSectionClick) {
+                    onSectionClick(d.data.label)
+                }
+            })
             .append("title")
             .text(d => `${d.data.label}: ${d.data.value.toLocaleString("en-US")}`);
 

@@ -1,4 +1,4 @@
-import {Form, Modal, Table} from "antd";
+import {Modal, Table} from "antd";
 import {ExportOutlined, ThunderboltOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
@@ -15,7 +15,18 @@ import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
 
-const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+const DatasetTable = ({
+    data,
+    loading,
+    handleTableChange,
+    page,
+    pageSize,
+    sortField,
+    sortOrder,
+    filters,
+    setFilters,
+    className
+}) => {
     const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
@@ -422,7 +433,9 @@ const DatasetTable = ({ data, loading, handleTableChange, page, pageSize, sortFi
                 <Spinner />
             ) : (
                 <>
-                    <ChartProvider><Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} /></ChartProvider>
+                    <ChartProvider>
+                        <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} setFilters={setFilters} />
+                    </ChartProvider>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">
                             {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}

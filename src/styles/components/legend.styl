@@ -4,14 +4,32 @@
     padding-left 0
   &__item
     list-style none
+    display flex
+    flex-direction row
+    align-items center
+    padding 0.25rem 0.5rem
+    cursor pointer
+    gap: 0.5rem;
+
+    &:hover
+      background-color #fafafa
+    &__selected
+      background-color #98c1e8
+      &:hover
+        background-color #98c1e8
     &__col
       width 20px
       height 20px
       display inline-block
     &__label
+      flex-grow 1
       display inline-block
       width 150px
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
       margin-right 20px
+      vertical-align: middle;
+    &__value
+      display inline-block
+      text-align right
