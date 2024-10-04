@@ -1,4 +1,6 @@
-import PropTypes from 'prop-types'
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
+import PropTypes from 'prop-types';
 
 function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
     const handleItemClick = (label) => {
@@ -29,7 +31,12 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
 
     return (
         <div className='c-legend my-4'>
-            <h5>Legend</h5>
+            <div className='c-legend__title'>
+                <h5>Legend</h5>
+                <Tooltip title='Click a legend item or graph section to filter results'>
+                    <InfoCircleOutlined />
+                </Tooltip>
+            </div>
             <ul>
                 {buildLegend()}
             </ul>
