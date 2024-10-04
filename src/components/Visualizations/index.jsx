@@ -214,10 +214,10 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
                                                 getColumnName()
                                             )}
                                             centered
+                                            closable={false}
                                             open={showModal}
                                             onOk={() => handleModalClose(true)}
                                             onCancel={() => handleModalClose(false)}
-                                            width={1000}
                                             okText='Set filters and close'
                                             cancelText='Close'
                                             okButtonProps={{ disabled: selectedFilterValues.length === 0 }}

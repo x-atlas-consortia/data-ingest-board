@@ -34,7 +34,7 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
             <div className='c-legend__title'>
                 <h5>Legend</h5>
                 <Tooltip title='Click a legend item or graph section to filter results'>
-                    <InfoCircleOutlined />
+                    <InfoCircleOutlined role='button' style={{ color: 'var(--bs-link-color)' }} />
                 </Tooltip>
             </div>
             <ul>
