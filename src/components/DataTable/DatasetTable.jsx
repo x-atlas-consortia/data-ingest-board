@@ -24,7 +24,6 @@ const DatasetTable = ({
     sortField,
     sortOrder,
     filters,
-    setFilters,
     className
 }) => {
     const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
@@ -434,7 +433,7 @@ const DatasetTable = ({
             ) : (
                 <>
                     <ChartProvider>
-                        <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} setFilters={setFilters} />
+                        <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
                     <div className="row">
                         <div className="col-12 col-md-3 count mt-md-3">

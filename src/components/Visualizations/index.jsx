@@ -13,7 +13,7 @@ import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
 
-function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name' }) {
+function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
     const [legend, setLegend] = useState([])
     const [column, setColumn] = useState(defaultColumn)
     const [chart, setChart] = useState('bar')
@@ -42,12 +42,10 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
     }
 
     const handleColumnMenuClick = (e) => {
-        console.log('click', e);
         setColumn(e.key)
     }
 
     const handleChartMenuClick = (e) => {
-        console.log('click', e)
         setChart(e.key)
     }
 
@@ -60,13 +58,27 @@ function Visualizations({ data, filters, setFilters, defaultColumn = 'group_name
         }
     }
 
-    const handleModalClose = (applyFilters) => {
-        if (selectedFilterValues.length > 0 && applyFilters) {
+    const handleModalClose = (shouldApplyFilters) => {
+        if (selectedFilterValues.length > 0 && shouldApplyFilters) {
+            const query = new URLSearchParams(window.location.search)
+            const pageSize = query.get('page_size') || 10
+
             // This overrides any existing filters
             const filtersToApply = {
-                [column]: selectedFilterValues.join(',')
+                [column]: selectedFilterValues.map((v) => v.toLowerCase())
             }
-            setFilters(filtersToApply)
+
+            const pagination = {
+                currentPage: 1,
+                pageSize: pageSize,
+            }
+
+            const sorter = {
+                field: column,
+                order: 'ascend',
+            }
+
+            applyFilters(pagination, filtersToApply, sorter, {})
         }
 
         setSelectedFilterValues([])

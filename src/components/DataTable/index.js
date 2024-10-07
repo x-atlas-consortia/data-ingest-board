@@ -217,7 +217,6 @@ const DataTable = (props) => {
             sortField={sortField}
             sortOrder={sortOrder}
             filters={filters}
-            setFilters={setFilters}
         />
     ) : uploadTable;
 
