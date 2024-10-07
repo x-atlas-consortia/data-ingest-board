@@ -55,9 +55,14 @@ const DatasetTable = ({
     }
 
     const getHierarchy = (str) => {
-        const r = new RegExp(/.+?(?=\()/)
-        let res = str.match(r)
-        return (res && res.length) ? res[0].trim() : str
+        let res = window.UBKG.organTypesGroups[str.trim()]
+        if (!res) {
+            const r = new RegExp(/.+?(?=\()/)
+            res = str.match(r)
+
+            return (res && res.length) ? res[0].trim() : str
+        }
+        return res
     }
 
     const makeHierarchyFilters = (items) => {
