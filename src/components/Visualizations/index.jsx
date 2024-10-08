@@ -51,11 +51,13 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
 
     const handleChartItemClick = (label) => {
         // Used for both the legend and chart items
-        if (selectedFilterValues.includes(label)) {
-            setSelectedFilterValues((selectedFilterValues) => selectedFilterValues.filter((v) => v !== label))
-        } else {
-            setSelectedFilterValues((selectedFilterValues) => [...selectedFilterValues, label])
-        }
+        setSelectedFilterValues((prevValues) => {
+            if (prevValues.includes(label)) {
+                return prevValues.filter((v) => v !== label);
+            } else {
+                return [...prevValues, label];
+            }
+        })
     }
 
     const handleModalClose = (shouldApplyFilters) => {
