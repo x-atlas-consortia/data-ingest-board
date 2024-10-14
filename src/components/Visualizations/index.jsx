@@ -186,6 +186,14 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
 
             i++
         }
+        if (charts.length === 0) {
+            return (
+                <div className='text-center w-100'>
+                    There is not enough data to present meaningful visualizations.
+                </div>
+            )
+        }
+
         return charts
     }
 
@@ -295,7 +303,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 </Row>
 
                                 <Row>
-                                    <div className='container mt-5'>
+                                    <div className='container'>
                                         <FilmStrip>
                                             {getMiniCharts()}
                                         </FilmStrip>
