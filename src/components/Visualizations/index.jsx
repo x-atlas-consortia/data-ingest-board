@@ -12,11 +12,17 @@ import TABLE from "@/lib/helpers/table";
 import THEME from "@/lib/helpers/theme";
 import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
+import ENVS from '@/lib/helpers/envs';
 
 function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
+    const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
+        acc[c.key] = c.default;
+        return acc
+    }, {})
+
     const [legend, setLegend] = useState([])
     const [column, setColumn] = useState(defaultColumn)
-    const [chart, setChart] = useState('bar')
+    const [chartTypes, setChartTypes] = useState(defaultChartTypes)
     const [chartData, setChartData] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [selectedFilterValues, setSelectedFilterValues] = useState([])
@@ -46,7 +52,12 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
     }
 
     const handleChartMenuClick = (e) => {
-        setChart(e.key)
+        setChartTypes((prevTypes) => {
+            return {
+                ...prevTypes,
+                [column]: e.key
+            }
+        })
     }
 
     const handleChartItemClick = (label) => {
@@ -98,30 +109,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         },
     ];
 
-    const columns = [
-        {
-            label: 'Group Name',
-            key: 'group_name',
-            active: true,
-        },
-        {
-            label: 'Status',
-            key: 'status',
-        },
-        {
-            label: TABLE.cols.n('source_type', 'Source Type'),
-            key: TABLE.cols.f('source_type'),
-        },
-        {
-            label: 'Dataset Type',
-            key: 'dataset_type',
-        },
-        {
-            label: 'Organ Type',
-            key: 'organ',
-            //disabled: true,
-        },
-    ];
+    const columns = ENVS.datasetCharts()
 
     const getColumnName = ( col ) => {
         col = col || column
@@ -143,8 +131,8 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         width: '25%',
     }
 
-    const isBar = () => chart === 'bar'
-    const isPie = () => chart === 'pie'
+    const isBar = (key) => chartTypes[key] === 'bar'
+    const isPie = (key) => chartTypes[key] === 'pie'
 
     const colorMethods = {
         'status': getStatusColor
@@ -168,7 +156,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                         style={{ ...baseStyle }}
                         className={c.key === column ? 'is-active' : ''}
                     >
-                        {isBar() && (
+                        {isBar(c.key) && (
                             <Bar
                                 data={_data}
                                 filters={filters}
@@ -179,9 +167,9 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 reload={false}
                             />
                         )}
-                        {isPie() && (
+                        {isPie(c.key) && (
                             <Pie
-                                data={filterChartData(c.key)}
+                                data={_data}
                                 column={c.key}
                                 chartId={i.toString()}
                                 colorMethods={colorMethods}
@@ -267,7 +255,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                                 )}
 
                                                 <Col className='mt-4' lg={{ span: 18, push: 6}} md={{ span: 24 }}>
-                                                    {isBar() && hasMeaningfulData() && (
+                                                    {isBar(column) && hasMeaningfulData() && (
                                                         <Bar
                                                             setLegend={setLegend}
                                                             data={chartData}
@@ -277,7 +265,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                                             onSectionClick={handleChartItemClick}
                                                         />
                                                     )}
-                                                    {isPie() && hasMeaningfulData() && (
+                                                    {isPie(column) && hasMeaningfulData() && (
                                                         <Pie
                                                             setLegend={setLegend}
                                                             data={chartData}
