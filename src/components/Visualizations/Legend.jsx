@@ -12,7 +12,7 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
     const buildLegend = () => {
         let res = []
         let _legend = Object.values(legend)
-        _legend.sort((a, b) => a.label.localeCompare(b.label))
+        _legend.sort((a, b) => b.value - a.value)
         for (let l of _legend) {
             let className = 'c-legend__item'
             if (selectedValues.includes(l.label)) {

@@ -36,11 +36,13 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
             }
             dict[key].value++
         }
-        return Object.values(dict)
+        const values = Object.values(dict)
+        return values.sort((a, b) => b.value - a.value)
     }
 
     useEffect(() => {
-        setChartData(filterChartData(column))
+        const filteredData = filterChartData(column)
+        setChartData(filteredData)
     }, [data, column])
 
     const getStatusColor = (label) => {
