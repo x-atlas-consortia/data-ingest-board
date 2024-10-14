@@ -31,6 +31,7 @@ const ENVS = {
         }
         return dict
     },
+    datasetCharts: () => parseJSON(process.env.NEXT_PUBLIC_DATASET_CHARTS),
     uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1',
     searchEnabled: () => process.env.NEXT_PUBLIC_SEARCH_ENABLED === '1',
     searchIndices: (entity) => {
