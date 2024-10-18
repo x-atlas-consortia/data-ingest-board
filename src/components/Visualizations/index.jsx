@@ -216,92 +216,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                             </div>
                         ),
                         children: (
-                            <div>
-                                <Row>
-                                    <Col span={3} offset={15}>
-                                        <Modal
-                                            className='c-chart-modal'
-                                            title={TABLE.cols.n(
-                                                column,
-                                                getColumnName()
-                                            )}
-                                            centered
-                                            closable={false}
-                                            open={showModal}
-                                            onOk={() => handleModalClose(true)}
-                                            onCancel={() => handleModalClose(false)}
-                                            okText='Set filters and close'
-                                            cancelText='Close'
-                                            okButtonProps={{ disabled: selectedFilterValues.length === 0 }}
-                                        >
-                                            <Row>
-                                                <Dropdown
-                                                    className='c-visualizations__columnDropdown'
-                                                    menu={columnMenuProps}
-                                                    placement='bottomLeft'
-                                                    arrow
-                                                >
-                                                    <Button>
-                                                        Select a data column
-                                                    </Button>
-                                                </Dropdown>
-
-                                                <Dropdown
-                                                    className='c-visualizations__chartDropdown'
-                                                    menu={chartMenuProps}
-                                                    placement='bottomRight'
-                                                    arrow
-                                                >
-                                                    <Button>
-                                                        <AreaChartOutlined />
-                                                    </Button>
-                                                </Dropdown>
-                                            </Row>
-                                            <Row>
-                                                {!hasMeaningfulData() && (
-                                                    <div className='text-center w-100 my-4' >
-                                                        There is not enough data to present a meaningful chart visualization.
-                                                    </div>
-                                                )}
-
-                                                <Col className='mt-4' lg={{ span: 18, push: 6}} md={{ span: 24 }}>
-                                                    {isBar(column) && hasMeaningfulData() && (
-                                                        <Bar
-                                                            setLegend={setLegend}
-                                                            data={chartData}
-                                                            column={column}
-                                                            colorMethods={colorMethods}
-                                                            showXLabels={true}
-                                                            onSectionClick={handleChartItemClick}
-                                                        />
-                                                    )}
-                                                    {isPie(column) && hasMeaningfulData() && (
-                                                        <Pie
-                                                            setLegend={setLegend}
-                                                            data={chartData}
-                                                            column={column}
-                                                            colorMethods={colorMethods}
-                                                            onSectionClick={handleChartItemClick}
-                                                        />
-                                                    )}
-                                                </Col>
-
-                                                <Col className='mt-4' lg={{ span: 6, pull: 18 }} md={{ span: 24 }}>
-                                                    <Row>
-                                                        {hasMeaningfulData() && <Legend
-                                                            legend={legend}
-                                                            setLegend={setLegend}
-                                                            selectedValues={selectedFilterValues}
-                                                            onItemClick={handleChartItemClick}
-                                                        />}
-                                                    </Row>
-                                                </Col>
-
-                                            </Row>
-                                        </Modal>
-                                    </Col>
-                                </Row>
-
+                            <>
                                 <Row>
                                     <div className='container'>
                                         <FilmStrip>
@@ -309,7 +224,89 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                         </FilmStrip>
                                     </div>
                                 </Row>
-                            </div>
+
+                                <Modal
+                                    className='c-chart-modal'
+                                    classNames={{ body: 'c-chart-modal__body' }}
+                                    title={TABLE.cols.n(
+                                        column,
+                                        getColumnName()
+                                    )}
+                                    centered
+                                    closable={false}
+                                    open={showModal}
+                                    onOk={() => handleModalClose(true)}
+                                    onCancel={() => handleModalClose(false)}
+                                    okText='Set filters and close'
+                                    cancelText='Close'
+                                    okButtonProps={{ disabled: selectedFilterValues.length === 0 }}
+                                >
+                                    <Row>
+                                        <Col span={24}>
+                                            <Dropdown
+                                                className='c-visualizations__columnDropdown'
+                                                menu={columnMenuProps}
+                                                placement='bottomLeft'
+                                                arrow
+                                            >
+                                                <Button>
+                                                    Select a data column
+                                                </Button>
+                                            </Dropdown>
+
+                                            <Dropdown
+                                                className='c-visualizations__chartDropdown'
+                                                menu={chartMenuProps}
+                                                placement='bottomRight'
+                                                arrow
+                                            >
+                                                <Button>
+                                                    <AreaChartOutlined />
+                                                </Button>
+                                            </Dropdown>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        {!hasMeaningfulData() && (
+                                            <Col className='text-center w-100' span={24} >
+                                                There is not enough data to present a meaningful chart visualization.
+                                            </Col>
+                                        )}
+
+                                        <Col className='mt-4 ps-md-4' md={{ span: 18, push: 6 }} sm={{ span: 24 }} xs={{ span: 24 }}>
+                                            {isBar(column) && hasMeaningfulData() && (
+                                                <Bar
+                                                    setLegend={setLegend}
+                                                    data={chartData}
+                                                    column={column}
+                                                    colorMethods={colorMethods}
+                                                    showXLabels={true}
+                                                    onSectionClick={handleChartItemClick}
+                                                />
+                                            )}
+                                            {isPie(column) && hasMeaningfulData() && (
+                                                <Pie
+                                                    setLegend={setLegend}
+                                                    data={chartData}
+                                                    column={column}
+                                                    colorMethods={colorMethods}
+                                                    onSectionClick={handleChartItemClick}
+                                                />
+                                            )}
+                                        </Col>
+
+                                        <Col className='mt-4' md={{ span: 6, pull: 18 }} sm={{ span: 24 }} xs={{ span: 24 }}>
+                                            {hasMeaningfulData() && <Legend
+                                                legend={legend}
+                                                setLegend={setLegend}
+                                                selectedValues={selectedFilterValues}
+                                                onItemClick={handleChartItemClick}
+                                            />}
+                                        </Col>
+                                    </Row>
+                                </Modal>
+                            </>
                         )
                     }
                 ]}

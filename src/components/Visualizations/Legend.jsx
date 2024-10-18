@@ -37,7 +37,7 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
                     <InfoCircleOutlined role='button' style={{ color: 'var(--bs-link-color)' }} />
                 </Tooltip>
             </div>
-            <ul>
+            <ul className='c-legend__list'>
                 {buildLegend()}
             </ul>
         </div>
