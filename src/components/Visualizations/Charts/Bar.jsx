@@ -66,9 +66,13 @@ function Bar({
             .domain(data.map(d => d.label))
             .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length))
 
+        // Bar must have a minimum height to be able to click. 2% of the max value seems good
+        const maxY = d3.max(data, (d) => d.value);
+        const yStartPos = -(maxY * .02)
+
         // Declare the y (vertical position) scale.
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, (d) => d.value)])
+            .domain([yStartPos, maxY])
             .range([height - marginBottom, marginTop]);
 
         // Create the SVG container.
@@ -89,8 +93,8 @@ function Bar({
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
                 colors[d.label] = {color, value: d.value, label: d.label};
                 return color; })
-            .attr("y", (d) => y(0))
-            .attr("height", (d) => y(0) - y(0))
+            .attr("y", (d) => y(yStartPos))
+            .attr("height", (d) => y(yStartPos) - y(yStartPos))
             .attr("width", x.bandwidth())
             .on("click", function(event, d) {
                 if (onSectionClick) {
@@ -103,7 +107,7 @@ function Bar({
             .transition()
             .duration(800)
             .attr("y", (d) => y(d.value))
-            .attr("height", function(d) { return y(0) - y(d.value); })
+            .attr("height", function(d) { return y(yStartPos) - y(d.value); })
             .delay(function(d,i){return(i*100)})
 
         svg.selectAll("rect")
