@@ -41,7 +41,7 @@ function Bar({
             const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden"); 
             let maxLabelWidth = 0;
             names.forEach(name => {
-                const textElement = tempSvg.append("text").text(name).style("font-size", "10px");
+                const textElement = tempSvg.append("text").text(name).style("font-size", "11px");
                 const bbox = textElement.node().getBBox();
                 if (bbox.width > maxLabelWidth) {
                     maxLabelWidth = bbox.width;
@@ -122,7 +122,7 @@ function Bar({
             .selectAll("text")
             .style("display", showXLabels ? "block" : "none")
             .style("text-anchor", "end")
-            .style("font-size", "10px")
+            .style("font-size", "11px")
             .attr("dx", "-0.8em")
             .attr("dy", "0.15em")
             .attr("transform", "rotate(-45)");
@@ -137,7 +137,9 @@ function Bar({
                 .attr("y", 10)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "start")
-                .text("↑ Frequency"));
+                .text("↑ Frequency"))
+            .selectAll("text")
+            .style("font-size", "11px"); 
 
         // Return the SVG element.
         return svg.node();
