@@ -23,6 +23,10 @@ function Bar({
 
     const colors = {}
 
+    const truncateLabel = (label) => {
+        return label.length > 30 ? label.substring(0, 27) + "..." : label;
+    }
+
     const buildChart = ()  => {
         data.sort((a, b) => b.value - a.value)
         const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
@@ -41,7 +45,8 @@ function Bar({
             const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden"); 
             let maxLabelWidth = 0;
             names.forEach(name => {
-                const textElement = tempSvg.append("text").text(name).style("font-size", "11px");
+                const truncName = truncateLabel(name);
+                const textElement = tempSvg.append("text").text(truncName).style("font-size", "11px");
                 const bbox = textElement.node().getBBox();
                 if (bbox.width > maxLabelWidth) {
                     maxLabelWidth = bbox.width;
@@ -125,7 +130,10 @@ function Bar({
             .style("font-size", "11px")
             .attr("dx", "-0.8em")
             .attr("dy", "0.15em")
-            .attr("transform", "rotate(-45)");
+            .attr("transform", "rotate(-45)")
+            .text(function(d) {
+                return truncateLabel(d);
+            });
 
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
