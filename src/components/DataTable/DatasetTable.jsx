@@ -14,6 +14,7 @@ import {STATUS} from "../../lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
+import { getHierarchy } from "@/lib/helpers/hierarchy";
 
 const DatasetTable = ({
     data,
@@ -52,17 +53,6 @@ const DatasetTable = ({
     const filterField = (f) => {
         if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
-    }
-
-    const getHierarchy = (str) => {
-        let res = window.UBKG.organTypesGroups[str.trim()]
-        if (!res) {
-            const r = new RegExp(/.+?(?=\()/)
-            res = str.match(r)
-
-            return (res && res.length) ? res[0].trim() : str
-        }
-        return res
     }
 
     const makeHierarchyFilters = (items) => {
