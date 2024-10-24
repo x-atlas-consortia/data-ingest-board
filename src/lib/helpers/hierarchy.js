@@ -1,4 +1,5 @@
 export const getHierarchy = (str) => {
+    if (!window.UBKG) return str
     let res = window.UBKG.organTypesGroups[str.trim()]
     if (!res) {
         const r = new RegExp(/.+?(?=\()/)
