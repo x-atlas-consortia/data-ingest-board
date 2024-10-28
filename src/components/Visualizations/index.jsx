@@ -42,7 +42,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
             }
             dict[key].value++
         }
-        const values = Object.values(dict)
+        const values = Object.values(dict).filter((v) => v.label !== '')
         return values.sort((a, b) => b.value - a.value)
     }
 
