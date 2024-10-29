@@ -38,7 +38,7 @@ function Bar({
         const marginTop = 30;
         const marginRight = 0;
         let marginBottom = 30;
-        const marginLeft = 40;
+        let marginLeft = 60;
 
         if (showXLabels) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
