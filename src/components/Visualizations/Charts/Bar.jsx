@@ -23,6 +23,10 @@ function Bar({
 
     const colors = {}
 
+    const truncateLabel = (label) => {
+        return label.length > 30 ? label.substring(0, 27) + "..." : label;
+    }
+
     const buildChart = ()  => {
         data.sort((a, b) => b.value - a.value)
         const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
@@ -34,14 +38,15 @@ function Bar({
         const marginTop = 30;
         const marginRight = 0;
         let marginBottom = 30;
-        const marginLeft = 40;
+        let marginLeft = 80;
 
         if (showXLabels) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
             const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden"); 
             let maxLabelWidth = 0;
             names.forEach(name => {
-                const textElement = tempSvg.append("text").text(name).style("font-size", "10px");
+                const truncName = truncateLabel(name);
+                const textElement = tempSvg.append("text").text(truncName).style("font-size", "11px");
                 const bbox = textElement.node().getBBox();
                 if (bbox.width > maxLabelWidth) {
                     maxLabelWidth = bbox.width;
@@ -66,9 +71,13 @@ function Bar({
             .domain(data.map(d => d.label))
             .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length))
 
+        // Bar must have a minimum height to be able to click. 2% of the max value seems good
+        const maxY = d3.max(data, (d) => d.value);
+        const yStartPos = -(maxY * .02)
+
         // Declare the y (vertical position) scale.
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, (d) => d.value)])
+            .domain([yStartPos, maxY])
             .range([height - marginBottom, marginTop]);
 
         // Create the SVG container.
@@ -89,8 +98,8 @@ function Bar({
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
                 colors[d.label] = {color, value: d.value, label: d.label};
                 return color; })
-            .attr("y", (d) => y(0))
-            .attr("height", (d) => y(0) - y(0))
+            .attr("y", (d) => y(yStartPos))
+            .attr("height", (d) => y(yStartPos) - y(yStartPos))
             .attr("width", x.bandwidth())
             .on("click", function(event, d) {
                 if (onSectionClick) {
@@ -103,7 +112,7 @@ function Bar({
             .transition()
             .duration(800)
             .attr("y", (d) => y(d.value))
-            .attr("height", function(d) { return y(0) - y(d.value); })
+            .attr("height", function(d) { return y(yStartPos) - y(d.value); })
             .delay(function(d,i){return(i*100)})
 
         svg.selectAll("rect")
@@ -118,10 +127,13 @@ function Bar({
             .selectAll("text")
             .style("display", showXLabels ? "block" : "none")
             .style("text-anchor", "end")
-            .style("font-size", "10px")
+            .style("font-size", "11px")
             .attr("dx", "-0.8em")
             .attr("dy", "0.15em")
-            .attr("transform", "rotate(-45)");
+            .attr("transform", "rotate(-45)")
+            .text(function(d) {
+                return truncateLabel(d);
+            });
 
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
@@ -133,7 +145,9 @@ function Bar({
                 .attr("y", 10)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "start")
-                .text("↑ Frequency"));
+                .text("↑ Frequency"))
+            .selectAll("text")
+            .style("font-size", "11px"); 
 
         // Return the SVG element.
         return svg.node();
