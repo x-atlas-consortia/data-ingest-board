@@ -1,5 +1,6 @@
 import Spinner from '@/components/Spinner'
 import { getRequestOptions } from '@/lib/helpers/general'
+import { getHierarchy } from '@/lib/helpers/hierarchy'
 import URLS from '@/lib/helpers/urls'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -32,7 +33,9 @@ function Sankey({ filters }) {
     const fetchData = async () => {
         // call the sankey endpoint
         const res = await axios.get(URLS.entity.sankey(), getRequestOptions())
-        const data = res.data
+        const data = res.data.map((row) => {
+            return {...row, organ_type: getHierarchy(row.organ_type)}
+        })
 
         // filter the data if there are valid filters
         const validFilters = getValidFilters()
