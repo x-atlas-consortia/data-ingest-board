@@ -205,13 +205,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <Spinner />
             ) : (
                 <>
-                    <div className="row">
-                        <div className="col-12 col-md-3 count mt-md-3">
-                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
-                        </div>
+                    <div className="count c-table--header">
+                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
+                        {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                     </div>
-                    <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={uploadColumns}
                            showHeader={!loading}
                            dataSource={countFilteredRecords(rawData, filters)}
