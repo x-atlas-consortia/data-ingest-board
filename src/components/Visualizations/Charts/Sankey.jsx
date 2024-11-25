@@ -1,3 +1,4 @@
+import Spinner from '@/components/Spinner'
 import { getRequestOptions } from '@/lib/helpers/general'
 import URLS from '@/lib/helpers/urls'
 import axios from 'axios'
@@ -6,6 +7,7 @@ import { sankey as d3sankey, sankeyLinkHorizontal } from 'd3-sankey'
 import { useEffect, useRef, useState } from 'react'
 
 function Sankey({ filters }) {
+    const [loading, setLoading] = useState(true)
     const [graph, setGraph] = useState(null)
     const containerRef = useRef(null)
 
@@ -76,6 +78,7 @@ function Sankey({ filters }) {
             })
         })
 
+        setLoading(false)
         setGraph(newGraph)
     }
 
@@ -184,7 +187,9 @@ function Sankey({ filters }) {
             .attr('text-anchor', 'start')
     }, [graph])
 
-    return <div ref={containerRef} className='c-sankey__container'></div>
+    return <div ref={containerRef} className='c-sankey__container'>
+        {loading && <Spinner />}
+    </div>
 }
 
 export default Sankey
