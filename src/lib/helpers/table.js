@@ -1,5 +1,5 @@
 import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
-import {Dropdown, Space, Tooltip} from "antd";
+import {Button, Dropdown, Space, Tooltip} from "antd";
 import React from "react";
 import {eq, toDateString} from "./general";
 import ENVS from "./envs";
@@ -296,11 +296,26 @@ const TABLE = {
         </span>
     },
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
-      return <Space wrap>
-          <Dropdown.Button menu={menuProps}>
-              {selectedEntities.length ? 'Selected': 'Showing'} {selectedEntities.length ? selectedEntities.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
-          </Dropdown.Button>
-      </Space>
+        return <Space wrap>
+            <Dropdown.Button menu={menuProps}>
+                {selectedEntities.length ? 'Selected': 'Showing'} {selectedEntities.length ? selectedEntities.length : countFilteredRecords(modifiedData, filters).length} {entity}(s)
+            </Dropdown.Button>
+        </Space>
+    },
+    viewSankeyButton: ({filters}) => {
+        let queryString = ''
+        if (Object.keys(filters).length > 0) {
+            queryString = '?' + Object.entries(filters)
+                .map(([key, values]) => `${key}=${values}`)
+                .join('&');
+        }
+
+        return <Button
+            href={`/sankey${queryString}`}
+            type="primary"
+            className="text-decoration-none ms-2">
+            View Sankey Diagram
+        </Button>
     },
     getSelectedRows: (selectedEntities) => {
         return selectedEntities.map((item) => item[TABLE.cols.f('id')])

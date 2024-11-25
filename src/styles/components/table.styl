@@ -23,11 +23,26 @@
       background-color white
       border-radius 8px
 
+  &--header
+    width 95%
+    margin-left auto
+    margin-right auto
+    +md-max()
+      position static
+      text-align center
+
   &--main
-    margin-top -3rem
     position relative
     bottom 2rem
     z-index 0
+    width 95%
+    margin-left auto
+    margin-right auto
+    margin-top 1rem
+    margin-bottom 1.5rem
+    +md-max()
+      margin-top 2rem
+      margin-bottom 2rem
 
   &--pDatasets
     .revision-number
