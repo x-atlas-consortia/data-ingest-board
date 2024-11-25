@@ -157,7 +157,7 @@ function Sankey({ filters }) {
             .join('path')
             .attr('class', 'c-sankey__link')
             .attr('d', sankeyLinkHorizontal())
-            .attr('stroke-width', (d) => Math.max(1, d.width))
+            .attr('stroke-width', (d) => Math.max(2, d.width))
             .append('title')
             .text((d) => `${d.source.name} → ${d.target.name}\n${d.value} Datasets`) // Tooltip
 
@@ -172,7 +172,7 @@ function Sankey({ filters }) {
             .call(drag)
 
         node.append('rect')
-            .attr('height', (d) => d.y1 - d.y0)
+            .attr('height', (d) => Math.max(5, d.y1 - d.y0))
             .attr('width', sankey.nodeWidth())
             .attr('fill', (d) => color(d.name))
             .attr('stroke-width', 0)
