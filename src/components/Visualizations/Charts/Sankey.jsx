@@ -94,7 +94,7 @@ function Sankey({ filters }) {
 
         // Get the container width and height
         const containerWidth = containerRef.current?.clientWidth || 1920
-        const containerHeight = containerRef.current?.clientHeight || 1080
+        const containerHeight = Math.max(containerRef.current?.clientHeight || 1080, 1080)
 
         // svg dimensions
         const margin = { top: 20, right: 20, bottom: 20, left: 20 }
