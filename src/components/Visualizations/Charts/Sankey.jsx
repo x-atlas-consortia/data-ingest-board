@@ -11,6 +11,7 @@ function Sankey({ filters }) {
     const [loading, setLoading] = useState(true)
     const [graph, setGraph] = useState(null)
     const containerRef = useRef(null)
+    const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 })
 
     const validFilterMap = {
         group_name: 'dataset_group_name',
@@ -34,7 +35,7 @@ function Sankey({ filters }) {
         // call the sankey endpoint
         const res = await axios.get(URLS.entity.sankey(), getRequestOptions())
         const data = res.data.map((row) => {
-            return {...row, organ_type: getHierarchy(row.organ_type)}
+            return { ...row, organ_type: getHierarchy(row.organ_type) }
         })
 
         // filter the data if there are valid filters
@@ -85,29 +86,36 @@ function Sankey({ filters }) {
         setGraph(newGraph)
     }
 
+    const handleWindowResize = () => {
+        if (!containerRef.current) return
+        setContainerDimensions({
+            width: containerRef.current.offsetWidth,
+            height: Math.max(containerRef.current.offsetHeight, 1080)
+        })
+    }
+
     useEffect(() => {
         fetchData()
+        handleWindowResize()
+        window.addEventListener('resize', handleWindowResize)
+
+        return () => {
+            window.removeEventListener('resize', handleWindowResize)
+        }
     }, [])
 
     useEffect(() => {
-        if (graph == null) return
-
-        // Get the container width and height
-        const containerWidth = containerRef.current?.clientWidth || 1920
-        const containerHeight = Math.max(containerRef.current?.clientHeight || 1080, 1080)
+        if (!graph || !containerDimensions.width || !containerDimensions.height) return
 
         // svg dimensions
         const margin = { top: 20, right: 20, bottom: 20, left: 20 }
-        const width = containerWidth - margin.left - margin.right
-        const height = containerHeight - margin.top - margin.bottom
+        const width = containerDimensions.width - margin.left - margin.right
+        const height = containerDimensions.height - margin.top - margin.bottom
 
         const color = d3.scaleOrdinal(d3.schemeCategory10)
 
-        const container = d3.select(containerRef.current)
-        // Remove all children of the container
-        container.selectAll('*').remove()
-
         // Layout the svg element
+        const container = d3.select(containerRef.current)
         const svg = container.append('svg').attr('width', width).attr('height', height).attr('transform', `translate(${margin.left},${margin.top})`)
 
         // Set up the Sankey generator
@@ -115,8 +123,8 @@ function Sankey({ filters }) {
             .nodeWidth(30)
             .nodePadding(10)
             .extent([
-                [1, 1],
-                [width - 1, height - 6]
+                [0, 0],
+                [width, height]
             ])
 
         // Create the Sankey layout
@@ -188,11 +196,17 @@ function Sankey({ filters }) {
             .filter((d) => d.x0 < width / 2)
             .attr('x', 6 + sankey.nodeWidth())
             .attr('text-anchor', 'start')
-    }, [graph])
 
-    return <div ref={containerRef} className='c-sankey__container'>
-        {loading && <Spinner />}
-    </div>
+        return () => {
+            svg.remove()
+        }
+    }, [graph, containerDimensions])
+
+    return (
+        <div ref={containerRef} className='c-sankey__container'>
+            {loading && <Spinner />}
+        </div>
+    )
 }
 
 export default Sankey
