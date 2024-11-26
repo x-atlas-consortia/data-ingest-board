@@ -121,9 +121,9 @@ function Sankey({ filters }) {
         // Set up the Sankey generator
         const sankey = d3sankey()
             .nodeWidth(30)
-            .nodePadding(10)
+            .nodePadding(15)
             .extent([
-                [0, 0],
+                [0, margin.top],
                 [width, height - margin.bottom]
             ])
 
