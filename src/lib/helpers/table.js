@@ -312,6 +312,8 @@ const TABLE = {
 
         return <Button
             href={`/sankey${queryString}`}
+            target="_blank"
+            rel="noopener noreferrer"
             type="primary"
             className="text-decoration-none ms-2">
             View Sankey Diagram
