@@ -1,13 +1,13 @@
 .c-visualizations
   container()
+  &__dropdownContainer
+    display flex
   &__columnDropdown
     border-bottom-right-radius 0
     border-top-right-radius 0
   &__chartDropdown
     border-bottom-left-radius 0
     border-top-left-radius 0
-    position relative
-    top -1px
   &__tooltip
     background-color white
     border solid $col-trout 1px
@@ -16,3 +16,18 @@
     padding 5px
   &__chart
     position relative
+
+.c-sankey
+  &__container
+    min-height 100vh
+  &__node rect
+    stroke #000
+    fill-opacity 0.9
+    &:hover
+      fill-opacity 1
+  &__link
+    fill none
+    stroke #000
+    stroke-opacity 0.2
+    &:hover
+      stroke-opacity 0.4
