@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import AppContext from '@/context/AppContext'
-import AppNavBar from '@/components/AppNavBar'
 import Sankey from '@/components/Visualizations/Charts/Sankey'
 import AppLogin from '@/components/AppLogin'
 
@@ -25,9 +24,7 @@ function SankeyPage() {
 
     return (
         <div className='App bg--galGrey'>
-            <AppNavBar />
             {isLoading || (isLogout && <></>)}
-
             {!isLoading && (!isAuthenticated || unauthorized) && !isLogout && (
                 <AppLogin
                     onLogin={handleLogin}
