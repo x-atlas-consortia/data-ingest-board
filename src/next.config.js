@@ -17,7 +17,8 @@ const nextConfig = {
         'rc-pagination',
         'rc-picker',
         'rc-notification',
-        'rc-tooltip'
+        'rc-tooltip',
+        'rc-input'
     ]
 }
 
