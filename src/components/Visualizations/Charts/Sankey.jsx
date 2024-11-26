@@ -89,8 +89,8 @@ function Sankey({ filters }) {
     const handleWindowResize = () => {
         if (!containerRef.current) return
         setContainerDimensions({
-            width: containerRef.current.offsetWidth,
-            height: Math.max(containerRef.current.offsetHeight, 1080)
+            width: containerRef.current.clientWidth,
+            height: Math.max(containerRef.current.clientHeight, 1080)
         })
     }
 
@@ -124,7 +124,7 @@ function Sankey({ filters }) {
             .nodePadding(10)
             .extent([
                 [0, 0],
-                [width, height]
+                [width, height - margin.bottom]
             ])
 
         // Create the Sankey layout
