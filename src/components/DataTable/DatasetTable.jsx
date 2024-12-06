@@ -430,13 +430,13 @@ const DatasetTable = ({
                     <ChartProvider>
                         <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
-                    <div className="row">
-                        <div className="col-12 col-md-3 count mt-md-3">
-                            {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
-                            {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
-                        </div>
+                    <div className="count c-table--header">
+                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
+                        {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
+                        {TABLE.viewSankeyButton({filters})}
                     </div>
-                    <Table className={`m-4 c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+
+                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredDatasetColumns}
                            dataSource={countFilteredRecords(rawData, filters)}
                            showHeader={!loading}
@@ -450,7 +450,6 @@ const DatasetTable = ({
                                type: 'checkbox',
                                ...rowSelection,
                            }}
-
                     />
 
                     <Modal

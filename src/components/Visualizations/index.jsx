@@ -248,7 +248,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                     okButtonProps={{ disabled: selectedFilterValues.length === 0 }}
                                 >
                                     <Row>
-                                        <Col span={24}>
+                                        <div className='c-visualizations__dropdownContainer'>
                                             <Dropdown
                                                 className='c-visualizations__columnDropdown'
                                                 menu={columnMenuProps}
@@ -270,7 +270,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                                     <AreaChartOutlined />
                                                 </Button>
                                             </Dropdown>
-                                        </Col>
+                                        </div>
                                     </Row>
 
                                     <Row>
