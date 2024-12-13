@@ -251,7 +251,7 @@ const TABLE = {
             },
             statusUpload: {
                 title: "Status",
-                width: '15%',
+                width: 150,
                 dataIndex: "status",
                 align: "left",
                 defaultSortOrder: defaultSortOrder["status"] || null,
