@@ -140,7 +140,7 @@ const DataTable = (props) => {
         const options = getHeadersWith(globusToken)
         try {
             const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
-            setIsCachingDatasets((datasetResponse.status === 200))
+            setIsCachingDatasets((datasetResponse.status === 202))
 
             let uploadData = []
             let uploadResponse
