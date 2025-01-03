@@ -11,6 +11,8 @@ import TABLE from "../../lib/helpers/table";
 import AppContext from "../../context/AppContext";
 import Spinner from "../Spinner";
 import {Alert} from "react-bootstrap";
+import {MailOutlined} from "@ant-design/icons";
+import {Spin} from "antd";
 
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
@@ -31,7 +33,7 @@ const DataTable = (props) => {
     const [filters, setFilters] = useState(props.tableFilters);
     const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
-    const {setSelectedEntities} = useContext(AppContext)
+    const {setSelectedEntities, t} = useContext(AppContext)
 
     useEffect(() => {
         loadData();
@@ -138,7 +140,7 @@ const DataTable = (props) => {
         const options = getHeadersWith(globusToken)
         try {
             const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
-            setIsCachingDatasets((datasetResponse.status === 202))
+            setIsCachingDatasets((datasetResponse.status === 200))
 
             let uploadData = []
             let uploadResponse
@@ -258,8 +260,20 @@ const DataTable = (props) => {
                     {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads, toggleHistory}}  />}
                     {!loading && (useDatasetApi && !isCachingDatasets) && table}
                     {!loading && (!useDatasetApi && !isCachingUploads) && table}
-                    {(isCachingDatasets || isCachingUploads) && <div className={'c-contentBanner'}><Alert variant={'warning'} >Currently initializing data. Please return later.</Alert></div>}
-                    {loading && <Spinner />}
+                    {(isCachingDatasets || isCachingUploads) && <div className={'c-contentBanner'}><Alert
+                        variant={'warning'}>
+                        <h3 className={'mb-3'}>Data initialization in progress ... <Spin size="large">
+                            <span></span>
+                        </Spin></h3>
+                        <p>Currently initializing data. Please return later.</p>
+                        <p>If you continue to have
+                        issues accessing this site please contact the &nbsp;
+                        <a href={`mailto:${t('help@hubmapconsortium.org')}`} className='lnk--ic'>{t('HuBMAP')} Help
+                            Desk <MailOutlined/></a>.
+                    </p>
+
+                        </Alert></div>}
+                    {loading && <Spinner/>}
                 </div>
             </div>
         </>
