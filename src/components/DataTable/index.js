@@ -10,6 +10,7 @@ import URLS from "../../lib/helpers/urls";
 import TABLE from "../../lib/helpers/table";
 import AppContext from "../../context/AppContext";
 import Spinner from "../Spinner";
+import {Alert} from "react-bootstrap";
 
 const DataTable = (props) => {
     const [datasetData, setDatasetData] = useState([]);
@@ -18,6 +19,8 @@ const DataTable = (props) => {
     const [primaryData, setPrimaryData] = useState([]);
     const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isCachingDatasets, setIsCachingDatasets] = useState(false)
+    const [isCachingUploads, setIsCachingUploads] = useState(false)
     const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
     const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
     const [invalidUploadId, setInvalidUploadId] = useState(false);
@@ -135,11 +138,13 @@ const DataTable = (props) => {
         const options = getHeadersWith(globusToken)
         try {
             const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
+            setIsCachingDatasets((datasetResponse.status === 202))
 
             let uploadData = []
             let uploadResponse
             if (ENVS.uploadsEnabled()) {
                 uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
+                setIsCachingUploads((uploadResponse.status === 202))
                 applyUploads(uploadResponse.data)
                 uploadData = uploadResponse.data.data
             }
@@ -251,7 +256,9 @@ const DataTable = (props) => {
                         </button>
                     </div>
                     {ENVS.searchEnabled() && <Search useDatasetApi={useDatasetApi} originalResponse={originalResponse} callbacks={{applyDatasets, applyUploads, toggleHistory}}  />}
-                    {!loading && table}
+                    {!loading && (useDatasetApi && !isCachingDatasets) && table}
+                    {!loading && (!useDatasetApi && !isCachingUploads) && table}
+                    {(isCachingDatasets || isCachingUploads) && <div className={'c-contentBanner'}><Alert variant={'warning'} >Currently initializing data. Please return later.</Alert></div>}
                     {loading && <Spinner />}
                 </div>
             </div>
