@@ -180,7 +180,7 @@ const DatasetTable = ({
             render: (organType, record) => {
                 if (!organType) return null
                 return (
-                    <span className='txt-break-spaces'>{getUBKGName(organType)}</span>
+                    <span>{getUBKGName(organType)}</span>
                 )
             }
         },
