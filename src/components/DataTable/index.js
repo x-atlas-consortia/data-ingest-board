@@ -121,11 +121,11 @@ const DataTable = (props) => {
     }
 
     const getPrimaryDatasets = (dataResponse) => {
-        return dataResponse.filter(dataset => eq(dataset.is_primary, "true"));
+        return dataResponse?.filter(dataset => eq(dataset.is_primary, "true"));
     }
 
     const applyDatasets = (datasetResponse) => {
-        const primaryDatasets = getPrimaryDatasets(datasetResponse.data);
+        const primaryDatasets = getPrimaryDatasets(datasetResponse?.data);
         setDatasetData(datasetResponse.data);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
