@@ -147,7 +147,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
         {
             title: TABLE.cols.n('intended_source_type', 'Intended Source Type'),
-            width: 150,
+            width: 200,
             dataIndex: TABLE.cols.f('intended_source_type'),
             align: "left",
             defaultSortOrder: urlSortOrder[TABLE.cols.f('intended_source_type')] || null,
