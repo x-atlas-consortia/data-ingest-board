@@ -128,6 +128,18 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
         {
+            title: TABLE.cols.n('intended_source_type', 'Intended Source Type'),
+            width: 220,
+            dataIndex: TABLE.cols.f('intended_source_type'),
+            align: "left",
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('intended_source_type')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('intended_source_type')]?.localeCompare(b[TABLE.cols.f('intended_source_type')]),
+            filteredValue: urlParamFilters[TABLE.cols.f('intended_source_type')] || null,
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('intended_source_type')], value),
+            ellipsis: true,
+        },
+        {
             title: "Intended Organ",
             width: 180,
             dataIndex: "intended_organ",
@@ -144,18 +156,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <span>{getUBKGName(organType)}</span>
                 )
             }
-        },
-        {
-            title: TABLE.cols.n('intended_source_type', 'Intended Source Type'),
-            width: 220,
-            dataIndex: TABLE.cols.f('intended_source_type'),
-            align: "left",
-            defaultSortOrder: urlSortOrder[TABLE.cols.f('intended_source_type')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('intended_source_type')]?.localeCompare(b[TABLE.cols.f('intended_source_type')]),
-            filteredValue: urlParamFilters[TABLE.cols.f('intended_source_type')] || null,
-            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('intended_source_type')], value),
-            ellipsis: true,
         },
         {
             title: "Intended Dataset Type",
