@@ -34,7 +34,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const [modal, setModal] = useState({cancelCSS: 'none'})
 
+    const excludedColumns = ENVS.excludeTableColumnsUploads()
     const filterField = (f) => {
+        if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
     }
 
@@ -202,7 +204,15 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
     ];
 
-    const dataIndexList = uploadColumns.map(column => column.dataIndex);
+    // Exclude named columns in .env from table
+    const filteredUploadColumns = []
+    for (let x = 0; x < uploadColumns.length; x++) {
+        if (excludedColumns[uploadColumns[x].dataIndex] === undefined) {
+            filteredUploadColumns.push(uploadColumns[x])
+        }
+    }
+
+    const dataIndexList = filteredUploadColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
@@ -278,7 +288,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                         {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                     </div>
                     <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={uploadColumns}
+                           columns={filteredUploadColumns}
                            showHeader={!loading}
                            dataSource={countFilteredRecords(rawData, filters)}
                            bordered={false}
