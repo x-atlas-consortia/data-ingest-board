@@ -34,7 +34,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const [modal, setModal] = useState({cancelCSS: 'none'})
 
+    const excludedColumns = ENVS.excludeTableColumnsUploads()
     const filterField = (f) => {
+        if (excludedColumns[f]) return []
         return [...new Set(data.map(item => item[f]))]
     }
 
@@ -60,6 +62,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const unfilteredOrganTypes = makeHierarchyFilters(filterField('intended_organ'))
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDatasetType = filterField('intended_dataset_type')
+    const uniqueSourceTypes = filterField('intended_source_type')
 
     let urlParamFilters = {};
 
@@ -127,6 +130,18 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
         {
+            title: TABLE.cols.n('intended_source_type', 'Intended Source Type'),
+            width: 220,
+            dataIndex: TABLE.cols.f('intended_source_type'),
+            align: "left",
+            defaultSortOrder: urlSortOrder[TABLE.cols.f('intended_source_type')] || null,
+            sorter: (a,b) => a[TABLE.cols.f('intended_source_type')]?.localeCompare(b[TABLE.cols.f('intended_source_type')]),
+            filteredValue: urlParamFilters[TABLE.cols.f('intended_source_type')] || null,
+            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('intended_source_type')], value),
+            ellipsis: true,
+        },
+        {
             title: "Intended Organ",
             width: 180,
             dataIndex: "intended_organ",
@@ -189,7 +204,15 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
         },
     ];
 
-    const dataIndexList = uploadColumns.map(column => column.dataIndex);
+    // Exclude named columns in .env from table
+    const filteredUploadColumns = []
+    for (let x = 0; x < uploadColumns.length; x++) {
+        if (excludedColumns[uploadColumns[x].dataIndex] === undefined) {
+            filteredUploadColumns.push(uploadColumns[x])
+        }
+    }
+
+    const dataIndexList = filteredUploadColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
         return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unreorganized', case2: 'reorganized'})
@@ -265,7 +288,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                         {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                     </div>
                     <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={uploadColumns}
+                           columns={filteredUploadColumns}
                            showHeader={!loading}
                            dataSource={countFilteredRecords(rawData, filters)}
                            bordered={false}
