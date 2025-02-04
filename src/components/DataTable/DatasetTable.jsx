@@ -1,7 +1,8 @@
 import {Modal, Table} from "antd";
-import {ExportOutlined, ThunderboltOutlined} from "@ant-design/icons";
+import {ExportOutlined, ThunderboltOutlined, CloudUploadOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
+import axios from "axios";
 import ENVS from "../../lib/helpers/envs";
 import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
@@ -27,7 +28,7 @@ const DatasetTable = ({
     filters,
     className
 }) => {
-    const {globusToken, hasDataAdminPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit, t} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -391,6 +392,10 @@ const DatasetTable = ({
                                                        dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    />})
         }
+        
+        if (e.key === '4') {
+            submitForPipelineTesting();
+        }
     }
 
     const closeModal = () => {
@@ -407,14 +412,48 @@ const DatasetTable = ({
         }
     }
 
-    const items = TABLE.bulkSelectionDropdown((hasDataAdminPrivs ? [
-        {
-            label: 'Submit For Processing',
-            key: '2',
-            icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
-            disabled: disabledMenuItems['bulkSubmit']
+    const handleExposedActions = () => {
+        let selections = []
+        if(hasDataAdminPrivs){
+            selections.push({
+                label: 'Submit For Processing',
+                key: '2',
+                icon: <ThunderboltOutlined style={{ fontSize: '18px' }} />,
+                disabled: disabledMenuItems['bulkSubmit']
+            },)
         }
-    ] : []), {hasDataAdminPrivs, disabledMenuItems});
+        if( (hasPipelineTestingPrivs || hasDataAdminPrivs) && t('HuBMAP-Read') === 'HuBMAP-Read'){
+            selections.push({
+                label: 'Submit For Testing',
+                key: '4',
+                icon: <CloudUploadOutlined style={{ fontSize: '18px' }} />,
+            },)
+        }
+        return selections
+    }
+
+    const submitForPipelineTesting = async () => {
+        const options = getHeadersWith(globusToken);
+        const selectedEntityUUIDs = [...selectedEntities.map((e) => e.uuid)];
+        try {
+            const response = await axios.post(URLS.ingest.data.pipelineTesting(), selectedEntityUUIDs, options);
+            handlePipelineResponse(response);
+        } catch (error) {
+            handlePipelineResponse(error.response);
+        }
+    };
+    
+    const handlePipelineResponse = (response) => {
+        const { className } = UI_BLOCKS.modalResponse.styling(response);
+        const mainTitle = 'Dataset(s) Submitted For Pipeline Testing';
+        const { modalBody } = UI_BLOCKS.modalResponse.body(response, mainTitle);
+        setModal({ body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null });
+    };
+
+    
+    const items = TABLE.bulkSelectionDropdown((
+        handleExposedActions()
+        ),{hasDataAdminPrivs, disabledMenuItems});
 
     const menuProps = {
         items,

@@ -18,7 +18,8 @@ const URLS = {
     ingest: {
         data: {
             datasets: () => process.env.NEXT_PUBLIC_DATASET_URL,
-            uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL
+            uploads: () => process.env.NEXT_PUBLIC_UPLOAD_URL,
+            pipelineTesting: () => process.env.NEXT_PUBLIC_PIPELINE_TESTING_URL
         },
         bulk: {
             submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL,
@@ -35,7 +36,8 @@ const URLS = {
         privs: {
             groups: () => process.env.NEXT_PUBLIC_PRIVS_GROUP_URL,
             admin: () =>  process.env.NEXT_PUBLIC_PRIVS_ADMIN_URL,
-            dataProviderGroups: () => process.env.NEXT_PUBLIC_PRIVS_DATA_PROVIDER_GROUPS
+            dataProviderGroups: () => process.env.NEXT_PUBLIC_PRIVS_DATA_PROVIDER_GROUPS,
+            pipelineTesting: () => process.env.NEXT_PUBLIC_PIPELINE_TESTING_PRIVS_URL
         },
         auth: {
             login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
