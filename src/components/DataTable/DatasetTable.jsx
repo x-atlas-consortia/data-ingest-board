@@ -28,7 +28,7 @@ const DatasetTable = ({
     filters,
     className
 }) => {
-    const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit, t} = useContext(AppContext)
+    const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -422,7 +422,7 @@ const DatasetTable = ({
                 disabled: disabledMenuItems['bulkSubmit']
             },)
         }
-        if( (hasPipelineTestingPrivs || hasDataAdminPrivs) && t('HuBMAP-Read') === 'HuBMAP-Read'){
+        if( (hasPipelineTestingPrivs || hasDataAdminPrivs) && ENVS.submissionTestingEnabled()){
             selections.push({
                 label: 'Submit For Testing',
                 key: '4',
