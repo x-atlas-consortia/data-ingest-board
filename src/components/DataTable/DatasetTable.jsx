@@ -32,7 +32,7 @@ const DatasetTable = ({
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
-    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true})
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkSubmit: true, submitForPipelineTesting:true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
     const hierarchyGroupings = {}
@@ -427,6 +427,7 @@ const DatasetTable = ({
                 label: 'Submit For Testing',
                 key: '4',
                 icon: <CloudUploadOutlined style={{ fontSize: '18px' }} />,
+                disabled: disabledMenuItems['submitForPipelineTesting']
             },)
         }
         return selections

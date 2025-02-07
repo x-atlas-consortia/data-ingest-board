@@ -366,9 +366,9 @@ const TABLE = {
             },
             onChange: (newSelectedRowKeys, selectedRows, e, a) => {
                 if (!selectedRows.length) {
-                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
+                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true, submitForPipelineTesting: true})
                 } else {
-                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
+                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false, submitForPipelineTesting: false})
                 }
             },
             getCheckboxProps: (record) => ({
