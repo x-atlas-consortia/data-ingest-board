@@ -23,13 +23,20 @@ const ENVS = {
     tableColumns: () => parseJSON(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
     filterFields: () => parseJSON(process.env.NEXT_PUBLIC_FILTER_FIELDS),
     defaultFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
-    excludeTableColumns: ()=> {
-        let cols = parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
+    excludeTableColumns: (cols)=> {
+        cols = cols || parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
         const dict = {}
         for (let col of cols) {
             dict[col] = true
         }
         return dict
+    },
+    excludeTableColumnsUploads: ()=> {
+        let cols = parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_UPLOADS_TABLE_COLUMNS)
+        if (!Object.entries(cols).length) {
+            cols = []
+        }
+        return ENVS.excludeTableColumns(cols)
     },
     datasetCharts: () => parseJSON(process.env.NEXT_PUBLIC_DATASET_CHARTS),
     uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1',
