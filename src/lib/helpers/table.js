@@ -132,7 +132,7 @@ const TABLE = {
                     label: 'Bulk Edit',
                     key: '3',
                     icon: <EditOutlined />,
-                    disabled: disabledMenuItems['bulkSubmit']
+                    disabled: disabledMenuItems['bulkEdit']
                 }
             )
         }
@@ -345,7 +345,7 @@ const TABLE = {
         return selected
     },
     rowSelection: ({setDisabledMenuItems, disabledMenuItems, selectedEntities,
-                       setSelectedEntities, setCheckedModifiedData, disabledRows = ['Published']}) => {
+                       setSelectedEntities, setCheckedModifiedData, disabledRows = ['']}) => {
         return {
             selectedRowKeys: TABLE.getSelectedRows(selectedEntities),
             onSelect: (record, hasSelected, selectedRows, nativeEvent) => {
@@ -365,10 +365,11 @@ const TABLE = {
                 }
             },
             onChange: (newSelectedRowKeys, selectedRows, e, a) => {
-                if (!selectedRows.length) {
-                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: true})
-                } else {
-                    setDisabledMenuItems({...disabledMenuItems, bulkSubmit: false})
+                const hasPublished = selectedRows.some(r => r.status === "Published");
+                if (!selectedRows.length) { // If noithing is selected
+                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: true, bulkSubmit:true, submitForPipelineTesting: true})
+                } else { // at least one thing is selected
+                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: hasPublished, bulkSubmit: hasPublished, submitForPipelineTesting: false })
                 }
             },
             getCheckboxProps: (record) => ({

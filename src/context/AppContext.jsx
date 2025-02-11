@@ -22,6 +22,7 @@ export const AppProvider = ({ children, messages, banners }) => {
     const [globusToken, setGlobusToken] = useState(null);
     const [unauthorized, setUnauthorized] = useState(false);
     const [hasDataAdminPrivs, setHasDataAdminPrivs] = useState(false)
+    const [hasPipelineTestingPrivs, setHasPipelineTestingPrivs] = useState(false)
     const pageLoaded = useRef(false)
     const revisionsData = useRef({})
     const [selectedEntities, setSelectedEntities] = useState([])
@@ -88,6 +89,15 @@ export const AppProvider = ({ children, messages, banners }) => {
         })
     }
 
+    const checkPipelineTestingPrivs = (token) => {
+        axios.get(URLS.ingest.privs.pipelineTesting(), getHeadersWith(token))
+            .then( (response) => {
+                setHasPipelineTestingPrivs(response.data.has_pipeline_test_privs)
+            }).catch((error) => {
+                setHasPipelineTestingPrivs(false)
+                console.error(error)
+        })
+    }
 
     const fetchDataProviderGroups = (token) => {
         if (!URLS.ingest.privs.dataProviderGroups()) return
@@ -110,6 +120,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 verifyInReadGroup(response.data)
                 checkInAdminGroup(token)
                 fetchDataProviderGroups(token)
+                checkPipelineTestingPrivs(token)
                 setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {
@@ -204,6 +215,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         unauthorized,
         banners,
         hasDataAdminPrivs,
+        hasPipelineTestingPrivs,
         handleLogin, handleLogout, getUserEmail,
         t,
         confirmBulkEdit,
