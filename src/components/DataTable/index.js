@@ -141,7 +141,7 @@ const DataTable = (props) => {
         if (isCaching) {
             clearTimeout(cachingTimeout.current)
             cachingTimeout.current = setTimeout(() => {
-                window.reload()
+                window.location.reload()
             }, 30000)
         }
         return isCaching
