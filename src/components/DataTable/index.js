@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useContext} from "react";
+import React, {useState, useEffect, useContext, useRef} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {eq, getHeadersWith} from "../../lib/helpers/general";
+import {eq, getHeadersWith} from "@/lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
 import ENVS from "../../lib/helpers/envs";
@@ -34,6 +34,7 @@ const DataTable = (props) => {
     const [globusToken, setGlobusToken] = useState(props.globusToken);
     const [tableKey, setTableKey] = useState('initialKey');
     const {setSelectedEntities, t} = useContext(AppContext)
+    const cachingTimeout = useRef(null)
 
     useEffect(() => {
         loadData();
@@ -135,18 +136,29 @@ const DataTable = (props) => {
         setUploadData(uploadResponse.data);
     }
 
+    const handleCachingRefresh = (response) => {
+        let isCaching = response.status === 202
+        if (isCaching) {
+            clearTimeout(cachingTimeout.current)
+            cachingTimeout.current = setTimeout(() => {
+                window.location.reload()
+            }, 30000)
+        }
+        return isCaching
+    }
+
     const loadData = async () => {
         setLoading(true);
         const options = getHeadersWith(globusToken)
         try {
-            const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options);
-            setIsCachingDatasets((datasetResponse.status === 202))
+            const datasetResponse = await axios.get(URLS.ingest.data.datasets(), options)
+            setIsCachingDatasets(handleCachingRefresh(datasetResponse))
 
             let uploadData = []
             let uploadResponse
             if (ENVS.uploadsEnabled()) {
                 uploadResponse = await axios.get(URLS.ingest.data.uploads(), options);
-                setIsCachingUploads((uploadResponse.status === 202))
+                setIsCachingUploads(handleCachingRefresh(uploadResponse))
                 applyUploads(uploadResponse.data)
                 uploadData = uploadResponse.data.data
             }
