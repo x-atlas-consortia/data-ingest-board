@@ -1,13 +1,15 @@
 import Spinner from '@/components/Spinner'
-import { getRequestOptions } from '@/lib/helpers/general'
+import {getHeadersWith} from '@/lib/helpers/general'
 import { getHierarchy } from '@/lib/helpers/hierarchy'
 import URLS from '@/lib/helpers/urls'
 import axios from 'axios'
 import * as d3 from 'd3'
 import { sankey as d3sankey, sankeyLinkHorizontal } from 'd3-sankey'
-import { useEffect, useRef, useState } from 'react'
+import {useContext, useEffect, useRef, useState} from 'react'
+import AppContext from "@/context/AppContext";
 
 function Sankey({ filters }) {
+    const {globusToken} = useContext(AppContext)
     const [loading, setLoading] = useState(true)
     const [graph, setGraph] = useState(null)
     const containerRef = useRef(null)
@@ -33,7 +35,7 @@ function Sankey({ filters }) {
 
     const fetchData = async () => {
         // call the sankey endpoint
-        const res = await axios.get(URLS.entity.sankey(), getRequestOptions())
+        const res = await axios.get(URLS.entity.sankey(), getHeadersWith(globusToken))
         const data = res.data.map((row) => {
             return { ...row, organ_type: getHierarchy(row.organ_type) }
         })
