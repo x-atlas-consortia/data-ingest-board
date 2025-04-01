@@ -185,6 +185,31 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             }
         },
         {
+            title: "Anticipated Completion Year/Month",
+            width: 300,
+            showSorterTooltip: {
+                title: <>The year and month that this <code>Upload</code> will have all required data uploaded and be ready for reorganization into <code>Datasets</code>.</>
+            },
+            dataIndex: "anticipated_complete_upload_month",
+            align: "left",
+            defaultSortOrder: urlSortOrder["anticipated_complete_upload_month"] || '',
+            sorter: (a,b) => new Date(a.anticipated_complete_upload_month + '-3') - new Date(b.anticipated_complete_upload_month + '-3'),
+            ellipsis: true,
+            render: (date, record) => <span>{date}</span>
+        },
+        {
+            title: "Anticipated Number of Datasets",
+            showSorterTooltip: {
+                title: <>The total number of <code>Datasets</code> that this <code>Upload</code> will eventually contain.</>
+            },
+            width: 320,
+            dataIndex: "anticipated_dataset_count",
+            align: "left",
+            defaultSortOrder: urlSortOrder["anticipated_dataset_count"] || 0,
+            sorter: (a,b) => a.anticipated_dataset_count - b.anticipated_dataset_count,
+            ellipsis: true,
+        },
+        {
             title: "Title",
             width: 320,
             dataIndex: "title",
