@@ -1,0 +1,43 @@
+.c-sankey {
+    min-height: 100vh
+}
+
+.c-sankey__node rect {
+    stroke: #000;
+    fill-opacity: .9
+}
+
+.c-sankey__node rect:hover {
+    fill-opacity: 1
+}
+
+.c-sankey__link {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: .2
+}
+
+.c-sankey__link:hover {
+    stroke-opacity: .4
+}
+
+.c-sankey__loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 500ms linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+xac-sankey, consortia-sankey, react-consortia-sankey {
+    width: 100%;
+    display: block;
+    height: 100%;
+}
