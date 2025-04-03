@@ -37,7 +37,8 @@
     "react-csv": "^2.2.2",
     "react-dom": "^18.3.1",
     "react-idle-timer": "^5.7.2",
-    "stylus": "^0.59.0"
+    "stylus": "^0.59.0",
+    "xac-sankey": "file:../../../data-sankey"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",
