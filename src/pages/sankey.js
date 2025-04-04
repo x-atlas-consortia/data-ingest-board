@@ -2,7 +2,6 @@ import {useContext, useEffect, useRef, useState} from 'react'
 import { useRouter } from 'next/router'
 import AppContext from '@/context/AppContext'
 import AppLogin from '@/components/AppLogin'
-import {getHierarchy} from "@/lib/helpers/hierarchy";
 import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 
@@ -31,9 +30,6 @@ function SankeyPage() {
             xacSankey.current.setOptions({
                 loading: {
                     callback: handleLoading
-                },
-                dataCallback: (row) => {
-                    return {...row, organ_type: getHierarchy(row.organ_type)}
                 }
             })
         }
@@ -85,7 +81,7 @@ function SankeyPage() {
                     filters,
                     api:
                         {
-                            url: URLS.entity.sankey(),
+                            sankey: URLS.entity.sankey(),
                             token: globusToken
                         }
                 }))
