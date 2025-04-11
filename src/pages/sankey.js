@@ -4,6 +4,8 @@ import AppContext from '@/context/AppContext'
 import AppLogin from '@/components/AppLogin'
 import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
+import ENVS from "@/lib/helpers/envs";
+import {eq} from "@/lib/helpers/general";
 
 function SankeyPage() {
     const {
@@ -25,12 +27,18 @@ function SankeyPage() {
         setLoading(ctx.isLoading)
     }
 
+    const isHM = () => eq(ENVS.appContext(), 'hubmap')
+
     const setSankeyOptions = ()=> {
         if (xacSankey.current && xacSankey.current.setOptions) {
-            xacSankey.current.setOptions({
+            const el = xacSankey.current
+            const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
+            el.setOptions({
                 loading: {
                     callback: handleLoading
-                }
+                },
+                onNodeClickCallback: (e, d) => adapter.goTo(d),
+                onLabelClickCallback: (e, d) => adapter.goTo(d)
             })
         }
     }
@@ -65,6 +73,7 @@ function SankeyPage() {
 
     return (
         <div className='App bg--galGrey'>
+            { isHM() && <script type='text/javascript' src='https://unpkg.com/lz-string@1.5.0/libs/lz-string.js'></script>}
             {isLoading || (isLogout && <></>)}
             {!isLoading && (!isAuthenticated || unauthorized) && !isLogout && (
                 <AppLogin
@@ -77,13 +86,19 @@ function SankeyPage() {
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
                 <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify({
                     useShadow: true,
-                    styleSheetPath: '/css/xac-sankey.css',
+                    styleSheetPath: 'https://rawcdn.githack.com/x-atlas-consortia/data-sankey/1.0.3/src/lib/xac-sankey.css',
                     filters,
                     api:
                         {
+                            context: ENVS.appContext().toLowerCase(),
                             sankey: URLS.entity.sankey(),
                             token: globusToken
-                        }
+                        },
+                    validFilterMap: isHM() ? undefined : {
+                        dataset_type: 'dataset_type_hierarchy',
+                        status: null,
+                        source_type: 'dataset_source_type'
+                    }
                 }))
                 }>
                     {loading && <Spinner />}
