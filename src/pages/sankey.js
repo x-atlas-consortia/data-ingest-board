@@ -22,9 +22,11 @@ function SankeyPage() {
     const [filters, setFilters] = useState(null)
     const xacSankey = useRef(null)
     const [loading, setLoading] = useState(true)
+    const [loadingMsg, setLoadingMsg] = useState('')
 
-    const handleLoading = (ctx) => {
-        setLoading(ctx.isLoading)
+    const handleLoading = (ctx, msg) => {
+        setLoading(msg ? true : ctx.isLoading)
+        setLoadingMsg(msg)
     }
 
     const isHM = () => eq(ENVS.appContext(), 'hubmap')
@@ -86,7 +88,7 @@ function SankeyPage() {
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
                 <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify({
                     useShadow: true,
-                    styleSheetPath: 'https://rawcdn.githack.com/x-atlas-consortia/data-sankey/1.0.3/src/lib/xac-sankey.css',
+                    styleSheetPath: 'https://rawcdn.githack.com/x-atlas-consortia/data-sankey/1.0.4a/src/lib/xac-sankey.css',
                     filters,
                     api:
                         {
@@ -100,9 +102,9 @@ function SankeyPage() {
                         source_type: 'dataset_source_type'
                     }
                 }))
-                }>
-                    {loading && <Spinner />}
-                </react-consortia-sankey>
+                } />
+                {loading && <Spinner tip={loadingMsg} />}
+
             </div>}
         </div>
     )
