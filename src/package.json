@@ -3,12 +3,13 @@
   "version": "1.4.7",
   "private": true,
   "scripts": {
-    "all": "npm-run-all --parallel dev css addons",
+    "all": "npm-run-all --parallel dev css sankey-css addons",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css",
+    "sankey-css": "stylus --include-css --compress -w styles/xac-sankey.styl -o public/css/xac-sankey.css",
     "addons": "./node_modules/.bin/babel lib/addons/core/__polyfill.js lib/addons/core/Addon.js lib/addons/core/*.js --presets minify --out-file public/js/addons.js",
     "addons-watch": "watch 'npm run addons' ./lib/addons/core"
   },
@@ -38,7 +39,7 @@
     "react-dom": "^18.3.1",
     "react-idle-timer": "^5.7.2",
     "stylus": "^0.59.0",
-    "xac-sankey": "file:../../../data-sankey"
+    "xac-sankey": "file:../../../xac-sankey"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",

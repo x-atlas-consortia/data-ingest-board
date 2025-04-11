@@ -39,6 +39,13 @@ function SankeyPage() {
                 loading: {
                     callback: handleLoading
                 },
+                onNodeBuildCssCallback: (d) => {
+                    if (!isHM() && eq(d.columnName, el.validFilterMap.dataset_type)) {
+                        const assay = adapter.captureByKeysValue({matchKey: d.columnName, matchValue: d.name, keepKey: 'dataset_type_description'}, el.rawData)
+                        return assay.length <= 0 ? 'c-sankey__node--default' : ''
+                    }
+                    return ''
+                },
                 onNodeClickCallback: (e, d) => adapter.goTo(d),
                 onLabelClickCallback: (e, d) => adapter.goTo(d)
             })
@@ -88,7 +95,7 @@ function SankeyPage() {
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
                 <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify({
                     useShadow: true,
-                    styleSheetPath: 'https://rawcdn.githack.com/x-atlas-consortia/data-sankey/1.0.4a/src/lib/xac-sankey.css',
+                    styleSheetPath: '/css/xac-sankey.css',
                     filters,
                     api:
                         {
