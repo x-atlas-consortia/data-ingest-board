@@ -6,6 +6,8 @@ import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 import ENVS from "@/lib/helpers/envs";
 import {eq} from "@/lib/helpers/general";
+import SenNetAdapter from "xac-sankey/dist/js/adapters/SenNetAdapter"
+import HuBMAPAdapter from "xac-sankey/dist/js/adapters/HuBMAPAdapter"
 
 function SankeyPage() {
     const {
@@ -39,6 +41,7 @@ function SankeyPage() {
                 loading: {
                     callback: handleLoading
                 },
+                onDataBuildCallback: () => adapter.onDataBuildCallback(),
                 onNodeBuildCssCallback: (d) => {
                     if (!isHM() && eq(d.columnName, el.validFilterMap.dataset_type)) {
                         const assay = adapter.captureByKeysValue({matchKey: d.columnName, matchValue: d.name, keepKey: 'dataset_type_description'}, el.rawData)
@@ -95,7 +98,7 @@ function SankeyPage() {
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
                 <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify({
                     useShadow: true,
-                    styleSheetPath: '/css/xac-sankey.css',
+                    styleSheetPath: '/css/xac-sankey.css?v='+(new Date()).getMilliseconds(),
                     filters,
                     api:
                         {
