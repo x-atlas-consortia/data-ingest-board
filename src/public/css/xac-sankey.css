@@ -1,2 +1,2 @@
 @import 'https://rawcdn.githack.com/x-atlas-consortia/data-sankey/1.0.4/src/lib/xac-sankey.css';
-.c-sankey{min-height:100vh}.c-sankey react-consortia-sankey{width:100%;display:block;height:100%}.c-sankey__node{cursor:pointer}.c-sankey__node:hover .c-sankey__value{fill:#fff}.c-sankey__node--default{cursor:default}.c-sankey__node--default:hover .c-sankey__value{fill:#000}
+.c-sankey{min-height:100vh}.c-sankey react-consortia-sankey{width:100%;display:block;height:100%}
