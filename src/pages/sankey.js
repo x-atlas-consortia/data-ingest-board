@@ -105,7 +105,8 @@ function SankeyPage() {
                             token: globusToken
                         },
                     validFilterMap: isHM() ? undefined : {
-                        dataset_type: 'dataset_type_hierarchy'
+                        dataset_type: 'dataset_type_hierarchy',
+                        source_type: 'dataset_source_type'
                     }
                 }))
                 } />
