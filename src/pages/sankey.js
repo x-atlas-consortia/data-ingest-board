@@ -6,8 +6,6 @@ import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 import ENVS from "@/lib/helpers/envs";
 import {eq} from "@/lib/helpers/general";
-import SenNetAdapter from "xac-sankey/dist/js/adapters/SenNetAdapter"
-import HuBMAPAdapter from "xac-sankey/dist/js/adapters/HuBMAPAdapter"
 
 function SankeyPage() {
     const {
