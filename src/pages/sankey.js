@@ -23,6 +23,7 @@ function SankeyPage() {
     const xacSankey = useRef(null)
     const [loading, setLoading] = useState(true)
     const [loadingMsg, setLoadingMsg] = useState('')
+    const [options, setOptions] = useState({})
 
     const handleLoading = (ctx, msg) => {
         setLoading(msg ? true : ctx.isLoading)
@@ -36,6 +37,7 @@ function SankeyPage() {
             const el = xacSankey.current
             const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
             el.setOptions({
+                ...options,
                 loading: {
                     callback: handleLoading
                 },
@@ -66,7 +68,22 @@ function SankeyPage() {
     useEffect(() => {
         if (!router.isReady) return
         setFilters(router.query)
-    }, [router.isReady, router.query])
+        setOptions(btoa(JSON.stringify({
+            useShadow: true,
+            styleSheetPath: '/css/xac-sankey.css?v='+(new Date()).getMilliseconds(),
+            filters,
+            api:
+                {
+                    context: ENVS.appContext().toLowerCase(),
+                    sankey: URLS.entity.sankey(),
+                    token: globusToken
+                },
+            validFilterMap: isHM() ? undefined : {
+                dataset_type: 'dataset_type_hierarchy',
+                source_type: 'dataset_source_type'
+            }
+        })))
+    }, [router.isReady, router.query, globusToken])
 
     useEffect(()=>{
         // web components needs global window
@@ -104,22 +121,7 @@ function SankeyPage() {
             )}
 
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
-                <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify({
-                    useShadow: true,
-                    styleSheetPath: '/css/xac-sankey.css?v='+(new Date()).getMilliseconds(),
-                    filters,
-                    api:
-                        {
-                            context: ENVS.appContext().toLowerCase(),
-                            sankey: URLS.entity.sankey(),
-                            token: globusToken
-                        },
-                    validFilterMap: isHM() ? undefined : {
-                        dataset_type: 'dataset_type_hierarchy',
-                        source_type: 'dataset_source_type'
-                    }
-                }))
-                } />
+                {options && globusToken && <react-consortia-sankey ref={xacSankey} options={options} />}
                 {loading && <Spinner tip={loadingMsg} />}
 
             </div>}
