@@ -83,7 +83,7 @@ function SankeyPage() {
                 source_type: 'dataset_source_type'
             }
         })))
-    }, [router.isReady, router.query])
+    }, [router.isReady, router.query, globusToken])
 
     useEffect(()=>{
         // web components needs global window
@@ -121,7 +121,7 @@ function SankeyPage() {
             )}
 
             {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
-                {options && <react-consortia-sankey ref={xacSankey} options={options} />}
+                {options && globusToken && <react-consortia-sankey ref={xacSankey} options={options} />}
                 {loading && <Spinner tip={loadingMsg} />}
 
             </div>}
