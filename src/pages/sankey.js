@@ -47,8 +47,18 @@ function SankeyPage() {
                     }
                     return ''
                 },
-                onNodeClickCallback: (e, d) => adapter.goTo(d),
-                onLabelClickCallback: (e, d) => adapter.goTo(d)
+                onLinkClickCallback: (e, d) => {
+                    e.preventDefault()
+                    adapter.goToFromLink(d)
+                },
+                onNodeClickCallback: (e, d) => {
+                    e.preventDefault()
+                    adapter.goToFromNode(d)
+                },
+                onLabelClickCallback: (e, d) => {
+                    e.preventDefault()
+                    adapter.goToFromNode(d)
+                }
             })
         }
     }
