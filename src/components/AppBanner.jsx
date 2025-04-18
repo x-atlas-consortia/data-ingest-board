@@ -49,7 +49,7 @@ function AppBanner({name = 'login'}) {
 }
 
 AppBanner.propTypes = {
-    name: PropTypes.string.isRequired
+    name: PropTypes.string
 }
 
 export default AppBanner

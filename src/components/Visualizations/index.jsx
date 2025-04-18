@@ -232,8 +232,8 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 </Row>
 
                                 <Modal
-                                    className='c-chart-modal'
-                                    classNames={{ body: 'c-chart-modal__body' }}
+                                    className='c-chart c-chart--modal'
+                                    classNames={{ body: 'c-chart__body' }}
                                     title={TABLE.cols.n(
                                         column,
                                         getColumnName()
