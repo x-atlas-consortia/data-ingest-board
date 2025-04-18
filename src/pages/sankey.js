@@ -23,7 +23,7 @@ function SankeyPage() {
     const xacSankey = useRef(null)
     const [loading, setLoading] = useState(true)
     const [loadingMsg, setLoadingMsg] = useState('')
-    const [options, setOptions] = useState({})
+    const [options, setOptions] = useState(null)
 
     const handleLoading = (ctx, msg) => {
         setLoading(msg ? true : ctx.isLoading)
