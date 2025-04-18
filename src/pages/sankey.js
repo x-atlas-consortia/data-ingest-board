@@ -23,7 +23,7 @@ function SankeyPage() {
     const xacSankey = useRef(null)
     const [loading, setLoading] = useState(true)
     const [loadingMsg, setLoadingMsg] = useState('')
-    const [options, setOptions] = useState({})
+    const [options, setOptions] = useState(null)
 
     const handleLoading = (ctx, msg) => {
         setLoading(msg ? true : ctx.isLoading)
@@ -68,22 +68,28 @@ function SankeyPage() {
     useEffect(() => {
         if (!router.isReady) return
         setFilters(router.query)
-        setOptions(btoa(JSON.stringify({
-            useShadow: true,
-            styleSheetPath: '/css/xac-sankey.css?v='+(new Date()).getMilliseconds(),
-            filters,
-            api:
-                {
-                    context: ENVS.appContext().toLowerCase(),
-                    sankey: URLS.entity.sankey(),
-                    token: globusToken
-                },
-            validFilterMap: isHM() ? undefined : {
-                dataset_type: 'dataset_type_hierarchy',
-                source_type: 'dataset_source_type'
-            }
-        })))
-    }, [router.isReady, router.query, globusToken])
+    }, [router.isReady, router.query])
+
+    useEffect(() => {
+        if (globusToken) {
+            setOptions({
+                useShadow: true,
+                styleSheetPath: '/css/xac-sankey.css',
+                filters,
+                api:
+                    {
+                        context: ENVS.appContext().toLowerCase(),
+                        sankey: URLS.entity.sankey(),
+                        token: globusToken
+                    },
+                validFilterMap: isHM() ? undefined : {
+                    dataset_type: 'dataset_type_hierarchy',
+                    source_type: 'dataset_source_type'
+                }
+            })
+        }
+    }, [globusToken])
+
 
     useEffect(()=>{
         // web components needs global window
@@ -104,7 +110,6 @@ function SankeyPage() {
 
         const observer = new MutationObserver(callback)
         observer.observe(targetNode, config)
-
     }, [])
 
 
@@ -120,11 +125,11 @@ function SankeyPage() {
                 />
             )}
 
-            {isAuthenticated && !unauthorized && filters && <div className={'c-sankey'}>
-                {options && globusToken && <react-consortia-sankey ref={xacSankey} options={options} />}
-                {loading && <Spinner tip={loadingMsg} />}
-
-            </div>}
+            {isAuthenticated && !unauthorized && filters &&
+                <div className={'c-sankey'}>
+                    {options && <react-consortia-sankey ref={xacSankey} options={btoa(JSON.stringify(options))} />}
+                    {loading && <Spinner tip={loadingMsg} />}
+                </div>}
         </div>
     )
 }
