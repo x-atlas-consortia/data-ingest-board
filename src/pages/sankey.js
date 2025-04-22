@@ -81,6 +81,7 @@ function SankeyPage() {
                 useShadow: true,
                 styleSheetPath: '/css/xac-sankey.css',
                 filters,
+                groupByOrganCategoryKey: isHM() ? 'term' : undefined,
                 api:
                     {
                         context: ENVS.appContext().toLowerCase(),
