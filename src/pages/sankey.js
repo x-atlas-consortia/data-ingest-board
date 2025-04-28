@@ -42,10 +42,15 @@ function SankeyPage() {
                     callback: handleLoading
                 },
                 onDataBuildCallback: () => adapter.onDataBuildCallback(),
+                onLinkBuildCssCallback: (d) => {
+                    if (!isHM()) {
+                        return adapter.onLinkBuildCssCallback(d)
+                    }
+                    return ''
+                },
                 onNodeBuildCssCallback: (d) => {
-                    if (!isHM() && eq(d.columnName, el.validFilterMap.dataset_type)) {
-                        const assay = adapter.captureByKeysValue({matchKey: d.columnName, matchValue: d.name, keepKey: 'dataset_type_description'}, el.rawData)
-                        return assay.length <= 0 ? 'c-sankey__node--default' : ''
+                    if (!isHM()) {
+                        return adapter.onNodeBuildCssCallback(d)
                     }
                     return ''
                 },
@@ -76,13 +81,16 @@ function SankeyPage() {
                 useShadow: true,
                 styleSheetPath: '/css/xac-sankey.css',
                 filters,
+                groupByOrganCategoryKey: isHM() ? 'term' : undefined,
                 api:
                     {
                         context: ENVS.appContext().toLowerCase(),
                         sankey: URLS.entity.sankey(),
                         token: globusToken
                     },
-                validFilterMap: isHM() ? undefined : {
+                validFilterMap: isHM() ? {
+                    status: 'dataset_status'
+                } : {
                     dataset_type: 'dataset_type_hierarchy',
                     source_type: 'dataset_source_type'
                 }
