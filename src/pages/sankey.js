@@ -88,7 +88,9 @@ function SankeyPage() {
                         sankey: URLS.entity.sankey(),
                         token: globusToken
                     },
-                validFilterMap: isHM() ? undefined : {
+                validFilterMap: isHM() ? {
+                    status: 'dataset_status'
+                } : {
                     dataset_type: 'dataset_type_hierarchy',
                     source_type: 'dataset_source_type'
                 }
