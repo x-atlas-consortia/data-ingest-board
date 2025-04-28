@@ -76,7 +76,7 @@ function SankeyPage() {
     }, [router.isReady, router.query])
 
     useEffect(() => {
-        if (globusToken) {
+        if (globusToken && filters) {
             setOptions({
                 useShadow: true,
                 styleSheetPath: '/css/xac-sankey.css',
@@ -88,15 +88,19 @@ function SankeyPage() {
                         sankey: URLS.entity.sankey(),
                         token: globusToken
                     },
-                validFilterMap: isHM() ? {
-                    status: 'dataset_status'
-                } : {
+                displayableFilterMap: isHM() ? undefined : {
+                    group_name: 'dataset_group_name',
+                    dataset_type: 'dataset_type_hierarchy',
+                    organ: 'organ_type',
+                    source_type: 'dataset_source_type'
+                },
+                validFilterMap: isHM() ? undefined : {
                     dataset_type: 'dataset_type_hierarchy',
                     source_type: 'dataset_source_type'
                 }
             })
         }
-    }, [globusToken])
+    }, [globusToken, filters])
 
 
     useEffect(()=>{
