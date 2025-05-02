@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import axios from "axios";
 import {getRequestOptions} from "../lib/helpers/general";
 import ENVS from "../lib/helpers/envs";
+import {getCookie, setCookie} from "cookies-next";
 
 function useContent() {
     const [messages, setMessages] = useState({})
@@ -42,10 +43,24 @@ function useContent() {
         return window.UBKG
     }
 
+    const loadCss = () => {
+        const key = 'loadedCss'
+        if (!getCookie(key)) {
+            const style = document.createElement('link')
+            style.href = '/css/xac-sankey.css'
+            document.head.append(style)
+            setTimeout(()=>{
+                style.remove()
+            }, 3000)
+            setCookie(key, true, {maxAge: 60 * 60 * 24})
+        }
+    }
+
     useEffect(() => {
         loadMessages().then((r) => setMessages(r))
         loadBanners().then((r) => setBanners(r))
         loadUbkg().then((r) => setUbkg(r))
+        loadCss()
     }, [])
 
     return {messages, ubkg, banners}
