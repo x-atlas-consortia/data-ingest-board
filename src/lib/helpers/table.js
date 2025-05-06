@@ -19,6 +19,9 @@ const TABLE = {
             return cols[k]?.field || k
         }
     },
+    paginationOptions: {
+        pageSizeOptions: [10,20,30,50,100,200], showSizeChanger: true, showQuickJumper: true, position: ["topRight", "bottomRight"],
+    },
     getStatusDefinition: (status, entityType = 'Dataset') => {
         let msg
         if (status) {
