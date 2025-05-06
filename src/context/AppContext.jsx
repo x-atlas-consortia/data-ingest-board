@@ -120,7 +120,10 @@ export const AppProvider = ({ children, messages, banners }) => {
                 verifyInReadGroup(response.data)
                 checkInAdminGroup(token)
                 fetchDataProviderGroups(token)
-                checkPipelineTestingPrivs(token)
+                if (ENVS.submissionTestingEnabled()) {
+                    checkPipelineTestingPrivs(token)
+                }
+
                 setIsLoading(false)
             }).catch((error) => {
                 if (error?.response?.status === 401) {

@@ -2,15 +2,19 @@
   "name": "data-ingest-board",
   "version": "1.4.8",
   "private": true,
+  "watch": {
+    "addons": "./lib/addons/core/*.js"
+  },
   "scripts": {
-    "all": "npm-run-all --parallel dev css addons",
+    "all": "npm-run-all --parallel dev css sankey-css watch",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css",
+    "sankey-css": "stylus --include-css --compress -w styles/xac-sankey.styl -o public/css/xac-sankey.css",
     "addons": "./node_modules/.bin/babel lib/addons/core/__polyfill.js lib/addons/core/Addon.js lib/addons/core/*.js --presets minify --out-file public/js/addons.js",
-    "addons-watch": "watch 'npm run addons' ./lib/addons/core"
+    "watch": "npm-watch"
   },
   "prettier": {
     "singleQuote": true,
@@ -37,7 +41,8 @@
     "react-csv": "^2.2.2",
     "react-dom": "^18.3.1",
     "react-idle-timer": "^5.7.2",
-    "stylus": "^0.59.0"
+    "stylus": "^0.59.0",
+    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.0.8"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",
@@ -45,6 +50,6 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.24.7",
     "babel-preset-minify": "^0.5.2",
-    "watch": "^1.0.2"
+    "npm-watch": "^0.13.0"
   }
 }

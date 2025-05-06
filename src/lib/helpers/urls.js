@@ -13,7 +13,7 @@ const URLS = {
             let path = process.env.NEXT_PUBLIC_REVISIONS_PATH.format(uuid)
             return ENVS.urlFormat.entity(path)
         },
-        sankey: () => ENVS.urlFormat.entity('/datasets/sankey_data')
+        sankey: () => process.env.NEXT_PUBLIC_SANKEY_URL
     },
     ingest: {
         data: {
