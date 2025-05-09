@@ -59,17 +59,20 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         const xac = await import('xac-sankey')
         let _colorMethods = {
             ...colorMethods,
+            organ: scaleOrdinal(xac.XACSankey.pinkColors()),
             source_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.yellowColors()),
             dataset_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.greenColors()),
-            organ: scaleOrdinal(xac.XACSankey.pinkColors()),
+
         }
         setColorMethods(_colorMethods)
     }
 
     useEffect(() => {
         const filteredData = filterChartData(column)
-        setChartData(filteredData)
-        applyColors()
+
+        applyColors().then(()=> {
+            setChartData(filteredData)
+        })
     }, [data, column])
 
     const handleColumnMenuClick = (e) => {
@@ -185,7 +188,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 chartId={i.toString()}
                                 colorMethods={colorMethods}
                                 showXLabels={false}
-                                reload={false}
+                                reload={true}
                             />
                         )}
                         {isPie(c.key) && (
