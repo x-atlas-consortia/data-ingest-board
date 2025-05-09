@@ -13,7 +13,7 @@
     "lint": "next lint",
     "css": "stylus --include-css --compress -w styles/main.styl -o styles/main.css",
     "sankey-css": "stylus --include-css --compress -w styles/xac-sankey.styl -o public/css/xac-sankey.css",
-    "addons": "./node_modules/.bin/babel lib/addons/core/__polyfill.js lib/addons/core/Addon.js lib/addons/core/*.js --presets minify --out-file public/js/addons.js",
+    "addons": "./node_modules/.bin/babel lib/addons/core/Addon.js lib/addons/core/*.js --out-file public/js/addons.js",
     "watch": "npm-watch"
   },
   "prettier": {
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
-    "@babel/polyfill": "^7.12.1",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/preset-env": "^7.24.7",
     "babel-preset-minify": "^0.5.2",
     "npm-watch": "^0.13.0"
