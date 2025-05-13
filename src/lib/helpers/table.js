@@ -121,18 +121,24 @@ const TABLE = {
         })
     },
     generateCSVFile: (data, filename) => {
+        if (!data.length) return
         let _data = ''
         const cols = Object.keys(data[0])
-        for (let i = 0; i < cols.length; i++) {
-            let sep = i === cols.length - 1 ? '' : ','
-            _data += `"${cols[i]}"${sep}`
+
+        const csv = (d) => {
+            let sep, c, col
+            for (let i = 0; i < cols.length; i++) {
+                sep = i === cols.length - 1 ? '' : ','
+                c = cols[i]
+                col = d ? d[c] : c
+                _data += `"${col}"${sep}`
+            }
         }
+
+        csv()
         _data += "\n"
         for (let d of data) {
-            for (let i = 0; i < cols.length; i++) {
-                let sep = i === cols.length - 1 ? '' : ','
-                _data += `"${d[cols[i]]}"${sep}`
-            }
+            csv(d)
             _data += "\n"
         }
         const type = 'comma/tab-separated-values'
