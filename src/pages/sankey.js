@@ -5,7 +5,6 @@ import AppLogin from '@/components/AppLogin'
 import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 import ENVS from "@/lib/helpers/envs";
-import {eq} from "@/lib/helpers/general";
 
 function SankeyPage() {
     const {
@@ -30,7 +29,7 @@ function SankeyPage() {
         setLoadingMsg(msg)
     }
 
-    const isHM = () => eq(ENVS.appContext(), 'hubmap')
+    const isHM = () => ENVS.isHM()
 
     const setSankeyOptions = ()=> {
         if (xacSankey.current && xacSankey.current.setOptions) {
@@ -89,10 +88,7 @@ function SankeyPage() {
                         token: globusToken
                     },
                 displayableFilterMap: isHM() ? undefined : {
-                    group_name: 'dataset_group_name',
-                    dataset_type: 'dataset_type_hierarchy',
-                    organ: 'organ_type',
-                    source_type: 'dataset_source_type'
+                    status: null
                 },
                 validFilterMap: isHM() ? undefined : {
                     dataset_type: 'dataset_type_hierarchy',
