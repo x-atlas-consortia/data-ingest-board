@@ -5,7 +5,6 @@ import {eq, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
-import {CSVLink} from "react-csv";
 import {STATUS} from "../constants";
 
 const TABLE = {
@@ -120,6 +119,31 @@ const TABLE = {
             }
             return item;
         })
+    },
+    generateCSVFile: (data, filename) => {
+        let _data = ''
+        const cols = Object.keys(data[0])
+        for (let i = 0; i < cols.length; i++) {
+            let sep = i === cols.length - 1 ? '' : ','
+            _data += `"${cols[i]}"${sep}`
+        }
+        _data += "\n"
+        for (let d of data) {
+            for (let i = 0; i < cols.length; i++) {
+                let sep = i === cols.length - 1 ? '' : ','
+                _data += `"${d[cols[i]]}"${sep}`
+            }
+            _data += "\n"
+        }
+        const type = 'comma/tab-separated-values'
+        const a = document.createElement('a')
+        const url = window.URL.createObjectURL(new Blob([_data], {type}))
+        a.href = url
+        a.download = filename
+        document.body.append(a)
+        a.click()
+        a.remove()
+        window.URL.revokeObjectURL(url)
     },
     bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [
@@ -293,9 +317,9 @@ const TABLE = {
     },
     csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <CSVLink data={selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)} filename={filename} className="ic--download js-gtm--btn-cta-csvDownload">
+            <button onClick={() => TABLE.generateCSVFile(selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters), filename)} className="ic--download js-gtm--btn-cta-csvDownload">
                 <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-            </CSVLink>
+            </button>
         </span>
     },
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
