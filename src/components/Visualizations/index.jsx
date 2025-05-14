@@ -62,6 +62,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
             organ: scaleOrdinal(xac.XACSankey.pinkColors()),
             source_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.yellowColors()),
             dataset_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.greenColors()),
+            group_name: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.blueGreyColors()),
 
         }
         setColorMethods(_colorMethods)
