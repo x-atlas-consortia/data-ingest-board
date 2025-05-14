@@ -5,6 +5,7 @@ import AppLogin from '@/components/AppLogin'
 import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 import ENVS from "@/lib/helpers/envs";
+import {scaleOrdinal} from 'd3'
 
 function SankeyPage() {
     const {
@@ -31,10 +32,11 @@ function SankeyPage() {
 
     const isHM = () => ENVS.isHM()
 
-    const setSankeyOptions = ()=> {
+    const setSankeyOptions = (xac)=> {
         if (xacSankey.current && xacSankey.current.setOptions) {
             const el = xacSankey.current
             const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
+            el.theme.byScheme.dataset_group_name = scaleOrdinal(xac.XACSankey.blueGreyColors())
             el.setOptions({
                 ...options,
                 loading: {
@@ -101,23 +103,23 @@ function SankeyPage() {
 
     useEffect(()=>{
         // web components needs global window
-        import('xac-sankey')
+        import('xac-sankey').then((xac)=> {
+            // the only way to pass objects is via a functional call to the exposed shadow dom
+            // must observe that this web component el is ready in DOM before calling the method
+            const targetNode = document.getElementById("__next")
+            const config = {  attributes: true, childList: true, subtree: true }
 
-        // the only way to pass objects is via a functional call to the exposed shadow dom
-        // must observe that this web component el is ready in DOM before calling the method
-        const targetNode = document.getElementById("__next")
-        const config = {  attributes: true, childList: true, subtree: true }
-
-        const callback = (mutationList, observer) => {
-            if (xacSankey.current && xacSankey.current.setOptions) {
-                // it's ready
-                setSankeyOptions()
-                observer.disconnect()
+            const callback = (mutationList, observer) => {
+                if (xacSankey.current && xacSankey.current.setOptions) {
+                    // it's ready
+                    setSankeyOptions(xac)
+                    observer.disconnect()
+                }
             }
-        }
 
-        const observer = new MutationObserver(callback)
-        observer.observe(targetNode, config)
+            const observer = new MutationObserver(callback)
+            observer.observe(targetNode, config)
+        })
     }, [])
 
 
