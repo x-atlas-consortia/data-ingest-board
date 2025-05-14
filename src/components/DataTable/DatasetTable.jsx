@@ -286,6 +286,15 @@ const DatasetTable = ({
             ellipsis: true,
         },
         {
+            title: "Has Source Sample Metadata",
+            width: 200,
+            dataIndex: "has_source_sample_metadata",
+            align: "left",
+            defaultSortOrder: urlSortOrder["has_source_sample_metadata"] || null,
+            sorter: (a,b) => b.has_source_sample_metadata.localeCompare(a.has_source_sample_metadata),
+            ellipsis: true,
+        },
+        {
             title: "Has Dataset Metadata",
             width: 200,
             dataIndex: "has_dataset_metadata",
