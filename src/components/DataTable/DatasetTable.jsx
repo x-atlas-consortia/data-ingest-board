@@ -277,7 +277,7 @@ const DatasetTable = ({
             ellipsis: true,
         },
         {
-            title: "Has Donor Metadata",
+            title: TABLE.cols.n('has_donor_metadata'),
             width: 200,
             dataIndex: "has_donor_metadata",
             align: "left",
