@@ -36,7 +36,9 @@ function SankeyPage() {
         if (xacSankey.current && xacSankey.current.setOptions) {
             const el = xacSankey.current
             const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
-            el.theme.byScheme.dataset_group_name = scaleOrdinal(xac.XACSankey.blueGreyColors())
+            if (!isHM()) {
+                el.theme.byScheme.dataset_group_name = scaleOrdinal(xac.XACSankey.blueGreyColors())
+            }
             el.setOptions({
                 ...options,
                 loading: {
