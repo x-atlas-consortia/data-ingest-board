@@ -287,7 +287,7 @@ const DatasetTable = ({
         },
         {
             title: "Has Source Sample Metadata",
-            width: 200,
+            width: 250,
             dataIndex: "has_source_sample_metadata",
             align: "left",
             defaultSortOrder: urlSortOrder["has_source_sample_metadata"] || null,
