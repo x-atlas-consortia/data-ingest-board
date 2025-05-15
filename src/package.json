@@ -41,7 +41,7 @@
     "react-dom": "^18.3.1",
     "react-idle-timer": "^5.7.2",
     "stylus": "^0.59.0",
-    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.0.9"
+    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.0.10"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",
