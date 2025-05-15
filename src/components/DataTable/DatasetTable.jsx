@@ -277,12 +277,21 @@ const DatasetTable = ({
             ellipsis: true,
         },
         {
-            title: "Has Donor Metadata",
+            title: TABLE.cols.n('has_donor_metadata'),
             width: 200,
             dataIndex: "has_donor_metadata",
             align: "left",
             defaultSortOrder: urlSortOrder["has_donor_metadata"] || null,
             sorter: (a,b) => b.has_donor_metadata.localeCompare(a.has_donor_metadata),
+            ellipsis: true,
+        },
+        {
+            title: "Has Source Sample Metadata",
+            width: 250,
+            dataIndex: "has_source_sample_metadata",
+            align: "left",
+            defaultSortOrder: urlSortOrder["has_source_sample_metadata"] || null,
+            sorter: (a,b) => b.has_source_sample_metadata.localeCompare(a.has_source_sample_metadata),
             ellipsis: true,
         },
         {
