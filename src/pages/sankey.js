@@ -5,7 +5,6 @@ import AppLogin from '@/components/AppLogin'
 import URLS from "@/lib/helpers/urls";
 import Spinner from "@/components/Spinner";
 import ENVS from "@/lib/helpers/envs";
-import {scaleOrdinal} from 'd3'
 
 function SankeyPage() {
     const {
@@ -36,8 +35,9 @@ function SankeyPage() {
         if (xacSankey.current && xacSankey.current.setOptions) {
             const el = xacSankey.current
             const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
-            if (!isHM()) {
-                el.theme.byScheme.dataset_group_name = scaleOrdinal(xac.XACSankey.blueGreyColors())
+            if (isHM()) {
+                // clear color settings & leave HM to be its current randomized color until otherwise requested
+                el.theme.byScheme = undefined
             }
             el.setOptions({
                 ...options,
@@ -82,6 +82,7 @@ function SankeyPage() {
         if (globusToken && filters) {
             setOptions({
                 useShadow: true,
+                disableUbkgColorPalettes: isHM(),
                 styleSheetPath: '/css/xac-sankey.css',
                 filters,
                 groupByOrganCategoryKey: isHM() ? 'term' : undefined,
