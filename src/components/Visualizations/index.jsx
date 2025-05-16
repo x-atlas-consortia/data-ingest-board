@@ -57,18 +57,18 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         return values.sort((a, b) => b.value - a.value)
     }
 
-    const getColorFromUbkgPalette = (key, label, fallback) => {
-        return colorPalettes[key] && colorPalettes[key][label] ? colorPalettes[key][label] : scaleOrdinal(fallback)(label)
+    const getColorScale = (key, palette) => {
+        return colorPalettes && Object.keys(colorPalettes).length ? scaleOrdinal(Object.keys(colorPalettes[key]), Object.values(colorPalettes[key])) : scaleOrdinal(palette)
     }
 
     const applyColors = async () => {
 
         let _colorMethods = {
             ...colorMethods,
-            organ: ENVS.isHM() ? undefined : (label) =>  getColorFromUbkgPalette('organs', label, Palette.pinkColors),
+            organ: ENVS.isHM() ? undefined : getColorScale('organs', Palette.pinkColors),
             source_type: ENVS.isHM() ? undefined : scaleOrdinal(Palette.yellowColors),
-            dataset_type: ENVS.isHM() ? undefined :  (label) => getColorFromUbkgPalette('datasetTypes', label, Palette.greenColors),
-            group_name: ENVS.isHM() ? undefined :  (label) => getColorFromUbkgPalette('groups', label, Palette.blueGreyColors),
+            dataset_type: ENVS.isHM() ? undefined :  getColorScale('datasetTypes', Palette.greenColors),
+            group_name: ENVS.isHM() ? undefined :  getColorScale('groups', Palette.blueGreyColors),
 
         }
         setColorMethods(_colorMethods)
