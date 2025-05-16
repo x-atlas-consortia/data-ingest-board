@@ -15,6 +15,8 @@ import Pie from "@/components/Visualizations/Charts/Pie";
 import ENVS from '@/lib/helpers/envs';
 import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {scaleOrdinal} from 'd3'
+import Palette from 'xac-sankey/dist/js/util/Palette'
+import useContent from "@/hooks/useContent";
 
 function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
@@ -28,6 +30,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
     const [chartData, setChartData] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [selectedFilterValues, setSelectedFilterValues] = useState([])
+    const { colorPalettes} = useContent()
 
     const getStatusColor = (label) => {
         return THEME.getStatusColor(label).bg
@@ -54,15 +57,18 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         return values.sort((a, b) => b.value - a.value)
     }
 
+    const getColorFromUbkgPalette = (key, label, fallback) => {
+        return colorPalettes[key] && colorPalettes[key][label] ? colorPalettes[key][label] : scaleOrdinal(fallback)(label)
+    }
 
     const applyColors = async () => {
-        const xac = await import('xac-sankey')
+
         let _colorMethods = {
             ...colorMethods,
-            organ: scaleOrdinal(xac.XACSankey.pinkColors()),
-            source_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.yellowColors()),
-            dataset_type: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.greenColors()),
-            group_name: ENVS.isHM() ? undefined : scaleOrdinal(xac.XACSankey.blueGreyColors()),
+            organ: ENVS.isHM() ? undefined : (label) =>  getColorFromUbkgPalette('organs', label, Palette.pinkColors),
+            source_type: ENVS.isHM() ? undefined : scaleOrdinal(Palette.yellowColors),
+            dataset_type: ENVS.isHM() ? undefined :  (label) => getColorFromUbkgPalette('datasetTypes', label, Palette.greenColors),
+            group_name: ENVS.isHM() ? undefined :  (label) => getColorFromUbkgPalette('groups', label, Palette.blueGreyColors),
 
         }
         setColorMethods(_colorMethods)

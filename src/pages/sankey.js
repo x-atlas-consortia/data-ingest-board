@@ -37,7 +37,10 @@ function SankeyPage() {
             const el = xacSankey.current
             const adapter = isHM() ? new HuBMAPAdapter(el) : new SenNetAdapter(el)
             if (!isHM()) {
-                el.theme.byScheme.dataset_group_name = scaleOrdinal(xac.XACSankey.blueGreyColors())
+                el.theme.byScheme.dataset_group_name = scaleOrdinal(el.getColorPalettes().blueGrey)
+            }  else {
+                // clear the pink organs & leave HM to be its current randomized color until otherwise requested
+                el.theme.byScheme.organ_type = null
             }
             el.setOptions({
                 ...options,
@@ -82,6 +85,7 @@ function SankeyPage() {
         if (globusToken && filters) {
             setOptions({
                 useShadow: true,
+                disableUbkgColorPalettes: isHM(),
                 styleSheetPath: '/css/xac-sankey.css',
                 filters,
                 groupByOrganCategoryKey: isHM() ? 'term' : undefined,
