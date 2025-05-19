@@ -266,6 +266,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             TABLE.handleCSVDownload()
         }
 
+        if (e.key === '1b') {
+            TABLE.handleManifestDownload({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData})
+        }
+
         if (e.key === '3') {
             showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}

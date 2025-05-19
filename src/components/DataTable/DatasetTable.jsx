@@ -382,6 +382,10 @@ const DatasetTable = ({
             TABLE.handleCSVDownload()
         }
 
+        if (e.key === '1b') {
+            TABLE.handleManifestDownload({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData})
+        }
+
         if (e.key === '2') {
             showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess'})
         }

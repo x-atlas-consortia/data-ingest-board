@@ -1,7 +1,7 @@
-import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, CloseOutlined, DownloadOutlined, FileExcelOutlined, EditOutlined, FileTextOutlined} from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip} from "antd";
 import React from "react";
-import {eq, toDateString} from "./general";
+import {autoBlobDownloader, eq, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
@@ -126,9 +126,17 @@ const TABLE = {
             {
                 label: 'Download CSV Data',
                 key: '1',
-                icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
+                icon: <FileExcelOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
         ]
+
+        _items.push(
+            {
+                label: 'Download Manifest TXT',
+                key: '1b',
+                icon: <FileTextOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
+            }
+        )
         if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
             _items.push(
                 {
@@ -290,6 +298,15 @@ const TABLE = {
         $el.style.display = 'block'
         document.querySelector('.ic--download').click()
         $el.style.display = 'none'
+    },
+    handleManifestDownload: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        let manifestData  = ''
+        let data = selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)
+        for (let e of data){
+            manifestData += `${e['uuid']} /\n`
+        }
+
+        autoBlobDownloader([manifestData], 'text/plain', `data-manifest.txt`)
     },
     csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
