@@ -63,6 +63,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
     const uniqueDatasetType = filterField('intended_dataset_type')
     const uniqueSourceTypes = filterField('intended_source_type')
+    const uniquePriorityPList = [...new Set(filterField('priority_project_list').flat())]
 
     let urlParamFilters = {};
 
@@ -227,6 +228,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
             ellipsis: true,
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
     ];
 
     // Exclude named columns in .env from table

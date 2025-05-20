@@ -1,5 +1,21 @@
 import axios from "axios";
 
+export function some(s1, s2, insensitive = true) {
+    let res = s1 === s2
+    if (insensitive && s1 !== undefined && s2 !== undefined) {
+        if (typeof s1 === 'string') {
+            s1 = s1.split(',')
+        }
+        for (let t of s1) {
+            if (eq(t, s2, insensitive)) {
+                res = true
+                break
+            }
+        }
+    }
+    return res
+}
+
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
     if (insensitive && s1 !== undefined && s2 !== undefined) {
