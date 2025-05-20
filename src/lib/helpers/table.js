@@ -141,20 +141,14 @@ const TABLE = {
             csv(d)
             _data += "\n"
         }
+
         const type = 'comma/tab-separated-values'
-        const a = document.createElement('a')
-        const url = window.URL.createObjectURL(new Blob([_data], {type}))
-        a.href = url
-        a.download = filename
-        document.body.append(a)
-        a.click()
-        a.remove()
-        window.URL.revokeObjectURL(url)
+        autoBlobDownloader([_data], type, filename)
     },
     bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [
             {
-                label: 'Download CSV Data',
+                label: <span className={'js-gtm--btn-cta-csvDownload'}>Download CSV Data</span>,
                 key: '1',
                 icon: <FileExcelOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
@@ -162,7 +156,7 @@ const TABLE = {
 
         _items.push(
             {
-                label: 'Download Manifest TXT',
+                label: <span className={'js-gtm--btn-cta-manifestDownload'}>Download Manifest TXT</span>,
                 key: '1b',
                 icon: <FileTextOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
             }
@@ -323,11 +317,9 @@ const TABLE = {
             }
         }
     },
-    handleCSVDownload: () => {
-        const $el = document.querySelector('.js-csvDownload')
-        $el.style.display = 'block'
-        document.querySelector('.ic--download').click()
-        $el.style.display = 'none'
+    handleCSVDownload: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        let data = selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)
+        TABLE.generateCSVFile(data, filename)
     },
     handleManifestDownload: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
         let manifestData  = ''
@@ -337,13 +329,6 @@ const TABLE = {
         }
 
         autoBlobDownloader([manifestData], 'text/plain', `data-manifest.txt`)
-    },
-    csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
-        return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <button onClick={() => TABLE.generateCSVFile(selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters), filename)} className="ic--download js-gtm--btn-cta-csvDownload">
-                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-            </button>
-        </span>
     },
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
         return <Space wrap>

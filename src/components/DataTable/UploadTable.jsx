@@ -263,7 +263,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            TABLE.handleCSVDownload()
+            TABLE.handleCSVDownload({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})
         }
 
         if (e.key === '1b') {
@@ -314,7 +314,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <>
                     <div className="count c-table--header">
                         {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                        {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'uploads-data.csv'})}
                     </div>
                     <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                            columns={filteredUploadColumns}
