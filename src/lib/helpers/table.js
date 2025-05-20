@@ -148,17 +148,17 @@ const TABLE = {
     bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [
             {
-                label: <span className={'js-gtm--btn-cta-csvDownload'}>Download CSV Data</span>,
+                label: <span className={'js-gtm--btn-cta-csvDownload'}>Download CSV Data <FileExcelOutlined /></span>,
                 key: '1',
-                icon: <FileExcelOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
+                icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
         ]
 
         _items.push(
             {
-                label: <span className={'js-gtm--btn-cta-manifestDownload'}>Download Manifest TXT</span>,
+                label: <span className={'js-gtm--btn-cta-manifestDownload'}>Download Manifest TXT <FileTextOutlined /></span>,
                 key: '1b',
-                icon: <FileTextOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
+                icon: <DownloadOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
             }
         )
         if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
