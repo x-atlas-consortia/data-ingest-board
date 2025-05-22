@@ -78,6 +78,7 @@ const DatasetTable = ({
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
     const uniqueHasRuiStates = filterField('has_rui_info')
+    const uniquePriorityPList = [...new Set(filterField('priority_project_list').flat())]
 
     let order = sortOrder;
     let field = sortField;
@@ -219,6 +220,7 @@ const DatasetTable = ({
                 )
             }
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
         {
             title: "Last Touch",
             width: 225,
