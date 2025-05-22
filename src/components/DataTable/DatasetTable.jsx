@@ -53,7 +53,7 @@ const DatasetTable = ({
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
         if (excludedColumns[f]) return []
-        return [...new Set(data.map(item => item[f]))]
+        return [...new Set(data.map(item => item[f]))].filter(name => name !== "" && name !== " " && name !== undefined)
     }
 
     const makeHierarchyFilters = (items) => {
@@ -78,6 +78,10 @@ const DatasetTable = ({
     const uniqueDatasetType = filterField('dataset_type')
     const uniqueSourceTypes = filterField('source_type')
     const uniqueHasRuiStates = filterField('has_rui_info')
+    const uniqueHasDonorMeta = filterField('has_donor_metadata')
+    const uniqueHasDataMeta = filterField('has_dataset_metadata')
+    const uniqueHasData = filterField('has_data')
+    const uniqueHasSourceSampleMeta = filterField('has_source_sample_metadata')
 
     let order = sortOrder;
     let field = sortField;
@@ -282,8 +286,11 @@ const DatasetTable = ({
             dataIndex: "has_donor_metadata",
             align: "left",
             defaultSortOrder: urlSortOrder["has_donor_metadata"] || null,
-            sorter: (a,b) => b.has_donor_metadata.localeCompare(a.has_donor_metadata),
+            sorter: (a,b) => b.has_donor_metadata?.localeCompare(a.has_donor_metadata),
             ellipsis: true,
+            filteredValue: urlParamFilters[TABLE.cols.f('has_donor_metadata')] || null,
+            filters: uniqueHasDonorMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_donor_metadata')], value),
         },
         {
             title: "Has Source Sample Metadata",
@@ -291,17 +298,23 @@ const DatasetTable = ({
             dataIndex: "has_source_sample_metadata",
             align: "left",
             defaultSortOrder: urlSortOrder["has_source_sample_metadata"] || null,
-            sorter: (a,b) => b.has_source_sample_metadata.localeCompare(a.has_source_sample_metadata),
+            sorter: (a,b) => b.has_source_sample_metadata?.localeCompare(a.has_source_sample_metadata),
             ellipsis: true,
+            filteredValue: urlParamFilters[TABLE.cols.f('has_source_sample_metadata')] || null,
+            filters: uniqueHasSourceSampleMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_source_sample_metadata')], value),
         },
         {
             title: "Has Dataset Metadata",
             width: 200,
             dataIndex: "has_dataset_metadata",
             align: "left",
-            defaultSortOrder: urlSortOrder["has_data_metadata"] || null,
-            sorter: (a,b) => b.has_data_metadata.localeCompare(a.has_data_metadata),
+            defaultSortOrder: urlSortOrder["has_dataset_metadata"] || null,
+            sorter: (a,b) => b.has_dataset_metadata?.localeCompare(a.has_dataset_metadata),
             ellipsis: true,
+            filteredValue: urlParamFilters[TABLE.cols.f('has_dataset_metadata')] || null,
+            filters: uniqueHasDataMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_dataset_metadata')], value),
         },
         {
             title: "Upload",
@@ -309,7 +322,7 @@ const DatasetTable = ({
             dataIndex: "upload",
             align: "left",
             defaultSortOrder: urlSortOrder["upload"] || null,
-            sorter: (a,b) => a.upload.localeCompare(b.upload),
+            sorter: (a,b) => a.upload?.localeCompare(b.upload),
             ellipsis: true,
         },
         {
@@ -321,7 +334,7 @@ const DatasetTable = ({
             sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
             ellipsis: true,
             filteredValue: urlParamFilters[TABLE.cols.f('has_rui_info')] || null,
-            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name.toLowerCase() })),
+            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name?.toLowerCase() })),
             onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
         },
         {
@@ -332,6 +345,9 @@ const DatasetTable = ({
             defaultSortOrder: urlSortOrder["has_data"] || null,
             sorter: (a,b) => b.has_data.localeCompare(a.has_data),
             ellipsis: true,
+            filteredValue: urlParamFilters[TABLE.cols.f('has_data')] || null,
+            filters: uniqueHasData.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[TABLE.cols.f('has_data')], value),
         },
     ]
 
