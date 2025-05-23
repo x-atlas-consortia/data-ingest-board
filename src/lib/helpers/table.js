@@ -7,6 +7,7 @@ import URLS from "./urls";
 import THEME from "./theme";
 import {CSVLink} from "react-csv";
 import {STATUS} from "../constants";
+import {getHierarchy} from "@/lib/helpers/hierarchy";
 
 const TABLE = {
     cols: {
@@ -21,6 +22,80 @@ const TABLE = {
     },
     paginationOptions: {
         pageSizeOptions: [10,20,30,50,100,200], showSizeChanger: true, showQuickJumper: true, position: ["topRight", "bottomRight"],
+    },
+    makeHierarchyFilters: (items, hierarchyGroupings) => {
+        const hierarchyNames = new Set()
+        for (let i of items) {
+            let groupName = getHierarchy(i)
+            if (!eq(i, groupName)) {
+                const normalized = groupName.toLowerCase()
+                if (hierarchyGroupings[normalized] === undefined) {
+                    hierarchyGroupings[normalized] = []
+                }
+                hierarchyGroupings[normalized].push(i)
+            }
+            hierarchyNames.add(groupName)
+        }
+        return Array.from(hierarchyNames)
+    },
+    handleSortOrder: ({sortOrder, sortField, urlSortOrder, filterFields}) => {
+        let order = sortOrder;
+        let field = sortField;
+        if (typeof sortOrder === "object"){
+            order = order[0];
+        }
+        if (typeof sortField === "object"){
+            field = field[0];
+        }
+
+        if (order && field && (eq(order, "ascend") || eq(order, "descend"))){
+            if (filterFields.includes(field)) {
+                urlSortOrder[field] = order;
+            }
+        }
+    },
+    handleUrlParams: ({filters, urlParamFilters, fields, hierarchyGroupings}) => {
+        for (let _field of fields) {
+            if (filters.hasOwnProperty(_field)) {
+                let values = filters[_field].toLowerCase().split(",")
+                for (let v of values) {
+                    if (urlParamFilters[_field] === undefined) {
+                        urlParamFilters[_field] = []
+                    }
+                    // append either the values for a particular group or just the filter itself
+                    urlParamFilters[_field] = urlParamFilters[_field].concat(hierarchyGroupings[v.toLowerCase()] || [v]);
+                }
+            }
+        }
+
+    },
+    columnOptions: ({field, urlParamFilters, urlSortOrder, uniqueDataFilters, title, width = 125}) => {
+        let f = TABLE.cols.f(field)
+        return {
+            title: TABLE.cols.n(field, title),
+            width: width || 125,
+            dataIndex: f,
+            align: "left",
+            defaultSortOrder: urlSortOrder[f] || null,
+            sorter: (a,b) => b[f]?.localeCompare(a[f]),
+            ellipsis: true,
+            filteredValue: urlParamFilters[f] || null,
+            filters: uniqueDataFilters[f]?.map(name => ({ text: name, value: name?.toLowerCase() })),
+            onFilter: (value, record) => eq(record[f], value),
+            render: (value, record) => {
+                let v = value
+                if (field.indexOf('has_') !== -1 && !value) {
+                    v = 'False'
+                }
+                return (
+                    <span className={`field-${field}`}>{v}</span>
+                )
+            }
+        }
+    },
+    filterField: (data, f, excludedColumns) => {
+        if (excludedColumns[f]) return []
+        return [...new Set(data.map(item => item[f]))].filter(name => name !== "" && name !== " " && name !== undefined)
     },
     getStatusDefinition: (status, entityType = 'Dataset') => {
         let msg
@@ -218,7 +293,7 @@ const TABLE = {
                 defaultSortOrder: defaultSortOrder["assigned_to_group_name"] || null,
                 sorter: (a,b) => a.assigned_to_group_name.localeCompare(b.assigned_to_group_name),
                 filteredValue: urlParamFilters["assigned_to_group_name"] || null,
-                filters: uniqueAssignedToGroupNames.map(name => ({ text: name, value: name.toLowerCase() })),
+                filters: uniqueAssignedToGroupNames?.map(name => ({ text: name, value: name.toLowerCase() })),
                 onFilter: (value, record) => eq(record.assigned_to_group_name, value),
                 ellipsis: true,
                 render: (groupName, record) => {

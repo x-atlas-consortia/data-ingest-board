@@ -1,25 +1,28 @@
 import {Button,Modal, Table} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
-import {eq, getUBKGName} from "../../lib/helpers/general";
+import {eq, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
 import TABLE from "../../lib/helpers/table";
 import URLS from "../../lib/helpers/urls";
 import ENVS from "../../lib/helpers/envs";
 import AppContext from "../../context/AppContext";
-import {STATUS} from "../../lib/constants";
+import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import UI_BLOCKS from "../../lib/helpers/uiBlocks";
-import { getHierarchy } from "@/lib/helpers/hierarchy";
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters, className}) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, globusToken, confirmBulkEdit} = useContext(AppContext)
+    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
+    const hierarchyGroupings = {}
+    const uniqueDataFilters = {}
+    let urlParamFilters = {}
+    let urlSortOrder = {}
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -36,56 +39,22 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
 
     const excludedColumns = ENVS.excludeTableColumnsUploads()
     const filterField = (f) => {
-        if (excludedColumns[f]) return []
-        return [...new Set(data.map(item => item[f]))]
+        return TABLE.filterField(data, f, excludedColumns)
     }
 
-    const makeHierarchyFilters = (items) => {
-        const hierarchyNames = new Set()
-        for (let i of items) {
-            let groupName = getHierarchy(i)
-            if (!eq(i, groupName)) {
-                const normalized = groupName.toLowerCase()
-                if (hierarchyGroupings[normalized] === undefined) {
-                    hierarchyGroupings[normalized] = []
-                }
-                hierarchyGroupings[normalized].push(i)
-            }
-            hierarchyNames.add(groupName)
-        }
-        return Array.from(hierarchyNames)
+    // Build unique filter dropdown for listed fields based on their respective data
+    // Currently HM & SN share the same settings here; if deviate will need to create a separate .env to handle.
+    const uploadsFilterFields = ['intended_organ', 'intended_dataset_type', 'intended_source_type', 'assigned_to_group_name', ...ENVS.sharedFilterFields()]
+    for (let f of uploadsFilterFields) {
+        uniqueDataFilters[f] = filterField(f)
     }
 
-    const unfilteredGroupNames = [...new Set(data.map(item => item.group_name))];
-    const uniqueGroupNames = unfilteredGroupNames.filter(name => name.trim() !== "" && name !== " ");
-    const uniqueAssignedToGroupNames = [...new Set(data.map(item => item.assigned_to_group_name))]
-    const unfilteredOrganTypes = makeHierarchyFilters(filterField('intended_organ'))
-    const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDatasetType = filterField('intended_dataset_type')
-    const uniqueSourceTypes = filterField('intended_source_type')
+    const uniqueOrganType =  TABLE.makeHierarchyFilters(uniqueDataFilters['intended_organ'], hierarchyGroupings)
 
-    let urlParamFilters = {};
+    // This is important to show visual indicator selections on filter drop down menu when there are valid url filters
+    TABLE.handleUrlParams({filters, urlParamFilters, fields: uploadsFilterFields, hierarchyGroupings})
 
-    for (let _field of ["group_name", "status"]) {
-        if (filters.hasOwnProperty(_field)) {
-            urlParamFilters[_field] = filters[_field].toLowerCase().split(",");
-        }
-    }
-
-    let order = sortOrder;
-    let field = sortField;
-    if (typeof sortOrder === "object"){
-        order = order[0];
-    }
-    if (typeof sortField === "object"){
-        field = field[0];
-    }
-    let urlSortOrder = {};
-    if (order && field && (eq(order, "ascend") || eq(order, "descend"))) {
-        if (ENVS.filterFields().includes(field)) {
-            urlSortOrder[field] = order;
-        }
-    }
+    TABLE.handleSortOrder({sortOrder, sortField, urlSortOrder, filterFields: uploadsFilterFields})
 
     const renderDropdownContent = (record) => {
         const showGlobusUrl = record.status?.toLowerCase() !== 'reorganized';
@@ -127,31 +96,22 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     };
     const uploadColumns = [
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).id(renderDropdownContent),
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueDataFilters['group_name']),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
         {
-            title: TABLE.cols.n('intended_source_type', 'Intended Source Type'),
-            width: 220,
-            dataIndex: TABLE.cols.f('intended_source_type'),
-            align: "left",
-            defaultSortOrder: urlSortOrder[TABLE.cols.f('intended_source_type')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('intended_source_type')]?.localeCompare(b[TABLE.cols.f('intended_source_type')]),
-            filteredValue: urlParamFilters[TABLE.cols.f('intended_source_type')] || null,
-            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('intended_source_type')], value),
-            ellipsis: true,
+            ... TABLE.columnOptions({
+                field: 'intended_source_type',
+                title: 'Intended Source Type',
+                width: 220,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
-            title: "Intended Organ",
-            width: 180,
-            dataIndex: "intended_organ",
-            align: "left",
-            defaultSortOrder: urlSortOrder["intended_organ"] || null,
-            sorter: (a,b) => a.intended_organ.localeCompare(b.intended_organ),
+            ... TABLE.columnOptions({
+                field: 'intended_organ',
+                title: 'Intended Organ',
+                width: 180,  urlSortOrder, urlParamFilters, uniqueDataFilters}),
             filteredValue: urlParamFilters["intended_organ"] ? filters['intended_organ'].toLowerCase().split(",") : null,
             filters: uniqueOrganType.map(name => ({ text: getUBKGName(name), value: name.toLowerCase() })),
             onFilter: (value, record) => eq(record.organ, value) || hierarchyGroupings[value]?.includes(record.organ),
-            ellipsis: true,
             render: (organType, record) => {
                 if (!organType) return null
                 return (
@@ -160,18 +120,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             }
         },
         {
-            title: "Intended Dataset Type",
-            width: 230,
-            dataIndex: "intended_dataset_type",
-            align: "left",
-            defaultSortOrder: urlSortOrder["intended_dataset_type"] || null,
-            sorter: (a,b) => a.intended_dataset_type.localeCompare(b.intended_dataset_type),
-            filteredValue: urlParamFilters["intended_dataset_type"] || null,
-            filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.intended_dataset_type, value),
-            ellipsis: true,
+            ... TABLE.columnOptions({
+                field: 'intended_dataset_type',
+                title: 'Intended Dataset Type',
+                width: 230,  urlSortOrder, urlParamFilters, uniqueDataFilters}),
         },
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueAssignedToGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueDataFilters['assigned_to_group_name']),
         {
             title: "Ingest Task",
             width: 200,

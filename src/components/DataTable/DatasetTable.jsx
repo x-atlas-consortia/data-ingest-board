@@ -15,7 +15,6 @@ import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
-import { getHierarchy } from "@/lib/helpers/hierarchy";
 
 const DatasetTable = ({
     data,
@@ -26,7 +25,6 @@ const DatasetTable = ({
     sortField,
     sortOrder,
     filters,
-    className
 }) => {
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [rawData, setRawData] = useState([])
@@ -36,6 +34,9 @@ const DatasetTable = ({
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
     const hierarchyGroupings = {}
+    const uniqueDataFilters = {}
+    let urlParamFilters = {}
+    let urlSortOrder = {}
 
     useEffect(() => {
         setRawData(JSON.parse(JSON.stringify(data)))
@@ -52,81 +53,32 @@ const DatasetTable = ({
 
     const excludedColumns = ENVS.excludeTableColumns()
     const filterField = (f) => {
-        if (excludedColumns[f]) return []
-        return [...new Set(data.map(item => item[f]))].filter(name => name !== "" && name !== " " && name !== undefined)
+        return TABLE.filterField(data, f, excludedColumns)
     }
 
-    const makeHierarchyFilters = (items) => {
-        const hierarchyNames = new Set()
-        for (let i of items) {
-            let groupName = getHierarchy(i)
-            if (!eq(i, groupName)) {
-                const normalized = groupName.toLowerCase()
-                if (hierarchyGroupings[normalized] === undefined) {
-                    hierarchyGroupings[normalized] = []
-                }
-                hierarchyGroupings[normalized].push(i)
-            }
-            hierarchyNames.add(groupName)
-        }
-        return Array.from(hierarchyNames)
-    }
-    const uniqueGroupNames = filterField('group_name')
-    const uniqueAssignedToGroupNames = filterField('assigned_to_group_name')
-    const unfilteredOrganTypes = makeHierarchyFilters(filterField('organ'))
-    const uniqueOrganType = unfilteredOrganTypes.filter(name => name !== "" && name !== " ");
-    const uniqueDatasetType = filterField('dataset_type')
-    const uniqueSourceTypes = filterField('source_type')
-    const uniqueHasRuiStates = filterField('has_rui_info')
-    const uniqueHasDonorMeta = filterField('has_donor_metadata')
-    const uniqueHasDataMeta = filterField('has_dataset_metadata')
-    const uniqueHasData = filterField('has_data')
-    const uniqueHasSourceSampleMeta = filterField('has_source_sample_metadata')
-
-    let order = sortOrder;
-    let field = sortField;
-    if (typeof sortOrder === "object"){
-        order = order[0];
-    }
-    if (typeof sortField === "object"){
-        field = field[0];
-    }
-    let urlParamFilters = {};
-    let urlSortOrder = {};
-    if (order && field && (eq(order, "ascend") || eq(order, "descend"))){
-        if (ENVS.filterFields().includes(field)) {
-            urlSortOrder[field] = order;
-        }
+    // Build unique filter dropdown for listed fields based on their respective data
+    const datasetFilterFields = [...ENVS.datasetFilterFields(), ...ENVS.sharedFilterFields()]
+    for (let f of datasetFilterFields) {
+        uniqueDataFilters[f] = filterField(f)
     }
 
-    for (let _field of ENVS.defaultFilterFields()) {
-        if (filters.hasOwnProperty(_field)) {
-            let values = filters[_field].toLowerCase().split(",")
-            for (let v of values) {
-                if (urlParamFilters[_field] === undefined) {
-                    urlParamFilters[_field] = []
-                }
-                // append either the values for a particular group or just the filter itself
-                urlParamFilters[_field] = urlParamFilters[_field].concat(hierarchyGroupings[v.toLowerCase()] || [v]);
-            }
-        }
-    }
+    const uniqueOrganType = TABLE.makeHierarchyFilters(uniqueDataFilters['organ'], hierarchyGroupings)
+
+    // This is important to show visual indicator selections on filter drop down menu when there are valid url filters
+    TABLE.handleUrlParams({filters, urlParamFilters, fields: datasetFilterFields, hierarchyGroupings})
+
+    TABLE.handleSortOrder({sortOrder, sortField, urlSortOrder, filterFields: datasetFilterFields})
+
 
     const datasetColumns = [
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).id(),
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).groupName(uniqueDataFilters['group_name']),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).status,
         {
-            title: "Dataset Type",
-            width: 170,
-            dataIndex: "dataset_type",
-            align: "left",
-            defaultSortOrder: urlSortOrder["dataset_type"] || null,
-            sorter: (a,b) => a.dataset_type.localeCompare(b.dataset_type),
-            filteredValue: urlParamFilters["dataset_type"] || null,
-            filters: uniqueDatasetType.map(name => ({ text: name, value: name.toLowerCase() })),
-            onFilter: (value, record) => eq(record.dataset_type, value),
-            ellipsis: true,
+            ... TABLE.columnOptions({
+                field: "dataset_type",
+                title: "Dataset Type",
+                width: 170,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
             title: "Processed Datasets",
@@ -146,7 +98,7 @@ const DatasetTable = ({
                                       modal={modal} setModal={setModal} />
             }
         },
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueAssignedToGroupNames),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueDataFilters['assigned_to_group_name']),
         {
             title: "Ingest Task",
             width: 200,
@@ -160,16 +112,10 @@ const DatasetTable = ({
             }
         },
         {
-            title: TABLE.cols.n('source_type', 'Source Type'),
-            width: 150,
-            dataIndex: TABLE.cols.f('source_type'),
-            align: "left",
-            defaultSortOrder: urlSortOrder[TABLE.cols.f('source_type')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('source_type')].localeCompare(b[TABLE.cols.f('source_type')]),
-            filteredValue: urlParamFilters[TABLE.cols.f('source_type')] || null,
-            filters: uniqueSourceTypes.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('source_type')], value),
-            ellipsis: true,
+            ... TABLE.columnOptions({
+                field: "source_type",
+                title: "Source Type",
+                width: 150,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
             title: "Organ Type",
@@ -215,7 +161,7 @@ const DatasetTable = ({
             dataIndex: "provider_experiment_id",
             align: "left",
             defaultSortOrder: urlSortOrder["provider_experiment_id"] || null,
-            sorter: (a,b) => a.provider_experiment_id.localeCompare(b.provider_experiment_id),
+            sorter: (a,b) => a.provider_experiment_id?.localeCompare(b.provider_experiment_id),
             ellipsis: true,
             render: (experimentId, record) => {
                 return (
@@ -242,7 +188,7 @@ const DatasetTable = ({
             dataIndex: "has_contacts",
             align: "left",
             defaultSortOrder: urlSortOrder["has_contacts"] || null,
-            sorter: (a,b) => b.has_contacts.localeCompare(a.has_contacts),
+            sorter: (a,b) => b.has_contacts?.localeCompare(a.has_contacts),
             ellipsis: true,
         },
         {
@@ -251,7 +197,7 @@ const DatasetTable = ({
             dataIndex: "has_contributors",
             align: "left",
             defaultSortOrder: urlSortOrder["has_contributors"] || null,
-            sorter: (a,b) => b.has_contributors.localeCompare(a.has_contributors),
+            sorter: (a,b) => b.has_contributors?.localeCompare(a.has_contributors),
             ellipsis: true,
         },
         {
@@ -260,7 +206,7 @@ const DatasetTable = ({
             dataIndex: TABLE.cols.f('donor_id'),
             align: "left",
             defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('donor_id')].localeCompare(b[TABLE.cols.f('donor_id')]),
+            sorter: (a,b) => a[TABLE.cols.f('donor_id')]?.localeCompare(b[TABLE.cols.f('donor_id')]),
             ellipsis: true,
         },{
             title: TABLE.cols.n('donor_submission_id'),
@@ -268,7 +214,7 @@ const DatasetTable = ({
             dataIndex: TABLE.cols.f('donor_submission_id'),
             align: "left",
             defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_submission_id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('donor_submission_id')].localeCompare(b[TABLE.cols.f('donor_submission_id')]),
+            sorter: (a,b) => a[TABLE.cols.f('donor_submission_id')]?.localeCompare(b[TABLE.cols.f('donor_submission_id')]),
             ellipsis: true,
         },
         {
@@ -277,44 +223,26 @@ const DatasetTable = ({
             dataIndex: TABLE.cols.f('donor_lab_id'),
             align: "left",
             defaultSortOrder: urlSortOrder[TABLE.cols.f('donor_lab_id')] || null,
-            sorter: (a,b) => a[TABLE.cols.f('donor_lab_id')].localeCompare(b[TABLE.cols.f('donor_lab_id')]),
+            sorter: (a,b) => a[TABLE.cols.f('donor_lab_id')]?.localeCompare(b[TABLE.cols.f('donor_lab_id')]),
             ellipsis: true,
         },
         {
-            title: TABLE.cols.n('has_donor_metadata'),
-            width: 200,
-            dataIndex: "has_donor_metadata",
-            align: "left",
-            defaultSortOrder: urlSortOrder["has_donor_metadata"] || null,
-            sorter: (a,b) => b.has_donor_metadata?.localeCompare(a.has_donor_metadata),
-            ellipsis: true,
-            filteredValue: urlParamFilters[TABLE.cols.f('has_donor_metadata')] || null,
-            filters: uniqueHasDonorMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('has_donor_metadata')], value),
+            ... TABLE.columnOptions({
+                field: "has_donor_metadata",
+                width: 200,  urlSortOrder, urlParamFilters, uniqueDataFilters})
+
         },
         {
-            title: "Has Source Sample Metadata",
-            width: 250,
-            dataIndex: "has_source_sample_metadata",
-            align: "left",
-            defaultSortOrder: urlSortOrder["has_source_sample_metadata"] || null,
-            sorter: (a,b) => b.has_source_sample_metadata?.localeCompare(a.has_source_sample_metadata),
-            ellipsis: true,
-            filteredValue: urlParamFilters[TABLE.cols.f('has_source_sample_metadata')] || null,
-            filters: uniqueHasSourceSampleMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('has_source_sample_metadata')], value),
+            ... TABLE.columnOptions({
+                field: "has_source_sample_metadata",
+                title: "Has Source Sample Metadata",
+                width: 250,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
-            title: "Has Dataset Metadata",
-            width: 200,
-            dataIndex: "has_dataset_metadata",
-            align: "left",
-            defaultSortOrder: urlSortOrder["has_dataset_metadata"] || null,
-            sorter: (a,b) => b.has_dataset_metadata?.localeCompare(a.has_dataset_metadata),
-            ellipsis: true,
-            filteredValue: urlParamFilters[TABLE.cols.f('has_dataset_metadata')] || null,
-            filters: uniqueHasDataMeta.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('has_dataset_metadata')], value),
+            ... TABLE.columnOptions({
+                field: "has_dataset_metadata",
+                title: "Has Dataset Metadata",
+                width: 250,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
             title: "Upload",
@@ -326,28 +254,18 @@ const DatasetTable = ({
             ellipsis: true,
         },
         {
-            title: "Has Rui Info",
-            width: 150,
-            dataIndex: "has_rui_info",
-            align: "left",
-            defaultSortOrder: urlSortOrder["has_rui_info"] || null,
-            sorter: (a,b) => b.has_rui_info.localeCompare(a.has_rui_info),
-            ellipsis: true,
-            filteredValue: urlParamFilters[TABLE.cols.f('has_rui_info')] || null,
-            filters: uniqueHasRuiStates.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('has_rui_info')], value),
+            ... TABLE.columnOptions({
+                field: "has_rui_info",
+                title: "Has Rui Info",
+                width: 150,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
         },
         {
-            title: "Has Data",
-            width: 125,
-            dataIndex: "has_data",
-            align: "left",
-            defaultSortOrder: urlSortOrder["has_data"] || null,
-            sorter: (a,b) => b.has_data.localeCompare(a.has_data),
-            ellipsis: true,
-            filteredValue: urlParamFilters[TABLE.cols.f('has_data')] || null,
-            filters: uniqueHasData.map(name => ({ text: name, value: name?.toLowerCase() })),
-            onFilter: (value, record) => eq(record[TABLE.cols.f('has_data')], value),
+            ... TABLE.columnOptions({
+                field: "has_data",
+                title: "Has Data",
+                width: 125,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
         },
     ]
 
