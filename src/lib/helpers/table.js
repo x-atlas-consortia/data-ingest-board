@@ -389,21 +389,21 @@ const TABLE = {
                 dataIndex: "priority_project_list",
                 align: "left",
                 defaultSortOrder: defaultSortOrder["priority_project_list"] || null,
-                sorter: (a,b) => a.priority_project_list.join(',').localeCompare(b.priority_project_list.join(',')),
+                sorter: (a,b) => `${a.priority_project_list}`.localeCompare(`${b.priority_project_list}`),
                 filteredValue: urlParamFilters["priority_project_list"] || null,
                 filters: uniquePriorityPList.map(name => ({ text: name.trim(), value: name.trim().toLowerCase() })),
                 onFilter: (value, record) => {
                     return record['priority_project_list'].comprises(value.trim())
                 },
-                ellipsis: true,
+                ellipsis: false,
                 render: (tag, record) => {
                     if (!tag) return null
                     let res = []
                     for (let t of tag) {
-                        res.push( <Tag key={t}>{t}</Tag>)
+                        res.push( <Tag className={'mb-1'} key={t}>{t}</Tag>)
                     }
                     return (
-                        <>{res}</>
+                        <div className='c-table__colTags'>{res}</div>
                     )
                 }
             }),
