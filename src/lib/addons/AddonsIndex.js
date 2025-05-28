@@ -1,4 +1,5 @@
 function AddonsIndex(source, globusInfo) {
+    if (!Addon) return;
     Addon.log('Addons started ...', {color: 'white'})
 
     window.addons = window.addons || {}
