@@ -393,7 +393,9 @@ const TABLE = {
                 filteredValue: urlParamFilters["priority_project_list"] || null,
                 filters: uniquePriorityPList.map(name => ({ text: name.trim(), value: name.trim().toLowerCase() })),
                 onFilter: (value, record) => {
-                    return record['priority_project_list'].comprises(value.trim())
+                    let list = record['priority_project_list']
+                    list = list && list.length ? list : []
+                    return list.comprises(value.trim())
                 },
                 ellipsis: false,
                 render: (tag, record) => {
