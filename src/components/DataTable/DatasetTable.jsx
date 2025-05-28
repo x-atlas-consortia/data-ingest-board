@@ -60,7 +60,6 @@ const DatasetTable = ({
     const datasetFilterFields = [...ENVS.datasetFilterFields(), ...ENVS.sharedFilterFields()]
     for (let f of datasetFilterFields) {
         uniqueDataFilters[f] = filterField(f)
-
     }
 
     const uniqueOrganType = TABLE.makeHierarchyFilters(uniqueDataFilters['organ'], hierarchyGroupings)
