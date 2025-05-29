@@ -7,6 +7,7 @@ function useContent() {
     const [messages, setMessages] = useState({})
     const [ubkg, setUbkg] = useState({})
     const [banners, setBanners] = useState({})
+    const [colorPalettes, setColorPalettes] = useState({})
 
     const loadMessages = async () => {
         let res = await axios.get(
@@ -29,6 +30,14 @@ function useContent() {
         return {}
     }
 
+    const loadColorPalettes = async () => {
+        let colors = await axios.get(
+            `https://x-atlas-consortia.github.io/ubkg-palettes/${ENVS.ubkg.sab().toLowerCase()}/palettes.json`,
+            getRequestOptions()
+        )
+        return colors.data
+    }
+
     const loadUbkg = async () => {
         let organTypes = await axios.get(
             `${ENVS.ubkg.base()}/organs?application_context=${ENVS.ubkg.sab()}`,
@@ -46,9 +55,10 @@ function useContent() {
         loadMessages().then((r) => setMessages(r))
         loadBanners().then((r) => setBanners(r))
         loadUbkg().then((r) => setUbkg(r))
+        loadColorPalettes().then((r) => setColorPalettes(r))
     }, [])
 
-    return {messages, ubkg, banners}
+    return {messages, ubkg, banners, colorPalettes}
 }
 
 

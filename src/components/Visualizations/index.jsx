@@ -14,6 +14,9 @@ import FilmStrip from "@/components/Visualizations/FilmStrip";
 import Pie from "@/components/Visualizations/Charts/Pie";
 import ENVS from '@/lib/helpers/envs';
 import {getHierarchy} from "@/lib/helpers/hierarchy";
+import {scaleOrdinal} from 'd3'
+import Palette from 'xac-sankey/dist/js/util/Palette'
+import useContent from "@/hooks/useContent";
 
 function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
@@ -27,6 +30,14 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
     const [chartData, setChartData] = useState([])
     const [showModal, setShowModal] = useState(false)
     const [selectedFilterValues, setSelectedFilterValues] = useState([])
+    const { colorPalettes} = useContent()
+
+    const getStatusColor = (label) => {
+        return THEME.getStatusColor(label).bg
+    }
+
+
+    const [colorMethods, setColorMethods] = useState({'status': getStatusColor,})
 
     const hierarchyColumns = ['organ']
 
@@ -46,14 +57,30 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         return values.sort((a, b) => b.value - a.value)
     }
 
+    const getColorScale = (key, palette) => {
+        return colorPalettes && Object.keys(colorPalettes).length ? scaleOrdinal(Object.keys(colorPalettes[key]), Object.values(colorPalettes[key])) : scaleOrdinal(palette)
+    }
+
+    const applyColors = async () => {
+
+        let _colorMethods = {
+            ...colorMethods,
+            organ: ENVS.isHM() ? undefined : getColorScale('organs', Palette.pinkColors),
+            source_type: ENVS.isHM() ? undefined : scaleOrdinal(Palette.yellowColors),
+            dataset_type: ENVS.isHM() ? undefined :  getColorScale('datasetTypes', Palette.greenColors),
+            group_name: ENVS.isHM() ? undefined :  getColorScale('groups', Palette.blueGreyColors),
+
+        }
+        setColorMethods(_colorMethods)
+    }
+
     useEffect(() => {
         const filteredData = filterChartData(column)
-        setChartData(filteredData)
-    }, [data, column])
 
-    const getStatusColor = (label) => {
-        return THEME.getStatusColor(label).bg
-    }
+        applyColors().then(()=> {
+            setChartData(filteredData)
+        })
+    }, [data, column])
 
     const handleColumnMenuClick = (e) => {
         setColumn(e.key)
@@ -142,10 +169,6 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
     const isBar = (key) => chartTypes[key] === 'bar'
     const isPie = (key) => chartTypes[key] === 'pie'
 
-    const colorMethods = {
-        'status': getStatusColor
-    }
-
     const openMiniChartInModal = (c) => {
         handleColumnMenuClick(c)
         setShowModal(true)
@@ -172,7 +195,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 chartId={i.toString()}
                                 colorMethods={colorMethods}
                                 showXLabels={false}
-                                reload={false}
+                                reload={true}
                             />
                         )}
                         {isPie(c.key) && (

@@ -1,4 +1,4 @@
-import {parseJSON} from "./general";
+import {eq, parseJSON} from "./general";
 
 const ENVS = {
     ubkg: {
@@ -8,6 +8,9 @@ const ENVS = {
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
+    },
+    isHM: () => {
+        return eq(ENVS.appContext(), 'hubmap')
     },
     appContext: () => {
         return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
