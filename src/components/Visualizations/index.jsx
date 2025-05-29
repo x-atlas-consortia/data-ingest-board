@@ -17,6 +17,7 @@ import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {scaleOrdinal} from 'd3'
 import Palette from 'xac-sankey/dist/js/util/Palette'
 import useContent from "@/hooks/useContent";
+import {getUBKGName} from "@/lib/helpers/general";
 
 function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
@@ -46,7 +47,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         for (let d of data) {
             let key = d[col]
             if (hierarchyColumns.includes(col)) {
-                key = getHierarchy(key)
+                key = getHierarchy(getUBKGName(key))
             }
             if (dict[key] === undefined) {
                 dict[key] = {label: key, value: 0, id: d.uuid}

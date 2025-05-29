@@ -25,7 +25,7 @@ const TABLE = {
     makeHierarchyFilters: (items, hierarchyGroupings) => {
         const hierarchyNames = new Set()
         for (let i of items) {
-            let groupName = getHierarchy(i)
+            let groupName = getHierarchy(getUBKGName(i))
             if (!eq(i, groupName)) {
                 const normalized = groupName.toLowerCase()
                 if (hierarchyGroupings[normalized] === undefined) {
