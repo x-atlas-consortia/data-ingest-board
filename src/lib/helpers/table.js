@@ -1,7 +1,7 @@
-import {CaretDownOutlined, CloseOutlined, DownloadOutlined, EditOutlined} from "@ant-design/icons";
+import {CaretDownOutlined, CloseOutlined, DownloadOutlined, FileExcelOutlined, EditOutlined, FileTextOutlined} from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip} from "antd";
 import React from "react";
-import {eq, toDateString} from "./general";
+import {autoBlobDownloader, eq, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
@@ -141,24 +141,26 @@ const TABLE = {
             csv(d)
             _data += "\n"
         }
+
         const type = 'comma/tab-separated-values'
-        const a = document.createElement('a')
-        const url = window.URL.createObjectURL(new Blob([_data], {type}))
-        a.href = url
-        a.download = filename
-        document.body.append(a)
-        a.click()
-        a.remove()
-        window.URL.revokeObjectURL(url)
+        autoBlobDownloader([_data], type, filename)
     },
     bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [
             {
-                label: 'Download CSV Data',
+                label: <span className={'js-gtm--btn-cta-csvDownload'}>Download CSV Data <FileExcelOutlined /></span>,
                 key: '1',
                 icon: <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '18px' }}/>,
             }
         ]
+
+        _items.push(
+            {
+                label: <span className={'js-gtm--btn-cta-manifestDownload'}>Download Manifest TXT <FileTextOutlined /></span>,
+                key: '1b',
+                icon: <DownloadOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
+            }
+        )
         if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
             _items.push(
                 {
@@ -315,18 +317,18 @@ const TABLE = {
             }
         }
     },
-    handleCSVDownload: () => {
-        const $el = document.querySelector('.js-csvDownload')
-        $el.style.display = 'block'
-        document.querySelector('.ic--download').click()
-        $el.style.display = 'none'
+    handleCSVDownload: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        let data = selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)
+        TABLE.generateCSVFile(data, filename)
     },
-    csvDownloadButton: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
-        return <span className='js-csvDownload' style={{display: 'none', opacity: 0}}>
-            <button onClick={() => TABLE.generateCSVFile(selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters), filename)} className="ic--download js-gtm--btn-cta-csvDownload">
-                <DownloadOutlined title="Export Selected Data as CSV" style={{ fontSize: '24px' }}/>
-            </button>
-        </span>
+    handleManifestDownload: ({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename}) => {
+        let manifestData  = ''
+        let data = selectedEntities.length ? countFilteredRecords(checkedModifiedData, []) : countFilteredRecords(modifiedData, filters)
+        for (let e of data){
+            manifestData += `${e['uuid']} /\n`
+        }
+
+        autoBlobDownloader([manifestData], 'text/plain', `data-manifest.txt`)
     },
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
         return <Space wrap>

@@ -379,7 +379,11 @@ const DatasetTable = ({
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            TABLE.handleCSVDownload()
+            TABLE.handleCSVDownload({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})
+        }
+
+        if (e.key === '1b') {
+            TABLE.handleManifestDownload({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData})
         }
 
         if (e.key === '2') {
@@ -472,7 +476,6 @@ const DatasetTable = ({
                     </ChartProvider>
                     <div className="count c-table--header">
                         {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
-                        {TABLE.csvDownloadButton({selectedEntities, countFilteredRecords, checkedModifiedData, filters, modifiedData, filename: 'datasets-data.csv'})}
                         {TABLE.viewSankeyButton({filters})}
                     </div>
 
