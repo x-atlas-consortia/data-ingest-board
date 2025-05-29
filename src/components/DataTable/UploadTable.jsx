@@ -50,6 +50,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     }
 
     const uniqueOrganType =  TABLE.makeHierarchyFilters(uniqueDataFilters['intended_organ'], hierarchyGroupings)
+    const uniquePriorityPList = [...new Set(filterField('priority_project_list').flat())]
 
     // This is important to show visual indicator selections on filter drop down menu when there are valid url filters
     TABLE.handleUrlParams({filters, urlParamFilters, fields: uploadsFilterFields, hierarchyGroupings})
