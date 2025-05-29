@@ -7,7 +7,6 @@ import URLS from "../lib/helpers/urls";
 import React, {useContext} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
-import {CSVLink} from "react-csv";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
 
@@ -170,9 +169,9 @@ function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Clic
                             <span className={'txt-lnk'}>{args.record[TABLE.cols.f('id')]}<CaretDownOutlined style={{verticalAlign: 'middle'}} /></span>
                         </Dropdown>
                     </h5>
-                    <CSVLink data={getCSVData()} filename="processed-datasets-data.csv" data-gtm-info={args.record.uuid} className="ic--download js-gtm--btn-cta-csvDownloadProcessed">
+                    <a onClick={()=>TABLE.generateCSVFile(getCSVData(), 'processed-datasets-data.csv')} data-gtm-info={args.record.uuid} className="ic--download js-gtm--btn-cta-csvDownloadProcessed">
                          <DownloadOutlined title="Export Data as CSV" style={{ fontSize: '24px' }}/>
-                    </CSVLink>
+                    </a>
                     <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={content} columns={getColumns()} />
                 </div>)
                 setModal({width: 1000, cancelCSS: 'none', className: '', open: true, body: modalBody})
