@@ -24,10 +24,10 @@ const ENVS = {
         }
     },
     tableColumns: () => parseJSON(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
-    filterFields: () => parseJSON(process.env.NEXT_PUBLIC_FILTER_FIELDS),
-    defaultFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DEFAULT_FILTER_FIELDS),
+    datasetFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DATASET_FILTER_FIELDS),
+    sharedFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_SHARED_FILTER_FIELDS),
     excludeTableColumns: (cols)=> {
-        cols = cols || parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_TABLE_COLUMNS)
+        cols = cols || parseJSON(process.env.NEXT_PUBLIC_EXCLUDE_DATASET_TABLE_COLUMNS)
         const dict = {}
         for (let col of cols) {
             dict[col] = true
