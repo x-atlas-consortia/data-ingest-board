@@ -1,7 +1,7 @@
 import {CaretDownOutlined, CloseOutlined, DownloadOutlined, FileExcelOutlined, EditOutlined, FileTextOutlined} from "@ant-design/icons";
-import {Button, Dropdown, Space, Tooltip} from "antd";
+import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
 import React from "react";
-import {autoBlobDownloader, eq, toDateString} from "./general";
+import {autoBlobDownloader, eq, getUBKGName, some, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
@@ -25,7 +25,7 @@ const TABLE = {
     makeHierarchyFilters: (items, hierarchyGroupings) => {
         const hierarchyNames = new Set()
         for (let i of items) {
-            let groupName = getHierarchy(i)
+            let groupName = getHierarchy(getUBKGName(i))
             if (!eq(i, groupName)) {
                 const normalized = groupName.toLowerCase()
                 if (hierarchyGroupings[normalized] === undefined) {
@@ -162,7 +162,7 @@ const TABLE = {
                     if (eq(item[key], special.case2)) {
                         return false;
                     }
-                } else if (item[key] && !filterValues.some(value => eq(item[key], value))) {
+                } else if (item[key] && !filterValues.some(value => some(item[key], value))) {
                     return false;
                 } else if (!item[key]) {
                     return false;
@@ -383,6 +383,32 @@ const TABLE = {
                     </Tooltip>
                 )
             },
+            priorityProjectList: (uniquePriorityPList, filters) => ({
+                title: "Priority Project List",
+                width: 250,
+                dataIndex: "priority_project_list",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["priority_project_list"] || null,
+                sorter: (a,b) => `${a.priority_project_list}`.localeCompare(`${b.priority_project_list}`),
+                filteredValue: urlParamFilters["priority_project_list"] || null,
+                filters: uniquePriorityPList.map(name => ({ text: name.trim(), value: name.trim().toLowerCase() })),
+                onFilter: (value, record) => {
+                    let list = record['priority_project_list']
+                    list = list && list.length ? list : []
+                    return list.comprises(value.trim())
+                },
+                ellipsis: false,
+                render: (tag, record) => {
+                    if (!tag) return null
+                    let res = []
+                    for (let t of tag) {
+                        res.push( <Tag className={'mb-1'} key={t}>{t}</Tag>)
+                    }
+                    return (
+                        <div className='c-table__colTags'>{res}</div>
+                    )
+                }
+            }),
             deleteAction: (handleRemove) => {
                 return {
                     title: 'Delete',

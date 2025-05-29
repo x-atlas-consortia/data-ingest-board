@@ -181,6 +181,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
             ellipsis: true,
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
     ];
 
     // Exclude named columns in .env from table

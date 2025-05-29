@@ -63,6 +63,7 @@ const DatasetTable = ({
     }
 
     const uniqueOrganType = TABLE.makeHierarchyFilters(uniqueDataFilters['organ'], hierarchyGroupings)
+    const uniquePriorityPList = [...new Set(filterField('priority_project_list').flat())]
 
     // This is important to show visual indicator selections on filter drop down menu when there are valid url filters
     TABLE.handleUrlParams({filters, urlParamFilters, fields: datasetFilterFields, hierarchyGroupings})
@@ -169,6 +170,7 @@ const DatasetTable = ({
                 )
             }
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
         {
             title: "Last Touch",
             width: 225,
