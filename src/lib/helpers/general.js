@@ -53,7 +53,7 @@ export const getUBKGName = (o) => {
     if (!window.UBKG) return o
     let organTypes = window.UBKG?.organTypes
     for (let organ of organTypes) {
-        if (organ.rui_code === o) {
+        if (organ.rui_code === o || organ.organ_uberon === o) {
             return organ.term
         }
     }
