@@ -1,6 +1,6 @@
 {
   "name": "data-ingest-board",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "private": true,
   "watch": {
     "addons": "./lib/addons/core/*.js"
@@ -41,7 +41,7 @@
     "react-dom": "^18.3.1",
     "react-idle-timer": "^5.7.2",
     "stylus": "^0.59.0",
-    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.0.11"
+    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.0.12"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.7",
