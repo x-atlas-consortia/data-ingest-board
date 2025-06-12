@@ -26,9 +26,9 @@ services:
       # For configurable banner message
       - "../src/public/content/banners/index.json:/usr/src/app/src/public/content/banners/index.json"
     networks:
-      - gateway_hubmap
+      - ${NETWORK_NAME}
 
 networks:
   # This is the network created by gateway to enable communicaton between multiple docker-compose projects
-  gateway_hubmap:
+  ${NETWORK_NAME}:
     external: true
