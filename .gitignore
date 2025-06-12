@@ -7,16 +7,6 @@
 BUILD
 
 # Ignore docker copied files/folders
-hubmap-docker/data-ingest-board/BUILD
-hubmap-docker/data-ingest-board/VERSION
-hubmap-docker/data-ingest-board/src
-hubmap-docker/data-ingest-board/log
-
-sennet-docker/data-ingest-board/BUILD
-sennet-docker/data-ingest-board/VERSION
-sennet-docker/data-ingest-board/src
-sennet-docker/data-ingest-board/log
-
 docker/data-ingest-board/BUILD
 docker/data-ingest-board/VERSION
 docker/data-ingest-board/src
