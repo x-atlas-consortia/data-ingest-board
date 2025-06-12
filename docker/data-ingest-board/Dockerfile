@@ -33,5 +33,3 @@ RUN apt-get purge -y git && \
 EXPOSE 3000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-CMD ["npm", "run", "start"]

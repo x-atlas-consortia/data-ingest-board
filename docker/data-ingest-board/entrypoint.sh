@@ -17,3 +17,5 @@ if [ $? -ne 0 ]; then
     groupadd -r -g $HOST_GID $USER
     useradd -r -u $HOST_UID -g $HOST_GID -m $USER
 fi
+
+npm run start
