@@ -314,7 +314,7 @@ const DatasetTable = ({
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
-            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),
             TABLE.reusableColumns(urlSortOrder, {}).status,
             TABLE.reusableColumns(urlSortOrder, {}).deleteAction(handleRemove)
         ]
