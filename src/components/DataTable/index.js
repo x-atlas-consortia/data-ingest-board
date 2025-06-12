@@ -127,13 +127,13 @@ const DataTable = (props) => {
 
     const applyDatasets = (datasetResponse) => {
         const primaryDatasets = getPrimaryDatasets(datasetResponse?.data);
-        setDatasetData(datasetResponse.data);
+        setDatasetData(datasetResponse?.data);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
     }
 
     const applyUploads = (uploadResponse) => {
-        setUploadData(uploadResponse.data);
+        setUploadData(uploadResponse?.data);
     }
 
     const handleCachingRefresh = (response) => {

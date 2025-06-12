@@ -8,11 +8,12 @@ const UI_BLOCKS = {
     modalResponse: {
       styling: (res) => {
           let className = 'alert alert-success'
-          const isOk =  ['202', '200'].comprises(res.status.toString())
+          const statusTxt = `${res.status}`
+          const isOk =  ['202', '200'].comprises(statusTxt)
           if (!isOk) {
               className = 'alert alert-danger'
           }
-          const preTitle = isOk ? (res.status === '200' ? 'SUCCESS' : 'ACCEPTED') : 'FAIL'
+          const preTitle = isOk ? (eq(statusTxt, '200') ? 'SUCCESS' : 'ACCEPTED') : 'FAIL'
           return {isOk, className, preTitle}
       },
       body: (res, mainTitle, otherDetails) => {
@@ -26,7 +27,7 @@ const UI_BLOCKS = {
               </center>
               <div>
                   <p className={'mt-4'}>RESPONSE:</p>
-                  <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : res.data.toString()}</code></div>
+                  <div style={{maxHeight: '200px', overflowY: 'auto'}}><code>{eq(typeof res.data, 'object') ? JSON.stringify(res.data) : `${res.data}`}</code></div>
                   {otherDetails && <div>{otherDetails}</div>}
               </div>
 
