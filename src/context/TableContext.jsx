@@ -18,7 +18,7 @@ import {
 const AppTableContext = createContext({})
 
 export const AppTableProvider = ({ children, baseColumns }) => {
-    var _a;
+    let _a;
     const DragIndexContext = createContext({ active: -1, over: -1 })
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 });
 
@@ -77,15 +77,22 @@ export const AppTableProvider = ({ children, baseColumns }) => {
         )
     }
 
-    const [columns, setColumns] = useState(() =>
-        baseColumns.map((column, i) =>
-            Object.assign(Object.assign({}, column), {
-                key: `${i}`,
-                onHeaderCell: () => ({ id: `${i}` }),
-                onCell: () => ({ id: `${i}` }),
-            }),
-        ),
-    );
+    const getColumns = (cols) => {
+        const _cols =  (cols.map((column, i) =>
+            {
+                column.key = column.dataIndex
+                return Object.assign(Object.assign({}, column), {
+                    key: `${i}`,
+                    onHeaderCell: () => ({ id: `${i}` }),
+                    onCell: () => ({ id: `${i}` }),
+                })
+            }
+        ))
+        return _cols
+    }
+
+    const [columns, setColumns] = useState(getColumns(baseColumns))
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -122,6 +129,8 @@ export const AppTableProvider = ({ children, baseColumns }) => {
 
     return (
         <AppTableContext.Provider value={{
+            setColumns,
+            getColumns,
             columns,
             TableBodyCell,
             TableHeaderCell,
@@ -133,7 +142,9 @@ export const AppTableProvider = ({ children, baseColumns }) => {
                 onDragOver={onDragOver}
                 collisionDetection={closestCenter}
             >
-                <SortableContext items={columns.map(i => i.key)} strategy={horizontalListSortingStrategy}>
+                <SortableContext items={columns.map(i => {
+                    return i.key
+                })} strategy={horizontalListSortingStrategy}>
                     <DragIndexContext.Provider value={dragIndex}>
             {children}
                     </DragIndexContext.Provider>

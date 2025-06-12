@@ -16,6 +16,7 @@ import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
 import AppTableContext, {AppTableProvider} from "@/context/TableContext";
+import AppTable from "@/components/DataTable/AppTable";
 
 const DatasetTable = ({
     data,
@@ -426,25 +427,8 @@ const DatasetTable = ({
                         {TABLE.viewSankeyButton({filters})}
                     </div>
                     <AppTableProvider baseColumns={filteredDatasetColumns}>
-                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={columns}
-                           dataSource={countFilteredRecords(rawData, filters)}
-                           showHeader={!loading}
-                           bordered={false}
-                           loading={loading}
-                           pagination={{ ...TABLE.paginationOptions, current: page, defaultPageSize: pageSize}}
-                           scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
-                           rowKey={TABLE.cols.f('id')}
-                           rowSelection={{
-                               type: 'checkbox',
-                               ...rowSelection,
-                           }}
-                           components={{
-                               header: { cell: TableHeaderCell },
-                               body: { cell: TableBodyCell },
-                           }}
-                    />
+                        <AppTable countFilteredRecords={countFilteredRecords} data={data}
+                                  filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
                     </AppTableProvider>
 
                     <Modal
