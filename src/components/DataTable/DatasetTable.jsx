@@ -15,6 +15,7 @@ import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
+import AppTableContext, {AppTableProvider} from "@/context/TableContext";
 
 const DatasetTable = ({
     data,
@@ -27,6 +28,7 @@ const DatasetTable = ({
     filters,
 }) => {
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
+    const {columns, TableBodyCell, TableHeaderCell} = useContext(AppTableContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -423,9 +425,9 @@ const DatasetTable = ({
                         {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
                         {TABLE.viewSankeyButton({filters})}
                     </div>
-
+                    <AppTableProvider baseColumns={filteredDatasetColumns}>
                     <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={filteredDatasetColumns}
+                           columns={columns}
                            dataSource={countFilteredRecords(rawData, filters)}
                            showHeader={!loading}
                            bordered={false}
@@ -438,7 +440,12 @@ const DatasetTable = ({
                                type: 'checkbox',
                                ...rowSelection,
                            }}
+                           components={{
+                               header: { cell: TableHeaderCell },
+                               body: { cell: TableBodyCell },
+                           }}
                     />
+                    </AppTableProvider>
 
                     <Modal
                         className={modal.className}
