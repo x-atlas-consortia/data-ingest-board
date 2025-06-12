@@ -426,7 +426,7 @@ const DatasetTable = ({
                         {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
                         {TABLE.viewSankeyButton({filters})}
                     </div>
-                    <AppTableProvider baseColumns={filteredDatasetColumns}>
+                    <AppTableProvider context={'Datasets'} baseColumns={filteredDatasetColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
                                   filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
                     </AppTableProvider>

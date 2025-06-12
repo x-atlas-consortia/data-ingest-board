@@ -1,10 +1,10 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import TABLE from "@/lib/helpers/table";
 import {Table} from "antd";
 import AppTableContext from "@/context/TableContext";
 
-function AppTable({ countFilteredRecords, data, filters, rawData, page, pageSize, handleTableChange, rowSelection, loading}) {
+function AppTable({countFilteredRecords, data, filters, rawData, page, pageSize, handleTableChange, rowSelection, loading}) {
     const {columns, TableBodyCell, TableHeaderCell} = useContext(AppTableContext)
 
     useEffect(() => {
@@ -33,10 +33,8 @@ function AppTable({ countFilteredRecords, data, filters, rawData, page, pageSize
     )
 }
 
-AppTable.defaultProps = {}
-
 AppTable.propTypes = {
-    children: PropTypes.node
+    data: PropTypes.array.isRequired
 }
 
 export default AppTable

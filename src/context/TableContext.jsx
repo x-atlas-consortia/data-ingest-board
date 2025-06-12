@@ -14,13 +14,16 @@ import {
     SortableContext,
     useSortable
 } from '@dnd-kit/sortable'
+import {storageKey} from "@/lib/helpers/general";
 
 const AppTableContext = createContext({})
 
-export const AppTableProvider = ({ children, baseColumns }) => {
+export const AppTableProvider = ({ children, context, baseColumns }) => {
     let _a;
     const DragIndexContext = createContext({ active: -1, over: -1 })
-    const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 });
+    const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
+    const STORE_KEY = storageKey(`table.${context}`)
+    const [dragEnd, setDragEnd] = useState(0)
 
     const dragActiveStyle = (dragState, id) => {
         const { active, over, direction } = dragState
@@ -78,17 +81,40 @@ export const AppTableProvider = ({ children, baseColumns }) => {
     }
 
     const getColumns = (cols) => {
-        const _cols =  (cols.map((column, i) =>
-            {
-                column.key = column.dataIndex
-                return Object.assign(Object.assign({}, column), {
-                    key: `${i}`,
-                    onHeaderCell: () => ({ id: `${i}` }),
-                    onCell: () => ({ id: `${i}` }),
-                })
+        let orderedColumns = cols
+        try {
+            let _orderedColumns = []
+            if (dragEnd === 0) {
+                // Initialize with order from storage
+                let columnOrder = localStorage.getItem(STORE_KEY)
+                if (columnOrder) {
+                    columnOrder = JSON.parse(columnOrder)
+                }
+                let dict = {}
+                for (let c of cols) {
+                    dict[c.dataIndex] = c
+                }
+                for (let c of columnOrder) {
+                    _orderedColumns.push(dict[c])
+                }
+                orderedColumns = Array.from(_orderedColumns)
             }
-        ))
-        return _cols
+
+            const _cols =  (orderedColumns.map((column, i) =>
+                {
+                    column.key = column.dataIndex
+                    return Object.assign(Object.assign({}, column), {
+                        key: `${i}`,
+                        onHeaderCell: () => ({ id: `${i}` }),
+                        onCell: () => ({ id: `${i}` }),
+                    })
+                }
+            ))
+            return _cols
+        } catch (e) {
+            console.error(e)
+        }
+        return []
     }
 
     const [columns, setColumns] = useState(getColumns(baseColumns))
@@ -101,6 +127,14 @@ export const AppTableProvider = ({ children, baseColumns }) => {
             },
         }),
     );
+
+    useEffect(() => {
+        if (dragEnd !== 0) {
+            localStorage.setItem(STORE_KEY, JSON.stringify(columns.map(a => a.dataIndex)))
+        }
+
+    }, [dragEnd]);
+
     const onDragEnd = ({ active, over }) => {
         if (active.id !== (over === null || over === void 0 ? void 0 : over.id)) {
             setColumns(prevState => {
@@ -112,6 +146,7 @@ export const AppTableProvider = ({ children, baseColumns }) => {
                 );
                 return arrayMove(prevState, activeIndex, overIndex);
             });
+            setDragEnd(dragEnd+1)
         }
         setDragIndex({ active: -1, over: -1 });
     };
