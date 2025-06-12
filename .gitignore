@@ -11,6 +11,7 @@ docker/data-ingest-board/BUILD
 docker/data-ingest-board/VERSION
 docker/data-ingest-board/src
 docker/data-ingest-board/log
+docker/.env
 
 # log files in any path
 **/*.log
