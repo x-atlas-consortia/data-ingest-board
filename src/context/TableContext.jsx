@@ -14,16 +14,34 @@ import {
     SortableContext,
     useSortable
 } from '@dnd-kit/sortable'
-import {storageKey} from "@/lib/helpers/general";
+import {eq, storageKey} from "@/lib/helpers/general";
 
 const AppTableContext = createContext({})
 
-export const AppTableProvider = ({ children, context, baseColumns }) => {
+export const AppTableProvider = ({ children,  context, baseColumns }) => {
     let _a;
     const DragIndexContext = createContext({ active: -1, over: -1 })
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
-    const STORE_KEY = storageKey(`table.${context}`)
+    const orderedColumnsStoreKey = storageKey(`table.orderedColumns.${context}`)
+    const hiddenColumnsStoreKey = storageKey(`table.hiddenColumns.${context}`)
     const [dragEnd, setDragEnd] = useState(0)
+    const [_, setHiddenColumns] = useState([])
+
+    const getColumnsDict = (cols) => {
+        let dict = {}
+        for (let c of cols) {
+            dict[c.dataIndex] = c
+        }
+        return dict
+    }
+    const handleHiddenColumns = (hidden) => {
+        for (let c of columns) {
+            c.hidden = hidden.comprises(c.dataIndex)
+        }
+        localStorage.setItem(hiddenColumnsStoreKey, JSON.stringify(hidden))
+        setHiddenColumns(hidden)
+
+    }
 
     const dragActiveStyle = (dragState, id) => {
         const { active, over, direction } = dragState
@@ -86,18 +104,24 @@ export const AppTableProvider = ({ children, context, baseColumns }) => {
             let _orderedColumns = []
             if (dragEnd === 0) {
                 // Initialize with order from storage
-                let columnOrder = localStorage.getItem(STORE_KEY)
+                let columnOrder = localStorage.getItem(orderedColumnsStoreKey)
                 if (columnOrder) {
                     columnOrder = JSON.parse(columnOrder)
+
+                    let dict = getColumnsDict(cols)
+                    for (let c of columnOrder) {
+                        _orderedColumns.push(dict[c])
+                    }
+                    orderedColumns = Array.from(_orderedColumns)
                 }
-                let dict = {}
-                for (let c of cols) {
-                    dict[c.dataIndex] = c
+
+                let hiddenColumns = localStorage.getItem(hiddenColumnsStoreKey)
+                if (hiddenColumns) {
+                    hiddenColumns = JSON.parse(hiddenColumns)
+                    for (let c of orderedColumns) {
+                        c.hidden = hiddenColumns.comprises(c.dataIndex)
+                    }
                 }
-                for (let c of columnOrder) {
-                    _orderedColumns.push(dict[c])
-                }
-                orderedColumns = Array.from(_orderedColumns)
             }
 
             const _cols =  (orderedColumns.map((column, i) =>
@@ -130,7 +154,7 @@ export const AppTableProvider = ({ children, context, baseColumns }) => {
 
     useEffect(() => {
         if (dragEnd !== 0) {
-            localStorage.setItem(STORE_KEY, JSON.stringify(columns.map(a => a.dataIndex)))
+            localStorage.setItem(orderedColumnsStoreKey, JSON.stringify(columns.map(a => a.dataIndex)))
         }
 
     }, [dragEnd]);
@@ -164,6 +188,7 @@ export const AppTableProvider = ({ children, context, baseColumns }) => {
 
     return (
         <AppTableContext.Provider value={{
+            handleHiddenColumns,
             setColumns,
             getColumns,
             columns,

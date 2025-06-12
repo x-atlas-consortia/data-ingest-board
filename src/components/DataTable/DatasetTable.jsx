@@ -36,6 +36,7 @@ const DatasetTable = ({
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkEdit: true, bulkSubmit: true, submitForPipelineTesting:true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
+
     const hierarchyGroupings = {}
     const uniqueDataFilters = {}
     let urlParamFilters = {}
@@ -422,13 +423,11 @@ const DatasetTable = ({
                     <ChartProvider>
                         <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
-                    <div className="count c-table--header">
-                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
-                        {TABLE.viewSankeyButton({filters})}
-                    </div>
+
                     <AppTableProvider context={'Datasets'} baseColumns={filteredDatasetColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
-                                  filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                                  menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
+                        filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
                     </AppTableProvider>
 
                     <Modal
