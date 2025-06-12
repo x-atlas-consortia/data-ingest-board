@@ -17,8 +17,3 @@ if [ $? -ne 0 ]; then
     groupadd -r -g $HOST_GID $USER
     useradd -r -u $HOST_UID -g $HOST_GID -m $USER
 fi
-
-# Lastly we use gosu to execute our process "$@" as that user
-# Remember CMD from a Dockerfile of child image gets passed to the entrypoint.sh as command line arguments
-# "$@" is a shell variable that means "all the arguments"
-exec /usr/local/bin/gosu $USER "$@"
