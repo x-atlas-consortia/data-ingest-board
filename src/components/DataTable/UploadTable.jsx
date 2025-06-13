@@ -1,15 +1,15 @@
-import {Button,Modal, Table} from "antd";
+import {Button,Modal} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {eq, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
-import TABLE from "../../lib/helpers/table";
-import URLS from "../../lib/helpers/urls";
-import ENVS from "../../lib/helpers/envs";
-import AppContext from "../../context/AppContext";
+import TABLE from "@/lib/helpers/table";
+import URLS from "@/lib/helpers/urls";
+import ENVS from "@/lib/helpers/envs";
+import AppContext from "@/context/AppContext";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
-import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import AppTable from "@/components/DataTable/AppTable";
 import {AppTableProvider} from "@/context/TableContext";
 import RouterContext from "@/context/RouterContext";
@@ -271,9 +271,12 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) =
             ) : (
                 <>
                     <AppTableProvider context={'Upload'} baseColumns={filteredUploadColumns}>
-                        <AppTable countFilteredRecords={countFilteredRecords} data={data}
-                                  menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
-                                  loading={loading}  rowSelection={rowSelection}  />
+                        <AppTable countFilteredRecords={countFilteredRecords}
+                                  data={data}
+                                  modifiedData={modifiedData}
+                                  menuProps={menuProps}
+                                  loading={loading}
+                                  rowSelection={rowSelection}  />
                     </AppTableProvider>
                     <Modal
                         className={modal.className}

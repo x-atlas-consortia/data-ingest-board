@@ -1,16 +1,16 @@
-import {Modal, Table} from "antd";
+import {Modal} from "antd";
 import {ExportOutlined, ThunderboltOutlined, CloudUploadOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import axios from "axios";
-import ENVS from "../../lib/helpers/envs";
-import TABLE from "../../lib/helpers/table";
-import URLS from "../../lib/helpers/urls";
+import ENVS from "@/lib/helpers/envs";
+import TABLE from "@/lib/helpers/table";
+import URLS from "@/lib/helpers/urls";
 import {callService, eq, getHeadersWith, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
-import AppContext from "../../context/AppContext";
-import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import AppContext from "@/context/AppContext";
+import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
@@ -421,7 +421,6 @@ const DatasetTable = ({
                                   data={data}
                                   modifiedData={modifiedData}
                                   menuProps={menuProps}
-                                  selectedEntities={selectedEntities}
                                   loading={loading}
                                   rowSelection={rowSelection}  />
                     </AppTableProvider>

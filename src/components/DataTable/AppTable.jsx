@@ -5,10 +5,22 @@ import {Table} from "antd";
 import AppTableContext from "@/context/TableContext";
 import ColumnToggle from "@/components/DataTable/ColumnToggle";
 import RouterContext from "@/context/RouterContext";
+import AppContext from "@/context/AppContext";
 
-function AppTable({countFilteredRecords, data, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
+/**
+ * @param {array} data The table data
+ * @param {array} modifiedData The table data for CSV
+ * @param {function} countFilteredRecords The method for counting filtered records
+ * @param {object} rowSelection The options for handling row selection
+ * @param {bool} loading
+ * @param {array} menuProps The options for the dropdown menu with actions
+ * @returns {Element}
+ * @constructor
+ */
+function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, loading, menuProps}) {
     const {filters, page, pageSize} = useContext(RouterContext)
     const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange, baseColumns, getColumnsDict} = useContext(AppTableContext)
+    const {selectedEntities} = useContext(AppContext)
     const [tableColumns, setTableColumns] = useState(columns)
 
     useEffect(() => {
