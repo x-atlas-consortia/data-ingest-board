@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select, Space } from 'antd';
 
-const ColumnToggle = ({columns, handleSelectionChange}) => {
+const ColumnToggle = ({columns, handleSelectionChange, hiddenColumns}) => {
     const options = [];
     for (let c of columns) {
         options.push({
@@ -20,7 +20,7 @@ const ColumnToggle = ({columns, handleSelectionChange}) => {
             allowClear
             style={{width: '100%'}}
             placeholder="Choose columns to hide"
-            defaultValue={['sennet_id']}
+            defaultValue={hiddenColumns}
             onChange={handleChange}
             options={options}
         />

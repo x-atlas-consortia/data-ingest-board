@@ -424,7 +424,7 @@ const DatasetTable = ({
                         <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
 
-                    <AppTableProvider context={'Datasets'} baseColumns={filteredDatasetColumns}>
+                    <AppTableProvider context={'Dataset'} initialColumnsToHide={['processed_datasets']} baseColumns={filteredDatasetColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
                                   menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
                         filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />

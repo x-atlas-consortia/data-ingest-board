@@ -15,17 +15,18 @@ import {
     useSortable
 } from '@dnd-kit/sortable'
 import {eq, storageKey} from "@/lib/helpers/general";
+import TABLE from "@/lib/helpers/table";
 
 const AppTableContext = createContext({})
 
-export const AppTableProvider = ({ children,  context, baseColumns }) => {
+export const AppTableProvider = ({ children,  context, baseColumns, initialColumnsToHide = [] }) => {
     let _a;
     const DragIndexContext = createContext({ active: -1, over: -1 })
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
     const orderedColumnsStoreKey = storageKey(`table.orderedColumns.${context}`)
     const hiddenColumnsStoreKey = storageKey(`table.hiddenColumns.${context}`)
     const [dragEnd, setDragEnd] = useState(0)
-    const [_, setHiddenColumns] = useState([])
+    const [hiddenColumns, setHiddenColumns] = useState(initialColumnsToHide)
 
     const getColumnsDict = (cols) => {
         let dict = {}
@@ -188,7 +189,9 @@ export const AppTableProvider = ({ children,  context, baseColumns }) => {
 
     return (
         <AppTableContext.Provider value={{
+            context,
             handleHiddenColumns,
+            hiddenColumns,
             setColumns,
             getColumns,
             columns,

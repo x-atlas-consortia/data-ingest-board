@@ -10,6 +10,8 @@ import AppContext from "../../context/AppContext";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import AppTable from "@/components/DataTable/AppTable";
+import {AppTableProvider} from "@/context/TableContext";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
     const [rawData, setRawData] = useState([])
@@ -268,24 +270,11 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <Spinner />
             ) : (
                 <>
-                    <div className="count c-table--header">
-                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                    </div>
-                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={filteredUploadColumns}
-                           showHeader={!loading}
-                           dataSource={countFilteredRecords(rawData, filters)}
-                           bordered={false}
-                           loading={loading}
-                           pagination={{ ...TABLE.paginationOptions, current: page, defaultPageSize: pageSize}}
-                           scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
-                           rowKey={TABLE.cols.f('id')}
-                           rowSelection={{
-                               type: 'checkbox',
-                               ...rowSelection,
-                           }}
-                    />
+                    <AppTableProvider context={'Upload'} baseColumns={filteredUploadColumns}>
+                        <AppTable countFilteredRecords={countFilteredRecords} data={data}
+                                  menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
+                                  filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                    </AppTableProvider>
                     <Modal
                         className={modal.className}
                         cancelButtonProps={{ style: { display: modal.cancelCSS } }}
