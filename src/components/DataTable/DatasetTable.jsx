@@ -17,17 +17,13 @@ import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
 import {AppTableProvider} from "@/context/TableContext";
 import AppTable from "@/components/DataTable/AppTable";
+import RouterContext from "@/context/RouterContext";
 
 const DatasetTable = ({
     data,
     loading,
-    handleTableChange,
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    filters,
 }) => {
+    const {filters, handleTableChange, sortField, sortOrder} = useContext(RouterContext)
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -421,9 +417,13 @@ const DatasetTable = ({
                     </ChartProvider>
 
                     <AppTableProvider context={'Dataset'} initialColumnsToHide={['processed_datasets']} baseColumns={filteredDatasetColumns}>
-                        <AppTable countFilteredRecords={countFilteredRecords} data={data}
-                                  menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
-                        filters={filters}  page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                        <AppTable countFilteredRecords={countFilteredRecords}
+                                  data={data}
+                                  modifiedData={modifiedData}
+                                  menuProps={menuProps}
+                                  selectedEntities={selectedEntities}
+                                  loading={loading}
+                                  rowSelection={rowSelection}  />
                     </AppTableProvider>
 
                     <Modal

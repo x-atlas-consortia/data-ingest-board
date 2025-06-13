@@ -282,6 +282,7 @@ const TABLE = {
         return items
     },
     reusableColumns: (defaultSortOrder, urlParamFilters) => {
+        console.log('filters', urlParamFilters)
         return {
             id: (renderDropdownContent) => ({
                 title: TABLE.cols.n('id'),

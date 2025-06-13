@@ -12,8 +12,10 @@ import BulkEditForm from "../BulkEditForm";
 import UI_BLOCKS from "../../lib/helpers/uiBlocks";
 import AppTable from "@/components/DataTable/AppTable";
 import {AppTableProvider} from "@/context/TableContext";
+import RouterContext from "@/context/RouterContext";
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) => {
+    const {handleTableChange, page, pageSize, sortField, sortOrder, filters} = useContext(RouterContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
@@ -271,7 +273,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <AppTableProvider context={'Upload'} baseColumns={filteredUploadColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
                                   menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
-                                  filters={filters} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                                  loading={loading}  rowSelection={rowSelection}  />
                     </AppTableProvider>
                     <Modal
                         className={modal.className}

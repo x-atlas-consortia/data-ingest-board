@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable'
 import {eq, storageKey} from "@/lib/helpers/general";
 import TABLE from "@/lib/helpers/table";
+import RouterContext from "@/context/RouterContext";
 
 const AppTableContext = createContext({})
 
@@ -27,6 +28,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const hiddenColumnsStoreKey = storageKey(`table.hiddenColumns.${context}`)
     const [dragEnd, setDragEnd] = useState(0)
     const [hiddenColumns, setHiddenColumns] = useState(initialColumnsToHide)
+    const {setFilters, setPage, setPageSize} = useContext(RouterContext)
 
     const getColumnsDict = (cols) => {
         let dict = {}
@@ -195,6 +197,69 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
         });
     };
 
+    const handleTableChange = (pagination, _filters, sorter, {}) => {
+
+        const query = new URLSearchParams(window.location.search)
+
+        setPage(pagination.current)
+        setPageSize(pagination.pageSize)
+        let correctedFilters = {}
+        let filtersToRemove = {}
+
+        for (let filter in _filters) {
+            if (_filters[filter]) {
+                correctedFilters[filter] = _filters[filter];
+            } else {
+                filtersToRemove[filter] = true
+            }
+        }
+
+        for (let correctedFilter in correctedFilters){
+            if (Array.isArray(correctedFilters[correctedFilter])){
+                correctedFilters[correctedFilter] = correctedFilters[correctedFilter].join(',');
+            }
+        }
+
+        setFilters(correctedFilters)
+
+        if (sorter.field) {
+            query.set('sort_field', sorter.field);
+            if (sorter.order) {
+                query.set('sort_order', sorter.order);
+            } else {
+                query.delete('sort_field');
+                query.delete('sort_order');
+            }
+        } else {
+            query.delete('sort_field');
+            query.delete('sort_order');
+        }
+        Object.keys(correctedFilters).forEach(key => {
+            if (correctedFilters[key]) {
+                let val = Array.isArray(correctedFilters[key]) ? correctedFilters[key] : [correctedFilters[key]]
+                query.set(key, val.join(','));
+            } else {
+                query.delete(key);
+            }
+        });
+
+        Object.keys(filtersToRemove).forEach(key => {
+            query.delete(key);
+        });
+
+        if (pagination.current && pagination.current !== 1) {
+            query.set('page', pagination.current);
+        } else {
+            query.delete('page');
+        }
+        if (pagination.pageSize && pagination.pageSize !== 10) {
+            query.set('page_size', pagination.pageSize);
+        } else {
+            query.delete('page_size');
+        }
+        window.history.pushState(null, null, `?${query.toString()}`);
+    }
+
     return (
         <AppTableContext.Provider value={{
             context,
@@ -205,6 +270,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             columns,
             TableBodyCell,
             TableHeaderCell,
+            handleTableChange
         }}>
             <DndContext
                 sensors={sensors}

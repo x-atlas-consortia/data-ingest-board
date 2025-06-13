@@ -13,9 +13,11 @@ import Spinner from "../Spinner";
 import {Alert} from "react-bootstrap";
 import {MailOutlined} from "@ant-design/icons";
 import {Spin} from "antd";
+import RouterContext from "@/context/RouterContext";
 
-const DataTable = (props) => {
-    const [datasetData, setDatasetData] = useState([]);
+const DataTable = () => {
+    const {setSelectUploadId, setUseDatasetApi, useDatasetApi, setFilters, setSortField, setSortOrder, setPage, setPageSize} = useContext(RouterContext)
+    const {globusToken} = useContext(AppContext)
     const [originalResponse, setOriginalResponse] = useState({})
     const [uploadData, setUploadData] = useState([]);
     const [primaryData, setPrimaryData] = useState([]);
@@ -23,15 +25,8 @@ const DataTable = (props) => {
     const [loading, setLoading] = useState(true);
     const [isCachingDatasets, setIsCachingDatasets] = useState(false)
     const [isCachingUploads, setIsCachingUploads] = useState(false)
-    const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
-    const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
-    const [invalidUploadId, setInvalidUploadId] = useState(false);
-    const [page, setPage] = useState(props.initialPage);
-    const [pageSize, setPageSize] = useState(props.pageSize !== undefined ? props.pageSize : 10);
-    const [sortField, setSortField] = useState(props.sortField);
-    const [sortOrder, setSortOrder] = useState(props.sortOrder);
-    const [filters, setFilters] = useState(props.tableFilters);
-    const [globusToken, setGlobusToken] = useState(props.globusToken);
+    const [invalidUploadId, setInvalidUploadId] = useState(false)
+
     const [tableKey, setTableKey] = useState('initialKey');
     const {setSelectedEntities, t} = useContext(AppContext)
     const cachingTimeout = useRef(null)
@@ -39,68 +34,6 @@ const DataTable = (props) => {
     useEffect(() => {
         loadData();
     }, []);
-
-    const handleTableChange = (pagination, _filters, sorter, {}) => {
-        const query = new URLSearchParams(window.location.search)
-
-        setPage(pagination.current)
-        setPageSize(pagination.pageSize)
-        let correctedFilters = {}
-        let filtersToRemove = {}
-
-        for (let filter in _filters) {
-            if (_filters[filter]) {
-                correctedFilters[filter] = _filters[filter];
-            } else {
-                filtersToRemove[filter] = true
-            }
-        }
-
-        for (let correctedFilter in correctedFilters){
-            if (Array.isArray(correctedFilters[correctedFilter])){
-                correctedFilters[correctedFilter] = correctedFilters[correctedFilter].join(',');
-            }
-        }
-
-        setFilters(correctedFilters)
-
-        if (sorter.field) {
-            query.set('sort_field', sorter.field);
-            if (sorter.order) {
-                query.set('sort_order', sorter.order);
-            } else {
-                query.delete('sort_field');
-                query.delete('sort_order');
-            }
-        } else {
-            query.delete('sort_field');
-            query.delete('sort_order');
-        }
-        Object.keys(correctedFilters).forEach(key => {
-            if (correctedFilters[key]) {
-                let val = Array.isArray(correctedFilters[key]) ? correctedFilters[key] : [correctedFilters[key]]
-                query.set(key, val.join(','));
-            } else {
-                query.delete(key);
-            }
-        });
-
-        Object.keys(filtersToRemove).forEach(key => {
-            query.delete(key);
-        });
-
-        if (pagination.current && pagination.current !== 1) {
-            query.set('page', pagination.current);
-        } else {
-            query.delete('page');
-        }
-        if (pagination.pageSize && pagination.pageSize !== 10) {
-            query.set('page_size', pagination.pageSize);
-        } else {
-            query.delete('page_size');
-        }
-        window.history.pushState(null, null, `?${query.toString()}`);
-    }
 
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         if (typeof uploadId !== 'undefined') {
@@ -127,7 +60,6 @@ const DataTable = (props) => {
 
     const applyDatasets = (datasetResponse) => {
         const primaryDatasets = getPrimaryDatasets(datasetResponse?.data);
-        setDatasetData(datasetResponse.data);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
     }
@@ -186,16 +118,16 @@ const DataTable = (props) => {
             applyUploads(originalResponse.uploads)
             document.getElementById('appSearch').value = ''
         }
-        setFilters({});
-        setSortField(undefined);
-        setSortOrder(undefined);
-        setPage(1);
-        setPageSize( 10);
+        setFilters({})
+        setSortField(undefined)
+        setSortOrder(undefined)
+        setPage(1)
+        setPageSize( 10)
     }
 
     const toggleApi = () => {
         setSelectedEntities([])
-        setUseDatasetApi(!useDatasetApi);
+        setUseDatasetApi(!useDatasetApi)
         toggleHistory(useDatasetApi)
         clearBasicFilters()
     };
@@ -203,7 +135,7 @@ const DataTable = (props) => {
     const clearAll = () => {
         setSelectedEntities([])
         toggleHistory(!useDatasetApi)
-        setPrimaryData(originalPrimaryData);
+        setPrimaryData(originalPrimaryData)
         clearBasicFilters()
         setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
     };
@@ -216,12 +148,6 @@ const DataTable = (props) => {
             filterUploads={filterUploads}
             uploadData={uploadData}
             datasetData={originalPrimaryData}
-            handleTableChange={handleTableChange}
-            page={page}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            filters={filters}
         />
     ) : (<></>)
 
@@ -230,12 +156,6 @@ const DataTable = (props) => {
             key={tableKey}
             data={primaryData}
             loading={loading}
-            handleTableChange={handleTableChange}
-            page={page}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            filters={filters}
         />
     ) : uploadTable;
 

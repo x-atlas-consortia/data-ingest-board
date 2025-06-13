@@ -4,11 +4,14 @@ import TABLE from "@/lib/helpers/table";
 import {Table} from "antd";
 import AppTableContext from "@/context/TableContext";
 import ColumnToggle from "@/components/DataTable/ColumnToggle";
+import RouterContext from "@/context/RouterContext";
 
-function AppTable({countFilteredRecords, data, filters, page, pageSize, handleTableChange, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
-    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns} = useContext(AppTableContext)
+function AppTable({countFilteredRecords, data, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
+    const {filters, page, pageSize} = useContext(RouterContext)
+    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange} = useContext(AppTableContext)
 
     useEffect(() => {
+        console.log(page)
     }, [])
 
     return (
