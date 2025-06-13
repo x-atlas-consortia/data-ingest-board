@@ -27,7 +27,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const orderedColumnsStoreKey = storageKey(`table.orderedColumns.${context}`)
     const hiddenColumnsStoreKey = storageKey(`table.hiddenColumns.${context}`)
     const [dragEnd, setDragEnd] = useState(0)
-    const [hiddenColumns, setHiddenColumns] = useState(initialColumnsToHide)
+    const [_, setHiddenColumns] = useState(initialColumnsToHide)
     const {setFilters, setPage, setPageSize} = useContext(RouterContext)
 
     const getColumnsDict = (cols) => {
@@ -267,10 +267,12 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             getHiddenColumns,
             setColumns,
             getColumns,
+            getColumnsDict,
             columns,
             TableBodyCell,
             TableHeaderCell,
-            handleTableChange
+            handleTableChange,
+            baseColumns
         }}>
             <DndContext
                 sensors={sensors}

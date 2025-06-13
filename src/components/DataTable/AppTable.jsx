@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import TABLE from "@/lib/helpers/table";
 import {Table} from "antd";
@@ -8,11 +8,19 @@ import RouterContext from "@/context/RouterContext";
 
 function AppTable({countFilteredRecords, data, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
     const {filters, page, pageSize} = useContext(RouterContext)
-    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange} = useContext(AppTableContext)
+    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange, baseColumns, getColumnsDict} = useContext(AppTableContext)
+    const [tableColumns, setTableColumns] = useState(columns)
 
     useEffect(() => {
-        console.log(page)
-    }, [])
+        let dict = getColumnsDict(baseColumns)
+        let result = []
+        // The filteredValue property gets lost with the drag feature, so let's replenish it from the source.
+        for (let i = 0; i < columns.length; i++) {
+            result.push({...columns[i], filteredValue: dict[columns[i].dataIndex].filteredValue})
+        }
+        setTableColumns(result)
+
+    }, [filters])
 
     return (
         <>
@@ -22,7 +30,7 @@ function AppTable({countFilteredRecords, data, rowSelection, loading, menuProps,
                 <ColumnToggle hiddenColumns={getHiddenColumns()} columns={columns} handleSelectionChange={handleHiddenColumns} />
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                 columns={columns}
+                 columns={tableColumns}
                  dataSource={countFilteredRecords(data, filters)}
                  showHeader={!loading}
                  bordered={false}
