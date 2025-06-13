@@ -15,7 +15,7 @@ import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
-import AppTableContext, {AppTableProvider} from "@/context/TableContext";
+import {AppTableProvider} from "@/context/TableContext";
 import AppTable from "@/components/DataTable/AppTable";
 
 const DatasetTable = ({
@@ -29,7 +29,6 @@ const DatasetTable = ({
     filters,
 }) => {
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
-    const {columns, TableBodyCell, TableHeaderCell} = useContext(AppTableContext)
     const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])

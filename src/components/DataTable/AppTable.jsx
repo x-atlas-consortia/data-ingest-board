@@ -6,7 +6,7 @@ import AppTableContext from "@/context/TableContext";
 import ColumnToggle from "@/components/DataTable/ColumnToggle";
 
 function AppTable({countFilteredRecords, data, filters, rawData, page, pageSize, handleTableChange, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
-    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, hiddenColumns} = useContext(AppTableContext)
+    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns} = useContext(AppTableContext)
 
     useEffect(() => {
     }, [])
@@ -16,7 +16,7 @@ function AppTable({countFilteredRecords, data, filters, rawData, page, pageSize,
             <div className="count c-table--header">
                 {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: context})}
                 {TABLE.viewSankeyButton({filters})}
-                <ColumnToggle hiddenColumns={hiddenColumns} columns={columns} handleSelectionChange={handleHiddenColumns} />
+                <ColumnToggle hiddenColumns={getHiddenColumns()} columns={columns} handleSelectionChange={handleHiddenColumns} />
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                  columns={columns}

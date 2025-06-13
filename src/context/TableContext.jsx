@@ -99,6 +99,16 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
         )
     }
 
+    const getHiddenColumns = () => {
+        let hiddenColumns = localStorage.getItem(hiddenColumnsStoreKey)
+        if (hiddenColumns) {
+            hiddenColumns = JSON.parse(hiddenColumns)
+        } else {
+            hiddenColumns = initialColumnsToHide
+        }
+        return hiddenColumns
+    }
+
     const getColumns = (cols) => {
         let orderedColumns = cols
         try {
@@ -116,12 +126,9 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
                     orderedColumns = Array.from(_orderedColumns)
                 }
 
-                let hiddenColumns = localStorage.getItem(hiddenColumnsStoreKey)
-                if (hiddenColumns) {
-                    hiddenColumns = JSON.parse(hiddenColumns)
-                    for (let c of orderedColumns) {
-                        c.hidden = hiddenColumns.comprises(c.dataIndex)
-                    }
+                let hiddenColumns = getHiddenColumns()
+                for (let c of orderedColumns) {
+                    c.hidden = hiddenColumns.comprises(c.dataIndex)
                 }
             }
 
@@ -191,7 +198,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
         <AppTableContext.Provider value={{
             context,
             handleHiddenColumns,
-            hiddenColumns,
+            getHiddenColumns,
             setColumns,
             getColumns,
             columns,
