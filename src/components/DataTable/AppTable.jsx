@@ -24,6 +24,7 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
     const [tableColumns, setTableColumns] = useState(columns)
 
     useEffect(() => {
+        // TODO: fix for Show Datasets on Uploads
         let dict = getColumnsDict(baseColumns)
         let result = []
         // The filteredValue property gets lost with the drag feature, so let's replenish it from the source.
