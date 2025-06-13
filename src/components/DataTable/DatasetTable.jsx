@@ -83,7 +83,7 @@ const DatasetTable = ({
         },
         {
             title: "Processed Datasets",
-            width: 180,
+            width: 200,
             dataIndex: "processed_datasets",
             align: "left",
             defaultSortOrder: urlSortOrder["processed_datasets"] || null,
@@ -231,20 +231,20 @@ const DatasetTable = ({
         {
             ... TABLE.columnOptions({
                 field: "has_donor_metadata",
-                width: 200,  urlSortOrder, urlParamFilters, uniqueDataFilters})
+                width: 210,  urlSortOrder, urlParamFilters, uniqueDataFilters})
 
         },
         {
             ... TABLE.columnOptions({
                 field: "has_source_sample_metadata",
-                title: "Has Source Sample Metadata",
-                width: 250,  urlSortOrder, urlParamFilters, uniqueDataFilters})
+                title: "Has Dataset Parent Sample Metadata",
+                width: 320,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
             ... TABLE.columnOptions({
                 field: "has_dataset_metadata",
                 title: "Has Dataset Metadata",
-                width: 250,  urlSortOrder, urlParamFilters, uniqueDataFilters})
+                width: 220,  urlSortOrder, urlParamFilters, uniqueDataFilters})
         },
         {
             title: "Upload",
@@ -266,7 +266,7 @@ const DatasetTable = ({
             ... TABLE.columnOptions({
                 field: "has_data",
                 title: "Has Data",
-                width: 125,  urlSortOrder, urlParamFilters, uniqueDataFilters
+                width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
     ]
@@ -291,7 +291,7 @@ const DatasetTable = ({
         const headers = getHeadersWith(globusToken)
         callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
             const {className} = UI_BLOCKS.modalResponse.styling(res)
-            let mainTitle = 'Dataset(s) Submitted For Processing'
+            let mainTitle = 'Dataset(s) Subfmitted For Processing'
             const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
             setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
         })
