@@ -16,24 +16,20 @@ import {Spin} from "antd";
 import RouterContext from "@/context/RouterContext";
 
 const DataTable = () => {
-    const {setSelectUploadId, setUseDatasetApi, useDatasetApi, setFilters, setSortField, setSortOrder, setPage, setPageSize} = useContext(RouterContext)
-    const {globusToken} = useContext(AppContext)
+    const {setSelectUploadId, selectUploadId, setUseDatasetApi, useDatasetApi, setFilters, setSortField, setSortOrder, setPage, setPageSize} = useContext(RouterContext)
+    const {globusToken, setSelectedEntities, t} = useContext(AppContext)
+
     const [originalResponse, setOriginalResponse] = useState({})
-    const [uploadData, setUploadData] = useState([]);
-    const [primaryData, setPrimaryData] = useState([]);
-    const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
+    const [uploadData, setUploadData] = useState([])
+    const [primaryData, setPrimaryData] = useState([])
+    const [originalPrimaryData, setOriginalPrimaryData] = useState([])
     const [loading, setLoading] = useState(true);
     const [isCachingDatasets, setIsCachingDatasets] = useState(false)
     const [isCachingUploads, setIsCachingUploads] = useState(false)
     const [invalidUploadId, setInvalidUploadId] = useState(false)
+    const [tableKey, setTableKey] = useState('initialKey')
 
-    const [tableKey, setTableKey] = useState('initialKey');
-    const {setSelectedEntities, t} = useContext(AppContext)
     const cachingTimeout = useRef(null)
-
-    useEffect(() => {
-        loadData();
-    }, []);
 
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         if (typeof uploadId !== 'undefined') {
@@ -102,6 +98,10 @@ const DataTable = () => {
         setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadData();
+    }, []);
 
     const toggleHistory = (condition, params = '') => {
         if (condition) {

@@ -15,7 +15,7 @@ import {AppTableProvider} from "@/context/TableContext";
 import RouterContext from "@/context/RouterContext";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) => {
-    const {handleTableChange, page, pageSize, sortField, sortOrder, filters} = useContext(RouterContext)
+    const {sortField, sortOrder, filters} = useContext(RouterContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})

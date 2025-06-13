@@ -8,9 +8,10 @@ import AppContext from "../context/AppContext";
 import AppNavBar from "../components/AppNavBar";
 import {RouterProvider} from "@/context/RouterContext";
 
-function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, filters }) {
-    const {globusToken, handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout} = useContext(AppContext)
-    const [entityType, setEntityType] = useState(entity_type);
+function App(props) {
+    const {handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout} = useContext(AppContext)
+    const [entityType, setEntityType] = useState(props.entity_type)
+    const [pageProps, _] = useState(props)
 
     return (
         <div className="App bg--galGrey">
@@ -21,10 +22,9 @@ function App({ entity_type, upload_id, page, page_size, sort_field, sort_order, 
             <AppLogin onLogin={handleLogin} unauthorized={unauthorized} onLogout={handleLogout}/> }
 
             { isAuthenticated && !unauthorized &&
-                <RouterProvider props={{entity_type, upload_id, page, page_size, sort_field, sort_order, filters}}><DataTable className="c-table--data"
-                    entityType={entityType}
-                    setEntityType={setEntityType}
-                /></RouterProvider> }
+                <RouterProvider props={pageProps}>
+                    <DataTable className="c-table--data" />
+                </RouterProvider> }
         </div>
 
 
