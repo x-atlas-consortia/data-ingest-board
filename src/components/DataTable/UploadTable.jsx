@@ -14,7 +14,6 @@ import AppTable from "@/components/DataTable/AppTable";
 import {AppTableProvider} from "@/context/TableContext";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
-    const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
@@ -27,7 +26,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     let urlSortOrder = {}
 
     useEffect(() => {
-        setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
@@ -273,7 +271,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                     <AppTableProvider context={'Upload'} baseColumns={filteredUploadColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
                                   menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
-                                  filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                                  filters={filters} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
                     </AppTableProvider>
                     <Modal
                         className={modal.className}

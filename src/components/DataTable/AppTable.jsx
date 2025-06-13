@@ -5,7 +5,7 @@ import {Table} from "antd";
 import AppTableContext from "@/context/TableContext";
 import ColumnToggle from "@/components/DataTable/ColumnToggle";
 
-function AppTable({countFilteredRecords, data, filters, rawData, page, pageSize, handleTableChange, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
+function AppTable({countFilteredRecords, data, filters, page, pageSize, handleTableChange, rowSelection, loading, menuProps, selectedEntities, modifiedData}) {
     const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns} = useContext(AppTableContext)
 
     useEffect(() => {
@@ -20,7 +20,7 @@ function AppTable({countFilteredRecords, data, filters, rawData, page, pageSize,
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
                  columns={columns}
-                 dataSource={countFilteredRecords(rawData, filters)}
+                 dataSource={countFilteredRecords(data, filters)}
                  showHeader={!loading}
                  bordered={false}
                  loading={loading}

@@ -29,7 +29,6 @@ const DatasetTable = ({
     filters,
 }) => {
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
-    const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkEdit: true, bulkSubmit: true, submitForPipelineTesting:true})
@@ -42,7 +41,6 @@ const DatasetTable = ({
     let urlSortOrder = {}
 
     useEffect(() => {
-        setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
@@ -419,13 +417,13 @@ const DatasetTable = ({
             ) : (
                 <>
                     <ChartProvider>
-                        <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
+                        <Visualizations data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
 
                     <AppTableProvider context={'Dataset'} initialColumnsToHide={['processed_datasets']} baseColumns={filteredDatasetColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords} data={data}
                                   menuProps={menuProps} selectedEntities={selectedEntities} modifiedData={modifiedData}
-                        filters={filters} rawData={rawData} page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
+                        filters={filters}  page={page} loading={loading} pageSize={pageSize} handleTableChange={handleTableChange} rowSelection={rowSelection}  />
                     </AppTableProvider>
 
                     <Modal
