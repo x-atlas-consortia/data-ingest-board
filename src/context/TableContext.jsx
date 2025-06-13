@@ -136,9 +136,9 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
                 {
                     column.key = column.dataIndex
                     return Object.assign(Object.assign({}, column), {
-                        key: `${i}`,
-                        onHeaderCell: () => ({ id: `${i}` }),
-                        onCell: () => ({ id: `${i}` }),
+                        key: column.dataIndex || `${i}`,
+                        onHeaderCell: () => ({ id: column.dataIndex || `${i}` }),
+                        onCell: () => ({ id: column.dataIndex || `${i}` }),
                     })
                 }
             ))

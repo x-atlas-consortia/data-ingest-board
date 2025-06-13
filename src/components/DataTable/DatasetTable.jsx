@@ -403,7 +403,6 @@ const DatasetTable = ({
         setModal({ body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null });
     };
 
-    
     const items = TABLE.bulkSelectionDropdown((
         handleExposedActions()
         ),{hasDataAdminPrivs, disabledMenuItems});
