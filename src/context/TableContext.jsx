@@ -135,10 +135,11 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             const _cols =  (orderedColumns.map((column, i) =>
                 {
                     column.key = column.dataIndex
+                    const id = column.dataIndex || `${i}`
                     return Object.assign(Object.assign({}, column), {
-                        key: column.dataIndex || `${i}`,
-                        onHeaderCell: () => ({ id: column.dataIndex || `${i}` }),
-                        onCell: () => ({ id: column.dataIndex || `${i}` }),
+                        key: id,
+                        onHeaderCell: () => ({ id }),
+                        onCell: () => ({ id }),
                     })
                 }
             ))
