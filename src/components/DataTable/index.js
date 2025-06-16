@@ -34,18 +34,18 @@ const DataTable = () => {
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         if (typeof uploadId !== 'undefined') {
             const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload[TABLE.cols.f('id')] === uploadId);
+            setSelectUploadId(uploadId)
             if (typeof matchingUpload !== 'undefined') {
-                const datasetsInUpload = matchingUpload.datasets;
-                const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
-                const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
-                setPrimaryData(filteredDatasets);
-                setSelectUploadId(uploadId);
-                setUseDatasetApi(true);
-                setInvalidUploadId(false);
+                const datasetsInUpload = matchingUpload.datasets
+                const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim())
+                const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid))
+                setPrimaryData(filteredDatasets)
+                setUseDatasetApi(true)
+                setInvalidUploadId(false)
                 window.history.pushState(null, null, `/?upload_id=${uploadId}`)
             }
             else if (typeof matchingUpload === 'undefined') {
-                setInvalidUploadId(true);
+                setInvalidUploadId(true)
             }
         }
     }
@@ -181,7 +181,7 @@ const DataTable = () => {
                             {hasDataLoaded() && <span className={'h6 txt-muted-light txt-sm-light d-block'}><small>Last refreshed: {getLastUpdated()}</small></span>}
                         </h2>
                     </div>
-                    {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
+                    {invalidUploadId && <div className={'m-3'}><div className={'alert alert-warning'}>Upload ID <code>{selectUploadId}</code> not found.</div></div>}
                     <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                         {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3 js-gtm--btn-cta-switch" onClick={toggleApi}>
                             {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}
