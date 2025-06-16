@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext, useRef} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {eq, getHeadersWith} from "@/lib/helpers/general";
+import {deleteFromLocalStorage, eq, getHeadersWith, storageKey} from "@/lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
 import ENVS from "../../lib/helpers/envs";
@@ -118,6 +118,7 @@ const DataTable = () => {
             applyUploads(originalResponse.uploads)
             document.getElementById('appSearch').value = ''
         }
+        deleteFromLocalStorage(storageKey('table'))
         setFilters({})
         setSortField(undefined)
         setSortOrder(undefined)
