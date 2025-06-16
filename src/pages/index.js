@@ -10,7 +10,6 @@ import {RouterProvider} from "@/context/RouterContext";
 
 function App(props) {
     const {handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout} = useContext(AppContext)
-    const [entityType, setEntityType] = useState(props.entity_type)
     const [pageProps, _] = useState(props)
 
     return (
@@ -26,8 +25,6 @@ function App(props) {
                     <DataTable className="c-table--data" />
                 </RouterProvider> }
         </div>
-
-
     );
 }
 
