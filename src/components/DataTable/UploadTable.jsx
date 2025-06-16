@@ -14,7 +14,7 @@ import AppTable from "@/components/DataTable/AppTable";
 import {AppTableProvider} from "@/context/TableContext";
 import RouterContext from "@/context/RouterContext";
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) => {
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, clearBasicFilters}) => {
     const {sortField, sortOrder, filters} = useContext(RouterContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -86,8 +86,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData}) =
                 key: '3',
                 label: (
                     <Button onClick={() => {
-                        const uuid = record.uuid.trim();
-                        filterUploads(uploadData, datasetData, uuid);
+                        const uuid = record.uuid.trim()
+                        clearBasicFilters()
+                        filterUploads(uploadData, datasetData, uuid)
                         window.history.pushState(null, null, `/?upload_id=${record[TABLE.cols.f('id')]}`)
                     }}>
                         Show Datasets

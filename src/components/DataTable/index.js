@@ -148,6 +148,7 @@ const DataTable = () => {
             filterUploads={filterUploads}
             uploadData={uploadData}
             datasetData={originalPrimaryData}
+            clearBasicFilters={clearBasicFilters}
         />
     ) : (<></>)
 
