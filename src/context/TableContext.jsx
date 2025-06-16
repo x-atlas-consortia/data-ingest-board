@@ -20,12 +20,15 @@ import RouterContext from "@/context/RouterContext";
 
 const AppTableContext = createContext({})
 
+export const TABLE_COL_ORDER_KEY = 'table.orderedColumns.'
+export const TABLE_COL_HIDDEN_KEY = 'table.hiddenColumns.'
+
 export const AppTableProvider = ({ children,  context, baseColumns, initialColumnsToHide = [] }) => {
     let _a;
     const DragIndexContext = createContext({ active: -1, over: -1 })
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
-    const orderedColumnsStoreKey = storageKey(`table.orderedColumns.${context}`)
-    const hiddenColumnsStoreKey = storageKey(`table.hiddenColumns.${context}`)
+    const orderedColumnsStoreKey = storageKey(`${TABLE_COL_ORDER_KEY}${context}`)
+    const hiddenColumnsStoreKey = storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`)
     const [dragEnd, setDragEnd] = useState(0)
     const [_, setHiddenColumns] = useState(initialColumnsToHide)
     const {setFilters, setPage, setPageSize} = useContext(RouterContext)

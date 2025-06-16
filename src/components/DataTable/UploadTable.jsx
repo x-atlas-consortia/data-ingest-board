@@ -17,6 +17,7 @@ import RouterContext from "@/context/RouterContext";
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, clearBasicFilters}) => {
     const {sortField, sortOrder, filters} = useContext(RouterContext)
     const [modifiedData, setModifiedData] = useState([])
+    // user selected (checkbox) from the table results
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
     const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
