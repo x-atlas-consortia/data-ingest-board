@@ -1,7 +1,0 @@
-version: "3.7"
-
-services:
-
-  data-ingest-board:
-    # Use the published image and tag from DockerHub
-    image: sennet/data-ingest-board:${DATA_INGEST_BOARD_VERSION:?err}
