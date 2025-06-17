@@ -416,7 +416,7 @@ const DatasetTable = ({
                         <Visualizations data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
 
-                    <AppTableProvider context={'Dataset'} initialColumnsToHide={['processed_datasets']} baseColumns={filteredDatasetColumns}>
+                    <AppTableProvider context={'Dataset'} baseColumns={filteredDatasetColumns}>
                         <AppTable countFilteredRecords={countFilteredRecords}
                                   data={data}
                                   modifiedData={modifiedData}
