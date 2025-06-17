@@ -55,6 +55,8 @@
       width 90%
       margin-top 2rem
       margin-bottom 2rem
+    .ant-spin-container .ant-pagination:first-child .ant-pagination-options-quick-jumper
+      display none
 
   &--pDatasets
     .revision-number
@@ -63,8 +65,11 @@
 
   &__columnToggle
     display inline-block
-    width 200px
+    width 210px
     margin-left 5px
+    +sm()
+      margin-top 5px
+      margin-left 0
     .ant-select-selector
       height 33px
       overflow-y auto
