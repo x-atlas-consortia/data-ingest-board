@@ -1,19 +1,23 @@
-import {Button,Modal, Table} from "antd";
+import {Button,Modal} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {eq, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
-import TABLE from "../../lib/helpers/table";
-import URLS from "../../lib/helpers/urls";
-import ENVS from "../../lib/helpers/envs";
-import AppContext from "../../context/AppContext";
+import TABLE from "@/lib/helpers/table";
+import URLS from "@/lib/helpers/urls";
+import ENVS from "@/lib/helpers/envs";
+import AppContext from "@/context/AppContext";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
-import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import UI_BLOCKS from "@/lib/helpers/uiBlocks";
+import AppTable from "@/components/DataTable/AppTable";
+import {AppTableProvider} from "@/context/TableContext";
+import RouterContext from "@/context/RouterContext";
 
-const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, handleTableChange, page, pageSize, sortField, sortOrder, filters}) => {
-    const [rawData, setRawData] = useState([])
+const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, clearBasicFilters}) => {
+    const {sortField, sortOrder, filters} = useContext(RouterContext)
     const [modifiedData, setModifiedData] = useState([])
+    // user selected (checkbox) from the table results
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({})
     const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
@@ -25,7 +29,6 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
     let urlSortOrder = {}
 
     useEffect(() => {
-        setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
@@ -84,8 +87,9 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 key: '3',
                 label: (
                     <Button onClick={() => {
-                        const uuid = record.uuid.trim();
-                        filterUploads(uploadData, datasetData, uuid);
+                        const uuid = record.uuid.trim()
+                        clearBasicFilters()
+                        filterUploads(uploadData, datasetData, uuid)
                         window.history.pushState(null, null, `/?upload_id=${record[TABLE.cols.f('id')]}`)
                     }}>
                         Show Datasets
@@ -268,24 +272,14 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, ha
                 <Spinner />
             ) : (
                 <>
-                    <div className="count c-table--header">
-                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: 'Upload'})}
-                    </div>
-                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={filteredUploadColumns}
-                           showHeader={!loading}
-                           dataSource={countFilteredRecords(rawData, filters)}
-                           bordered={false}
-                           loading={loading}
-                           pagination={{ ...TABLE.paginationOptions, current: page, defaultPageSize: pageSize}}
-                           scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
-                           rowKey={TABLE.cols.f('id')}
-                           rowSelection={{
-                               type: 'checkbox',
-                               ...rowSelection,
-                           }}
-                    />
+                    <AppTableProvider context={'Upload'} baseColumns={filteredUploadColumns}>
+                        <AppTable countFilteredRecords={countFilteredRecords}
+                                  data={data}
+                                  modifiedData={modifiedData}
+                                  menuProps={menuProps}
+                                  loading={loading}
+                                  rowSelection={rowSelection}  />
+                    </AppTableProvider>
                     <Modal
                         className={modal.className}
                         cancelButtonProps={{ style: { display: modal.cancelCSS } }}

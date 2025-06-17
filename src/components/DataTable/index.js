@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext, useRef} from "react";
 import axios from "axios";
 import UploadTable from "./UploadTable";
 import DatasetTable from "./DatasetTable";
-import {eq, getHeadersWith} from "@/lib/helpers/general";
+import {deleteFromLocalStorage, eq, getHeadersWith, storageKey} from "@/lib/helpers/general";
 import Search from "../Search";
 import AppBanner from "../AppBanner";
 import ENVS from "../../lib/helpers/envs";
@@ -13,110 +13,39 @@ import Spinner from "../Spinner";
 import {Alert} from "react-bootstrap";
 import {MailOutlined} from "@ant-design/icons";
 import {Spin} from "antd";
+import RouterContext from "@/context/RouterContext";
 
-const DataTable = (props) => {
-    const [datasetData, setDatasetData] = useState([]);
+const DataTable = () => {
+    const {setSelectUploadId, selectUploadId, setUseDatasetApi, useDatasetApi, setFilters, setSortField, setSortOrder, setPage, setPageSize} = useContext(RouterContext)
+    const {globusToken, setSelectedEntities, t} = useContext(AppContext)
+
     const [originalResponse, setOriginalResponse] = useState({})
-    const [uploadData, setUploadData] = useState([]);
-    const [primaryData, setPrimaryData] = useState([]);
-    const [originalPrimaryData, setOriginalPrimaryData] = useState([]);
+    const [uploadData, setUploadData] = useState([])
+    const [primaryData, setPrimaryData] = useState([])
+    const [originalPrimaryData, setOriginalPrimaryData] = useState([])
     const [loading, setLoading] = useState(true);
     const [isCachingDatasets, setIsCachingDatasets] = useState(false)
     const [isCachingUploads, setIsCachingUploads] = useState(false)
-    const [useDatasetApi, setUseDatasetApi] = useState(props.entityType !== 'uploads');
-    const [selectUploadId, setSelectUploadId] = useState(props.selectUploadId);
-    const [invalidUploadId, setInvalidUploadId] = useState(false);
-    const [page, setPage] = useState(props.initialPage);
-    const [pageSize, setPageSize] = useState(props.pageSize !== undefined ? props.pageSize : 10);
-    const [sortField, setSortField] = useState(props.sortField);
-    const [sortOrder, setSortOrder] = useState(props.sortOrder);
-    const [filters, setFilters] = useState(props.tableFilters);
-    const [globusToken, setGlobusToken] = useState(props.globusToken);
-    const [tableKey, setTableKey] = useState('initialKey');
-    const {setSelectedEntities, t} = useContext(AppContext)
+    const [invalidUploadId, setInvalidUploadId] = useState(false)
+    const [tableKey, setTableKey] = useState('initialKey')
+
     const cachingTimeout = useRef(null)
-
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const handleTableChange = (pagination, _filters, sorter, {}) => {
-        const query = new URLSearchParams(window.location.search)
-
-        setPage(pagination.current)
-        setPageSize(pagination.pageSize)
-        let correctedFilters = {}
-        let filtersToRemove = {}
-
-        for (let filter in _filters) {
-            if (_filters[filter]) {
-                correctedFilters[filter] = _filters[filter];
-            } else {
-                filtersToRemove[filter] = true
-            }
-        }
-
-        for (let correctedFilter in correctedFilters){
-            if (Array.isArray(correctedFilters[correctedFilter])){
-                correctedFilters[correctedFilter] = correctedFilters[correctedFilter].join(',');
-            }
-        }
-
-        setFilters(correctedFilters)
-
-        if (sorter.field) {
-            query.set('sort_field', sorter.field);
-            if (sorter.order) {
-                query.set('sort_order', sorter.order);
-            } else {
-                query.delete('sort_field');
-                query.delete('sort_order');
-            }
-        } else {
-            query.delete('sort_field');
-            query.delete('sort_order');
-        }
-        Object.keys(correctedFilters).forEach(key => {
-            if (correctedFilters[key]) {
-                let val = Array.isArray(correctedFilters[key]) ? correctedFilters[key] : [correctedFilters[key]]
-                query.set(key, val.join(','));
-            } else {
-                query.delete(key);
-            }
-        });
-
-        Object.keys(filtersToRemove).forEach(key => {
-            query.delete(key);
-        });
-
-        if (pagination.current && pagination.current !== 1) {
-            query.set('page', pagination.current);
-        } else {
-            query.delete('page');
-        }
-        if (pagination.pageSize && pagination.pageSize !== 10) {
-            query.set('page_size', pagination.pageSize);
-        } else {
-            query.delete('page_size');
-        }
-        window.history.pushState(null, null, `?${query.toString()}`);
-    }
 
     const filterUploads = (uploadResponse, datasetResponse, uploadId) => {
         if (typeof uploadId !== 'undefined') {
             const matchingUpload = uploadResponse.find(upload => upload.uuid === uploadId || upload[TABLE.cols.f('id')] === uploadId);
+            setSelectUploadId(uploadId)
             if (typeof matchingUpload !== 'undefined') {
-                const datasetsInUpload = matchingUpload.datasets;
-                const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim());
-                const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid));
-                setPrimaryData(filteredDatasets);
-                setSelectUploadId(uploadId);
-                setUseDatasetApi(true);
-                setInvalidUploadId(false);
+                const datasetsInUpload = matchingUpload.datasets
+                const listOfDatasets = datasetsInUpload.split(',').map(item => item.trim())
+                const filteredDatasets = datasetResponse.filter((dataset) => listOfDatasets.includes(dataset.uuid))
+                setPrimaryData(filteredDatasets)
+                setUseDatasetApi(true)
+                setInvalidUploadId(false)
                 window.history.pushState(null, null, `/?upload_id=${uploadId}`)
             }
             else if (typeof matchingUpload === 'undefined') {
-                setInvalidUploadId(true);
+                setInvalidUploadId(true)
             }
         }
     }
@@ -171,6 +100,10 @@ const DataTable = (props) => {
         }
     };
 
+    useEffect(() => {
+        loadData();
+    }, []);
+
     const toggleHistory = (condition, params = '') => {
         if (condition) {
             window.history.pushState(null, null, `/?entity_type=uploads${params}`)
@@ -186,16 +119,17 @@ const DataTable = (props) => {
             applyUploads(originalResponse.uploads)
             document.getElementById('appSearch').value = ''
         }
-        setFilters({});
-        setSortField(undefined);
-        setSortOrder(undefined);
-        setPage(1);
-        setPageSize( 10);
+        deleteFromLocalStorage(storageKey('table'))
+        setFilters({})
+        setSortField(undefined)
+        setSortOrder(undefined)
+        setPage(1)
+        setPageSize( 10)
     }
 
     const toggleApi = () => {
         setSelectedEntities([])
-        setUseDatasetApi(!useDatasetApi);
+        setUseDatasetApi(!useDatasetApi)
         toggleHistory(useDatasetApi)
         clearBasicFilters()
     };
@@ -203,7 +137,7 @@ const DataTable = (props) => {
     const clearAll = () => {
         setSelectedEntities([])
         toggleHistory(!useDatasetApi)
-        setPrimaryData(originalPrimaryData);
+        setPrimaryData(originalPrimaryData)
         clearBasicFilters()
         setTableKey(prevKey => prevKey === 'initialKey' ? 'updatedKey' : 'initialKey');
     };
@@ -216,12 +150,7 @@ const DataTable = (props) => {
             filterUploads={filterUploads}
             uploadData={uploadData}
             datasetData={originalPrimaryData}
-            handleTableChange={handleTableChange}
-            page={page}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            filters={filters}
+            clearBasicFilters={clearBasicFilters}
         />
     ) : (<></>)
 
@@ -230,12 +159,6 @@ const DataTable = (props) => {
             key={tableKey}
             data={primaryData}
             loading={loading}
-            handleTableChange={handleTableChange}
-            page={page}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            filters={filters}
         />
     ) : uploadTable;
 
@@ -260,7 +183,7 @@ const DataTable = (props) => {
                             {hasDataLoaded() && <span className={'h6 txt-muted-light txt-sm-light d-block'}><small>Last refreshed: {getLastUpdated()}</small></span>}
                         </h2>
                     </div>
-                    {invalidUploadId && <p style={{ color: "red" }}>Upload ID Not Found</p>}
+                    {invalidUploadId && <div className={'m-3'}><div className={'alert alert-warning'}>Upload ID <code>{selectUploadId}</code> not found.</div></div>}
                     <div className={`c-table__btns ${ENVS.uploadsEnabled() ? 'mx-auto text-center' : 'pull-right mx-3'}`}>
                         {ENVS.uploadsEnabled() && <button className="c-btn c-btn--primary col-md-6 col-lg-3 js-gtm--btn-cta-switch" onClick={toggleApi}>
                             {useDatasetApi ? "SWITCH TO UPLOADS" : 'SWITCH TO DATASETS'}

@@ -1,45 +1,42 @@
-import {Modal, Table} from "antd";
+import {Modal} from "antd";
 import {ExportOutlined, ThunderboltOutlined, CloudUploadOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import axios from "axios";
-import ENVS from "../../lib/helpers/envs";
-import TABLE from "../../lib/helpers/table";
-import URLS from "../../lib/helpers/urls";
+import ENVS from "@/lib/helpers/envs";
+import TABLE from "@/lib/helpers/table";
+import URLS from "@/lib/helpers/urls";
 import {callService, eq, getHeadersWith, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
-import AppContext from "../../context/AppContext";
-import UI_BLOCKS from "../../lib/helpers/uiBlocks";
+import AppContext from "@/context/AppContext";
+import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import Visualizations from "@/components/Visualizations";
 import {ChartProvider} from "@/context/ChartContext";
+import {AppTableProvider} from "@/context/TableContext";
+import AppTable from "@/components/DataTable/AppTable";
+import RouterContext from "@/context/RouterContext";
 
 const DatasetTable = ({
     data,
     loading,
-    handleTableChange,
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    filters,
 }) => {
+    const {filters, handleTableChange, sortField, sortOrder} = useContext(RouterContext)
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
-    const [rawData, setRawData] = useState([])
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
     const [disabledMenuItems, setDisabledMenuItems] = useState({bulkEdit: true, bulkSubmit: true, submitForPipelineTesting:true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
+
     const hierarchyGroupings = {}
     const uniqueDataFilters = {}
     let urlParamFilters = {}
     let urlSortOrder = {}
 
     useEffect(() => {
-        setRawData(JSON.parse(JSON.stringify(data)))
         setModifiedData(TABLE.flattenDataForCSV(JSON.parse(JSON.stringify(data))))
     }, [data])
 
@@ -400,7 +397,6 @@ const DatasetTable = ({
         setModal({ body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null });
     };
 
-    
     const items = TABLE.bulkSelectionDropdown((
         handleExposedActions()
         ),{hasDataAdminPrivs, disabledMenuItems});
@@ -417,28 +413,17 @@ const DatasetTable = ({
             ) : (
                 <>
                     <ChartProvider>
-                        <Visualizations data={countFilteredRecords(rawData, filters)} filters={filters} applyFilters={handleTableChange} />
+                        <Visualizations data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
-                    <div className="count c-table--header">
-                        {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters})}
-                        {TABLE.viewSankeyButton({filters})}
-                    </div>
 
-                    <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                           columns={filteredDatasetColumns}
-                           dataSource={countFilteredRecords(rawData, filters)}
-                           showHeader={!loading}
-                           bordered={false}
-                           loading={loading}
-                           pagination={{ ...TABLE.paginationOptions, current: page, defaultPageSize: pageSize}}
-                           scroll={{ x: 1500, y: 1500 }}
-                           onChange={handleTableChange}
-                           rowKey={TABLE.cols.f('id')}
-                           rowSelection={{
-                               type: 'checkbox',
-                               ...rowSelection,
-                           }}
-                    />
+                    <AppTableProvider context={'Dataset'} baseColumns={filteredDatasetColumns}>
+                        <AppTable countFilteredRecords={countFilteredRecords}
+                                  data={data}
+                                  modifiedData={modifiedData}
+                                  menuProps={menuProps}
+                                  loading={loading}
+                                  rowSelection={rowSelection}  />
+                    </AppTableProvider>
 
                     <Modal
                         className={modal.className}
