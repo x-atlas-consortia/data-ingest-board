@@ -432,7 +432,7 @@ const TABLE = {
                     if (!tag) return null
                     let res = []
                     for (let t of tag) {
-                        res.push( <Tag className={'mb-1'} key={t}>{t}</Tag>)
+                        res.push( <Tag className={`mb-1 js-tag`} key={t}>{t}</Tag>)
                     }
                     return (
                         <div className='c-table__colTags'>{res}</div>
@@ -481,7 +481,7 @@ const TABLE = {
             target="_blank"
             rel="noopener noreferrer"
             type="primary"
-            className="text-decoration-none ms-2">
+            className="text-decoration-none ms-2 js-btn--viewSankey">
             View Sankey Diagram
         </Button>
     },
