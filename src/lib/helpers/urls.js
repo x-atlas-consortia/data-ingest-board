@@ -23,6 +23,7 @@ const URLS = {
         },
         bulk: {
             submit: () =>  process.env.NEXT_PUBLIC_INGEST_BULK_SUBMIT_URL,
+            validate: (entity) =>  process.env.NEXT_PUBLIC_INGEST_BULK_VALIDATE_URL.format(entity),
             edit: {
                 datasets: () => process.env.NEXT_PUBLIC_INGEST_BULK_EDIT_DATASETS_URL,
                 uploads: () => process.env.NEXT_PUBLIC_INGEST_BULK_EDIT_UPLOADS_URL,

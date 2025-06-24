@@ -1,13 +1,31 @@
-import {CaretDownOutlined, CloseOutlined, DownloadOutlined, FileExcelOutlined, EditOutlined, FileTextOutlined} from "@ant-design/icons";
+import {
+    CaretDownOutlined,
+    CloseOutlined,
+    DownloadOutlined,
+    FileExcelOutlined,
+    EditOutlined,
+    FileTextOutlined,
+    ThunderboltOutlined, BugOutlined
+} from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
 import React from "react";
-import {autoBlobDownloader, eq, getUBKGName, some, storageKey, toDateString} from "./general";
+import {
+    autoBlobDownloader,
+    callService,
+    eq,
+    getHeadersWith,
+    getUBKGName,
+    some,
+    storageKey,
+    toDateString
+} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
 import {STATUS} from "../constants";
 import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {TABLE_COL_HIDDEN_KEY, TABLE_COL_ORDER_KEY} from "@/context/TableContext";
+import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 
 const TABLE = {
     cols: {
@@ -266,6 +284,17 @@ const TABLE = {
                 icon: <DownloadOutlined title="Export Selected Data as Manifest TXT File" style={{ fontSize: '18px' }}/>,
             }
         )
+
+        if(hasDataAdminPrivs){
+            _items.push({
+                label: 'Validate Data',
+                key: '5',
+                icon: <
+                    BugOutlined />,
+                disabled: disabledMenuItems['bulkValidate']
+            },)
+        }
+
         if (hasDataAdminPrivs && ENVS.bulkEditEnabled()) {
             _items.push(
                 {
@@ -461,6 +490,15 @@ const TABLE = {
 
         autoBlobDownloader([manifestData], 'text/plain', `data-manifest.txt`)
     },
+    confirmBulk: ({url, title, selectedEntities, globusToken, setModal}) => {
+        const headers = getHeadersWith(globusToken)
+        callService(url, headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
+            const {className} = UI_BLOCKS.modalResponse.styling(res)
+
+            const {modalBody} = UI_BLOCKS.modalResponse.body(res, title)
+            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
+        })
+    },
     rowSelectionDropdown: ({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity = 'Dataset'}) => {
         return <Space wrap>
             <Dropdown.Button menu={menuProps}>
@@ -531,11 +569,12 @@ const TABLE = {
                 }
             },
             onChange: (newSelectedRowKeys, selectedRows, e, a) => {
-                const hasPublished = selectedRows.some(r => r.status === "Published");
+                const hasPublished = selectedRows.some(r => eq(r.status, "Published"));
+                const hasCertainStatus = selectedRows.some(r => ["Published", "Processing", "Reorganized"].comprises(r.status))
                 if (!selectedRows.length) { // If noithing is selected
-                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: true, bulkSubmit:true, submitForPipelineTesting: true})
+                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: true, bulkSubmit:true, bulkValidate: true, submitForPipelineTesting: true})
                 } else { // at least one thing is selected
-                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: hasPublished, bulkSubmit: hasPublished, submitForPipelineTesting: false })
+                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: hasPublished, bulkSubmit: hasPublished, bulkValidate: hasCertainStatus, submitForPipelineTesting: false })
                 }
             },
             getCheckboxProps: (record) => ({

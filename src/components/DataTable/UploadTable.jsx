@@ -19,8 +19,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     const [modifiedData, setModifiedData] = useState([])
     // user selected (checkbox) from the table results
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
-    const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkValidate: true})
+    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit, globusToken} = useContext(AppContext)
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
     const hierarchyGroupings = {}
@@ -205,6 +205,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
+    const confirmBulkValidate = () => {
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('uploads'), title: 'Upload(s) Submitted For Validation', selectedEntities, globusToken, setModal})
+    }
+
     const handleRemove = (record) => {
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
@@ -236,6 +240,10 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
                                                    dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    entityName={'uploads'} />})
         }
+
+        if (e.key === '5') {
+            showConfirmModalOfSelectedUploads({callback: 'confirmBulkValidate'})
+        }
     }
 
     const confirmBulkUploadEdit = () => {
@@ -253,7 +261,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     }
 
     const modalCallbacks = {
-        confirmBulkUploadEdit
+        confirmBulkUploadEdit,
+        confirmBulkValidate
     }
 
     const handleModalOk = () => {
