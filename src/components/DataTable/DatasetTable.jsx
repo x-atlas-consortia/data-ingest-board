@@ -132,7 +132,7 @@ const DatasetTable = ({
             render: (organType, record) => {
                 if (!organType) return null
                 return (
-                    <span>{getUBKGName(organType)}</span>
+                    <span className='js-cell__organType'>{getUBKGName(organType)}</span>
                 )
             }
         },
@@ -314,7 +314,7 @@ const DatasetTable = ({
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
-            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),
             TABLE.reusableColumns(urlSortOrder, {}).status,
             TABLE.reusableColumns(urlSortOrder, {}).deleteAction(handleRemove)
         ]
