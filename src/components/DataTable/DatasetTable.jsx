@@ -289,7 +289,7 @@ const DatasetTable = ({
     }
 
     const confirmBulkValidate = () => {
-        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('datasets'), title: 'Dataset(s) Submitted For Validation', selectedEntities, globusToken, setModal})
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('datasets'), title: 'Dataset(s) Submitted For Validation', selectedEntities, globusToken, setModal, method: 'post'})
     }
 
     const confirmBulkDatasetEdit = () => {

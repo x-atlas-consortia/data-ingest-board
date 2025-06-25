@@ -490,9 +490,9 @@ const TABLE = {
 
         autoBlobDownloader([manifestData], 'text/plain', `data-manifest.txt`)
     },
-    confirmBulk: ({url, title, selectedEntities, globusToken, setModal}) => {
+    confirmBulk: ({url, title, selectedEntities, globusToken, setModal, method = 'put'}) => {
         const headers = getHeadersWith(globusToken)
-        callService(url, headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
+        callService(url, headers.headers, selectedEntities.map(item => item.uuid), method).then((res) => {
             const {className} = UI_BLOCKS.modalResponse.styling(res)
 
             const {modalBody} = UI_BLOCKS.modalResponse.body(res, title)

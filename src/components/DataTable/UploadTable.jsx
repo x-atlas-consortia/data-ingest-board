@@ -206,7 +206,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
     const confirmBulkValidate = () => {
-        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('uploads'), title: 'Upload(s) Submitted For Validation', selectedEntities, globusToken, setModal})
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('uploads'), title: 'Upload(s) Submitted For Validation', selectedEntities, globusToken, setModal, method: 'post'})
     }
 
     const handleRemove = (record) => {
@@ -217,7 +217,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
-            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).deleteAction(handleRemove)
         ]
