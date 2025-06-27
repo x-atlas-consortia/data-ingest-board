@@ -213,7 +213,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
-            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).deleteAction(handleRemove)
         ]
