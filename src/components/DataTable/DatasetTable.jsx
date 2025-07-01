@@ -306,7 +306,7 @@ const DatasetTable = ({
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
-    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
+    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent, title = ''}) => {
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
@@ -315,7 +315,7 @@ const DatasetTable = ({
             TABLE.reusableColumns(urlSortOrder, {}).deleteAction(handleRemove)
         ]
         UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
-        columns, selectedEntities, setModal})
+        columns, selectedEntities, setModal, title})
     }
 
     const handleMenuClick = (e) => {
@@ -328,11 +328,11 @@ const DatasetTable = ({
         }
 
         if (e.key === '2') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess'})
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess', title: 'for bulk processing'})
         }
 
         if (e.key === '3') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit', title: 'for bulk editing',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
                                                        dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    />})
@@ -343,7 +343,7 @@ const DatasetTable = ({
         }
 
         if (e.key === '5') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkValidate'})
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkValidate', title: 'for bulk validation'})
         }
     }
 
