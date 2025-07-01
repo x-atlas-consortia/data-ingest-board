@@ -18,7 +18,7 @@ import AppContext from "@/context/AppContext";
  * @constructor
  */
 function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, loading, menuProps}) {
-    const {filters, page, pageSize} = useContext(RouterContext)
+    const {filters, page, pageSize, sortOrder} = useContext(RouterContext)
     const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange, baseColumns, getColumnsDict} = useContext(AppTableContext)
     const {selectedEntities} = useContext(AppContext)
     const [tableColumns, setTableColumns] = useState(columns)
@@ -26,13 +26,13 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
     useEffect(() => {
         let dict = getColumnsDict(baseColumns)
         let result = []
-        // The filteredValue property gets lost with the drag feature, so let's replenish it from the source.
+        // The defaultSortOrder, filteredValue property gets lost with the drag feature, so let's replenish it from the source.
         for (let i = 0; i < columns.length; i++) {
-            result.push({...columns[i], filteredValue: dict[columns[i].dataIndex].filteredValue})
+            result.push({...columns[i], defaultSortOrder: dict[columns[i].dataIndex].defaultSortOrder,  filteredValue: dict[columns[i].dataIndex].filteredValue})
         }
         setTableColumns(result)
 
-    }, [filters])
+    }, [filters, sortOrder])
 
     return (
         <>
@@ -42,6 +42,7 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
                 <ColumnToggle hiddenColumns={getHiddenColumns()} columns={columns} handleSelectionChange={handleHiddenColumns} />
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
+                   key={new Date().getMilliseconds()}
                  columns={tableColumns}
                  dataSource={countFilteredRecords(data, filters)}
                  showHeader={!loading}
