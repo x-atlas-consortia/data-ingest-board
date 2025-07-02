@@ -61,7 +61,7 @@ const DataTable = () => {
     }
 
     const applyUploads = (uploadResponse) => {
-        setUploadData(uploadResponse.data);
+        setUploadData(uploadResponse?.data);
     }
 
     const handleCachingRefresh = (response) => {
