@@ -19,7 +19,7 @@ import Palette from 'xac-sankey/dist/js/util/Palette'
 import useContent from "@/hooks/useContent";
 import {getUBKGName} from "@/lib/helpers/general";
 
-function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_name' }) {
+function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
         acc[c.key] = c.default;
         return acc
@@ -62,7 +62,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
         return colorPalettes && Object.keys(colorPalettes).length ? scaleOrdinal(Object.keys(colorPalettes[key]), Object.values(colorPalettes[key])) : scaleOrdinal(palette)
     }
 
-    const applyColors = async () => {
+    const applyColors = () => {
 
         let _colorMethods = {
             ...colorMethods,
@@ -78,10 +78,10 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
     useEffect(() => {
         const filteredData = filterChartData(column)
 
-        applyColors().then(()=> {
-            setChartData(filteredData)
-        })
-    }, [data, column])
+        applyColors()
+        setChartData(filteredData)
+        setHasInitViz(true)
+    }, [data, column, hasInitViz])
 
     const handleColumnMenuClick = (e) => {
         setColumn(e.key)
@@ -188,7 +188,7 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                         style={{ ...baseStyle }}
                         className={c.key === column ? 'is-active' : ''}
                     >
-                        {isBar(c.key) && (
+                        {hasInitViz && isBar(c.key) && (
                             <Bar
                                 data={_data}
                                 filters={filters}
@@ -196,10 +196,10 @@ function Visualizations({ data, filters, applyFilters, defaultColumn = 'group_na
                                 chartId={i.toString()}
                                 colorMethods={colorMethods}
                                 showXLabels={false}
-                                reload={true}
+                                reload={false}
                             />
                         )}
-                        {isPie(c.key) && (
+                        {hasInitViz && isPie(c.key) && (
                             <Pie
                                 data={_data}
                                 column={c.key}

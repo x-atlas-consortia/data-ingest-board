@@ -22,6 +22,7 @@ import RouterContext from "@/context/RouterContext";
 const DatasetTable = ({
     data,
     loading,
+    hasInitViz, setHasInitViz,
 }) => {
     const {filters, handleTableChange, sortField, sortOrder} = useContext(RouterContext)
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
@@ -413,7 +414,7 @@ const DatasetTable = ({
             ) : (
                 <>
                     <ChartProvider>
-                        <Visualizations data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
+                        <Visualizations hasInitViz={hasInitViz} setHasInitViz={setHasInitViz} data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
                     </ChartProvider>
 
                     <AppTableProvider context={'Dataset'} baseColumns={filteredDatasetColumns}>
