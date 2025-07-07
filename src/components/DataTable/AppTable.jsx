@@ -42,7 +42,6 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
                 <ColumnToggle hiddenColumns={getHiddenColumns()} columns={columns} handleSelectionChange={handleHiddenColumns} />
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
-                   key={new Date().getMilliseconds()}
                  columns={tableColumns}
                  dataSource={countFilteredRecords(data, filters)}
                  showHeader={!loading}
