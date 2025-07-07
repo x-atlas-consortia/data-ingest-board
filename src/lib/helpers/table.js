@@ -285,7 +285,7 @@ const TABLE = {
             }
         )
 
-        if(hasDataAdminPrivs){
+        if(hasDataAdminPrivs && ENVS.bulkValidateEnabled()){
             _items.push({
                 label: 'Validate Data',
                 key: '5',
