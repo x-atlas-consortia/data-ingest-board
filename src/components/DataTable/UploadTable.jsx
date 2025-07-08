@@ -19,8 +19,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     const [modifiedData, setModifiedData] = useState([])
     // user selected (checkbox) from the table results
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
-    const [disabledMenuItems, setDisabledMenuItems] = useState({})
-    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkValidate: true})
+    const {selectedEntities, setSelectedEntities, hasDataAdminPrivs, dataProviderGroups, confirmBulkEdit, globusToken} = useContext(AppContext)
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
     const hierarchyGroupings = {}
@@ -205,20 +205,24 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
+    const confirmBulkValidate = () => {
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('uploads'), title: 'Upload(s) Submitted For Validation', selectedEntities, globusToken, setModal, method: 'post'})
+    }
+
     const handleRemove = (record) => {
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
-    const showConfirmModalOfSelectedUploads  = ({callback, afterTableComponent}) => {
+    const showConfirmModalOfSelectedUploads  = ({callback, afterTableComponent, title = ''}) => {
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
-            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueGroupNames),
+            TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).statusUpload,
             TABLE.reusableColumns(urlSortOrder, urlParamFilters).deleteAction(handleRemove)
         ]
         UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
-            columns, selectedEntities, setModal, entityName: 'Uploads'})
+            columns, selectedEntities, setModal, entityName: 'Uploads', title})
     }
 
     const handleMenuClick = (e) => {
@@ -231,10 +235,14 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
         }
 
         if (e.key === '3') {
-            showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit',
+            showConfirmModalOfSelectedUploads({callback: 'confirmBulkUploadEdit', title: 'for bulk editing',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.uploads)}
                                                    dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    entityName={'uploads'} />})
+        }
+
+        if (e.key === '5') {
+            showConfirmModalOfSelectedUploads({callback: 'confirmBulkValidate', title: 'for bulk validation'})
         }
     }
 
@@ -253,7 +261,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     }
 
     const modalCallbacks = {
-        confirmBulkUploadEdit
+        confirmBulkUploadEdit,
+        confirmBulkValidate
     }
 
     const handleModalOk = () => {

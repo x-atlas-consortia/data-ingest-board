@@ -28,7 +28,7 @@ const DatasetTable = ({
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
-    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkEdit: true, bulkSubmit: true, submitForPipelineTesting:true})
+    const [disabledMenuItems, setDisabledMenuItems] = useState({bulkEdit: true, bulkSubmit: true, bulkValidate: true, submitForPipelineTesting:true})
     const [bulkEditValues, setBulkEditValues] = useState({})
     const [confirmModalArgs, setConfirmModalArgs] = useState({})
 
@@ -286,13 +286,11 @@ const DatasetTable = ({
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})
 
     const confirmBulkProcess = () => {
-        const headers = getHeadersWith(globusToken)
-        callService(URLS.ingest.bulk.submit(), headers.headers, selectedEntities.map(item => item.uuid)).then((res) => {
-            const {className} = UI_BLOCKS.modalResponse.styling(res)
-            let mainTitle = 'Dataset(s) Subfmitted For Processing'
-            const {modalBody} = UI_BLOCKS.modalResponse.body(res, mainTitle)
-            setModal({body: modalBody, width: 1000, className, open: true, cancelCSS: 'none', okCallback: null})
-        })
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.submit(), title: 'Dataset(s) Submitted For Processing', selectedEntities, globusToken, setModal})
+    }
+
+    const confirmBulkValidate = () => {
+        TABLE.confirmBulk( {url: URLS.ingest.bulk.validate('datasets'), title: 'Dataset(s) Submitted For Validation', selectedEntities, globusToken, setModal, method: 'post'})
     }
 
     const confirmBulkDatasetEdit = () => {
@@ -301,6 +299,7 @@ const DatasetTable = ({
 
     const modalCallbacks = {
         confirmBulkProcess,
+        confirmBulkValidate,
         confirmBulkDatasetEdit
     }
 
@@ -308,7 +307,7 @@ const DatasetTable = ({
         TABLE.removeFromSelection(record, selectedEntities, setSelectedEntities, setCheckedModifiedData)
     }
 
-    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent}) => {
+    const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent, title = ''}) => {
         setConfirmModalArgs({callback, afterTableComponent})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
@@ -317,7 +316,7 @@ const DatasetTable = ({
             TABLE.reusableColumns(urlSortOrder, {}).deleteAction(handleRemove)
         ]
         UI_BLOCKS.modalConfirm.showConfirmModalOfSelectedEntities({callback, afterTableComponent,
-        columns, selectedEntities, setModal})
+        columns, selectedEntities, setModal, title})
     }
 
     const handleMenuClick = (e) => {
@@ -330,11 +329,11 @@ const DatasetTable = ({
         }
 
         if (e.key === '2') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess'})
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkProcess', title: 'for bulk processing'})
         }
 
         if (e.key === '3') {
-            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit',
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkDatasetEdit', title: 'for bulk editing',
                 afterTableComponent: <BulkEditForm statuses={TABLE.getStatusFilters(STATUS.datasets)}
                                                        dataProviderGroups={dataProviderGroups} setBulkEditValues={setBulkEditValues}
                                                    />})
@@ -342,6 +341,10 @@ const DatasetTable = ({
         
         if (e.key === '4') {
             submitForPipelineTesting();
+        }
+
+        if (e.key === '5') {
+            showConfirmModalOfSelectedDatasets({callback: 'confirmBulkValidate', title: 'for bulk validation'})
         }
     }
 
