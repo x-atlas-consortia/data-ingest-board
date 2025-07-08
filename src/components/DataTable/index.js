@@ -57,6 +57,7 @@ const DataTable = () => {
 
     const applyDatasets = (datasetResponse) => {
         const primaryDatasets = getPrimaryDatasets(datasetResponse?.data);
+        setDatasetData(datasetResponse?.data);
         setPrimaryData(primaryDatasets);
         setOriginalPrimaryData(primaryDatasets);
     }
