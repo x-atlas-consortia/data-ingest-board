@@ -1,12 +1,13 @@
 import {CaretDownOutlined, CloseOutlined, DownloadOutlined, FileExcelOutlined, EditOutlined, FileTextOutlined} from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
 import React from "react";
-import {autoBlobDownloader, eq, getUBKGName, some, toDateString} from "./general";
+import {autoBlobDownloader, eq, getUBKGName, some, storageKey, toDateString} from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
 import THEME from "./theme";
 import {STATUS} from "../constants";
 import {getHierarchy} from "@/lib/helpers/hierarchy";
+import {TABLE_COL_HIDDEN_KEY, TABLE_COL_ORDER_KEY} from "@/context/TableContext";
 
 const TABLE = {
     cols: {
@@ -195,30 +196,59 @@ const TABLE = {
             return item;
         })
     },
+    sortColumns: (filename, cols) => {
+        let _cols = []
+        // Print csv in order of column sorting in toggling
+        const context = filename.includes('upload') ? 'Upload' : 'Dataset';
+        const columnOrder = localStorage.getItem(storageKey(`${TABLE_COL_ORDER_KEY}${context}`))
+        let hiddenColumns = localStorage.getItem(storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`))
+
+        if (columnOrder) {
+            cols = JSON.parse(columnOrder) || []
+        }
+
+        if (hiddenColumns) {
+            hiddenColumns = JSON.parse(hiddenColumns)
+
+            for (let i = 0; i < cols.length; i++) {
+                if (!hiddenColumns.includes(cols[i])) {
+                    _cols.push(cols[i])
+                }
+            }
+
+            cols = Array.from(_cols)
+        }
+        return _cols.length ? _cols : cols
+    },
     generateCSVFile: (data, filename) => {
         if (!data.length) return
-        let _data = ''
-        const cols = Object.keys(data[0])
+        try {
+            let _data = ''
+            let cols = TABLE.sortColumns(filename, Object.keys(data[0]))
 
-        const csv = (d) => {
-            let sep, c, col
-            for (let i = 0; i < cols.length; i++) {
-                sep = i === cols.length - 1 ? '' : ','
-                c = cols[i]
-                col = d ? d[c] : c
-                _data += `"${col}"${sep}`
+            const csv = (d) => {
+                let sep, c, col
+                for (let i = 0; i < cols.length; i++) {
+                    sep = i === cols.length - 1 ? '' : ','
+                    c = cols[i]
+                    col = d ? d[c] : c
+                    _data += `"${col}"${sep}`
+                }
             }
-        }
 
-        csv()
-        _data += "\n"
-        for (let d of data) {
-            csv(d)
+            csv()
             _data += "\n"
+            for (let d of data) {
+                csv(d)
+                _data += "\n"
+            }
+
+            const type = 'comma/tab-separated-values'
+            autoBlobDownloader([_data], type, filename)
+        } catch (e) {
+
         }
 
-        const type = 'comma/tab-separated-values'
-        autoBlobDownloader([_data], type, filename)
     },
     bulkSelectionDropdown: (items = [], {hasDataAdminPrivs, disabledMenuItems}) => {
         let _items = [

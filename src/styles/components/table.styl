@@ -55,8 +55,27 @@
       width 90%
       margin-top 2rem
       margin-bottom 2rem
+    .ant-spin-container .ant-pagination:first-child .ant-pagination-options-quick-jumper
+      display none
 
   &--pDatasets
     .revision-number
       padding 2px 10px
       border-radius 3px
+
+  &__columnToggle
+    display inline-block
+    width 210px
+    margin-left 5px
+    +sm()
+      margin-top 5px
+      margin-left 0
+    .ant-select-selector
+      height 33px
+      overflow-y auto
+
+  .ant-table-column-sorters:hover
+    cursor pointer
+
+  .ant-table-column-title:hover
+    cursor move
