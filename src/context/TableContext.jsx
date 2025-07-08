@@ -31,7 +31,8 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const hiddenColumnsStoreKey = storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`)
     const [dragEnd, setDragEnd] = useState(0)
     const [_, setHiddenColumns] = useState(initialColumnsToHide)
-    const {setFilters, setPage, setPageSize, setSortOrder, setSortField} = useContext(RouterContext)
+    const {setFilters, setPage, setPageSize} = useContext(RouterContext)
+    const sortingInfo = useRef(null)
 
     const getColumnsDict = (cols) => {
         let dict = {}
@@ -223,25 +224,32 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             }
         }
 
-        setFilters(correctedFilters)
+
+
 
         const clearSort = () => {
-            setSortOrder(undefined)
-            setSortField(undefined)
+            //setSortOrder(undefined)
+            //setSortField(undefined)
+            sortingInfo.current = null
             query.delete('sort_field')
             query.delete('sort_order')
         }
 
         if (sorter.field) {
+            const sortingFlag = `${sorter.field}_${sorter.order}`
+            if (sortingInfo.current === sortingFlag) {
+                setFilters(correctedFilters)
+            }
             query.set('sort_field', sorter.field);
-            setSortField(sorter.field)
             if (sorter.order) {
-                setSortOrder(sorter.order)
+                sortingInfo.current = sortingFlag
                 query.set('sort_order', sorter.order);
             } else {
                 clearSort()
             }
+
         } else {
+            setFilters(correctedFilters)
             clearSort()
         }
         Object.keys(correctedFilters).forEach(key => {

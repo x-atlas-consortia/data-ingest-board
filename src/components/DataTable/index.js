@@ -28,6 +28,7 @@ const DataTable = () => {
     const [isCachingUploads, setIsCachingUploads] = useState(false)
     const [invalidUploadId, setInvalidUploadId] = useState(false)
     const [tableKey, setTableKey] = useState('initialKey')
+    const [hasInitViz, setHasInitViz] = useState(false)
 
     const cachingTimeout = useRef(null)
 
@@ -134,6 +135,7 @@ const DataTable = () => {
     };
 
     const clearAll = () => {
+        setHasInitViz(false)
         setSelectedEntities([])
         toggleHistory(!useDatasetApi)
         setPrimaryData(originalPrimaryData)
@@ -158,6 +160,8 @@ const DataTable = () => {
             key={tableKey}
             data={primaryData}
             loading={loading}
+            hasInitViz={hasInitViz}
+            setHasInitViz={setHasInitViz}
         />
     ) : uploadTable;
 
