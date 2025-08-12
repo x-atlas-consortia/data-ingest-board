@@ -6,7 +6,6 @@ export const STATUS = {
     ],
 
     uploads: [
-        {text: 'Unreorganized', value: 'unreorganized'},
         {text: 'Valid', value: 'valid'},
         {text: 'Reorganized', value: 'reorganized'},
     ]
