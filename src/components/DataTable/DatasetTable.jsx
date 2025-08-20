@@ -267,6 +267,7 @@ const DatasetTable = ({
                 width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage,
     ]
 
     // Exclude named columns in .env from table

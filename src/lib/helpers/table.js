@@ -26,6 +26,7 @@ import {STATUS} from "../constants";
 import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {TABLE_COL_HIDDEN_KEY, TABLE_COL_ORDER_KEY} from "@/context/TableContext";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
+import ModalOver from "@/components/ModalOver";
 
 const TABLE = {
     cols: {
@@ -441,6 +442,18 @@ const TABLE = {
                     </span>
                     </Tooltip>
                 )
+            },
+            errorMessage: {
+                title: "Error Message",
+                width: 200,
+                dataIndex: "error_message",
+                align: "left",
+                defaultSortOrder: defaultSortOrder["error_message"] || null,
+                sorter: (a,b) => a?.error_message.localeCompare(b?.error_message),
+                ellipsis: true,
+                render: (content, record) => {
+                    return <ModalOver content={content} modal={modal} setModal={setModal} />
+                }
             },
             priorityProjectList: (uniquePriorityPList, filters) => ({
                 title: "Priority Project List",
