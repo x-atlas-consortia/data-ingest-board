@@ -267,7 +267,9 @@ const DatasetTable = ({
                 width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage,
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({modal, name: 'Blocks', field: 'blocks'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({modal, name: 'Parent Ancestors', field: 'parent_ancestors'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage({modal, setModal}),
     ]
 
     // Exclude named columns in .env from table

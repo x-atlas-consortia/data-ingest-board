@@ -187,7 +187,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
             ellipsis: true,
         },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage,
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage({modal, setModal}),
     ];
 
     // Exclude named columns in .env from table

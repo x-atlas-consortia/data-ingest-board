@@ -8,7 +8,7 @@ function ModalOver({content, displayMax = 24, modal, setModal}) {
 
     return (
         <>
-            <Popover content={'Click to view full task content.'} placement={'left'}><span onClick={() => {
+            <Popover content={'Click to view full content.'} placement={'left'}><span onClick={() => {
                 setModal({width: 700, cancelCSS: 'none', className: '', body: content, open: true})
             }
             }>{content}</span></Popover>

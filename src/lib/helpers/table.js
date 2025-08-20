@@ -27,6 +27,7 @@ import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {TABLE_COL_HIDDEN_KEY, TABLE_COL_ORDER_KEY} from "@/context/TableContext";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import ModalOver from "@/components/ModalOver";
+import ModalOverComponent from "@/components/ModalOverComponent";
 
 const TABLE = {
     cols: {
@@ -443,18 +444,40 @@ const TABLE = {
                     </Tooltip>
                 )
             },
-            errorMessage: {
-                title: "Error Message",
-                width: 200,
-                dataIndex: "error_message",
-                align: "left",
-                defaultSortOrder: defaultSortOrder["error_message"] || null,
-                sorter: (a,b) => a?.error_message.localeCompare(b?.error_message),
-                ellipsis: true,
-                render: (content, record) => {
-                    return <ModalOver content={content} modal={modal} setModal={setModal} />
+            errorMessage: ({modal, setModal}) => (
+                {
+                    title: "Error Message",
+                    width: 200,
+                    dataIndex: "error_message",
+                    align: "left",
+                    defaultSortOrder: defaultSortOrder["error_message"] || null,
+                    sorter: (a,b) => a?.error_message.localeCompare(b?.error_message),
+                    ellipsis: true,
+                    render: (content, record) => {
+                        return <ModalOver content={content} modal={modal} setModal={setModal} />
+                    }
                 }
-            },
+            ),
+            uuidList: ({name, field, setModal}) => ({
+                title: name,
+                width: 250,
+                dataIndex: field,
+                align: "left",
+                defaultSortOrder: defaultSortOrder[field] || null,
+                sorter: (a,b) => `${a[field]}`.localeCompare(`${b[field]}`),
+                ellipsis: false,
+                render: (uuids, record) => {
+                    if (!uuids || !uuids.length) return null
+                    let res = []
+                    for (let id of uuids) {
+                        res.push( <a href={URLS.ingest.view(id)} className={`mb-1 js-tag`} key={id}>{id}</a>)
+                    }
+                    if (uuids.length > 1) return <ModalOverComponent setModal={setModal} ><div className='c-table__colTags'>{res}</div></ModalOverComponent>
+
+                    return <a href={URLS.ingest.view(uuids[0])} className={`mb-1 js-tag`}>{uuids[0]}</a>
+
+                }
+            }),
             priorityProjectList: (uniquePriorityPList, filters) => ({
                 title: "Priority Project List",
                 width: 250,
