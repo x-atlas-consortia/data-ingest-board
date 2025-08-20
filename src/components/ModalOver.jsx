@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import {Popover} from "antd";
 
 function ModalOver({content, displayMax = 24, modal, setModal}) {
-    if (content.length < displayMax) {
+    if (content?.length < displayMax) {
         return <span>{content}</span>
     }
 

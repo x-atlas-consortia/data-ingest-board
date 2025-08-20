@@ -1,17 +1,24 @@
 import PropTypes from 'prop-types'
-import {Popover} from "antd";
+import {Popover, Button, Modal} from "antd";
+import { EllipsisOutlined } from '@ant-design/icons';
+import {useState} from "react";
+import AppModal from "@/components/AppModal";
 
-function ModalOverComponent({children, cond = true, setModal}) {
-    if (!cond) {
-        return <div>{children}</div>
-    }
+function ModalOverComponent({children, modalContent}) {
+    const [modal, setModal] = useState({cancelCSS: 'none', okText: 'OK'})
 
     return (
         <>
-            <Popover content={'Click to view full content.'} placement={'left'}><div onClick={() => {
-                setModal({width: 700, cancelCSS: 'none', className: '', body: content, open: true})
+            {children}
+            <Popover content={'Click to view full content.'} placement={'left'}><div onClick={(e) => {
+                e.preventDefault()
+                setModal({width: 700, cancelCSS: 'none', className: '', body: modalContent, open: true})
             }
-            }>{children}</div></Popover>
+            }>
+                <Button type="primary" shape="round" icon={<EllipsisOutlined />} size={'small'}>View all </Button>
+            </div></Popover>
+
+            <AppModal modal={modal} setModal={setModal} />
         </>
     )
 }

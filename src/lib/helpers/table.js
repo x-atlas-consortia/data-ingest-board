@@ -5,7 +5,7 @@ import {
     FileExcelOutlined,
     EditOutlined,
     FileTextOutlined,
-    ThunderboltOutlined, BugOutlined
+    ExportOutlined, BugOutlined
 } from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
 import React from "react";
@@ -464,17 +464,30 @@ const TABLE = {
                 dataIndex: field,
                 align: "left",
                 defaultSortOrder: defaultSortOrder[field] || null,
-                sorter: (a,b) => `${a[field]}`.localeCompare(`${b[field]}`),
+                sorter: (a,b) => {
+                    let _a = (!a[field] || !a[field].length) ? '' : `${a[field][0][TABLE.cols.f('id')]}`
+                    let _b = (!b[field] || !b[field].length) ? '' : `${b[field][0][TABLE.cols.f('id')]}`
+                    if (!a[field] || !b[field] || !a[field].length || !b[field].length) return 0
+                    return _a.localeCompare(_b)
+                },
                 ellipsis: false,
                 render: (uuids, record) => {
                     if (!uuids || !uuids.length) return null
                     let res = []
                     for (let id of uuids) {
-                        res.push( <a href={URLS.ingest.view(id)} className={`mb-1 js-tag`} key={id}>{id}</a>)
+                        res.push(<li key={id.uuid}><a href={URLS.ingest.view(id.uuid)} target={'_blank'} className={`mb-1 js-tag`} >{id[TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a></li>)
                     }
-                    if (uuids.length > 1) return <ModalOverComponent setModal={setModal} ><div className='c-table__colTags'>{res}</div></ModalOverComponent>
+                    const display = <a target={'_blank'} href={URLS.ingest.view(uuids[0].uuid)} className={`mb-1 js-tag`}>{uuids[0][TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    if (uuids.length > 1) {
+                        return (<ModalOverComponent setModal={setModal} modalContent={<div className='c-table__colTags'>
+                            <h3>{name} of {record[TABLE.cols.f('id')]}</h3>
+                            <ul>{res}</ul>
+                        </div>}>
+                            {display}
+                        </ModalOverComponent>)
+                    }
 
-                    return <a href={URLS.ingest.view(uuids[0])} className={`mb-1 js-tag`}>{uuids[0]}</a>
+                    return display
 
                 }
             }),
