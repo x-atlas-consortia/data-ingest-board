@@ -453,7 +453,7 @@ const TABLE = {
                     dataIndex: "error_message",
                     align: "left",
                     defaultSortOrder: defaultSortOrder["error_message"] || null,
-                    sorter: (a,b) => a?.error_message.localeCompare(b?.error_message),
+                    sorter: (a,b) => a?.error_message?.localeCompare(b?.error_message),
                     ellipsis: true,
                     render: (content, record) => {
                         return <ModalOver content={content} />
