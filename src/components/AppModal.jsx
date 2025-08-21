@@ -1,7 +1,7 @@
 
 import { Modal} from "antd";
 
-function AppModal({modal, setModal, handleModalOk}) {
+function AppModal({modal, setModal, handleModalOk, id}) {
 
     const closeModal = () => {
         setModal({...modal, okText: 'OK', open: false})
@@ -9,6 +9,7 @@ function AppModal({modal, setModal, handleModalOk}) {
 
     return (
         <Modal
+            id={id}
             className={modal.className}
             width={modal.width}
             cancelButtonProps={{ style: { display: modal.cancelCSS } }}

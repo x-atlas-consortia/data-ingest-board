@@ -1,4 +1,3 @@
-import {Modal} from "antd";
 import {ExportOutlined, ThunderboltOutlined, CloudUploadOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useRef, useState} from "react";
 import Spinner from "../Spinner";
@@ -108,7 +107,7 @@ const DatasetTable = ({
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} modal={modal} setModal={setModal} />
+                return <ModalOver content={task} />
             }
         },
         {

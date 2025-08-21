@@ -3,9 +3,10 @@ import {Popover, Button, Modal} from "antd";
 import { EllipsisOutlined } from '@ant-design/icons';
 import {useState} from "react";
 import AppModal from "@/components/AppModal";
+import {modalDefault} from "@/lib/constants";
 
 function ModalOverComponent({children, modalContent}) {
-    const [modal, setModal] = useState({cancelCSS: 'none', okText: 'OK'})
+    const [modal, setModal] = useState(modalDefault)
 
     return (
         <>

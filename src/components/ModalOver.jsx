@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types'
 import {Popover} from "antd";
+import {useState} from "react";
+import AppModal from "@/components/AppModal";
+import {modalDefault} from "@/lib/constants";
 
-function ModalOver({content, displayMax = 24, modal, setModal}) {
+function ModalOver({content, displayMax = 24}) {
+    const [modal, setModal] = useState(modalDefault)
+
     if (content?.length < displayMax) {
         return <span>{content}</span>
     }
@@ -12,14 +17,14 @@ function ModalOver({content, displayMax = 24, modal, setModal}) {
                 setModal({width: 700, cancelCSS: 'none', className: '', body: content, open: true})
             }
             }>{content}</span></Popover>
+            <AppModal modal={modal} setModal={setModal} />
         </>
     )
 }
 
 ModalOver.propTypes = {
     content: PropTypes.string.isRequired,
-    displayMax: PropTypes.number,
-    setModal: PropTypes.func.isRequired
+    displayMax: PropTypes.number
 }
 
 export default ModalOver
