@@ -475,14 +475,20 @@ const TABLE = {
                     if (!uuids || !uuids.length) return null
                     let res = []
                     for (let id of uuids) {
-                        res.push(<li key={id.uuid}><a href={URLS.ingest.view(id.uuid)} target={'_blank'} className={`mb-1 js-tag`} >{id[TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a></li>)
+                        res.push(<li key={id.uuid} className={'list-group-item'}><a href={URLS.ingest.view(id.uuid)} target={'_blank'} className={`mb-1 text-decoration-none`} >{id[TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a></li>)
                     }
-                    const display = <a target={'_blank'} href={URLS.ingest.view(uuids[0].uuid)} className={`mb-1 js-tag`}>{uuids[0][TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a>
+                    const titles = {
+                        blocks: 'Sample Blocks',
+                        parent_ancestors: name
+                    }
+                    const display = <a target={'_blank'} href={URLS.ingest.view(uuids[0].uuid)} className={`mb-1`}>{uuids[0][TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle'}}/></a>
                     if (uuids.length > 1) {
-                        return (<ModalOverComponent setModal={setModal} modalContent={<div className='c-table__colTags'>
-                            <h3>{name} of {record[TABLE.cols.f('id')]}</h3>
-                            <ul>{res}</ul>
-                        </div>}>
+                        return (<ModalOverComponent setModal={setModal} modalContent={
+                            <div className='c-table__colTags'>
+                                <h3 className={'fs-6'}>{titles[field]} of <a className='text-decoration-none' target={'_blank'} href={URLS.ingest.view(record.uuid)}>{record[TABLE.cols.f('id')]} <ExportOutlined style={{verticalAlign: 'middle', fontSize: '14px'}}/></a> {record.dataset_type && <span className='badge bg-secondary p-2 mx-2'>{record.dataset_type}</span>}</h3>
+                                <ul className={'list-group list-scrollable mt-3'}>{res}</ul>
+                            </div>}>
+
                             {display}
                         </ModalOverComponent>)
                     }
