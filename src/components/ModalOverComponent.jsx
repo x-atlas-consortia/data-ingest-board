@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import {Popover, Button, Modal} from "antd";
+import {Popover, Button} from "antd";
 import { EllipsisOutlined } from '@ant-design/icons';
 import {useState} from "react";
 import AppModal from "@/components/AppModal";
@@ -16,7 +16,7 @@ function ModalOverComponent({children, modalContent}) {
                 setModal({width: 700, cancelCSS: 'none', className: '', body: modalContent, open: true})
             }
             }>
-                <Button type="primary" shape="round" icon={<EllipsisOutlined />} size={'small'}>View all </Button>
+                <Button className='ant-btn-more' type="primary" shape="round" icon={<EllipsisOutlined style={{fontSize: '24px'}} />} size={'small'}>View all </Button>
             </div></Popover>
 
             <AppModal modal={modal} setModal={setModal} />
@@ -26,8 +26,7 @@ function ModalOverComponent({children, modalContent}) {
 
 ModalOverComponent.propTypes = {
     children: PropTypes.node,
-    displayMax: PropTypes.number,
-    setModal: PropTypes.func.isRequired
+    displayMax: PropTypes.number
 }
 
 export default ModalOverComponent

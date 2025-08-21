@@ -94,7 +94,7 @@ const DatasetTable = ({
             ellipsis: true,
             render: (processed_datasets, record) => {
                 return <ModalOverData args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
-                                      modal={modal} setModal={setModal} />
+                                       />
             }
         },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueDataFilters['assigned_to_group_name']),
@@ -267,9 +267,9 @@ const DatasetTable = ({
                 width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({modal, setModal, name: 'Blocks', field: 'blocks'}),
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({modal, setModal, name: 'Parent Ancestors', field: 'parent_ancestors'}),
-        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage({modal, setModal}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Blocks', field: 'blocks'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Parent Ancestors', field: 'parent_ancestors'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage(),
     ]
 
     // Exclude named columns in .env from table

@@ -446,7 +446,7 @@ const TABLE = {
                     </Tooltip>
                 )
             },
-            errorMessage: ({modal, setModal}) => (
+            errorMessage: () => (
                 {
                     title: "Error Message",
                     width: 200,
@@ -456,11 +456,11 @@ const TABLE = {
                     sorter: (a,b) => a?.error_message.localeCompare(b?.error_message),
                     ellipsis: true,
                     render: (content, record) => {
-                        return <ModalOver content={content} modal={modal} setModal={setModal} />
+                        return <ModalOver content={content} />
                     }
                 }
             ),
-            uuidList: ({name, field, setModal}) => ({
+            uuidList: ({name, field}) => ({
                 title: name,
                 width: 250,
                 dataIndex: field,
@@ -484,14 +484,13 @@ const TABLE = {
                         parent_ancestors: name
                     }
                     const display = <IdLink data={uuids[0]} />
-                    const isBlocks = eq(field, 'blocks')
                     if (uuids.length > 1) {
-                        return (<ModalOverComponent setModal={setModal} modalContent={
+                        return (<ModalOverComponent modalContent={
                             <div className='c-table__colTags'>
-                                <h3 className={'fs-6'}>{titles[field]} of &nbsp;
-                                    {isBlocks && <IdLink data={record} />}
-                                    {!isBlocks && <IdLinkDropdown data={record} />}
+                                <h3 className={'fs-5'}>
+                                    <IdLinkDropdown data={record} />
                                     {record.dataset_type && <span className='badge bg-secondary p-2 mx-2'>{record.dataset_type}</span>}</h3>
+                                <h4 className={'fs-6 mt-3'}>{titles[field]}</h4>
                                 <ul className={'list-group list-scrollable mt-3'}>{res}</ul>
                             </div>}>
 

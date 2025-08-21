@@ -189,8 +189,7 @@ function ModalOverData({content, cols = [],  popoverText = 'Click to view all pr
 ModalOverData.propTypes = {
     content: PropTypes.array.isRequired,
     cols: PropTypes.array,
-    args: PropTypes.object.isRequired,
-    setModal: PropTypes.func.isRequired
+    args: PropTypes.object.isRequired
 }
 
 export default ModalOverData
