@@ -4,15 +4,19 @@ import {getHeadersWith, toDateString} from "../lib/helpers/general";
 import THEME from "../lib/helpers/theme";
 import TABLE from "../lib/helpers/table";
 import URLS from "../lib/helpers/urls";
-import React, {useContext} from "react";
+import React, {useContext, useState} from "react";
 import axios from "axios";
 import AppContext from "../context/AppContext";
 import {CaretDownOutlined, DownloadOutlined} from "@ant-design/icons";
 import Spinner from "./Spinner";
+import AppModal from "@/components/AppModal";
+import {modalDefault} from "@/lib/constants";
 
-function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Click to view all processed datasets.', args}) {
+function ModalOverData({content, cols = [],  popoverText = 'Click to view all processed datasets.', args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
+    const [modal, setModal] = useState(modalDefault)
+
     let usedColors = {}
     let dataIndices = {}
     let revisionsDict = {}
@@ -177,6 +181,7 @@ function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Clic
                 setModal({width: 1000, cancelCSS: 'none', className: '', open: true, body: modalBody})
             }
             }>{content.length}</span></Popover>
+            <AppModal modal={modal} setModal={setModal} />
         </>
     )
 }
@@ -184,8 +189,7 @@ function ModalOverData({content, cols = [], modal, setModal, popoverText = 'Clic
 ModalOverData.propTypes = {
     content: PropTypes.array.isRequired,
     cols: PropTypes.array,
-    args: PropTypes.object.isRequired,
-    setModal: PropTypes.func.isRequired
+    args: PropTypes.object.isRequired
 }
 
 export default ModalOverData

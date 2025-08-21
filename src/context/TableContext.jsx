@@ -33,6 +33,13 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const [_, setHiddenColumns] = useState(initialColumnsToHide)
     const {setFilters, setPage, setPageSize} = useContext(RouterContext)
     const sortingInfo = useRef(null)
+    const adjustedFilters = useRef(null)
+
+    useEffect(() => {
+        $('body').on('click', '.ant-table-filter-dropdown-btns', (e)=> {
+            setFilters(adjustedFilters.current)
+        })
+    }, []);
 
     const getColumnsDict = (cols) => {
         let dict = {}
@@ -249,7 +256,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             }
 
         } else {
-            setFilters(correctedFilters)
+            adjustedFilters.current = correctedFilters
             clearSort()
         }
         Object.keys(correctedFilters).forEach(key => {

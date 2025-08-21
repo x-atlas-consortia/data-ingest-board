@@ -52,10 +52,14 @@ function useContent() {
     }
 
     useEffect(() => {
-        loadMessages().then((r) => setMessages(r))
-        loadBanners().then((r) => setBanners(r))
-        loadUbkg().then((r) => setUbkg(r))
-        loadColorPalettes().then((r) => setColorPalettes(r))
+        try {
+            loadMessages().then((r) => setMessages(r))
+            loadBanners().then((r) => setBanners(r))
+            loadUbkg().then((r) => setUbkg(r))
+            loadColorPalettes().then((r) => setColorPalettes(r))
+        } catch (e) {
+            console.error(e)
+        }
     }, [])
 
     return {messages, ubkg, banners, colorPalettes}
