@@ -23,9 +23,11 @@ const AppTableContext = createContext({})
 export const TABLE_COL_ORDER_KEY = 'table.orderedColumns.'
 export const TABLE_COL_HIDDEN_KEY = 'table.hiddenColumns.'
 
+const DragIndexContext = createContext({ active: -1, over: -1 })
+
 export const AppTableProvider = ({ children,  context, baseColumns, initialColumnsToHide = [] }) => {
     let _a;
-    const DragIndexContext = createContext({ active: -1, over: -1 })
+
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
     const orderedColumnsStoreKey = storageKey(`${TABLE_COL_ORDER_KEY}${context}`)
     const hiddenColumnsStoreKey = storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`)
