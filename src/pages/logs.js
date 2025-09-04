@@ -6,6 +6,7 @@ import { callService, eq, getHeadersWith } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
 import ESQ from "@/lib/helpers/esq";
+import Spinner from '@/components/Spinner';
 const { Header, Sider, Content } = Layout;
 const { RangePicker } = DatePicker;
 const Logs = () => {
@@ -24,6 +25,7 @@ const Logs = () => {
     const [activeSection, setActiveSection] = useState(null)
     const indicesSections = useRef({})
     const indicesData = useRef({})
+    const [isLoading, setIsLoading] = useState(true)
 
     const handleDateRange = (dates, dateStrings) => {
         console.log(dates, dateStrings)
@@ -36,23 +38,47 @@ const Logs = () => {
 
     const isRepos = (key) => eq(key, 'openSourceRepos')
 
+    const isFiles = (key) => eq(key, 'fileDownloads')
+
+    const formatNum = (num) => new Intl.NumberFormat().format(num)
+
+    const formatBytes = (bytes, decimals = 2) => {
+        if (!+bytes) return '0 Bytes'
+
+        const k = 1024
+        const dm = decimals < 0 ? 0 : decimals
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+    }
+
     const getCardDetail = (key, data) => {
         const indices = indicesSections.current[key]
         let clones, totalClones = 0
         let views, totalViews = 0
-        let totalHits = 0
-        let services = 0
-
-
+        let totalHits, services = 0
+        let totalBytes, datasetGroups, totalFiles = 0
+        let indexData, agg 
+        
         for (let i of indices) {
             clones = 0
             views = 0
+            indexData = data[i].data
+            agg = indexData.aggregations
+
             if (isMicro(key)) {
-                totalHits = data[i].data.hits.total?.value
-                services = data[i].data.aggregations.services.buckets.length
+                totalHits = indexData.hits.total?.value
+                services = agg.services.buckets.length
+            } else if (isFiles(key)) {
+                totalHits = indexData.hits.total?.value
+                totalFiles = agg.totalFiles.value
+                datasetGroups = agg.totalDatasets.value
+                totalBytes = agg.totalBytes.value
             } else {
                 // TODO to be restructured
-                for (let d of data[i].data.hits.hits) {
+                for (let d of indexData.hits.hits) {
                     clones += (d._source.clones?.count || 0)
                     views += (d._source.views?.count || 0)
                 }
@@ -62,8 +88,6 @@ const Logs = () => {
                 totalClones += clones
                 totalViews += views
             }
-
-
         }
 
         if (isRepos(key)) {
@@ -79,11 +103,24 @@ const Logs = () => {
         if (isMicro(key)) {
             return (<>
                 <div><h3>{services}</h3></div>
-                <Row>
+                <Row className='mt-2'>
                     <Col span={12}>0<br />endpoints</Col>
                 </Row>
-                <Row>
-                    <Col span={12}>{totalHits}<br />hits</Col>
+                <Row className='mt-2'>
+                    <Col span={12}>{formatNum(totalHits)}<br />hits</Col>
+                </Row>
+            </>)
+        }
+
+        if (isFiles(key)) {
+            return (<>
+                <div><h3>{formatNum(totalFiles)}</h3>globus files</div>
+                <Row className='mt-2'>
+                    <Col span={12}>{formatNum(datasetGroups)}<br />datasets</Col>
+                    <Col span={12}>{formatBytes(totalBytes)}<br />downloaded</Col>
+                </Row>
+                <Row className='mt-2'>
+                    <Col span={12}>{formatNum(totalHits)}<br />hits</Col>
                 </Row>
             </>)
         }
@@ -114,6 +151,18 @@ const Logs = () => {
                 }
             ],
             microservices: [
+                {
+                    title: 'Endpoints',
+                    dataIndex: 'endpoints',
+                    key: 'endpoints',
+                },
+                {
+                    title: 'Hits',
+                    dataIndex: 'hits',
+                    key: 'hits',
+                }
+            ],
+            fileDownloads: [
                 {
                     title: 'Endpoints',
                     dataIndex: 'endpoints',
@@ -167,6 +216,9 @@ const Logs = () => {
             },
             microservices: {
                 title: 'Microservices'
+            },
+            fileDownloads: {
+                title: 'Data Transfers'
             }
         }
 
@@ -185,6 +237,7 @@ const Logs = () => {
         setCards(comps)
         setTabs(_tabs)
         setActiveSection(`tab-${Object.keys(indicesSections.current)[0]}`)
+        setIsLoading(false)
     }
 
     const fetchData = async () => {
@@ -259,6 +312,7 @@ const Logs = () => {
                         style={{ marginBottom: 32 }}
                         items={tabs}
                     /></Row>}
+                    {isLoading && <Spinner />}
                 </Content>
             </Layout>
         </Layout>

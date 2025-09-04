@@ -12,7 +12,7 @@ const ESQ = {
     },
     groupByField: (field = 'dataset_uuid') => {
         return {
-            "field" : `${field}.keyword`,
+            "field": `${field}.keyword`,
             "inner_hits": {
                 "name": "files",
                 "size": 20,
@@ -24,11 +24,25 @@ const ESQ = {
     sum: (field) => {
         return { "sum": { "field": field } }
     },
-    bucket: (field) => {
+    bucket: (field, count = 10000) => {
         return {
             "terms": {
                 "field": `${field}.keyword`,
-                "size": 10000
+                "size": count
+            }
+        }
+    },
+    bucketStats: (field) => {
+        return {
+            "stats_bucket": {
+                "buckets_path": `${field}._count`
+            }
+        }
+    },
+    bucketCount: (field) => {
+        return {
+            "cardinality": {
+                "field": `${field}.keyword`
             }
         }
     },
@@ -64,7 +78,11 @@ const ESQ = {
                 collapse: ESQ.groupByField(),
                 aggs: {
                     totalBytes: ESQ.sum('bytes_transferred'),
-                    datasetsGroups: ESQ.bucket('datasets_uuid')
+                    //datasetGroups: ESQ.bucket('dataset_uuid'),
+                    //files: ESQ.bucket('relative_file_path'),
+                    totalFiles: ESQ.bucketCount('relative_file_path'),
+                    totalDatasets: ESQ.bucketCount('dataset_uuid'),
+                  
                 }
             }
         }
