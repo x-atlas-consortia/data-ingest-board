@@ -33,37 +33,38 @@ const ESQ = {
         }
     },
     indexQueries: (from, to) => {
+        const queryField = from ? 'range' : 'match_all'
         return {
             // TODO: restructure
             'logs-repos': {
-                "query": {
-                    [from ? 'range' : 'match_all']: from ? ESQ.dateRange(from, to, 'clones.clones.timestamp') : {}
+                query: {
+                    [queryField]: from ? ESQ.dateRange(from, to, 'clones.clones.timestamp') : {}
                 },
-                "track_total_hits": true,
+                track_total_hits: true,
                 //"size": 0,
                 aggs: {
-                    "repos": ESQ.bucket('host'),
+                    repos: ESQ.bucket('host'),
                 }
             },
             'logs-api-usage': {
-                "query": {
-                    [from ? 'range' : 'match_all']: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {}
+                query: {
+                    [queryField]: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {}
                 },
-                "track_total_hits": true,
+                track_total_hits: true,
                 aggs: {
-                    "services": ESQ.bucket('host'),
-                    //"endpoints": ESQ.bucket('resource_path_parameter')
+                    services: ESQ.bucket('host'),
+                    endpoints: ESQ.bucket('resource_path_parameter')
                 }
             },
             'logs-file-downloads': {
-                "query": {
-                    [from ? 'range' : 'match_all']: from ? ESQ.fileDownloadDateRange(from, to) : {}
+                query: {
+                    [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
-                "track_total_hits": true,
+                track_total_hits: true,
                 collapse: ESQ.groupByField(),
                 aggs: {
-                    "total_bytes": ESQ.sum('bytes_transferred'),
-                    "datasets_uuids": ESQ.bucket('datasets_uuid')
+                    totalBytes: ESQ.sum('bytes_transferred'),
+                    datasetsGroups: ESQ.bucket('datasets_uuid')
                 }
             }
         }
