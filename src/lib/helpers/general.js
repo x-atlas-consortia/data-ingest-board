@@ -33,6 +33,8 @@ export function toDateString(timestamp) {
     return date.toUTCString()
 }
 
+export const formatNum = (num) => new Intl.NumberFormat().format(num)
+
 Object.assign(Array.prototype, {
     comprises(needle, insensitive = true) {
         return this.some((i) => eq(i, needle, insensitive))

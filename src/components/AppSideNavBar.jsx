@@ -53,7 +53,7 @@ function AppSideNavBar({}) {
                                 />
                         </span>
                         {!collapsed &&<h1 className="c-nav__title text-white">
-                            <span className='d-inline-block'>Data Ingest Board</span>
+                            <span className='d-inline-block'>Logs Dashboard</span>
                         </h1>}
                     </Navbar.Brand>
                 </div>

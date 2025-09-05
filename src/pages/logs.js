@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useState, useContext, act } from 'react';
 import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Table } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
-import ENS from "@/lib/helpers/envs";
-import { callService, eq, getHeadersWith } from "@/lib/helpers/general";
+import { callService, eq, getHeadersWith, formatNum } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
 import ESQ from "@/lib/helpers/esq";
 import Spinner from '@/components/Spinner';
+import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 const { Header, Sider, Content } = Layout;
 const { RangePicker } = DatePicker;
 const Logs = () => {
@@ -26,6 +26,7 @@ const Logs = () => {
     const indicesSections = useRef({})
     const indicesData = useRef({})
     const [isLoading, setIsLoading] = useState(true)
+    const [pageSize, setPageSize] = useState(10)
 
     const handleDateRange = (dates, dateStrings) => {
         console.log(dates, dateStrings)
@@ -39,8 +40,6 @@ const Logs = () => {
     const isRepos = (key) => eq(key, 'openSourceRepos')
 
     const isFiles = (key) => eq(key, 'fileDownloads')
-
-    const formatNum = (num) => new Intl.NumberFormat().format(num)
 
     const formatBytes = (bytes, decimals = 2) => {
         if (!+bytes) return '0 Bytes'
@@ -161,22 +160,13 @@ const Logs = () => {
                     dataIndex: 'hits',
                     key: 'hits',
                 }
-            ],
-            fileDownloads: [
-                {
-                    title: 'Endpoints',
-                    dataIndex: 'endpoints',
-                    key: 'endpoints',
-                },
-                {
-                    title: 'Hits',
-                    dataIndex: 'hits',
-                    key: 'hits',
-                }
             ]
         }
-        const _cols = Array.from(columns[key])
-        _cols.unshift(col)
+        const _cols = Array.from(columns[key] || [])
+        if (!isFiles(key)) {
+            _cols.unshift(col)
+        }
+        
         return _cols
     }
 
@@ -205,6 +195,13 @@ const Logs = () => {
                 <Table
                     rowSelection={{ type: 'checkbox', ...rowSelection }}
                     dataSource={tableData} columns={cols} />
+            </>
+        }
+
+        if (isFiles(key)) {
+            
+            return <>
+                <LogsFilesTable fromDate={fromDate} toDate={toDate} />
             </>
         }
     }
@@ -249,20 +246,13 @@ const Logs = () => {
             for (let i of indicies) {
                 if (!_data[i]) {
                     url = ENVS.urlFormat.search(`/${i}/search`)
-                    q = ESQ.indexQueries(fromDate, toDate)[i]
+                    q = ESQ.indexQueries({from: fromDate, to: toDate})[i]
                     headers = getHeadersWith(globusToken).headers
                     _data[i] = await callService(url,
                         headers,
                         q,
                         'POST')
-                    // q.size = 20
-                    // q.from = 0
-                    // let res = await callService(url,
-                    //     headers,
-                    //     q,
-                    //     'POST')
-                    // _data[i].table = res.data || []
-
+                
                 }
 
             }
@@ -309,7 +299,7 @@ const Logs = () => {
                         defaultActiveKey={activeSection}
                         type="card"
                         size={'middle'}
-                        style={{ marginBottom: 32 }}
+                        style={{ marginBottom: 32, width: '100%' }}
                         items={tabs}
                     /></Row>}
                     {isLoading && <Spinner />}
