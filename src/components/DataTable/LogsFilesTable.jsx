@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
 import { Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
@@ -12,6 +12,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
     const [tableData, setTableData] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const { globusToken } = useContext(AppContext)
+    const adjustedForESPages = useRef(null)
 
     const [tableParams, setTableParams] = useState({
         pagination: {
@@ -20,15 +21,39 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
         },
     });
 
+    useEffect(()=> {
+        adjustedForESPages.current = null
+    }, [])
+
+    const getESSearchable = async (totalEstimatedPages, url, headers, q, dataSize) => {
+        // ES has a limitation in that depending on number of groups (cardinality) and 'size' parameter
+        // pagination using 'from' parameter deep in results, may return 0 hits
+        // so we need to get the actual offset from which ES will correctly return results.
+        let searchablePage = totalEstimatedPages
+        delete q.aggs.totalDatasets
+        for (let i = totalEstimatedPages; i > 1; i--) {
+            q.from = (i - 1) * dataSize
+            let res = await callService(url, headers, q, 'POST')
+            if (res.status === 200) {
+                if (res.data.hits.hits.length > 0) {
+                    searchablePage = i
+                    break
+                }
+            }
+        }
+        adjustedForESPages.current = searchablePage * dataSize
+    }
+
     const fetchData = async () => {
         setIsLoading(true)
-        let datasize = tableParams.pagination.pageSize
+        let dataSize = tableParams.pagination.pageSize
         let i = 'logs-file-downloads'
         let url = ENVS.urlFormat.search(`/${i}/search`)
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: datasize })[i]
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[i]
         let headers = getHeadersWith(globusToken).headers
-        q.size = datasize
-        q.from = (tableParams.pagination.current - 1) * datasize
+        q.size = dataSize
+        q.from = (tableParams.pagination.current - 1) * dataSize
+        q._source = ["dataset_uuid", "relative_file_path"]
         //q.aggs.groupSort = ESQ.groupSort({})
         delete q.aggs.totalBytes
         delete q.aggs.totalFiles
@@ -42,8 +67,12 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             for (let d of res.data.hits.hits) {
                 ids.push(d._source.dataset_uuid)
             }
-            totalDatasets = res.data.aggregations.totalDatasets.value
 
+            totalDatasets = res.data.aggregations.totalDatasets.value
+            if (adjustedForESPages.current == null) {
+               await getESSearchable(Math.ceil(totalDatasets/dataSize), url, headers, q, dataSize) 
+            }
+            
             // Find out info about these ids
             let entitiesSearch = await callService(ENVS.urlFormat.search(`/entities/search`),
                 headers,
@@ -62,7 +91,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
 
 
             let _tableData = []
-            let q = ESQ.indexQueries({ list: ids, field: 'dataset_uuid' }).filter
+            q = ESQ.indexQueries({ list: ids, field: 'dataset_uuid' }).filter
             q.aggs = {
                 datasetGroups: ESQ.bucket('dataset_uuid'),
             }
@@ -81,11 +110,12 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
                 }
             }
             setTableData(_tableData)
+
             setTableParams({
                 ...tableParams,
                 pagination: {
                     ...tableParams.pagination,
-                    total: totalDatasets,
+                    total: adjustedForESPages.current,
                 },
             });
             setIsLoading(false)

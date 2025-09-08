@@ -10,7 +10,7 @@ const ESQ = {
     fileDownloadDateRange: (from, to) => {
         return ESQ.dateRange(from, to, 'download_date_time')
     },
-    groupByField: ({size = 10, field = 'dataset_uuid'}) => {
+    groupByField: ({ size = 10, field = 'dataset_uuid' }) => {
         return {
             "field": `${field}.keyword`,
             "inner_hits": {
@@ -21,14 +21,14 @@ const ESQ = {
             "max_concurrent_group_searches": 4
         }
     },
-    groupSort: ({sort = 'desc', field = 'dataset_uuid'}) => {
+    groupSort: ({ sort = 'desc', field = 'dataset_uuid' }) => {
         return {
-          "terms": {
-            "field": `${field}.keyword`,
-            "order": {
-              "_count": sort
+            "terms": {
+                "field": `${field}.keyword`,
+                "order": {
+                    "_count": sort
+                }
             }
-          }
         }
     },
     sum: (field) => {
@@ -56,7 +56,7 @@ const ESQ = {
             }
         }
     },
-    indexQueries: ({from, to, list, collapse, size = 0, field = 'uuid'}) => {
+    indexQueries: ({ from, to, list, collapse, size = 0, field = 'uuid' }) => {
         const queryField = from ? 'range' : 'match_all'
         return {
             // TODO: restructure
@@ -85,7 +85,7 @@ const ESQ = {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 track_total_hits: true,
-                collapse: collapse ? ESQ.groupByField({size: size}) : undefined,
+                collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
                 aggs: {
                     totalBytes: ESQ.sum('bytes_transferred'),
                     //datasetGroups: ESQ.bucket('dataset_uuid'),
@@ -105,6 +105,43 @@ const ESQ = {
                                 }
                             }
                         ]
+                    }
+                }
+            },
+            filessBucketSearch: {
+                "size": 0,
+                "aggs": {
+                    "dataset_buckets": {
+                        "composite": {
+                            "size": 5000,
+                            "sources": [
+                                {
+                                    "dataset_uuid.keyword": {
+                                        "terms": {
+                                            "field": "dataset_uuid.keyword"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "aggs": {
+                            "file_download_count": {
+                                "value_count": {
+                                    "field": "_id"
+                                }
+                            },
+                            "dataset_count_sort": {
+                                "bucket_sort": {
+                                    "sort": [
+                                        {
+                                            "file_download_count": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
