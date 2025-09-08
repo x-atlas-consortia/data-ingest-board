@@ -70,10 +70,11 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             }
 
             setTableData([...tableData, ..._tableData])
-            setIsLoading(false)
+            
         } else {
             setHasMoreData(false)
         }
+        setIsLoading(false)
     }
 
     const cols = [
@@ -109,8 +110,9 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
     ]
 
     useEffect(() => {
+        setTableData([])
         fetchData()
-    }, [])
+    }, [fromDate, toDate])
 
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
