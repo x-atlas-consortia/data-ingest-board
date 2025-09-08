@@ -108,12 +108,15 @@ const ESQ = {
                     }
                 }
             },
-            filessBucketSearch: {
+            filesBucketSearch: {
+                query: {
+                    [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
+                },
                 "size": 0,
                 "aggs": {
                     "dataset_buckets": {
                         "composite": {
-                            "size": 5000,
+                            "size": size,
                             "sources": [
                                 {
                                     "dataset_uuid.keyword": {
