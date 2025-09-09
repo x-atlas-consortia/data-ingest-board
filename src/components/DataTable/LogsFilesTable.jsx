@@ -68,6 +68,7 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
                 _tableData.push(
                     {
                         files: d.doc_count,
+                        bytes: d.file_bytes.value,
                         uuid,
                         ...(entities[uuid] || {})
                     }
@@ -103,11 +104,11 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
             sorter: (a, b) => a.datasetType?.localeCompare(b?.datasetType),
         },
         {
-            title: 'Files Downloaded',
-            dataIndex: 'files',
-            key: 'files',
+            title: 'Bytes Downloaded',
+            dataIndex: 'bytes',
+            key: 'bytes',
             defaultSortOrder: 'descend',
-            sorter: (a, b) => a.files - b.files,
+            sorter: (a, b) => a.bytes - b.bytes,
             render: (v, r) => {
                 return <ModalOverFiles data={r} count={v} />
             }

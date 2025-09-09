@@ -128,22 +128,7 @@ const ESQ = {
                             ]
                         },
                         "aggs": {
-                            "file_download_count": {
-                                "value_count": {
-                                    "field": "_id"
-                                }
-                            },
-                            "dataset_count_sort": {
-                                "bucket_sort": {
-                                    "sort": [
-                                        {
-                                            "file_download_count": {
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+                            file_bytes: ESQ.sum('bytes_transferred'),
                         }
                     }
                 }

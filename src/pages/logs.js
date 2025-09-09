@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useContext, act } from 'react';
 import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Table } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
-import { callService, eq, getHeadersWith, formatNum } from "@/lib/helpers/general";
+import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
 import ESQ from "@/lib/helpers/esq";
@@ -42,17 +42,7 @@ const Logs = () => {
 
     const isFiles = (key) => eq(key, 'fileDownloads')
 
-    const formatBytes = (bytes, decimals = 2) => {
-        if (!+bytes) return '0 Bytes'
-
-        const k = 1024
-        const dm = decimals < 0 ? 0 : decimals
-        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
-
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-    }
+    
 
     const getCardDetail = (key, data) => {
         const indices = indicesSections.current[key]

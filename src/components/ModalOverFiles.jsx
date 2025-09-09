@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import {Dropdown, Popover, Table} from "antd";
-import {formatNum, getHeadersWith, toDateString} from "../lib/helpers/general";
+import {formatNum, formatBytes, getHeadersWith, toDateString} from "../lib/helpers/general";
 import THEME from "../lib/helpers/theme";
 import TABLE from "../lib/helpers/table";
 import URLS from "../lib/helpers/urls";
@@ -13,7 +13,7 @@ import AppModal from "@/components/AppModal";
 import {modalDefault} from "@/lib/constants";
 import IdLinkDropdown from './IdLinkDropdown';
 
-function ModalOverFiles({count, data, popoverText = 'Click to view file details.'}) {
+function ModalOverFiles({count, data, popoverText = 'Click to view download details.'}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     const [modal, setModal] = useState(modalDefault)
@@ -42,28 +42,27 @@ function ModalOverFiles({count, data, popoverText = 'Click to view file details.
         ]
     }
 
-
+    
     return (
         <>
             <Popover content={popoverText} placement={'left'}><span className='txt-lnk js-gtm--btn-cta-viewFiles' data-gtm-info={data.uuid} onClick={async ()  => {
                 setModal({width: 800, cancelCSS: 'none', className: '', body: <Spinner />, open: true})
                 const modalBody = (<div>
                     <h5 className='text-center mb-5'>
-                        {formatNum(count)} Downloaded File{count > 1 ? 's': ''} for &nbsp; <IdLinkDropdown data={data} />
+                        {formatBytes(count)} Downloaded for {data.entityId && <IdLinkDropdown data={data} />} {!data.entityId && <span>{data.uuid}</span>}
                     </h5>
+                    <p><strong>Total Files</strong> {formatNum(data.files)}</p>
                 </div>)
                 setModal({width: 1000, cancelCSS: 'none', className: '', open: true, body: modalBody})
             }
-            }>{formatNum(count)}</span></Popover>
+            }>{formatBytes(count)}</span></Popover>
             <AppModal modal={modal} setModal={setModal} />
         </>
     )
 }
 
 ModalOverFiles.propTypes = {
-    content: PropTypes.array.isRequired,
-    cols: PropTypes.array,
-    args: PropTypes.object.isRequired
+    data: PropTypes.object.isRequired
 }
 
 export default ModalOverFiles
