@@ -1,23 +1,27 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
-import { Table, Button } from 'antd';
+import { Table, Button, Dropdown, Space } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
-import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
+import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import IdLinkDropdown from "../IdLinkDropdown";
+import ModalOverFiles from "../ModalOverFiles";
+import { SettingOutlined } from "@ant-design/icons";
 
-const LogsFilesTable = ({ fromDate, toDate }) => {
+const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => {
 
     const [tableData, setTableData] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const { globusToken } = useContext(AppContext)
     const [hasMoreData, setHasMoreData] = useState(true)
     const afterKey = useRef(null)
+    const [tableType, setTableType] = useState('byDatasetID')
+    const [numOfRows, setNumOfRows] = useState(20)
 
     const fetchData = async () => {
         setIsLoading(true)
-        let dataSize = 10
+        let dataSize = numOfRows
         let i = 'logs-file-downloads'
         let url = ENVS.urlFormat.search(`/${i}/search`)
         let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })['filesBucketSearch']
@@ -50,6 +54,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             if (entitiesSearch.status == 200) {
                 for (let d of entitiesSearch.data.hits.hits) {
                     entities[d._source.uuid] = {
+                        [TABLE.cols.f('id')]: d._source.hubmap_id,
                         entityId: d._source.hubmap_id, // TODO change to TABLE.col.f('id')
                         datasetType: d._source.dataset_type,
                     }
@@ -70,7 +75,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             }
 
             setTableData([...tableData, ..._tableData])
-            
+
         } else {
             setHasMoreData(false)
         }
@@ -104,7 +109,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             defaultSortOrder: 'descend',
             sorter: (a, b) => a.files - b.files,
             render: (v, r) => {
-                return <span className="text-primary"  data-field="files">{formatNum(v)}</span>
+                return <ModalOverFiles data={r} count={v} />
             }
         }
     ]
@@ -120,9 +125,82 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
         },
     };
 
+    const getMenuItemClassName = (s1, s2) => {
+        return eq(s1, s2) ? 'is-active' : undefined
+    }
+
+
+    const getRowsPerLoadMore = () => {
+        const ops = [10, 20, 50, 100, 200]
+        let r = []
+        for (let o of ops) {
+            r.push({
+                key: o,
+                label: o,
+                className: getMenuItemClassName(numOfRows.toString(), o.toString())
+            })
+        }
+        return r
+    }
+
+    const items = [
+        {
+            key: 'logsType',
+            type: 'group',
+            label: 'View Logs by',
+            children: [
+                {
+                    key: 'byDatasetID',
+                    className: getMenuItemClassName(tableType, 'byDatasetID'), 
+                    label: 'Dataset ID',
+                },
+                {
+                    key: 'byDatasetType',
+                    className: getMenuItemClassName(tableType, 'byDatasetType'),
+                    label: 'Dataset Type',
+                },
+            ],
+        },
+        {
+            key: 'numOfRows',
+            label: 'Rows Per Load More',
+            children: getRowsPerLoadMore(),
+        }
+    ];
+
+    const handleMenuClick = (e) => {
+       
+        if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
+            setNumOfRows(Number(e.key))
+        } else {
+            setTableType(e.key)
+        }
+    }
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
+
+    useEffect(() => {
+        setExtraActions({
+            ...extraActions, 'tab-fileDownloads': <div>
+                <Dropdown menu={menuProps}>
+                    <a onClick={e => e.preventDefault()}>
+                        <Space>
+                            Table Options
+                            <SettingOutlined />
+                        </Space>
+                    </a>
+                </Dropdown>
+            </div>
+        })
+    }, [numOfRows, tableType])
+
     // TODO: 
     // onclick of table row, add modal with list of popular files and counts
     return (<>
+
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             pagination={false}

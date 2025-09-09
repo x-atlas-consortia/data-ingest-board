@@ -27,6 +27,7 @@ const Logs = () => {
     const indicesData = useRef({})
     const [isLoading, setIsLoading] = useState(true)
     const [pageSize, setPageSize] = useState(10)
+    const [extraActions, setExtraActions] = useState({})
 
     const handleDateRange = (dates, dateStrings) => {
         console.log(dates, dateStrings)
@@ -59,8 +60,8 @@ const Logs = () => {
         let views, totalViews = 0
         let totalHits, services = 0
         let totalBytes, datasetGroups, totalFiles = 0
-        let indexData, agg 
-        
+        let indexData, agg
+
         for (let i of indices) {
             clones = 0
             views = 0
@@ -100,26 +101,33 @@ const Logs = () => {
         }
 
         if (isMicro(key)) {
+            let ms = []
+            for (let d of indexData.aggregations.services.buckets) {
+                ms.push(
+                    <Row className='mb-2' key={d.key}>
+                        <Col span={12}><strong>{d.key}</strong>:</Col>
+                        <Col span={12}>{formatNum(d.doc_count)}</Col>
+                    </Row>
+                )
+            }
             return (<>
-                <div><h3>{services}</h3></div>
+                {ms}
+                -----------------------------
                 <Row className='mt-2'>
-                    <Col span={12}>0<br />endpoints</Col>
-                </Row>
-                <Row className='mt-2'>
-                    <Col span={12}>{formatNum(totalHits)}<br />hits</Col>
+                    <Col span={12}><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
                 </Row>
             </>)
         }
 
         if (isFiles(key)) {
             return (<>
-                <div><h3>{formatNum(totalFiles)}</h3>globus files</div>
-                <Row className='mt-2'>
-                    <Col span={12}>{formatNum(datasetGroups)}<br />datasets</Col>
-                    <Col span={12}>{formatBytes(totalBytes)}<br />downloaded</Col>
+                <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
+                <Row className='mt-3'>
+                    <Col span={12}>{formatNum(datasetGroups)}<br /><strong>Datasets</strong></Col>
+                    <Col span={12}>{formatNum(totalFiles)}<br /><strong>Globus files</strong> </Col>
                 </Row>
                 <Row className='mt-2'>
-                    <Col span={12}>{formatNum(totalHits)}<br />hits</Col>
+                    <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col>
                 </Row>
             </>)
         }
@@ -156,9 +164,12 @@ const Logs = () => {
                     key: 'endpoints',
                 },
                 {
-                    title: 'Hits',
+                    title: 'Requests',
                     dataIndex: 'hits',
                     key: 'hits',
+                    render: (v, r) => {
+                        return <span data-field="files">{formatNum(v)}</span>
+                    }
                 }
             ]
         }
@@ -166,7 +177,7 @@ const Logs = () => {
         if (!isFiles(key)) {
             _cols.unshift(col)
         }
-        
+
         return _cols
     }
 
@@ -193,15 +204,16 @@ const Logs = () => {
             // TODO Add visualization of microservice against usage counts
             return <>
                 <Table
+                    pagination={false}
                     rowSelection={{ type: 'checkbox', ...rowSelection }}
                     dataSource={tableData} columns={cols} />
             </>
         }
 
         if (isFiles(key)) {
-            
+
             return <>
-                <LogsFilesTable fromDate={fromDate} toDate={toDate} />
+                <LogsFilesTable fromDate={fromDate} toDate={toDate} setExtraActions={setExtraActions} extraActions={extraActions} />
             </>
         }
     }
@@ -237,6 +249,10 @@ const Logs = () => {
         setIsLoading(false)
     }
 
+    const onTabChange = (active) => {
+        setActiveSection(active)
+    }
+
     const fetchData = async () => {
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
@@ -246,13 +262,13 @@ const Logs = () => {
             for (let i of indicies) {
                 if (!_data[i]) {
                     url = ENVS.urlFormat.search(`/${i}/search`)
-                    q = ESQ.indexQueries({from: fromDate, to: toDate})[i]
+                    q = ESQ.indexQueries({ from: fromDate, to: toDate })[i]
                     headers = getHeadersWith(globusToken).headers
                     _data[i] = await callService(url,
                         headers,
                         q,
                         'POST')
-                
+
                 }
 
             }
@@ -296,6 +312,8 @@ const Logs = () => {
                 >
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs
+                        onChange={onTabChange}
+                        tabBarExtraContent={extraActions[activeSection]}
                         defaultActiveKey={activeSection}
                         type="card"
                         size={'middle'}
