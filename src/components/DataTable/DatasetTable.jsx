@@ -7,7 +7,7 @@ import TABLE from "@/lib/helpers/table";
 import URLS from "@/lib/helpers/urls";
 import {eq, getHeadersWith, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
-import ModalOverData from "../ModalOverData";
+import ModalOverPDatasets from "../ModalOverPDatasets";
 import AppContext from "@/context/AppContext";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import {STATUS} from "@/lib/constants";
@@ -93,7 +93,7 @@ const DatasetTable = ({
             filteredValue: urlParamFilters["processed_datasets"] || null,
             ellipsis: true,
             render: (processed_datasets, record) => {
-                return <ModalOverData args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
+                return <ModalOverPDatasets args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
                                        />
             }
         },

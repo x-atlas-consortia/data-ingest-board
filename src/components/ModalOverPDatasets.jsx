@@ -12,7 +12,7 @@ import Spinner from "./Spinner";
 import AppModal from "@/components/AppModal";
 import {modalDefault} from "@/lib/constants";
 
-function ModalOverData({content, cols = [],  popoverText = 'Click to view all processed datasets.', args}) {
+function ModalOverPDatasets({content, cols = [],  popoverText = 'Click to view all processed datasets.', args}) {
 
     const {globusToken, revisionsData} = useContext(AppContext)
     const [modal, setModal] = useState(modalDefault)
@@ -186,10 +186,10 @@ function ModalOverData({content, cols = [],  popoverText = 'Click to view all pr
     )
 }
 
-ModalOverData.propTypes = {
+ModalOverPDatasets.propTypes = {
     content: PropTypes.array.isRequired,
     cols: PropTypes.array,
     args: PropTypes.object.isRequired
 }
 
-export default ModalOverData
+export default ModalOverPDatasets
