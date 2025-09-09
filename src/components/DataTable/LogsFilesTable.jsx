@@ -104,7 +104,7 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
             defaultSortOrder: 'descend',
             sorter: (a, b) => a.files - b.files,
             render: (v, r) => {
-                return <span data-field="files">{formatNum(v)}</span>
+                return <span className="text-primary"  data-field="files">{formatNum(v)}</span>
             }
         }
     ]
@@ -120,8 +120,9 @@ const LogsFilesTable = ({ fromDate, toDate }) => {
         },
     };
 
+    // TODO: 
+    // onclick of table row, add modal with list of popular files and counts
     return (<>
-
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             pagination={false}

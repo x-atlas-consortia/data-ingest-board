@@ -190,7 +190,7 @@ const Logs = () => {
                     )
                 }
             }
-
+            // TODO Add visualization of microservice against usage counts
             return <>
                 <Table
                     rowSelection={{ type: 'checkbox', ...rowSelection }}
