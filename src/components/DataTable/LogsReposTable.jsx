@@ -18,6 +18,7 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     const afterKey = useRef(null)
     const [tableType, setTableType] = useState('numOfRows')
     const [numOfRows, setNumOfRows] = useState(20)
+    const [vizData, setVizData] = useState([])
 
     const fetchData = async () => {
         setIsLoading(true)
@@ -41,29 +42,33 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
             /// 
 
-            let repo 
+            let repo, types, r
             let repos = {}
             let list = _data?.buckets
             let _tableData = []
 
             if (list.length) {
+
                 for (let d of list) {
+                    types = d['type.keyword'].buckets
                     repo = d.key['repository.keyword']
-                    repos[repo] = repos[repo] || {}
-                    repos[repo] = { ...repos[repo], name: repo, [d.key['type.keyword']]: { unique: d.unique.value, count: d.count.value } }
+                    repos[repo] = {}
+                    for (let t of types) {
+                        repos[repo] = { ...repos[repo], name: repo, [t.key]: { unique: t.unique.value, count: t.count.value } }
+                    }
 
-                }
+                    r = repos[repo]
 
-                for (let r of Object.values(repos)) {
                     _tableData.push(
                         {
-                            name: r.name,
+                            name: repo,
                             views: r.view?.count || 0,
                             uniqueViews: r.view?.unique || 0,
                             clones: r.clone?.count || 0,
                             uniqueClones: r.clone?.unique || 0
 
                         })
+
                 }
             }
 
@@ -192,8 +197,8 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     // onclick of table row, add modal with list of popular files and counts
     return (<>
 
-        {tableData.length > 0 && <ChartProvider>
-            <StackedBar data={prepareStackedData(Array.from(tableData))} chartId='modal' />
+        {vizData.length > 0 && <ChartProvider>
+            <StackedBar data={prepareStackedData(Array.from(vizData))} chartId='modal' />
         </ChartProvider>}
 
         <Table

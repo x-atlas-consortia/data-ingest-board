@@ -131,10 +131,18 @@ const ESQ = {
                 size: 0,
                 aggs: {
                     buckets: {
-                        composite: ESQ.composite(['type', 'repository'], size),
+                        composite: ESQ.composite(['repository'], size),
                         aggs: {
-                            count: ESQ.sum('count'),
-                            unique: ESQ.sum('uniques')
+                            'type.keyword': {
+                                terms: {
+                                    field: 'type.keyword'
+                                },
+                                aggs: {
+                                    count: ESQ.sum('count'),
+                                    unique: ESQ.sum('uniques')
+                                }
+                            }
+
                         }
                     }
 
