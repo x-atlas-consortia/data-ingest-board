@@ -24,7 +24,7 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
         let dataSize = numOfRows
         let i = 'logs-file-downloads'
         let url = ENVS.urlFormat.search(`/${i}/search`)
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })['filesBucketSearch']
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${i}-table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {

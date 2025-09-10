@@ -1,3 +1,5 @@
+import ENVS from "./envs"
+
 const ESQ = {
     dateRange: (from, to, field = 'timestamp') => {
         return {
@@ -56,36 +58,83 @@ const ESQ = {
             }
         }
     },
-    composite: (field) => {
-        return {
-            
-            sources: [
-                {
-                    [`${field}.keyword`]: {
-                        terms: {
-                            field: `${field}.keyword`
-                        }
+    composite: (fields) => {
+        let sources = []
+        for (let field of fields) {
+            sources.push({
+                [`${field}.keyword`]: {
+                    terms: {
+                        field: `${field}.keyword`
                     }
                 }
-            ]
+            })
+        }
+        return {
+            size: 1000,
+            sources
+        }
+    },
+    ownerFilter: (from, to) => {
+        let filter = [
+            {
+                terms: {
+                    owner: [`${ENVS.appContext().toLowerCase()}consortium`]
+                }
+            }]
+        if (from) {
+            filter.push(
+                {
+                    range: ESQ.dateRange(from, to)
+                }
+            )
+        }
+        return {
+            bool: {
+                filter
+            }
         }
     },
     indexQueries: ({ from, to, list, collapse, size = 0, field = 'uuid' }) => {
         const queryField = from ? 'range' : 'match_all'
+
         return {
-            // TODO: restructure
-            'logs-repos': {
+            filter: {
                 query: {
-                    [queryField]: from ? ESQ.dateRange(from, to) : {}
-                },
-                track_total_hits: true,
+                    bool: {
+                        filter: [
+                            {
+                                terms: {
+                                    [field]: list
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'logs-repos': {
+                query: ESQ.ownerFilter(from, to),
+                size: 0,
                 aggs: {
-                    repos: ESQ.bucket('repository.keyword'),
+                    repos: ESQ.bucket('repository'),
                     buckets: {
-                        composite: ESQ.composite('type'),
+                        composite: ESQ.composite(['type']),
                         aggs: {
                             count: ESQ.sum('count'),
-                            unique: ESQ.sum('unique')
+                            unique: ESQ.sum('uniques')
+                        }
+                    }
+
+                }
+            },
+            'logs-repos-table': {
+                query: ESQ.ownerFilter(from, to),
+                size: 0,
+                aggs: {
+                    buckets: {
+                        composite: ESQ.composite(['type', 'repository']),
+                        aggs: {
+                            count: ESQ.sum('count'),
+                            unique: ESQ.sum('uniques')
                         }
                     }
 
@@ -110,34 +159,19 @@ const ESQ = {
                 collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
                 aggs: {
                     totalBytes: ESQ.sum('bytes_transferred'),
-                    //datasetGroups: ESQ.bucket('dataset_uuid'),
-                    //files: ESQ.bucket('relative_file_path'),
                     totalFiles: ESQ.bucketCount('relative_file_path'),
                     totalDatasets: ESQ.bucketCount('dataset_uuid'),
 
                 }
             },
-            filter: {
-                query: {
-                    bool: {
-                        filter: [
-                            {
-                                terms: {
-                                    [field]: list
-                                }
-                            }
-                        ]
-                    }
-                }
-            },
-            filesBucketSearch: {
+            'logs-file-downloads-table': {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 size: 0,
                 aggs: {
                     dataset_buckets: {
-                        composite: ESQ.composite('dataset_uuid'),
+                        composite: ESQ.composite(['dataset_uuid']),
                         aggs: {
                             file_bytes: ESQ.sum('bytes_transferred'),
                         }
