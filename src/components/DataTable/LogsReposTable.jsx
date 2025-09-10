@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
-import { Table, Button, Dropdown, Space, Popover } from 'antd';
+import { Table, Button, Dropdown, Space } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
 import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/helpers/general";
@@ -129,6 +129,9 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
+            if (selectedRows.length < 7) {
+                setVizData(selectedRows)
+            }
             console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         },
     };
@@ -152,11 +155,6 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     }
 
     const items = [
-        {
-            key: 'visualize',
-            className: getMenuItemClassName(tableType, 'visualize'),
-            label: 'Visualize',
-        },
         {
             key: 'numOfRows',
             label: 'Rows Per Load More',
@@ -193,19 +191,18 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
         })
     }, [numOfRows, tableType])
 
-    // TODO: 
-    // onclick of table row, add modal with list of popular files and counts
+
     return (<>
 
         {vizData.length > 0 && <ChartProvider>
-            <StackedBar data={prepareStackedData(Array.from(vizData))} chartId='modal' />
+            <StackedBar data={prepareStackedData(Array.from(vizData))} chartId='repos' />
         </ChartProvider>}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             pagination={false}
             loading={isLoading}
-            rowKey={'uuid'}
+            rowKey={'name'}
             scroll={{ y: 'calc(100vh - 200px)' }}
             dataSource={tableData} columns={cols} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
