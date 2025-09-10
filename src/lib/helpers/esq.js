@@ -56,17 +56,39 @@ const ESQ = {
             }
         }
     },
+    composite: (field) => {
+        return {
+            
+            sources: [
+                {
+                    [`${field}.keyword`]: {
+                        terms: {
+                            field: `${field}.keyword`
+                        }
+                    }
+                }
+            ]
+        }
+    },
     indexQueries: ({ from, to, list, collapse, size = 0, field = 'uuid' }) => {
         const queryField = from ? 'range' : 'match_all'
         return {
             // TODO: restructure
             'logs-repos': {
                 query: {
-                    [queryField]: from ? ESQ.dateRange(from, to, 'clones.clones.timestamp') : {}
+                    [queryField]: from ? ESQ.dateRange(from, to) : {}
                 },
                 track_total_hits: true,
                 aggs: {
-                    repos: ESQ.bucket('host'),
+                    repos: ESQ.bucket('repository.keyword'),
+                    buckets: {
+                        composite: ESQ.composite('type'),
+                        aggs: {
+                            count: ESQ.sum('count'),
+                            unique: ESQ.sum('unique')
+                        }
+                    }
+
                 }
             },
             'logs-api-usage': {
@@ -96,11 +118,11 @@ const ESQ = {
                 }
             },
             filter: {
-                "query": {
-                    "bool": {
-                        "filter": [
+                query: {
+                    bool: {
+                        filter: [
                             {
-                                "terms": {
+                                terms: {
                                     [field]: list
                                 }
                             }
@@ -112,22 +134,11 @@ const ESQ = {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
-                "size": 0,
-                "aggs": {
-                    "dataset_buckets": {
-                        "composite": {
-                            "size": size,
-                            "sources": [
-                                {
-                                    "dataset_uuid.keyword": {
-                                        "terms": {
-                                            "field": "dataset_uuid.keyword"
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        "aggs": {
+                size: 0,
+                aggs: {
+                    dataset_buckets: {
+                        composite: ESQ.composite('dataset_uuid'),
+                        aggs: {
                             file_bytes: ESQ.sum('bytes_transferred'),
                         }
                     }

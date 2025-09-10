@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
-import { Table, Button, Dropdown, Space } from 'antd';
+import { Table, Button, Dropdown, Space, Popover } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
-import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
+import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import IdLinkDropdown from "../IdLinkDropdown";
 import ModalOverFiles from "../ModalOverFiles";
@@ -110,8 +110,9 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
             defaultSortOrder: 'descend',
             sorter: (a, b) => a.bytes - b.bytes,
             render: (v, r) => {
-                return <ModalOverFiles data={r} count={v} />
+                return <Popover content={<span>{formatNum(r.files)} files downloaded</span>} placement={'right'}>{formatBytes(v)}</Popover>
             }
+            //bar chart by month of total downloaded bytes
         }
     ]
 

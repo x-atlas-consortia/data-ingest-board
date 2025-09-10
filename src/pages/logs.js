@@ -46,37 +46,31 @@ const Logs = () => {
 
     const getCardDetail = (key, data) => {
         const indices = indicesSections.current[key]
-        let clones, totalClones = 0
-        let views, totalViews = 0
-        let totalHits, services = 0
+        let repos, totalClones, totalViews = 0
+        let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
         let indexData, agg
 
         for (let i of indices) {
-            clones = 0
-            views = 0
             indexData = data[i].data
             agg = indexData.aggregations
 
             if (isMicro(key)) {
-                totalHits = indexData.hits.total?.value
-                services = agg.services.buckets.length
+                totalHits = indexData.hits?.total?.value
             } else if (isFiles(key)) {
                 totalHits = indexData.hits.total?.value
                 totalFiles = agg.totalFiles.value
                 datasetGroups = agg.totalDatasets.value
                 totalBytes = agg.totalBytes.value
             } else {
-                // TODO to be restructured
-                for (let d of indexData.hits.hits) {
-                    clones += (d._source.clones?.count || 0)
-                    views += (d._source.views?.count || 0)
+                for (let b of agg.buckets.buckets) {
+                    if (eq(b.key['type.keyword'], 'clone')) {
+                        totalClones = b.count.value;
+                    } else {
+                        totalViews = b.count.value;
+                    }
                 }
-                indicesData.current[i] = {
-                    clones, views
-                }
-                totalClones += clones
-                totalViews += views
+                repos = agg.repos.buckets.length
             }
         }
 
@@ -84,8 +78,8 @@ const Logs = () => {
             return (<>
                 <div><h3>4</h3></div>
                 <Row>
-                    <Col span={12}>{totalViews}<br />views</Col>
-                    <Col span={12}>{totalClones}<br />clones</Col>
+                    <Col span={12}>{formatNum(totalViews)}<br />views</Col>
+                    <Col span={12}>{formatNum(totalClones)}<br />clones</Col>
                 </Row>
             </>)
         }
@@ -96,7 +90,7 @@ const Logs = () => {
                 ms.push(
                     <Row className='mb-2' key={d.key}>
                         <Col span={12}><strong>{d.key}</strong>:</Col>
-                        <Col span={12}>{formatNum(d.doc_count)}</Col>
+                        <Col span={12}><span className='txt-lnk'>{formatNum(d.doc_count)}</span></Col>
                     </Row>
                 )
             }
