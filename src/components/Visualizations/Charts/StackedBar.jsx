@@ -109,7 +109,7 @@ function StackedBar({
         return svg.node();
     }
 
-    const updateTable = (chartId = 'modal') => {
+    const updateTable = () => {
         $(getChartSelector(chartId, 'stackedBar')).html('')
         appendTooltip(chartId)
         $(getChartSelector(chartId, 'stackedBar')).append(buildChart())
