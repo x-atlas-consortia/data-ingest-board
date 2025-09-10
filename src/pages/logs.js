@@ -7,8 +7,8 @@ import AppContext from "@/context/AppContext";
 import ESQ from "@/lib/helpers/esq";
 import Spinner from '@/components/Spinner';
 import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
-import StackedBar, { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
-import { ChartProvider } from '@/context/ChartContext';
+import LogsReposTable from '@/components/DataTable/LogsReposTable';
+
 const { Header, Sider, Content } = Layout;
 const { RangePicker } = DatePicker;
 const Logs = () => {
@@ -131,40 +131,7 @@ const Logs = () => {
             key: 'name',
         }
         const columns = {
-            openSourceRepos: [
-                {
-                    title: 'Total Views',
-                    dataIndex: 'views',
-                    key: 'views',
-                    render: (v, r) => {
-                        return <span data-field="views">{formatNum(v)}</span>
-                    }
-                },
-                {
-                    title: 'Unique Views',
-                    dataIndex: 'uniqueViews',
-                    key: 'uniqueViews',
-                    render: (v, r) => {
-                        return <span data-field="uniqueViews">{formatNum(v)}</span>
-                    }
-                },
-                {
-                    title: 'Total Clones',
-                    dataIndex: 'clones',
-                    key: 'clones',
-                    render: (v, r) => {
-                        return <span data-field="clones">{v > 0 ? formatNum(v) : '-'}</span>
-                    }
-                },
-                {
-                    title: 'Unique Clones',
-                    dataIndex: 'uniqueClones',
-                    key: 'uniqueClones',
-                    render: (v, r) => {
-                        return <span data-field="uniqueClones">{v > 0 ? formatNum(v) : '-'}</span>
-                    }
-                }
-            ],
+            
             microservices: [
                 {
                     title: 'Endpoints',
@@ -194,46 +161,10 @@ const Logs = () => {
         const indices = indicesSections.current[key]
         let tableData = []
 
-        let repo, repos
+       
         if (isRepos(key)) {
-
-
-            for (let i of indices) {
-                repos = {}
-                let list = data[`${i}-table`].data.aggregations.buckets.buckets
-
-                if (list.length) {
-                    for (let d of list) {
-                        repo = d.key['repository.keyword']
-                        repos[repo] = repos[repo] || {}
-                        repos[repo] = { ...repos[repo], name: repo, [d.key['type.keyword']]: { unique: d.unique.value, count: d.count.value } }
-
-                    }
-
-                    for (let r of Object.values(repos)) {
-                        tableData.push(
-                            {
-                                name: r.name,
-                                views: r.view?.count || 0,
-                                uniqueViews: r.view?.unique || 0,
-                                clones: r.clone?.count || 0,
-                                uniqueClones: r.clone?.unique || 0
-
-                            })
-                    }
-                }
-            }
-
-
             return <>
-                {tableData.length > 0 && <ChartProvider>
-                    <StackedBar data={prepareStackedData(Array.from(tableData))} chartId='modal' />
-                </ChartProvider>}
-                <Table
-                    rowKey={'name'}
-                    pagination={false}
-                    rowSelection={{ type: 'checkbox', ...rowSelection }}
-                    dataSource={tableData} columns={cols} />
+                <LogsReposTable fromDate={fromDate} toDate={toDate} setExtraActions={setExtraActions} extraActions={extraActions} />
             </>
         }
         if (isMicro(key)) {
@@ -317,15 +248,6 @@ const Logs = () => {
                         headers,
                         q,
                         'POST')
-
-                    if (eq(i, 'logs-repos')) {
-                        let tableI = 'logs-repos-table'
-                        q = ESQ.indexQueries({ from: fromDate, to: toDate })[tableI]
-                        _data[tableI] = await callService(url,
-                            headers,
-                            q,
-                            'POST')
-                    }
 
                 }
 

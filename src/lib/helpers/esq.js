@@ -58,7 +58,7 @@ const ESQ = {
             }
         }
     },
-    composite: (fields) => {
+    composite: (fields, size = 1000) => {
         let sources = []
         for (let field of fields) {
             sources.push({
@@ -70,7 +70,7 @@ const ESQ = {
             })
         }
         return {
-            size: 1000,
+            size,
             sources
         }
     },
@@ -131,7 +131,7 @@ const ESQ = {
                 size: 0,
                 aggs: {
                     buckets: {
-                        composite: ESQ.composite(['type', 'repository']),
+                        composite: ESQ.composite(['type', 'repository'], size),
                         aggs: {
                             count: ESQ.sum('count'),
                             unique: ESQ.sum('uniques')
