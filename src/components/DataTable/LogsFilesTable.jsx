@@ -19,7 +19,7 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     const [tableType, setTableType] = useState('byDatasetID')
     const [numOfRows, setNumOfRows] = useState(20)
 
-    const fetchData = async () => {
+    const fetchData = async (includePrevData = true) => {
         setIsLoading(true)
         let dataSize = numOfRows
         let i = 'logs-file-downloads'
@@ -75,7 +75,11 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
                 )
             }
 
-            setTableData([...tableData, ..._tableData])
+            if (includePrevData) {
+                setTableData([...tableData, ..._tableData])
+            } else {
+                setTableData(_tableData)
+            }
 
         } else {
             setHasMoreData(false)
@@ -118,7 +122,8 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
     useEffect(() => {
         setTableData([])
-        fetchData()
+        afterKey.current = null
+        fetchData(false)
     }, [fromDate, toDate])
 
     const rowSelection = {
@@ -199,8 +204,7 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
         })
     }, [numOfRows, tableType])
 
-    // TODO: 
-    // onclick of table row, add modal with list of popular files and counts
+
     return (<>
 
         <Table

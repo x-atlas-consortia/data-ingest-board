@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useContext} from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Table } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
@@ -8,6 +8,7 @@ import ESQ from "@/lib/helpers/esq";
 import Spinner from '@/components/Spinner';
 import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 import LogsReposTable from '@/components/DataTable/LogsReposTable';
+import { LogsProvider } from '@/context/LogsContext';
 
 const { Header, Sider, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -131,7 +132,7 @@ const Logs = () => {
             key: 'name',
         }
         const columns = {
-            
+
             microservices: [
                 {
                     title: 'Endpoints',
@@ -161,10 +162,16 @@ const Logs = () => {
         const indices = indicesSections.current[key]
         let tableData = []
 
-       
+
         if (isRepos(key)) {
             return <>
-                <LogsReposTable fromDate={fromDate} toDate={toDate} setExtraActions={setExtraActions} extraActions={extraActions} />
+                <LogsProvider selectedMenuItem={'numOfRows'}
+                    indexKey={key}
+                    fromDate={fromDate} toDate={toDate}
+                    setExtraActions={setExtraActions}
+                    extraActions={extraActions} >
+                    <LogsReposTable />
+                </LogsProvider>
             </>
         }
         if (isMicro(key)) {
