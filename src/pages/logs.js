@@ -129,7 +129,7 @@ const Logs = () => {
         }
         const columns = {
 
-            microservices: [
+            apiUsage: [
                 {
                     title: 'Endpoints',
                     dataIndex: 'endpoints',
@@ -169,6 +169,7 @@ const Logs = () => {
             </>
         }
         if (isMicro(key)) {
+           
             for (let d of data[key].data.aggregations.services.buckets) {
                 tableData.push(
                     {
