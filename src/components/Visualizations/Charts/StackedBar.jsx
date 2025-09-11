@@ -19,6 +19,7 @@ function StackedBar({
     filters,
     data = [],
     reload = true,
+    subGroupLabels = {},
     chartId = 'modal',
 }) {
     const {
@@ -28,10 +29,14 @@ function StackedBar({
 
     const hasLoaded = useRef(false)
 
+    const chartType = 'stackedBar'
+    const colors = {}
+
     const buildChart = () => {
 
-        var margin = { top: 10, right: 30, bottom: 20, left: 50 },
-            width = 460 - margin.left - margin.right,
+        const dyWidth = Math.max(460, data.length * 150)
+        const margin = { top: 10, right: 30, bottom: 20, left: 50 },
+            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 300 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 2
         const marginX = margin.left + margin.right
@@ -46,8 +51,7 @@ function StackedBar({
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`)
 
-        var subgroups = Object.keys(data[0]).slice(1)
-
+        const subgroups = Object.keys(data[0]).slice(1)
 
         const groups = data.map(d => (d.name))
 
@@ -84,7 +88,8 @@ function StackedBar({
             .call(d3.axisLeft(y));
 
         // color palette = one color per subgroup
-        const color = d3.scaleOrdinal(d3.schemeCategory10)
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+        const formatValue = x => isNaN(x) ? "N/A" : x.toLocaleString("en")
 
         // Show the bars
         g.append("g")
@@ -92,11 +97,21 @@ function StackedBar({
             // Enter in the stack data = loop key per key = group per group
             .data(stackedData)
             .join("g")
-            .attr("fill", d => color(d.key))
+            .attr("fill", d => {
+                const color = colorScale(d.key)
+                const label = subGroupLabels[d.key]
+                colors[label] = colors[label] || { color, label, value: 0 }
+                colors[label].value += d[0][1] - d[0][0]
+                return color
+            })
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
-            .data(d => d)
+            .data(D => D.map(d => (d.key = D.key, d)))
             .join("rect")
+            .attr('data-value', d => d[1] - d[0])
+            .attr('data-label', d => {
+                return subGroupLabels[d.key]
+            })
             .attr("x", d => x(d.data.name))
             .attr("y", d => {
                 return y(d[1] - d[0])
@@ -105,23 +120,34 @@ function StackedBar({
                 return y(d[0]) - y(d[1])
             })
             .attr("width", x.bandwidth())
+            .append("title")
+            .text(d => {
+
+                return `${d.data.name} ${subGroupLabels[d.key]}\n${d[1] - d[0]}`
+            })
+
+        svg.selectAll("rect")
+            .on("mouseover", toolTipHandlers(chartId, chartType).mouseover)
+            .on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
+            .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();
     }
 
     const updateTable = () => {
-        $(getChartSelector(chartId, 'stackedBar')).html('')
-        appendTooltip(chartId)
-        $(getChartSelector(chartId, 'stackedBar')).append(buildChart())
+        $(getChartSelector(chartId, chartType)).html('')
+        appendTooltip(chartId, chartType)
+        $(getChartSelector(chartId, chartType)).append(buildChart())
 
-        if (setLegend) {
-            setLegend(colors)
-        }
+        // if (setLegend) {
+        //     setLegend(colors)
+        // }
     }
 
     useEffect(() => {
         if (reload || !hasLoaded.current) {
             hasLoaded.current = true
+            console.log('reloading hcart')
             updateTable()
         }
 

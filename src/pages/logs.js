@@ -17,7 +17,7 @@ const Logs = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { globusToken, hasDataAdminPrivs } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
 
     const [fromDate, setFromDate] = useState(null)
     const [toDate, setToDate] = useState(null)
@@ -27,7 +27,7 @@ const Logs = () => {
     const [activeSection, setActiveSection] = useState(null)
     const indicesSections = useRef({})
     const indicesData = useRef({})
-    const [isLoading, setIsLoading] = useState(true)
+    const [isBusy, setIsBusy] = useState(true)
     const [pageSize, setPageSize] = useState(10)
     const [extraActions, setExtraActions] = useState({})
 
@@ -226,7 +226,7 @@ const Logs = () => {
         setCards(comps)
         setTabs(_tabs)
         setActiveSection(`tab-${Object.keys(indicesSections.current)[0]}`)
-        setIsLoading(false)
+        setIsBusy(false)
     }
 
     const onTabChange = (active) => {
@@ -264,6 +264,10 @@ const Logs = () => {
         }
     }, [globusToken, fromDate]);
 
+    if (!isLoading && !isAuthenticated) {
+        window.location = '/'
+    }
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <AppSideNavBar />
@@ -300,7 +304,7 @@ const Logs = () => {
                         style={{ marginBottom: 32, width: '100%' }}
                         items={tabs}
                     /></Row>}
-                    {isLoading && <Spinner />}
+                    {isBusy && <Spinner />}
                 </Content>
             </Layout>
         </Layout>

@@ -1,13 +1,12 @@
 import { useEffect, useState, useContext, useRef } from "react";
-import TABLE from '@/lib/helpers/table';
 import { Table, Button, Dropdown, Space } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
-import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/helpers/general";
+import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import { SettingOutlined } from "@ant-design/icons";
-import StackedBar, { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
-import { ChartProvider } from '@/context/ChartContext';
+import { LogsProvider } from "@/context/LogsContext";
+import StackedBarWithLegend from "../Visualizations/StackedBarWithLegend";
 
 const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => {
 
@@ -19,6 +18,7 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     const [tableType, setTableType] = useState('numOfRows')
     const [numOfRows, setNumOfRows] = useState(20)
     const [vizData, setVizData] = useState([])
+    
 
     const fetchData = async () => {
         setIsLoading(true)
@@ -127,9 +127,18 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
         fetchData()
     }, [fromDate, toDate])
 
+
+    const getSubgroupLabels = () => {
+        let labels = {}
+        for (let c of cols) {
+            labels[c.dataIndex] = c.title
+        }
+        return labels
+    }
+
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            if (selectedRows.length < 7) {
+            if (selectedRows.length < 10) {
                 setVizData(selectedRows)
             }
             console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
@@ -193,10 +202,10 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
 
     return (<>
-
-        {vizData.length > 0 && <ChartProvider>
-            <StackedBar data={prepareStackedData(Array.from(vizData))} chartId='repos' />
-        </ChartProvider>}
+        <LogsProvider>
+            {vizData.length > 0 && <StackedBarWithLegend data={vizData} subGroupLabels={getSubgroupLabels()} chartId={'repos'} />}
+        </LogsProvider>
+        
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

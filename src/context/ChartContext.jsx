@@ -39,6 +39,10 @@ export const ChartProvider = ({ children }) => {
 
     const isBar = (chart) => chart === 'bar'
 
+    const isStackedBar = (chart) => chart === 'stackedBar'
+
+    const isBarType = (chart) => isBar(chart) || isStackedBar(chart)
+
     const getTooltip = (id) => d3.select(`#${selectors.base}tooltip--${id}`)
 
     const toolTipHandlers = (id, chart = 'bar') => {
@@ -52,12 +56,14 @@ export const ChartProvider = ({ children }) => {
             },
             mousemove: function(e, d) {
                 const isModal = id === 'modal'
-                const scale = (isModal ? (isBar(chart) ? 1.5 : 1) : 5)
-                const x = isBar(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
+                const scale = (isModal ? (isBarType(chart) ? 1.5 : 1) : 5)
+                const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
+                const label = d.label || d.data?.label || (e.currentTarget.getAttribute('data-label'))
+                const value = d.value || d.data?.value || (e.currentTarget.getAttribute('data-value'))
                 getTooltip(id)
-                    .html(`<span>${d.label || d.data?.label}</span>: ${d.value || d.data?.value}`)
+                    .html(`<span>${label}</span>: ${value}`)
                     .style('left', x / scale + 'px')
-                    .style(isBar(chart) ? 'bottom' : 'top', isBar(chart) ? (d3.pointer(e)[1] /scale) : 0   + 'px')
+                    .style(isBarType(chart) ? 'bottom' : 'top', isBarType(chart) ? (d3.pointer(e)[1] /scale) : 0   + 'px')
             },
             mouseleave: function(d) {
                 getTooltip(id)
