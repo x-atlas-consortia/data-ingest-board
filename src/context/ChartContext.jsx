@@ -58,8 +58,8 @@ export const ChartProvider = ({ children }) => {
                 const isModal = id === 'modal'
                 const scale = (isModal ? (isBarType(chart) ? 1.5 : 1) : 5)
                 const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
-                const label = d.label || d.data?.label || (e.currentTarget.getAttribute('data-label'))
-                const value = d.value || d.data?.value || (e.currentTarget.getAttribute('data-value'))
+                const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
+                const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
                 getTooltip(id)
                     .html(`<span>${label}</span>: ${value}`)
                     .style('left', x / scale + 'px')

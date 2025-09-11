@@ -178,10 +178,28 @@ const ESQ = {
                 },
                 size: 0,
                 aggs: {
-                    dataset_buckets: {
+                    buckets: {
                         composite: ESQ.composite(['dataset_uuid']),
                         aggs: {
-                            file_bytes: ESQ.sum('bytes_transferred'),
+                            totalBytes: ESQ.sum('bytes_transferred'),
+                        }
+                    }
+                }
+            },
+            fileDownloadsHistogram: {
+                query: {
+                    [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
+                },
+                size: 0,
+                aggs: {
+                    monthly: {
+                        date_histogram: {
+                            field: "download_date_time",
+                            calendar_interval: "month",
+                            format: "yyyy-MM"
+                        },
+                        aggs: {
+                            totalBytes: ESQ.sum('bytes_transferred'),
                         }
                     }
                 }

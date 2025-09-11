@@ -12,7 +12,8 @@ function Bar({
     chartId = 'modal',
     reload = true,
     showXLabels = true,
-    onSectionClick
+    onSectionClick,
+    yAxisTickFormatter,
 }) {
 
     const hasLoaded = useRef(false)
@@ -94,9 +95,10 @@ function Bar({
             .join("rect")
             .attr("class", d => `bar--${d.id}`)
             .attr("x", (d) => x(d.label))
+            .attr('data-value', (d) => yAxisTickFormatter ? yAxisTickFormatter(d.value) : d.value)
             .attr("fill", function (d) {
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
-                colors[d.label] = {color, value: d.value, label: d.label};
+                colors[d.label] = {color, value: yAxisTickFormatter ? yAxisTickFormatter(d.value) : d.value, label: d.label};
                 return color; })
             .attr("y", (d) => y(yStartPos))
             .attr("height", (d) => y(yStartPos) - y(yStartPos))
@@ -138,8 +140,8 @@ function Bar({
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
-            .call(d3.axisLeft(y).tickFormat((y) => (y).toFixed()))
-            .call(g => g.select(".domain").remove())
+            .call(d3.axisLeft(y).tickFormat((y) => yAxisTickFormatter ? yAxisTickFormatter(y) :  (y).toFixed()))
+            //.call(g => g.select(".domain").remove())
             .call(g => g.append("text")
                 .attr("x", -marginLeft)
                 .attr("y", 10)

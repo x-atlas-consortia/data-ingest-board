@@ -7,12 +7,12 @@ import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/h
 import AppContext from "@/context/AppContext";
 import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
+import BarWithLegend from "../Visualizations/BarWithLegend";
 
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
     const [selectedRows, setSelectedRows] = useState([])
-    const chartType = useRef('bar')
 
     const {
         indexKey,
@@ -21,36 +21,41 @@ const LogsFilesTable = ({ }) => {
         hasMoreData, setHasMoreData,
         afterKey,
         selectedMenuItem, 
-        numOfRows, setNumOfRows,
+        numOfRows,
         vizData, setVizData,
         setMenuItems,
-        extraActions, setExtraActions,
         updateTableData,
         getMenuItemClassName,
         fromDate, toDate,
-        getDateRangeList
 
     } = useContext(LogsContext)
 
     let config = ENVS.logsIndicies()
 
+    const getUrl = () => {
+        let i = config[indexKey]
+        if (!i) return null
+
+        let url = ENVS.urlFormat.search(`/${i}/search`)
+        return url
+    }
+
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
         
-        let i = config[indexKey]
-        if (!i) return
-        let url = ENVS.urlFormat.search(`/${i}/search`)
+        let url = getUrl()
+        if (!url) return
         let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {
-            q.aggs.dataset_buckets.composite.after = afterKey.current
+            q.aggs.buckets.composite.after = afterKey.current
         }
 
         // Get page for grouped Ids
         let res = await callService(url, headers, q, 'POST')
-        let _data = res.data?.aggregations?.dataset_buckets
+        let _data = res.data?.aggregations?.buckets
 
         let ids = []
         if (res.status === 200 && _data?.buckets.length) {
@@ -85,7 +90,7 @@ const LogsFilesTable = ({ }) => {
                 _tableData.push(
                     {
                         files: d.doc_count,
-                        bytes: d.file_bytes.value,
+                        bytes: d.totalBytes.value,
                         uuid,
                         ...(entities[uuid] || {})
                     }
@@ -137,25 +142,34 @@ const LogsFilesTable = ({ }) => {
         setTableData([])
         afterKey.current = null
         fetchData(false)
+        updateVizData()
     }, [fromDate, toDate])
 
-    const updateVizData = () => {
-        let hasRange = false
+
+    const updateVizData = async () => {
+        if (!fromDate && !toDate) return
+        let url = getUrl()
+        if (!url) return
+
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate })[`${indexKey}Histogram`]
+        let headers = getHeadersWith(globusToken).headers
+
+        // Get page for grouped Ids
+        let res = await callService(url, headers, q, 'POST')
         let _vizData = []
-        if (fromDate && toDate) {
-            let range = getDateRangeList()
-            hasRange = range.length > 1
-        }
-        chartType.current = (selectedRows.length > 1 && selectedRows.length < 10) ? 'stackedBar' : 'bar'
-
-        let rows = {}
-        for (let i; i < tableData.length; i++) {
-            if (hasRange) {
-                
-            } else {
-
+        if (res.status == 200) {
+            let _data = res.data?.aggregations?.monthly?.buckets
+            console.log(_data)
+            for (let d of _data) {
+                _vizData.push({
+                    label: d.key_as_string,
+                    value: d.totalBytes.value
+                })
             }
+            setVizData(_vizData)
         }
+        
+
     }
 
     const rowSelection = {
@@ -190,6 +204,7 @@ const LogsFilesTable = ({ }) => {
     }, [])
 
     return (<>
+        {vizData.length > 0 && <BarWithLegend yAxisTickFormatter={formatBytes} data={vizData} chartId={'files'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}
