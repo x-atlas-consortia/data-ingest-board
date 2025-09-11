@@ -1,8 +1,8 @@
 import React from 'react'
 import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
-import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext';
+import { formatNum } from '@/lib/helpers/general';
 
 export const prepareStackedData = (data) => {
     let sorted = []
@@ -30,7 +30,16 @@ function StackedBar({
     const hasLoaded = useRef(false)
 
     const chartType = 'stackedBar'
-    const colors = {}
+    const colors = useRef({})
+    const chartData = useRef([])
+
+    const getSubGroupSum = (key) => {
+        let sum = 0
+        for (let d of data) {
+            sum += d[key]
+        }
+        return sum
+    }
 
     const buildChart = () => {
 
@@ -89,7 +98,6 @@ function StackedBar({
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
-        const formatValue = x => isNaN(x) ? "N/A" : x.toLocaleString("en")
 
         // Show the bars
         g.append("g")
@@ -100,8 +108,7 @@ function StackedBar({
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = subGroupLabels[d.key]
-                colors[label] = colors[label] || { color, label, value: 0 }
-                colors[label].value += d[0][1] - d[0][0]
+                colors.current[label] = { color, label, value: formatNum(getSubGroupSum(d.key)) }
                 return color
             })
             .selectAll("rect")
@@ -122,8 +129,7 @@ function StackedBar({
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
-
-                return `${d.data.name} ${subGroupLabels[d.key]}\n${d[1] - d[0]}`
+                return `${d.data.name}\n${subGroupLabels[d.key]}: ${formatNum(d[1] - d[0])}`
             })
 
         svg.selectAll("rect")
@@ -134,27 +140,27 @@ function StackedBar({
         return svg.node();
     }
 
-    const updateTable = () => {
+    const updateChart = () => {
         $(getChartSelector(chartId, chartType)).html('')
         appendTooltip(chartId, chartType)
         $(getChartSelector(chartId, chartType)).append(buildChart())
 
-        // if (setLegend) {
-        //     setLegend(colors)
-        // }
+        if (setLegend) {
+            setLegend(colors.current)
+        }
     }
 
     useEffect(() => {
-        if (reload || !hasLoaded.current) {
+        if (reload || chartData.current.length !== data.length || !hasLoaded.current) {
             hasLoaded.current = true
-            console.log('reloading hcart')
-            updateTable()
+            chartData.current = Array.from(data)
+            updateChart()
         }
 
     }, [data])
 
     useEffect(() => {
-        updateTable()
+        updateChart()
     }, [filters])
 
     return (

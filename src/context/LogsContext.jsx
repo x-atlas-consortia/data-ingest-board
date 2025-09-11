@@ -5,11 +5,8 @@ const LogsContext = createContext({})
 
 export const LogsProvider = ({ children }) => {
 
-    const [legend, setLegend] = useState([])
-
   return <LogsContext.Provider value={{
-        legend,
-        setLegend
+ 
     }}>{children}</LogsContext.Provider>
 }
 

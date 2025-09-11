@@ -20,7 +20,7 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
     const [vizData, setVizData] = useState([])
     
 
-    const fetchData = async () => {
+    const fetchData = async (includePrevData = true) => {
         setIsLoading(true)
         let dataSize = numOfRows
         let i = 'logs-repos'
@@ -74,7 +74,12 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
             /// END
 
-            setTableData([...tableData, ..._tableData])
+            if (includePrevData) {
+                setTableData([...tableData, ..._tableData])
+            } else {
+                setTableData(_tableData)
+            }
+            
 
         } else {
             setHasMoreData(false)
@@ -124,7 +129,9 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
     useEffect(() => {
         setTableData([])
-        fetchData()
+        setVizData([])
+        afterKey.current = null
+        fetchData(false)
     }, [fromDate, toDate])
 
 
@@ -141,7 +148,7 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
             if (selectedRows.length < 10) {
                 setVizData(selectedRows)
             }
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         },
     };
 
@@ -202,10 +209,7 @@ const LogsReposTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
 
 
     return (<>
-        <LogsProvider>
-            {vizData.length > 0 && <StackedBarWithLegend data={vizData} subGroupLabels={getSubgroupLabels()} chartId={'repos'} />}
-        </LogsProvider>
-        
+       {vizData.length > 0 && <StackedBarWithLegend data={vizData} subGroupLabels={getSubgroupLabels()} chartId={'repos'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

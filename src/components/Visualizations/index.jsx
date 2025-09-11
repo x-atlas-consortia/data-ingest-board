@@ -329,7 +329,6 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                         <Col className='mt-4' md={{ span: 6, pull: 18 }} sm={{ span: 24 }} xs={{ span: 24 }}>
                                             {hasMeaningfulData() && <Legend
                                                 legend={legend}
-                                                setLegend={setLegend}
                                                 selectedValues={selectedFilterValues}
                                                 onItemClick={handleChartItemClick}
                                             />}

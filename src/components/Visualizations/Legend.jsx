@@ -2,7 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import PropTypes from 'prop-types';
 
-function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
+function Legend({legend, sortLegend = true, selectedValues = [], onItemClick}) {
     const handleItemClick = (label) => {
         if (onItemClick) {
             onItemClick(label)
@@ -12,7 +12,10 @@ function Legend({legend, setLegend, selectedValues = [], onItemClick}) {
     const buildLegend = () => {
         let res = []
         let _legend = Object.values(legend)
-        _legend.sort((a, b) => b.value - a.value)
+        if (sortLegend) {
+          _legend.sort((a, b) => b.value - a.value)  
+        }
+        
         for (let l of _legend) {
             let className = 'c-legend__item'
             if (selectedValues.includes(l.label)) {
