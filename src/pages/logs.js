@@ -165,7 +165,7 @@ const Logs = () => {
 
         if (isRepos(key)) {
             return <>
-                <LogsProvider selectedMenuItem={'numOfRows'}
+                <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     fromDate={fromDate} toDate={toDate}
                     setExtraActions={setExtraActions}
@@ -200,7 +200,14 @@ const Logs = () => {
         if (isFiles(key)) {
 
             return <>
-                <LogsFilesTable fromDate={fromDate} toDate={toDate} setExtraActions={setExtraActions} extraActions={extraActions} />
+                <LogsProvider defaultMenuItem={'byDatasetID'}
+                    indexKey={key}
+                    fromDate={fromDate} toDate={toDate}
+                    setExtraActions={setExtraActions}
+                    extraActions={extraActions} >
+                    <LogsFilesTable />
+                </LogsProvider>
+                
             </>
         }
     }

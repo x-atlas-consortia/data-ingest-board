@@ -1,26 +1,35 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
-import { Table, Button, Dropdown, Space, Popover } from 'antd';
+import { Table, Button, Popover } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
 import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
+import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
-import ModalOverFiles from "../ModalOverFiles";
-import { SettingOutlined } from "@ant-design/icons";
 
-const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => {
+const LogsFilesTable = ({ }) => {
 
-    const [tableData, setTableData] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
     const { globusToken } = useContext(AppContext)
-    const [hasMoreData, setHasMoreData] = useState(true)
-    const afterKey = useRef(null)
-    const [tableType, setTableType] = useState('byDatasetID')
-    const [numOfRows, setNumOfRows] = useState(20)
+
+    const {
+        tableData, setTableData,
+        isBusy, setIsBusy,
+        hasMoreData, setHasMoreData,
+        afterKey,
+        selectedMenuItem, 
+        numOfRows, setNumOfRows,
+        vizData, setVizData,
+        setMenuItems,
+        extraActions, setExtraActions,
+        updateTableData,
+        getMenuItemClassName,
+        fromDate, toDate,
+
+    } = useContext(LogsContext)
 
     const fetchData = async (includePrevData = true) => {
-        setIsLoading(true)
+        setIsBusy(true)
         let dataSize = numOfRows
         let i = 'logs-file-downloads'
         let url = ENVS.urlFormat.search(`/${i}/search`)
@@ -75,16 +84,12 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
                 )
             }
 
-            if (includePrevData) {
-                setTableData([...tableData, ..._tableData])
-            } else {
-                setTableData(_tableData)
-            }
+            updateTableData(includePrevData, _tableData)
 
         } else {
             setHasMoreData(false)
         }
-        setIsLoading(false)
+        setIsBusy(false)
     }
 
     const cols = [
@@ -132,24 +137,6 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
         },
     };
 
-    const getMenuItemClassName = (s1, s2) => {
-        return eq(s1, s2) ? 'is-active' : undefined
-    }
-
-
-    const getRowsPerLoadMore = () => {
-        const ops = [10, 20, 50, 100, 200]
-        let r = []
-        for (let o of ops) {
-            r.push({
-                key: o,
-                label: o,
-                className: getMenuItemClassName(numOfRows.toString(), o.toString())
-            })
-        }
-        return r
-    }
-
     const items = [
         {
             key: 'logsType',
@@ -158,60 +145,28 @@ const LogsFilesTable = ({ fromDate, toDate, setExtraActions, extraActions }) => 
             children: [
                 {
                     key: 'byDatasetID',
-                    className: getMenuItemClassName(tableType, 'byDatasetID'), 
+                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetID'), 
                     label: 'Dataset ID',
                 },
                 {
                     key: 'byDatasetType',
-                    className: getMenuItemClassName(tableType, 'byDatasetType'),
+                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetType'),
                     label: 'Dataset Type',
                 },
             ],
-        },
-        {
-            key: 'numOfRows',
-            label: 'Rows Per Load More',
-            children: getRowsPerLoadMore(),
         }
     ];
 
-    const handleMenuClick = (e) => {
-       
-        if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
-            setNumOfRows(Number(e.key))
-        } else {
-            setTableType(e.key)
-        }
-    }
-
-    const menuProps = {
-        items,
-        onClick: handleMenuClick,
-    };
-
-    useEffect(() => {
-        setExtraActions({
-            ...extraActions, 'tab-fileDownloads': <div>
-                <Dropdown menu={menuProps}>
-                    <a onClick={e => e.preventDefault()}>
-                        <Space>
-                            Table Options
-                            <SettingOutlined />
-                        </Space>
-                    </a>
-                </Dropdown>
-            </div>
-        })
-    }, [numOfRows, tableType])
-
+     useEffect(() => {
+        setMenuItems(items)
+    }, [])
 
     return (<>
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             pagination={false}
-            loading={isLoading}
-            //onChange={handleTableChange}
+            loading={isBusy}
             rowKey={'uuid'}
             scroll={{ y: 'calc(100vh - 200px)' }}
             dataSource={tableData} columns={cols} />

@@ -15,15 +15,9 @@ const LogsReposTable = ({ }) => {
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
         afterKey,
-        tableType, setTableType,
-        numOfRows, setNumOfRows,
+        numOfRows, 
         vizData, setVizData,
-        setMenuItems,
-        extraActions, setExtraActions,
         updateTableData,
-        getMenuItemClassName,
-        getRowsPerLoadMore,
-        handleMenuClick,
         fromDate, toDate,
 
     } = useContext(LogsContext)
@@ -158,18 +152,7 @@ const LogsReposTable = ({ }) => {
         },
     };
 
-    const items = [
-        {
-            key: 'numOfRows',
-            label: 'Rows Per Load More',
-            children: getRowsPerLoadMore(),
-        }
-    ];
 
-
-    useEffect(() => {
-        setMenuItems(items)
-    }, [])
 
 
     return (<>

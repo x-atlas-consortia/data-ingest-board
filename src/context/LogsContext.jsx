@@ -6,20 +6,24 @@ import { eq } from "@/lib/helpers/general";
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, selectedMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
   const [hasMoreData, setHasMoreData] = useState(true)
   const afterKey = useRef(null)
-  const [tableType, setTableType] = useState(selectedMenuItem)
+  const [selectedMenuItem, setSelectedMenuItem] = useState(defaultMenuItem)
   const [numOfRows, setNumOfRows] = useState(20)
   const [vizData, setVizData] = useState([])
   const [menuItems, setMenuItems] = useState([])
 
   const menuProps = () => {
     return {
-      items: menuItems,
+      items: [...menuItems, {
+            key: 'numOfRows',
+            label: 'Rows Per Load More',
+            children: getRowsPerLoadMore(),
+        }],
       onClick: handleMenuClick,
     }
   }
@@ -37,7 +41,7 @@ export const LogsProvider = ({ children, selectedMenuItem, indexKey, fromDate, t
         </Dropdown>
       </div>
     })
-  }, [numOfRows, tableType, menuItems])
+  }, [numOfRows, selectedMenuItem, menuItems])
 
   const updateTableData = (includePrevData, _tableData) => {
     if (includePrevData) {
@@ -70,7 +74,7 @@ export const LogsProvider = ({ children, selectedMenuItem, indexKey, fromDate, t
     if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
       setNumOfRows(Number(e.key))
     } else {
-      setTableType(e.key)
+      setSelectedMenuItem(e.key)
     }
   }
 
@@ -80,7 +84,7 @@ export const LogsProvider = ({ children, selectedMenuItem, indexKey, fromDate, t
     isBusy, setIsBusy,
     hasMoreData, setHasMoreData,
     afterKey,
-    tableType, setTableType,
+    selectedMenuItem, setSelectedMenuItem,
     numOfRows, setNumOfRows,
     vizData, setVizData,
     menuItems, setMenuItems,
