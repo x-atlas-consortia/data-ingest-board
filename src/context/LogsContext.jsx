@@ -78,6 +78,18 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
   }
 
+  const getDateRangeList = (part = 1) => {
+    if (!fromDate || !toDate) return []
+    const isoSuffix = 'T00:00:00'
+    let from = fromDate.replace(isoSuffix, '').split('-')
+    let to = toDate.replace(isoSuffix, '').split('-')
+    let range = []
+    for (let i = Number(from[part]); i <= Number(to[part]); i++) {
+      range.push(i)
+    }
+    return range
+  }
+
 
   return <LogsContext.Provider value={{
     tableData, setTableData,
@@ -94,6 +106,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getRowsPerLoadMore,
     handleMenuClick,
     fromDate, toDate,
+    getDateRangeList,
+    indexKey
 
   }}>{children}</LogsContext.Provider>
 }

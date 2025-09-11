@@ -11,8 +11,11 @@ import IdLinkDropdown from "../IdLinkDropdown";
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
+    const [selectedRows, setSelectedRows] = useState([])
+    const chartType = useRef('bar')
 
     const {
+        indexKey,
         tableData, setTableData,
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
@@ -25,15 +28,20 @@ const LogsFilesTable = ({ }) => {
         updateTableData,
         getMenuItemClassName,
         fromDate, toDate,
+        getDateRangeList
 
     } = useContext(LogsContext)
+
+    let config = ENVS.logsIndicies()
 
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
-        let i = 'logs-file-downloads'
+        
+        let i = config[indexKey]
+        if (!i) return
         let url = ENVS.urlFormat.search(`/${i}/search`)
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${i}-table`]
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {
@@ -131,9 +139,29 @@ const LogsFilesTable = ({ }) => {
         fetchData(false)
     }, [fromDate, toDate])
 
+    const updateVizData = () => {
+        let hasRange = false
+        let _vizData = []
+        if (fromDate && toDate) {
+            let range = getDateRangeList()
+            hasRange = range.length > 1
+        }
+        chartType.current = (selectedRows.length > 1 && selectedRows.length < 10) ? 'stackedBar' : 'bar'
+
+        let rows = {}
+        for (let i; i < tableData.length; i++) {
+            if (hasRange) {
+                
+            } else {
+
+            }
+        }
+    }
+
     const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        onChange: (rowKeys, rows) => {
+            console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
+            setSelectedRows(rows)
         },
     };
 

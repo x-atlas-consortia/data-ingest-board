@@ -33,48 +33,44 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
 
     const handleDateRange = (dates, dateStrings) => {
-        console.log(dates, dateStrings)
-        setFromDate(dateStrings[0] + 'T00:00:00')
-        setToDate(dateStrings[1] + 'T00:00:00')
+        const isoSuffix = 'T00:00:00'
+        setFromDate(dateStrings[0] + isoSuffix)
+        setToDate(dateStrings[1] + isoSuffix)
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
-    const isMicro = (key) => eq(key, 'microservices')
+    const isMicro = (key) => eq(key, 'apiUsage')
 
     const isRepos = (key) => eq(key, 'openSourceRepos')
 
     const isFiles = (key) => eq(key, 'fileDownloads')
 
-
-
     const getCardDetail = (key, data) => {
-        const indices = indicesSections.current[key]
+       
         let repos, totalClones, totalViews = 0
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
-        let indexData, agg
+        let agg
 
-        for (let i of indices) {
-            indexData = data[i].data
-            agg = indexData.aggregations
+        let indexData = data[key].data
+        agg = indexData.aggregations
 
-            if (isMicro(key)) {
-                totalHits = indexData.hits?.total?.value
-            } else if (isFiles(key)) {
-                totalHits = indexData.hits.total?.value
-                totalFiles = agg.totalFiles.value
-                datasetGroups = agg.totalDatasets.value
-                totalBytes = agg.totalBytes.value
-            } else {
-                for (let b of agg.buckets.buckets) {
-                    if (eq(b.key['type.keyword'], 'clone')) {
-                        totalClones = b.count.value;
-                    } else {
-                        totalViews = b.count.value;
-                    }
+        if (isMicro(key)) {
+            totalHits = indexData.hits?.total?.value
+        } else if (isFiles(key)) {
+            totalHits = indexData.hits.total?.value
+            totalFiles = agg.totalFiles.value
+            datasetGroups = agg.totalDatasets.value
+            totalBytes = agg.totalBytes.value
+        } else {
+            for (let b of agg.buckets.buckets) {
+                if (eq(b.key['type.keyword'], 'clone')) {
+                    totalClones = b.count.value;
+                } else {
+                    totalViews = b.count.value;
                 }
-                repos = agg.repos.buckets.length
             }
+            repos = agg.repos.buckets.length
         }
 
         if (isRepos(key)) {
@@ -99,7 +95,7 @@ const Logs = () => {
             }
             return (<>
                 {ms}
-                -----------------------------
+                {totalHits > 0 && <span>-----------------------------</span>}
                 <Row className='mt-2'>
                     <Col span={12}><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
                 </Row>
@@ -159,9 +155,7 @@ const Logs = () => {
 
     const getTabContent = (key, data) => {
         const cols = getColumnsByKey(key)
-        const indices = indicesSections.current[key]
         let tableData = []
-
 
         if (isRepos(key)) {
             return <>
@@ -175,17 +169,14 @@ const Logs = () => {
             </>
         }
         if (isMicro(key)) {
-            for (let i of indices) {
-                for (let d of data[i].data.aggregations.services.buckets) {
-                    tableData.push(
-                        {
-
-                            name: d.key,
-                            hits: d.doc_count,
-                            endpoints: 'TODO' // todo
-                        }
-                    )
-                }
+            for (let d of data[key].data.aggregations.services.buckets) {
+                tableData.push(
+                    {
+                        name: d.key,
+                        hits: d.doc_count,
+                        endpoints: 'TODO' // todo
+                    }
+                )
             }
             // TODO Add visualization of microservice against usage counts
             return <>
@@ -207,7 +198,7 @@ const Logs = () => {
                     extraActions={extraActions} >
                     <LogsFilesTable />
                 </LogsProvider>
-                
+
             </>
         }
     }
@@ -217,7 +208,7 @@ const Logs = () => {
             openSourceRepos: {
                 title: 'Open Source Repositories'
             },
-            microservices: {
+            apiUsage: {
                 title: 'Microservices'
             },
             fileDownloads: {
@@ -252,18 +243,15 @@ const Logs = () => {
         let _data = {}
         let q, url, headers
         for (let s in indicesSections.current) {
-            let indicies = indicesSections.current[s]
-            for (let i of indicies) {
-                if (!_data[i]) {
-                    url = ENVS.urlFormat.search(`/${i}/search`)
-                    q = ESQ.indexQueries({ from: fromDate, to: toDate })[i]
-                    headers = getHeadersWith(globusToken).headers
-                    _data[i] = await callService(url,
-                        headers,
-                        q,
-                        'POST')
-
-                }
+            let index = indicesSections.current[s]
+            if (!_data[s]) {
+                url = ENVS.urlFormat.search(`/${index}/search`)
+                q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
+                headers = getHeadersWith(globusToken).headers
+                _data[s] = await callService(url,
+                    headers,
+                    q,
+                    'POST')
 
             }
         }

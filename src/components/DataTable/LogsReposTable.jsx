@@ -19,18 +19,21 @@ const LogsReposTable = ({ }) => {
         vizData, setVizData,
         updateTableData,
         fromDate, toDate,
+        indexKey
 
     } = useContext(LogsContext)
 
     const subgroupLabels = useRef({})
 
+    let config = ENVS.logsIndicies()
 
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
-        let i = 'logs-repos'
+        let i = config[indexKey]
+        if (!i) return
         let url = ENVS.urlFormat.search(`/${i}/search`)
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${i}-table`]
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {

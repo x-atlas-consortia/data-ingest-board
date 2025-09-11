@@ -111,7 +111,7 @@ const ESQ = {
                     }
                 }
             },
-            'logs-repos': {
+            openSourceRepos: {
                 query: ESQ.ownerFilter(from, to),
                 size: 0,
                 aggs: {
@@ -126,7 +126,7 @@ const ESQ = {
 
                 }
             },
-            'logs-repos-table': {
+            openSourceReposTable: {
                 query: ESQ.ownerFilter(from, to),
                 size: 0,
                 aggs: {
@@ -148,7 +148,7 @@ const ESQ = {
 
                 }
             },
-            'logs-api-usage': {
+            apiUsage: {
                 query: {
                     [queryField]: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {}
                 },
@@ -159,7 +159,7 @@ const ESQ = {
                     endpoints: ESQ.bucket('resource_path_parameter')
                 }
             },
-            'logs-file-downloads': {
+            fileDownloads: {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
@@ -172,7 +172,7 @@ const ESQ = {
 
                 }
             },
-            'logs-file-downloads-table': {
+            fileDownloadsTable: {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
