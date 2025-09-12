@@ -62,14 +62,14 @@ const LogsReposTable = ({ }) => {
                     repo = d.key['repository.keyword']
                     repos[repo] = {}
                     for (let t of types) {
-                        repos[repo] = { ...repos[repo], name: repo, [t.key]: { unique: t.unique.value, count: t.count.value } }
+                        repos[repo] = { ...repos[repo], [t.key]: { unique: t.unique.value, count: t.count.value } }
                     }
 
                     r = repos[repo]
 
                     _tableData.push(
                         {
-                            name: repo,
+                            group: repo,
                             views: r.view?.count || 0,
                             uniqueViews: r.view?.unique || 0,
                             clones: r.clone?.count || 0,
@@ -94,8 +94,8 @@ const LogsReposTable = ({ }) => {
     const cols = [
         {
             title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'group',
+            key: 'group',
         },
         {
             title: 'Total Views',
@@ -165,7 +165,7 @@ const LogsReposTable = ({ }) => {
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             pagination={false}
             loading={isBusy}
-            rowKey={'name'}
+            rowKey={'group'}
             scroll={{ y: 'calc(100vh - 200px)' }}
             dataSource={tableData} columns={cols} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>

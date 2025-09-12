@@ -11,6 +11,8 @@ export const prepareStackedData = (data) => {
             Object.entries(d).sort(([, a], [, b]) => b - a)
         ))
     }
+    
+    
     return sorted
 }
 
@@ -62,7 +64,7 @@ function StackedBar({
 
         const subgroups = Object.keys(data[0]).slice(1)
 
-        const groups = data.map(d => (d.name))
+        const groups = data.map(d => (d.group))
 
         // Add X axis
         const x = d3.scaleBand()
@@ -80,7 +82,6 @@ function StackedBar({
                 maxY = Math.max(maxY, d[subgroup])
             }
         }
-        const yStartPos = -(maxY * .02)
 
         var stack = d3.stack()
             .keys(subgroups)
@@ -119,7 +120,7 @@ function StackedBar({
             .attr('data-label', d => {
                 return subGroupLabels[d.key]
             })
-            .attr("x", d => x(d.data.name))
+            .attr("x", d => x(d.data.group))
             .attr("y", d => {
                 return y(d[1] - d[0])
             })
@@ -129,7 +130,7 @@ function StackedBar({
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.data.name}\n${subGroupLabels[d.key]}: ${formatNum(d[1] - d[0])}`
+                return `${d.data.group}\n${subGroupLabels[d.key]}: ${formatNum(d[1] - d[0])}`
             })
 
         svg.selectAll("rect")
