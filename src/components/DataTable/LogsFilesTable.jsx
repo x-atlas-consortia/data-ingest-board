@@ -8,11 +8,16 @@ import AppContext from "@/context/AppContext";
 import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
 import BarWithLegend from "../Visualizations/BarWithLegend";
+import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
-    const [selectedRows, setSelectedRows] = useState([])
+    const selectedRows = useRef([])
+    const chartType = useRef('bar')
+    const [vizData, setVizData] = useState({})
+    const entities = useRef({})
+    const datasetGroups = useRef([])
 
     const {
         indexKey,
@@ -22,7 +27,6 @@ const LogsFilesTable = ({ }) => {
         afterKey,
         selectedMenuItem, 
         numOfRows,
-        vizData, setVizData,
         setMenuItems,
         updateTableData,
         getMenuItemClassName,
@@ -72,10 +76,10 @@ const LogsFilesTable = ({ }) => {
                 ESQ.indexQueries({ list: ids }).filter,
                 'POST')
 
-            let entities = {}
+           
             if (entitiesSearch.status == 200) {
                 for (let d of entitiesSearch.data.hits.hits) {
-                    entities[d._source.uuid] = {
+                    entities.current[d._source.uuid] = {
                         [TABLE.cols.f('id')]: d._source.hubmap_id,
                         entityId: d._source.hubmap_id, // TODO change to TABLE.col.f('id')
                         datasetType: d._source.dataset_type,
@@ -92,7 +96,7 @@ const LogsFilesTable = ({ }) => {
                         files: d.doc_count,
                         bytes: d.totalBytes.value,
                         uuid,
-                        ...(entities[uuid] || {})
+                        ...(entities.current[uuid] || {})
                     }
                 )
             }
@@ -141,12 +145,14 @@ const LogsFilesTable = ({ }) => {
     useEffect(() => {
         setTableData([])
         afterKey.current = null
+        datasetGroups.current = []
+        entities.current = {}
         fetchData(false)
-        updateVizData()
+        buildBarChart()
     }, [fromDate, toDate])
 
 
-    const updateVizData = async () => {
+    const buildBarChart = async () => {
         if (!fromDate && !toDate) return
         let url = getUrl()
         if (!url) return
@@ -159,23 +165,57 @@ const LogsFilesTable = ({ }) => {
         let _vizData = []
         if (res.status == 200) {
             let _data = res.data?.aggregations?.monthly?.buckets
-            console.log(_data)
             for (let d of _data) {
                 _vizData.push({
                     label: d.key_as_string,
                     value: d.totalBytes.value
                 })
             }
-            setVizData(_vizData)
+            setVizData({...vizData, bar: _vizData})
         }
-        
+    }
 
+    const buildLineChart = async () => {
+        if (!fromDate && !toDate) return
+        let url = getUrl()
+        if (!url) return
+
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows.current })[`${indexKey}DatasetsHistogram`]
+        let headers = getHeadersWith(globusToken).headers
+
+        // Get page for grouped Ids
+        let res = await callService(url, headers, q, 'POST')
+        let _vizData = []
+        if (res.status == 200) {
+            let _data = res.data?.aggregations?.buckets?.buckets
+            let buckets = {}
+            for (let d of _data) {
+                
+                for (let m of d.monthly.buckets) {
+                    buckets[m.key_as_string] = buckets[m.key_as_string] || {xValue: m.key_as_string}
+                    buckets[m.key_as_string][entities.current[d.key]?.entityId || d.key] = m.totalBytes.value
+                }
+            }
+            _vizData = Object.values(buckets)
+            let datasets = []
+            for (let id of selectedRows.current) {
+                datasets.push(entities.current[id]?.entityId || id)
+            }
+            datasetGroups.current = datasets
+
+            setVizData({...vizData, line: _vizData})
+        }
     }
 
     const rowSelection = {
         onChange: (rowKeys, rows) => {
             console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
-            setSelectedRows(rows)
+            selectedRows.current = rowKeys
+            if (rowKeys.length) {
+                buildLineChart()
+            } else {
+                setVizData({...vizData, line: []})
+            }
         },
     };
 
@@ -204,7 +244,8 @@ const LogsFilesTable = ({ }) => {
     }, [])
 
     return (<>
-        {vizData.length > 0 && <BarWithLegend yAxisTickFormatter={formatBytes} data={vizData} chartId={'files'} />}
+        {vizData.bar?.length > 0 && selectedRows.current.length == 0 && <BarWithLegend yAxisTickFormatter={formatBytes} data={vizData.bar} chartId={'files'} />}
+        {vizData.line?.length > 0 && selectedRows.current.length > 0 && <LineWithLegend groups={datasetGroups.current} yAxisTickFormatter={formatBytes} data={vizData.line} chartId={'filesDataset'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

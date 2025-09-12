@@ -74,17 +74,18 @@ const ESQ = {
             sources
         }
     },
-    ownerFilter: (from, to) => {
+    filter: (from, to, field, list = [], rangeFn) => {
+
         let filter = [
             {
                 terms: {
-                    owner: [`${ENVS.appContext().toLowerCase()}consortium`]
+                    [field]: list
                 }
             }]
         if (from) {
             filter.push(
                 {
-                    range: ESQ.dateRange(from, to)
+                    range: rangeFn ? rangeFn(from, to) : ESQ.dateRange(from, to)
                 }
             )
         }
@@ -93,6 +94,22 @@ const ESQ = {
                 filter
             }
         }
+    },
+    ownerFilter: (from, to) => {
+        return ESQ.filter(from, to, 'owner', [`${ENVS.appContext().toLowerCase()}consortium`])
+    },
+    monthlyHistogram: () => {
+        return {
+            date_histogram: {
+                field: "download_date_time",
+                calendar_interval: "month",
+                format: "yyyy-MM"
+            },
+            aggs: {
+                totalBytes: ESQ.sum('bytes_transferred'),
+            }
+        }
+
     },
     indexQueries: ({ from, to, list, collapse, size = 0, field = 'uuid' }) => {
         const queryField = from ? 'range' : 'match_all'
@@ -192,21 +209,27 @@ const ESQ = {
                 },
                 size: 0,
                 aggs: {
-                    monthly: {
-                        date_histogram: {
-                            field: "download_date_time",
-                            calendar_interval: "month",
-                            format: "yyyy-MM"
+                    monthly: ESQ.monthlyHistogram()
+                }
+            },
+            fileDownloadsDatasetsHistogram: {
+                query: ESQ.filter(from, to, 'dataset_uuid', list, ESQ.fileDownloadDateRange),
+                size: 0,
+                aggs: {
+                    "buckets": {
+                        "terms": {
+                            "field": "dataset_uuid.keyword"
                         },
                         aggs: {
-                            totalBytes: ESQ.sum('bytes_transferred'),
+                            monthly: ESQ.monthlyHistogram()
                         }
                     }
                 }
+
             }
         }
     }
 
-}
+    }
 
 export default ESQ

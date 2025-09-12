@@ -155,7 +155,7 @@ function Bar({
         return svg.node();
     }
 
-    const updateTable = () => {
+    const updateChart = () => {
         $(getChartSelector(chartId)).html('')
         appendTooltip(chartId)
         $(getChartSelector(chartId)).append(buildChart())
@@ -167,13 +167,13 @@ function Bar({
     useEffect(() => {
         if (reload || !hasLoaded.current) {
             hasLoaded.current = true
-            updateTable()
+            updateChart()
         }
 
     }, [data])
 
     useEffect(() => {
-        updateTable()
+        updateChart()
     }, [filters])
 
     return (

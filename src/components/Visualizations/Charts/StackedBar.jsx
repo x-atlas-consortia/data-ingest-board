@@ -29,11 +29,11 @@ function StackedBar({
         toolTipHandlers,
         appendTooltip } = useContext(ChartContext)
 
-    const hasLoaded = useRef(false)
 
     const chartType = 'stackedBar'
     const colors = useRef({})
     const chartData = useRef([])
+    const hasLoaded = useRef(false)
 
     const getSubGroupSum = (key) => {
         let sum = 0
