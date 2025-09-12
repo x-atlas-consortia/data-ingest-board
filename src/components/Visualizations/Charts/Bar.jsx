@@ -13,7 +13,7 @@ function Bar({
     reload = true,
     showXLabels = true,
     onSectionClick,
-    yAxisTickFormatter,
+    yAxis ={},
 }) {
 
     const hasLoaded = useRef(false)
@@ -95,10 +95,10 @@ function Bar({
             .join("rect")
             .attr("class", d => `bar--${d.id}`)
             .attr("x", (d) => x(d.label))
-            .attr('data-value', (d) => yAxisTickFormatter ? yAxisTickFormatter(d.value) : d.value)
+            .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.value) : d.value)
             .attr("fill", function (d) {
                 const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
-                colors[d.label] = {color, value: yAxisTickFormatter ? yAxisTickFormatter(d.value) : d.value, label: d.label};
+                colors[d.label] = {color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label};
                 return color; })
             .attr("y", (d) => y(yStartPos))
             .attr("height", (d) => y(yStartPos) - y(yStartPos))
@@ -140,14 +140,14 @@ function Bar({
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
-            .call(d3.axisLeft(y).tickFormat((y) => yAxisTickFormatter ? yAxisTickFormatter(y) :  (y).toFixed()))
+            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) :  (y).toFixed()))
             //.call(g => g.select(".domain").remove())
             .call(g => g.append("text")
                 .attr("x", -marginLeft)
                 .attr("y", 10)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "start")
-                .text("↑ Frequency"))
+                .text(yAxis.label || "↑ Frequency"))
             .selectAll("text")
             .style("font-size", "11px"); 
 

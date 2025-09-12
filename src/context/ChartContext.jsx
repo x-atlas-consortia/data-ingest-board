@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, useRef} from 'react'
+import { createContext, useEffect, useState, useRef } from 'react'
 import * as d3 from "d3";
 import THEME from "@/lib/helpers/theme";
 
@@ -25,7 +25,7 @@ export const ChartProvider = ({ children }) => {
             currentColorPointer = 1
             currentColorIndex = 0
         }
-        return {color: '#'+color}
+        return { color: '#' + color }
     }
 
     const appendTooltip = (id, chart = 'bar') => {
@@ -45,27 +45,41 @@ export const ChartProvider = ({ children }) => {
 
     const getTooltip = (id) => d3.select(`#${selectors.base}tooltip--${id}`)
 
+    const showTooltip = (id, chart, e, d) => {
+        const isModal = id === 'modal'
+        const scale = (isModal ? 2 : 5)
+        const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
+        const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
+        const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
+
+        const element = document.getElementById(`c-visualizations__line--${id}`)
+        const rect = element?.getBoundingClientRect()
+
+        const xPos = rect ? (e.clientX - (rect.left)) : (isModal ? x : x / scale)
+        const yPos = rect && !isBarType(chart) ? e.clientY - rect.top : (isBarType(chart) ? (d3.pointer(e)[1] / scale) : 0)
+
+        getTooltip(id)
+            .html(`<span>${label}</span>: ${value}`)
+            .style('left', xPos + 'px')
+            .style(isBarType(chart) ? 'bottom' : 'top', yPos + 'px')
+    }
+
     const toolTipHandlers = (id, chart = 'bar') => {
         return {
-            mouseover: function(d) {
+            mouseover: function (d) {
                 getTooltip(id)
                     .style('opacity', 1)
                 d3.select(this)
                     .style('opacity', 0.9)
                     .style('cursor', 'pointer')
             },
-            mousemove: function(e, d) {
-                const isModal = id === 'modal'
-                const scale = (isModal ? (isBarType(chart) ? 1.5 : 1) : 5)
-                const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
-                const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
-                const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
-                getTooltip(id)
-                    .html(`<span>${label}</span>: ${value}`)
-                    .style('left', x / scale + 'px')
-                    .style(isBarType(chart) ? 'bottom' : 'top', isBarType(chart) ? (d3.pointer(e)[1] /scale) : 0   + 'px')
+            mousemove: function (e, d) {
+                showTooltip(id, chart, e, d)
             },
-            mouseleave: function(d) {
+            click: function (e, d) {
+                showTooltip(id, chart, e, d)
+            },
+            mouseleave: function (d) {
                 getTooltip(id)
                     .style('opacity', 0)
                 d3.select(this)

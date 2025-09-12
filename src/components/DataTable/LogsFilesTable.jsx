@@ -14,7 +14,7 @@ const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
     const selectedRows = useRef([])
-    const chartType = useRef('bar')
+    const xAxis = useRef({})
     const [vizData, setVizData] = useState({})
     const entities = useRef({})
     const datasetGroups = useRef([])
@@ -144,9 +144,12 @@ const LogsFilesTable = ({ }) => {
 
     useEffect(() => {
         setTableData([])
+        setVizData({})
         afterKey.current = null
         datasetGroups.current = []
         entities.current = {}
+        selectedRows.current = []
+        xAxis.current = {}
         fetchData(false)
         buildBarChart()
     }, [fromDate, toDate])
@@ -189,8 +192,14 @@ const LogsFilesTable = ({ }) => {
         if (res.status == 200) {
             let _data = res.data?.aggregations?.buckets?.buckets
             let buckets = {}
+
+            if (_data.length) {
+                const prevMonth = new Date(_data[0].monthly.buckets[0].key_as_string+'-2')
+                prevMonth.setMonth(prevMonth.getMonth()-1)
+                xAxis.current.prefix = `${prevMonth.getFullYear()}-${prevMonth.getMonth()+1}`
+            }
+
             for (let d of _data) {
-                
                 for (let m of d.monthly.buckets) {
                     buckets[m.key_as_string] = buckets[m.key_as_string] || {xValue: m.key_as_string}
                     buckets[m.key_as_string][entities.current[d.key]?.entityId || d.key] = m.totalBytes.value
@@ -198,6 +207,13 @@ const LogsFilesTable = ({ }) => {
             }
             _vizData = Object.values(buckets)
             let datasets = []
+
+            if (_vizData.length) {
+                const nextMonth = new Date(_vizData[_vizData.length-1].xValue+'-2')
+                nextMonth.setMonth(nextMonth.getMonth()+1)
+                xAxis.current.suffix = `${nextMonth.getFullYear()}-${nextMonth.getMonth()+1}`
+            }
+            
             for (let id of selectedRows.current) {
                 datasets.push(entities.current[id]?.entityId || id)
             }
@@ -208,6 +224,7 @@ const LogsFilesTable = ({ }) => {
     }
 
     const rowSelection = {
+        selectedRowKeys: selectedRows.current,
         onChange: (rowKeys, rows) => {
             console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
             selectedRows.current = rowKeys
@@ -243,9 +260,11 @@ const LogsFilesTable = ({ }) => {
         setMenuItems(items)
     }, [])
 
+    const yAxis = {formatter: formatBytes, label: '↑ Bytes Downloaded'}
+
     return (<>
-        {vizData.bar?.length > 0 && selectedRows.current.length == 0 && <BarWithLegend yAxisTickFormatter={formatBytes} data={vizData.bar} chartId={'files'} />}
-        {vizData.line?.length > 0 && selectedRows.current.length > 0 && <LineWithLegend groups={datasetGroups.current} yAxisTickFormatter={formatBytes} data={vizData.line} chartId={'filesDataset'} />}
+        {vizData.bar?.length > 0 && selectedRows.current.length == 0 && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
+        {vizData.line?.length > 0 && selectedRows.current.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

@@ -156,8 +156,6 @@ const LogsReposTable = ({ }) => {
     };
 
 
-
-
     return (<>
         {vizData.length > 0 && <StackedBarWithLegend data={vizData} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 

@@ -10,7 +10,8 @@ function Line({
     reload = true,
     groups = [],
     chartId = 'modal',
-    yAxisTickFormatter,
+    yAxis = {},
+    xAxis = {}
 }) {
 
     const chartType = 'line'
@@ -27,11 +28,11 @@ function Line({
     const buildChart = () => {
 
         const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 20, left: 50 },
+        const margin = { top: 10, right: 30, bottom: 30, left: 50 },
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 300 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 2
-        const marginX = margin.left + margin.right
+        const marginY = (margin.top + margin.bottom) * 3
+        const marginX = (margin.left + margin.right) * 2
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
@@ -41,7 +42,7 @@ function Line({
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`)
+            .attr("transform", `translate(${margin.left+10},${margin.top+50})`)
 
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -63,12 +64,16 @@ function Line({
         }
 
         let xGroups = data.map((d) => d.xValue)
+        if (xAxis.prefix) {
+            xGroups.unshift(xAxis.prefix)
+        }
+        if (xAxis.suffix) {
+            xGroups.push(xAxis.suffix)
+        }
         const yStartPos = -(maxY * .02)
 
         // A color scale: one color for each group
-        const colorScale = d3.scaleOrdinal()
-            .domain(groups)
-            .range(d3.schemeSet2);
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
         // Add X axis --> it is a date format
         const x = d3.scalePoint()
@@ -80,10 +85,18 @@ function Line({
 
         // Add Y axis
         const y = d3.scaleLinear()
-            .domain([yStartPos, maxY])
+            .domain([yStartPos, maxY*1.02])
             .range([height, 0]);
         g.append("g")
-            .call(d3.axisLeft(y).tickFormat((y) => yAxisTickFormatter ? yAxisTickFormatter(y) :  (y).toFixed()))
+            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) :  (y).toFixed()))
+            .call(g => g.append("text")
+                .attr("x", -margin.left)
+                .attr("y", -margin.top*3)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "start")
+                .text(yAxis.label || "↑ Frequency"))
+            .selectAll("text")
+            .style("font-size", "11px"); 
 
         // Add the lines
         const line = d3.line()
@@ -96,7 +109,13 @@ function Line({
             .attr("d", d => {
                 return line(d.values)
             })
-            .attr("stroke", d => colorScale(d.name))
+            .attr("stroke", d => {
+                const color = colorScale(d.name)
+                const label = d.name
+                const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
+                colors.current[label] = { color, label, value: yAxis.formatter ? yAxis.formatter(sum) : sum }
+                return color
+            })
             .style("stroke-width", 4)
             .style("fill", "none")
 
@@ -114,6 +133,8 @@ function Line({
             .attr("cx", d => x(d.xValue))
             .attr("cy", d => y(d.yValue))
             .attr("r", 5)
+            .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.yValue) : d.yValue )
+            .attr('data-label', (d) => d.xValue )
             .attr("stroke", "white")
 
         // Add a legend at the end of each line
@@ -127,8 +148,13 @@ function Line({
             .attr("x", 12) // shift the text a bit more right
             .text(d => d.name)
             .style("fill", d => colorScale(d.name))
-            .style("font-size", 15)
+            .style("font-size", 10)
 
+        
+        svg.selectAll("circle")
+            .on("mouseover", toolTipHandlers(chartId, chartType).mouseover)
+            .on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
+            .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();
     }

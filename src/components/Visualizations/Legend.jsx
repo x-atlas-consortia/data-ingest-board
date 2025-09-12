@@ -33,7 +33,7 @@ function Legend({legend, sortLegend = true, selectedValues = [], onItemClick}) {
     }
 
     return (
-        <div className='c-legend mb-4'>
+        <div className={`c-legend mb-4 ${!onItemClick ? 'c-legend--noHover' : ''}`}>
             <div className='c-legend__title'>
                 <h5>Legend</h5>
                 {onItemClick && <Tooltip title='Click a legend item or graph section to filter results'>
