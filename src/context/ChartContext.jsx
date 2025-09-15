@@ -45,7 +45,7 @@ export const ChartProvider = ({ children }) => {
 
     const getTooltip = (id) => d3.select(`#${selectors.base}tooltip--${id}`)
 
-    const showTooltip = (id, chart, e, d) => {
+    const buildTooltip = (id, chart, e, d) => {
         const isModal = id === 'modal'
         const scale = (isModal ? 2 : 5)
         const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
@@ -64,20 +64,27 @@ export const ChartProvider = ({ children }) => {
             .style(isBarType(chart) ? 'bottom' : 'top', yPos + 'px')
     }
 
+    const visibleTooltip = (id, chart, e, d) => {
+        getTooltip(id)
+            .style('opacity', 1)
+        d3.select(this)
+            .style('opacity', 0.9)
+            .style('cursor', 'pointer')
+    }
+
     const toolTipHandlers = (id, chart = 'bar') => {
         return {
-            mouseover: function (d) {
-                getTooltip(id)
-                    .style('opacity', 1)
-                d3.select(this)
-                    .style('opacity', 0.9)
-                    .style('cursor', 'pointer')
+            mouseover: function (e, d) {
+                visibleTooltip(id, chart, e, d)
+            },
+
+            mouseenter: function (e, d) {
+                e.stopPropagation()
+                visibleTooltip(id, chart, e, d)
+                buildTooltip(id, chart, e, d)
             },
             mousemove: function (e, d) {
-                showTooltip(id, chart, e, d)
-            },
-            click: function (e, d) {
-                showTooltip(id, chart, e, d)
+                buildTooltip(id, chart, e, d)
             },
             mouseleave: function (d) {
                 getTooltip(id)

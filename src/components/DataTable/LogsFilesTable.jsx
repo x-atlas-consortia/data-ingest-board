@@ -13,7 +13,7 @@ import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
-    const selectedRows = useRef([])
+    const [selectedRows, setSelectedRows] = useState([])
     const xAxis = useRef({})
     const [vizData, setVizData] = useState({})
     const entities = useRef({})
@@ -25,7 +25,7 @@ const LogsFilesTable = ({ }) => {
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
         afterKey,
-        selectedMenuItem, 
+        selectedMenuItem,
         numOfRows,
         setMenuItems,
         updateTableData,
@@ -47,7 +47,7 @@ const LogsFilesTable = ({ }) => {
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
-        
+
         let url = getUrl()
         if (!url) return
         let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
@@ -76,7 +76,7 @@ const LogsFilesTable = ({ }) => {
                 ESQ.indexQueries({ list: ids }).filter,
                 'POST')
 
-           
+
             if (entitiesSearch.status == 200) {
                 for (let d of entitiesSearch.data.hits.hits) {
                     entities.current[d._source.uuid] = {
@@ -148,11 +148,19 @@ const LogsFilesTable = ({ }) => {
         afterKey.current = null
         datasetGroups.current = []
         entities.current = {}
-        selectedRows.current = []
+        setSelectedRows([])
         xAxis.current = {}
         fetchData(false)
         buildBarChart()
     }, [fromDate, toDate])
+
+    useEffect(() => {
+        if (selectedRows.length) {
+            buildLineChart()
+        } else {
+            setVizData({ ...vizData, line: [] })
+        }
+    }, [selectedRows])
 
 
     const buildBarChart = async () => {
@@ -174,7 +182,7 @@ const LogsFilesTable = ({ }) => {
                     value: d.totalBytes.value
                 })
             }
-            setVizData({...vizData, bar: _vizData})
+            setVizData({ ...vizData, bar: _vizData })
         }
     }
 
@@ -183,7 +191,7 @@ const LogsFilesTable = ({ }) => {
         let url = getUrl()
         if (!url) return
 
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows.current })[`${indexKey}DatasetsHistogram`]
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}DatasetsHistogram`]
         let headers = getHeadersWith(globusToken).headers
 
         // Get page for grouped Ids
@@ -194,14 +202,14 @@ const LogsFilesTable = ({ }) => {
             let buckets = {}
 
             if (_data.length) {
-                const prevMonth = new Date(_data[0].monthly.buckets[0].key_as_string+'-2')
-                prevMonth.setMonth(prevMonth.getMonth()-1)
-                xAxis.current.prefix = `${prevMonth.getFullYear()}-${prevMonth.getMonth()+1}`
+                const prevMonth = new Date(_data[0].monthly.buckets[0].key_as_string + '-2')
+                prevMonth.setMonth(prevMonth.getMonth() - 1)
+                xAxis.current.prefix = `${prevMonth.getFullYear()}-${prevMonth.getMonth() + 1}`
             }
 
             for (let d of _data) {
                 for (let m of d.monthly.buckets) {
-                    buckets[m.key_as_string] = buckets[m.key_as_string] || {xValue: m.key_as_string}
+                    buckets[m.key_as_string] = buckets[m.key_as_string] || { xValue: m.key_as_string }
                     buckets[m.key_as_string][entities.current[d.key]?.entityId || d.key] = m.totalBytes.value
                 }
             }
@@ -209,30 +217,26 @@ const LogsFilesTable = ({ }) => {
             let datasets = []
 
             if (_vizData.length) {
-                const nextMonth = new Date(_vizData[_vizData.length-1].xValue+'-2')
-                nextMonth.setMonth(nextMonth.getMonth()+1)
-                xAxis.current.suffix = `${nextMonth.getFullYear()}-${nextMonth.getMonth()+1}`
+                const nextMonth = new Date(_vizData[_vizData.length - 1].xValue + '-2')
+                nextMonth.setMonth(nextMonth.getMonth() + 1)
+                xAxis.current.suffix = `${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}`
             }
-            
-            for (let id of selectedRows.current) {
+
+            for (let id of selectedRows) {
                 datasets.push(entities.current[id]?.entityId || id)
             }
             datasetGroups.current = datasets
 
-            setVizData({...vizData, line: _vizData})
+            setVizData({ ...vizData, line: _vizData })
         }
     }
 
     const rowSelection = {
-        selectedRowKeys: selectedRows.current,
+        selectedRowKeys: selectedRows,
         onChange: (rowKeys, rows) => {
             console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
-            selectedRows.current = rowKeys
-            if (rowKeys.length) {
-                buildLineChart()
-            } else {
-                setVizData({...vizData, line: []})
-            }
+            setSelectedRows(rowKeys)
+
         },
     };
 
@@ -244,7 +248,7 @@ const LogsFilesTable = ({ }) => {
             children: [
                 {
                     key: 'byDatasetID',
-                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetID'), 
+                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetID'),
                     label: 'Dataset ID',
                 },
                 {
@@ -256,15 +260,15 @@ const LogsFilesTable = ({ }) => {
         }
     ];
 
-     useEffect(() => {
+    useEffect(() => {
         setMenuItems(items)
     }, [])
 
-    const yAxis = {formatter: formatBytes, label: '↑ Bytes Downloaded'}
+    const yAxis = { formatter: formatBytes, label: '↑ Bytes Downloaded' }
 
     return (<>
-        {vizData.bar?.length > 0 && selectedRows.current.length == 0 && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
-        {vizData.line?.length > 0 && selectedRows.current.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}
+        {vizData.bar?.length > 0 && selectedRows.length == 0 && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
+        {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

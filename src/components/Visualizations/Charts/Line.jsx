@@ -32,7 +32,7 @@ function Line({
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 300 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 3
-        const marginX = (margin.left + margin.right) * 2
+        const marginX = (margin.left + margin.right) * 3
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
@@ -42,7 +42,7 @@ function Line({
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left+10},${margin.top+50})`)
+            .attr("transform", `translate(${margin.left+20},${margin.top+50})`)
 
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -109,6 +109,7 @@ function Line({
             .attr("d", d => {
                 return line(d.values)
             })
+            .attr('pointer-events', 'none')
             .attr("stroke", d => {
                 const color = colorScale(d.name)
                 const label = d.name
@@ -133,9 +134,9 @@ function Line({
             .attr("cx", d => x(d.xValue))
             .attr("cy", d => y(d.yValue))
             .attr("r", 5)
+            .attr('pointer-events', 'all')
             .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.yValue) : d.yValue )
-            .attr('data-label', (d) => d.xValue )
-            .attr("stroke", "white")
+            .attr('data-label', (d) => d.xValue)
 
         // Add a legend at the end of each line
         g
@@ -152,8 +153,8 @@ function Line({
 
         
         svg.selectAll("circle")
-            .on("mouseover", toolTipHandlers(chartId, chartType).mouseover)
-            .on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
+            .on("mouseenter", toolTipHandlers(chartId, chartType).mouseenter)
+            //.on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
             .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();
