@@ -178,6 +178,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
     const getMiniCharts = () => {
         let charts = []
         let i = 0
+        const chartClassName = 'c-visualizations__miniCharts'
         for (let c of columns) {
             let _data = filterChartData(c.key)
             if (_data.length > 1) {
@@ -186,7 +187,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                         onClick={() => openMiniChartInModal(c)}
                         key={i}
                         style={{ ...baseStyle }}
-                        className={c.key === column ? 'is-active' : ''}
+                        className={c.key === column ? chartClassName+' is-active' : chartClassName}
                     >
                         {hasInitViz && isBar(c.key) && (
                             <Bar

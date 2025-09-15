@@ -174,6 +174,7 @@ function Line({
         if (reload || chartData.current.length !== groups.length || !hasLoaded.current) {
             hasLoaded.current = true
             chartData.current = Array.from(groups)
+            colors.current = {}
             updateChart()
         }
 

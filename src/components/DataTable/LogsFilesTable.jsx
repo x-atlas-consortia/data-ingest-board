@@ -178,6 +178,7 @@ const LogsFilesTable = ({ }) => {
             let _data = res.data?.aggregations?.monthly?.buckets
             for (let d of _data) {
                 _vizData.push({
+                    id: d.key_as_string,
                     label: d.key_as_string,
                     value: d.totalBytes.value
                 })

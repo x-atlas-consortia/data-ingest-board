@@ -24,7 +24,7 @@ function BarWithLegend({ chartId, data, yAxis }) {
                         chartId={chartId} />
                 </ChartProvider>
             </Col>
-            <Col span={4} pull={18} className='pe-4'>
+            <Col span={5} pull={18} className='pe-4'>
                 <Legend legend={legend} sortLegend={false} />
             </Col>
         </Row>

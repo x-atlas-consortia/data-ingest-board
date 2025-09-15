@@ -43,25 +43,26 @@ export const ChartProvider = ({ children }) => {
 
     const isBarType = (chart) => isBar(chart) || isStackedBar(chart)
 
-    const getTooltip = (id) => d3.select(`#${selectors.base}tooltip--${id}`)
+    const getTooltipSelector = (id) => `#${selectors.base}tooltip--${id}`
+
+    const getTooltip = (id) => d3.select(getTooltipSelector(id))
 
     const buildTooltip = (id, chart, e, d) => {
-        const isModal = id === 'modal'
-        const scale = (isModal ? 2 : 5)
-        const x = isBarType(chart) || !isModal ? d3.pointer(e)[0] : 200 + d3.pointer(e)[0]
+        const $element = $(getTooltipSelector(id)).parent()
+        const miniCharts = $element.parents('.c-visualizations__miniCharts')
+        const isMiniChart = miniCharts.length > 0
+        const marginY = isMiniChart ? 20 :40  // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
+        const rect = $element[0]?.getBoundingClientRect()
 
-        const element = document.getElementById(`c-visualizations__line--${id}`)
-        const rect = element?.getBoundingClientRect()
-
-        const xPos = rect ? (e.clientX - (rect.left)) : (isModal ? x : x / scale)
-        const yPos = rect && !isBarType(chart) ? e.clientY - rect.top : (isBarType(chart) ? (d3.pointer(e)[1] / scale) : 0)
+        const xPos = e.clientX - rect.left
+        const yPos = e.clientY - rect.top - marginY
 
         getTooltip(id)
             .html(`<span>${label}</span>: ${value}`)
             .style('left', xPos + 'px')
-            .style(isBarType(chart) ? 'bottom' : 'top', yPos + 'px')
+            .style('top', yPos + 'px')
     }
 
     const visibleTooltip = (id, chart, e, d) => {
@@ -77,7 +78,6 @@ export const ChartProvider = ({ children }) => {
             mouseover: function (e, d) {
                 visibleTooltip(id, chart, e, d)
             },
-
             mouseenter: function (e, d) {
                 e.stopPropagation()
                 visibleTooltip(id, chart, e, d)
@@ -86,7 +86,9 @@ export const ChartProvider = ({ children }) => {
             mousemove: function (e, d) {
                 buildTooltip(id, chart, e, d)
             },
-            mouseleave: function (d) {
+            mouseleave: function (e, d) {
+                e.stopPropagation()
+                console.log('mouse leave', e)
                 getTooltip(id)
                     .style('opacity', 0)
                 d3.select(this)
