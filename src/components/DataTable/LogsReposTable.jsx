@@ -157,7 +157,7 @@ const LogsReposTable = ({ }) => {
 
 
     return (<>
-        {vizData.length > 0 && <StackedBarWithLegend data={vizData} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.length > 0 && <StackedBarWithLegend yAxis={{label: "↑ Views"}} xAxis={{formatter: formatNum}} data={vizData} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

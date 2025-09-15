@@ -71,9 +71,11 @@ const LogsFilesTable = ({ }) => {
             }
 
             // Find out info about these ids
+            q = ESQ.indexQueries({ list: ids }).filter
+            q._source = ['uuid', 'dataset_type', TABLE.cols.f('id')]
             let entitiesSearch = await callService(ENVS.urlFormat.search(`/entities/search`),
                 headers,
-                ESQ.indexQueries({ list: ids }).filter,
+                q,
                 'POST')
 
 

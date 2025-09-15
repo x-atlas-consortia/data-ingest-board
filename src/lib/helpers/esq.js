@@ -180,6 +180,7 @@ const ESQ = {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
+                size: 0,
                 track_total_hits: true,
                 collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
                 aggs: {

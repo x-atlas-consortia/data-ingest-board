@@ -49,9 +49,9 @@ export const ChartProvider = ({ children }) => {
 
     const buildTooltip = (id, chart, e, d) => {
         const $element = $(getTooltipSelector(id)).parent()
-        const miniCharts = $element.parents('.c-visualizations__miniCharts')
-        const isMiniChart = miniCharts.length > 0
-        const marginY = isMiniChart ? 20 :40  // add a margin to prevent chrome flickering due to overlapping with tooltip
+        // const miniCharts = $element.parents('.c-visualizations__miniCharts')
+        // const isMiniChart = miniCharts.length > 0
+        const marginY = 40 // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
         const rect = $element[0]?.getBoundingClientRect()

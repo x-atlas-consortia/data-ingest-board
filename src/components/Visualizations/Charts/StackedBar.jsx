@@ -2,7 +2,6 @@ import React from 'react'
 import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
-import { formatNum } from '@/lib/helpers/general';
 
 export const prepareStackedData = (data) => {
     let sorted = []
@@ -23,6 +22,8 @@ function StackedBar({
     reload = true,
     subGroupLabels = {},
     chartId = 'modal',
+    yAxis = {},
+    xAxis={}
 }) {
     const {
         getChartSelector,
@@ -49,7 +50,7 @@ function StackedBar({
         const margin = { top: 10, right: 30, bottom: 20, left: 50 },
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 300 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 2
+        const marginY = (margin.top + margin.bottom) * 3
         const marginX = margin.left + margin.right
 
         // append the svg object to the body of the page
@@ -60,7 +61,7 @@ function StackedBar({
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`)
+            .attr("transform", `translate(${margin.left},${margin.top + 50})`)
 
         const subgroups = Object.keys(data[0]).slice(1)
 
@@ -95,10 +96,20 @@ function StackedBar({
             .domain([0, maxY])
             .range([height, 0]);
         g.append("g")
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y))
+            .call(g => g.append("text")
+                .attr("x", -margin.left)
+                .attr("y", -margin.top*3)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "start")
+                .text(yAxis.label || "↑ Frequency"))
+            .selectAll("text")
+            .style("font-size", "11px"); 
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+
+        const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
 
         // Show the bars
         g.append("g")
@@ -109,14 +120,14 @@ function StackedBar({
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = subGroupLabels[d.key]
-                colors.current[label] = { color, label, value: formatNum(getSubGroupSum(d.key)) }
+                colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
                 return color
             })
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
             .data(D => D.map(d => (d.key = D.key, d)))
             .join("rect")
-            .attr('data-value', d => d[1] - d[0])
+            .attr('data-value', d => formatVal(d[1] - d[0]))
             .attr('data-label', d => {
                 return subGroupLabels[d.key]
             })
@@ -130,7 +141,7 @@ function StackedBar({
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.data.group}\n${subGroupLabels[d.key]}: ${formatNum(d[1] - d[0])}`
+                return `${d.data.group}\n${subGroupLabels[d.key]}: ${formatVal(d[1] - d[0])}`
             })
 
         svg.selectAll("rect")

@@ -75,6 +75,8 @@ function Line({
         // A color scale: one color for each group
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
+        const formatVal = (v) => yAxis.formatter ? yAxis.formatter(v) : v
+
         // Add X axis --> it is a date format
         const x = d3.scalePoint()
             .domain(xGroups)
@@ -88,7 +90,7 @@ function Line({
             .domain([yStartPos, maxY*1.02])
             .range([height, 0]);
         g.append("g")
-            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) :  (y).toFixed()))
+            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
             .call(g => g.append("text")
                 .attr("x", -margin.left)
                 .attr("y", -margin.top*3)
@@ -114,7 +116,7 @@ function Line({
                 const color = colorScale(d.name)
                 const label = d.name
                 const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
-                colors.current[label] = { color, label, value: yAxis.formatter ? yAxis.formatter(sum) : sum }
+                colors.current[label] = { color, label, value: formatVal(sum) }
                 return color
             })
             .style("stroke-width", 4)
@@ -135,7 +137,7 @@ function Line({
             .attr("cy", d => y(d.yValue))
             .attr("r", 5)
             .attr('pointer-events', 'all')
-            .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.yValue) : d.yValue )
+            .attr('data-value', (d) => formatVal(d.yValue) )
             .attr('data-label', (d) => d.xValue)
 
         // Add a legend at the end of each line
@@ -154,7 +156,6 @@ function Line({
         
         svg.selectAll("circle")
             .on("mouseenter", toolTipHandlers(chartId, chartType).mouseenter)
-            //.on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
             .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();

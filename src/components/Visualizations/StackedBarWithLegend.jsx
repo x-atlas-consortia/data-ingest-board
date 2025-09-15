@@ -4,7 +4,7 @@ import Legend from "@/components/Visualizations/Legend";
 import { ChartProvider } from '@/context/ChartContext';
 import StackedBar, { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
 
-function StackedBarWithLegend({ chartId, data, subGroupLabels}) {
+function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis}) {
     const [legend, setLegend] = useState({})
     const [_, setRefresh] = useState(null)
 
@@ -21,10 +21,12 @@ function StackedBarWithLegend({ chartId, data, subGroupLabels}) {
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}
+                        yAxis={yAxis}
+                        xAxis={xAxis}
                         chartId={chartId} />
                 </ChartProvider>
             </Col>
-            <Col span={6} pull={18}>
+            <Col span={5} pull={18}>
                 <Legend legend={legend} sortLegend={false} />
             </Col>
         </Row>
