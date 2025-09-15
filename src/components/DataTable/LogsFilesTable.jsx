@@ -18,6 +18,7 @@ const LogsFilesTable = ({ }) => {
     const [vizData, setVizData] = useState({})
     const entities = useRef({})
     const datasetGroups = useRef([])
+    const byDatasetTypes = useRef([])
 
     const {
         indexKey,
@@ -31,6 +32,7 @@ const LogsFilesTable = ({ }) => {
         updateTableData,
         getMenuItemClassName,
         fromDate, toDate,
+        getFromDate, getToDate,
 
     } = useContext(LogsContext)
 
@@ -42,6 +44,19 @@ const LogsFilesTable = ({ }) => {
 
         let url = ENVS.urlFormat.search(`/${i}/search`)
         return url
+    }
+
+    const parseByDatasetType = (_data) => {
+        let types = {}
+        let type, uuid
+        for (let d of _data) {
+            uuid = d.key['dataset_uuid.keyword']
+            type = entities.current[uuid]?.datasetType || 'N/A'
+            types[type] = types[type] || { value: 0, label: type, id: type, datasetType: type, bytes: 0 }
+            types[type].value += d.totalBytes.value    // viz
+            types[type].bytes += d.totalBytes.value   // table
+        }
+        byDatasetTypes.current = Object.values(types)
     }
 
     const fetchData = async (includePrevData = true) => {
@@ -78,7 +93,6 @@ const LogsFilesTable = ({ }) => {
                 q,
                 'POST')
 
-
             if (entitiesSearch.status == 200) {
                 for (let d of entitiesSearch.data.hits.hits) {
                     entities.current[d._source.uuid] = {
@@ -102,6 +116,8 @@ const LogsFilesTable = ({ }) => {
                     }
                 )
             }
+
+            parseByDatasetType(_data.buckets)
 
             updateTableData(includePrevData, _tableData)
 
@@ -150,6 +166,7 @@ const LogsFilesTable = ({ }) => {
         afterKey.current = null
         datasetGroups.current = []
         entities.current = {}
+        byDatasetTypes.current = []
         setSelectedRows([])
         xAxis.current = {}
         fetchData(false)
@@ -190,11 +207,11 @@ const LogsFilesTable = ({ }) => {
     }
 
     const buildLineChart = async () => {
-        if (!fromDate && !toDate) return
+        //if (!fromDate && !toDate) return
         let url = getUrl()
         if (!url) return
 
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}DatasetsHistogram`]
+        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: selectedRows })[`${indexKey}DatasetsHistogram`]
         let headers = getHeadersWith(globusToken).headers
 
         // Get page for grouped Ids
@@ -265,24 +282,42 @@ const LogsFilesTable = ({ }) => {
 
     useEffect(() => {
         setMenuItems(items)
-    }, [])
+        setVizData({ ...vizData, barByTypes: byDatasetTypes.current })
+    }, [selectedMenuItem])
 
     const yAxis = { formatter: formatBytes, label: '↑ Bytes Downloaded' }
 
+    const logByDatasetID = eq(selectedMenuItem, 'byDatasetID')
+    const logByType = eq(selectedMenuItem, 'byDatasetType')
+    const byTypeCols = Array.from(cols)
+    byTypeCols.shift()
+
     return (<>
-        {vizData.bar?.length > 0 && selectedRows.length == 0 && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
+        {vizData.bar?.length > 0 && selectedRows.length == 0 && logByDatasetID && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
+        {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
         {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}
 
-        <Table
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
-            pagination={false}
-            loading={isBusy}
-            rowKey={'uuid'}
-            scroll={{ y: 'calc(100vh - 200px)' }}
-            dataSource={tableData} columns={cols} />
-        {hasMoreData && <Button onClick={fetchData} type="primary" block>
-            Load More
-        </Button>}
+
+        {logByDatasetID && <>
+            <Table
+                rowSelection={{ type: 'checkbox', ...rowSelection }}
+                pagination={false}
+                loading={isBusy}
+                rowKey={'uuid'}
+                scroll={{ y: 'calc(100vh - 200px)' }}
+                dataSource={tableData} columns={cols} />
+            {hasMoreData && <Button onClick={fetchData} type="primary" block>
+                Load More
+            </Button>}
+        </>}
+
+        {logByType && <>
+            <Table
+                rowSelection={{ type: 'checkbox', ...rowSelection }}
+                loading={isBusy}
+                rowKey={'id'}
+                dataSource={vizData.barByTypes} columns={byTypeCols} />
+        </>}
 
     </>)
 }

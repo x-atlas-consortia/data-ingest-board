@@ -1,19 +1,18 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import {Button, Col, Layout, Menu, Row} from "antd";
+import { Button, Layout, Menu } from "antd";
 import {
     DownloadOutlined,
     LeftOutlined, QuestionOutlined,
     RightOutlined,
-    UploadOutlined,
     UserOutlined,
-    VideoCameraOutlined
 } from "@ant-design/icons";
 import AppContext from "@/context/AppContext";
-import {Navbar} from "react-bootstrap";
-const {  Sider } = Layout;
-function AppSideNavBar({}) {
-    const {handleLogout, isAuthenticated, t, getUserEmail} = useContext(AppContext)
+import { Navbar } from "react-bootstrap";
+import { eq } from '@/lib/helpers/general';
+const { Sider } = Layout;
+function AppSideNavBar({ exportHandler }) {
+    const { handleLogout, isAuthenticated, t, getUserEmail } = useContext(AppContext)
     const [collapsed, setCollapsed] = useState(false)
     const [items, setItems] = useState(null)
 
@@ -26,18 +25,25 @@ function AppSideNavBar({}) {
                     label: getUserEmail(),
                 },
                 {
-                    key: '2',
+                    key: 'export',
                     icon: <DownloadOutlined />,
                     label: 'Export',
                 },
                 {
-                    key: '3',
+                    key: 'help',
                     icon: <QuestionOutlined />,
                     label: 'Help',
                 },
             ])
         }
     }, [isAuthenticated])
+
+
+    const handleMenuClick = (e) => {
+        if (eq(e.key, 'export')) {
+            exportHandler()
+        }
+    }
 
     return (
         <Sider className={'c-nav c-nav--sider'} trigger={null} collapsible collapsed={collapsed}>
@@ -46,18 +52,19 @@ function AppSideNavBar({}) {
                 <div className='c-nav__brand'>
                     <Navbar.Brand className={'w-75'}>
                         <span className={'c-nav__imgWrap'}>
-                                <img
-                                    className="c-logo"
-                                    src={`images/${collapsed ? t('hubmap-logo.png') : t('hubmap-type-white250.png')}`}
-                                    alt={t('HuBMAP Logo')}
-                                />
+                            <img
+                                className="c-logo"
+                                src={`images/${collapsed ? t('hubmap-logo.png') : t('hubmap-type-white250.png')}`}
+                                alt={t('HuBMAP Logo')}
+                            />
                         </span>
-                        {!collapsed &&<h1 className="c-nav__title text-white">
+                        {!collapsed && <h1 className="c-nav__title text-white">
                             <span className='d-inline-block'>Logs Dashboard</span>
                         </h1>}
                     </Navbar.Brand>
                 </div>
                 {items && <Menu
+                    onClick={handleMenuClick}
                     theme="dark"
                     mode="inline"
                     defaultSelectedKeys={['1']}

@@ -242,17 +242,17 @@ const TABLE = {
         }
         return _cols.length ? _cols : cols
     },
-    generateCSVFile: (data, filename) => {
+    generateCSVFile: (data, filename, cols) => {
         if (!data.length) return
         try {
             let _data = ''
-            let cols = TABLE.sortColumns(filename, Object.keys(data[0]))
+            let _cols = cols ? cols : TABLE.sortColumns(filename, Object.keys(data[0]))
 
             const csv = (d) => {
                 let sep, c, col
-                for (let i = 0; i < cols.length; i++) {
-                    sep = i === cols.length - 1 ? '' : ','
-                    c = cols[i]
+                for (let i = 0; i < _cols.length; i++) {
+                    sep = i === _cols.length - 1 ? '' : ','
+                    c = _cols[i]
                     col = d ? d[c] : c
                     _data += `"${col}"${sep}`
                 }

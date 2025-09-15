@@ -6,7 +6,7 @@ import { eq } from "@/lib/helpers/general";
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -28,10 +28,25 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
   }
 
+  useEffect(()=> {
+    console.log(tableData)
+    exportData.current[indexKey] = tableData
+  }, [tableData])
+
+  const getFromDate = () => {
+        if (fromDate) return fromDate
+        let t = new Date()
+        t.setDate(t.getDate() - 1)
+        return `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`
+    }
+    const getToDate = () => {
+        if (toDate) return toDate
+        return 'now'
+    }
+
   useEffect(() => {
-    console.log(extraActions)
-    setExtraActions({
-      ...extraActions, [`tab-${indexKey}`]: (<div>
+    tabExtraActions.current = {
+      ...tabExtraActions.current, [`tab-${indexKey}`]: (<div>
         <Dropdown menu={menuProps()}>
           <a onClick={e => e.preventDefault()}>
             <Space>
@@ -41,7 +56,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
           </a>
         </Dropdown>
       </div>)
-    })
+    }
+    setExtraActions(tabExtraActions.current)
   }, [numOfRows, selectedMenuItem, menuItems])
 
   const updateTableData = (includePrevData, _tableData) => {
@@ -71,7 +87,6 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   const handleMenuClick = (e) => {
-
     if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
       setNumOfRows(Number(e.key))
     } else {
@@ -94,6 +109,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getRowsPerLoadMore,
     handleMenuClick,
     fromDate, toDate,
+    getFromDate, getToDate,
     indexKey
 
   }}>{children}</LogsContext.Provider>

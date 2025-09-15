@@ -9,8 +9,9 @@ import Spinner from '@/components/Spinner';
 import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 import LogsReposTable from '@/components/DataTable/LogsReposTable';
 import { LogsProvider } from '@/context/LogsContext';
+import TABLE from '@/lib/helpers/table';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
 const Logs = () => {
 
@@ -28,8 +29,9 @@ const Logs = () => {
     const indicesSections = useRef({})
     const [isBusy, setIsBusy] = useState(true)
     const [extraActions, setExtraActions] = useState({})
-    const _tabActions = useRef({})
+    const tabExtraActions = useRef({})
     const isoSuffix = 'T00:00:00'
+    const exportData = useRef({})
 
     const handleDateRange = (dates, dateStrings) => {
         setFromDate(dateStrings[0] + isoSuffix)
@@ -159,7 +161,9 @@ const Logs = () => {
             return <>
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
+                    exportData={exportData}
                     fromDate={fromDate} toDate={toDate}
+                    tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions} >
                     <LogsReposTable />
@@ -192,7 +196,9 @@ const Logs = () => {
             return <>
                 <LogsProvider defaultMenuItem={'byDatasetID'}
                     indexKey={key}
+                    exportData={exportData}
                     fromDate={fromDate} toDate={toDate}
+                    tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions} >
                     <LogsFilesTable />
@@ -234,11 +240,10 @@ const Logs = () => {
     }
 
     const onTabChange = (active) => {
-        console.log(active, extraActions)
-        for (let act in extraActions) {
-         _tabActions.current[act] = extraActions[act]
-        }
-        setExtraActions(_tabActions.current)
+        // for (let act in extraActions) {
+        //  _tabActions.current[act] = extraActions[act]
+        // }
+        // setExtraActions(_tabActions.current)
         setActiveSection(active)
     }
 
@@ -270,13 +275,28 @@ const Logs = () => {
         }
     }, [globusToken, fromDate]);
 
+    useEffect(() => {
+        exportData.current = {}
+    }, [fromDate, toDate])
+
     if (!isLoading && !isAuthenticated) {
         window.location = '/'
     }
 
+    const exportHandler = () => {
+        // TODO improve for dynamic export
+        let indexKey = activeSection.replace('tab-', '')
+        let _data = exportData.current[indexKey] || []
+        let cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
+
+        if (_data.length) {
+            TABLE.generateCSVFile(_data, indexKey + '.csv', cols)
+        }
+    }
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar />
+            <AppSideNavBar exportHandler={exportHandler} />
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <Row>
