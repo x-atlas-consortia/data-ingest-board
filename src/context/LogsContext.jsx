@@ -29,8 +29,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   useEffect(() => {
+    console.log(extraActions)
     setExtraActions({
-      ...extraActions, [`tab-${indexKey}`]: <div>
+      ...extraActions, [`tab-${indexKey}`]: (<div>
         <Dropdown menu={menuProps()}>
           <a onClick={e => e.preventDefault()}>
             <Space>
@@ -39,7 +40,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
             </Space>
           </a>
         </Dropdown>
-      </div>
+      </div>)
     })
   }, [numOfRows, selectedMenuItem, menuItems])
 

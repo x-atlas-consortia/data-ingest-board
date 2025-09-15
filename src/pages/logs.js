@@ -22,18 +22,16 @@ const Logs = () => {
 
     const [fromDate, setFromDate] = useState(null)
     const [toDate, setToDate] = useState(null)
-    const [data, setData] = useState(null)
     const [cards, setCards] = useState(null)
     const [tabs, setTabs] = useState(null)
     const [activeSection, setActiveSection] = useState(null)
     const indicesSections = useRef({})
-    const indicesData = useRef({})
     const [isBusy, setIsBusy] = useState(true)
-    const [pageSize, setPageSize] = useState(10)
     const [extraActions, setExtraActions] = useState({})
+    const _tabActions = useRef({})
+    const isoSuffix = 'T00:00:00'
 
     const handleDateRange = (dates, dateStrings) => {
-        const isoSuffix = 'T00:00:00'
         setFromDate(dateStrings[0] + isoSuffix)
         setToDate(dateStrings[1] + isoSuffix)
         // dates: [dayjs, dayjs], dateStrings: [string, string]
@@ -236,6 +234,11 @@ const Logs = () => {
     }
 
     const onTabChange = (active) => {
+        console.log(active, extraActions)
+        for (let act in extraActions) {
+         _tabActions.current[act] = extraActions[act]
+        }
+        setExtraActions(_tabActions.current)
         setActiveSection(active)
     }
 
