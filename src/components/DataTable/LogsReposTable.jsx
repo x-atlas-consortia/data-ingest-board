@@ -229,7 +229,7 @@ const LogsReposTable = ({ }) => {
         },
     };
 
-    const yAxis = { label: "↑ Views" }
+    const yAxis = { label: "↑ Views/Clones" }
 
     return (<>
         {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
