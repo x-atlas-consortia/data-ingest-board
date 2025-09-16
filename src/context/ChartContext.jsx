@@ -1,6 +1,7 @@
-import { createContext, useEffect, useState, useRef } from 'react'
+import { createContext, useRef } from 'react'
 import * as d3 from "d3";
 import THEME from "@/lib/helpers/theme";
+import { eq } from "@/lib/helpers/general";
 
 const ChartContext = createContext({})
 
@@ -37,15 +38,18 @@ export const ChartProvider = ({ children }) => {
             .attr('class', `${selectors.base}tooltip`)
     }
 
-    const isBar = (chart) => chart === 'bar'
-
-    const isStackedBar = (chart) => chart === 'stackedBar'
-
-    const isBarType = (chart) => isBar(chart) || isStackedBar(chart)
-
     const getTooltipSelector = (id) => `#${selectors.base}tooltip--${id}`
 
     const getTooltip = (id) => d3.select(getTooltipSelector(id))
+
+    const handleLineLabel = (id, e, v) => {
+        const $element = $(getTooltipSelector(id)).parent()
+        const type = $element.attr('data-type')
+        if (eq(type, 'line')) {
+            const lineName = e.currentTarget.getAttribute('data-linename')
+            d3.select(`.line--${lineName}`).style('opacity', v)
+        }
+    }
 
     const buildTooltip = (id, chart, e, d) => {
         const $element = $(getTooltipSelector(id)).parent()
@@ -58,6 +62,8 @@ export const ChartProvider = ({ children }) => {
 
         const xPos = e.clientX - rect.left
         const yPos = e.clientY - rect.top - marginY
+
+        handleLineLabel(id, e, '1')
 
         getTooltip(id)
             .html(`<span>${label}</span>: ${value}`)
@@ -88,6 +94,7 @@ export const ChartProvider = ({ children }) => {
             },
             mouseleave: function (e, d) {
                 e.stopPropagation()
+                handleLineLabel(id, e, '0')
                 getTooltip(id)
                     .style('opacity', 0)
                 d3.select(this)

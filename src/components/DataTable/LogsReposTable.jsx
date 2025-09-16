@@ -23,7 +23,8 @@ const LogsReposTable = ({ }) => {
         selectedRows, setSelectedRows,
         getUrl,
         determineCalendarInterval,
-        getAxisTick
+        getAxisTick,
+        getDatePart
 
     } = useContext(LogsContext)
 
@@ -160,6 +161,7 @@ const LogsReposTable = ({ }) => {
         if (!url) return
 
         let histogramOps = determineCalendarInterval()
+        
 
         let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
@@ -172,7 +174,7 @@ const LogsReposTable = ({ }) => {
             let buckets = {}
 
             if (_data?.length) {
-                const prevDate = new Date(_data[0].key_as_string + '-2')
+                const prevDate = new Date(_data[0].key_as_string + getDatePart(histogramOps))
                 xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
             }
 
@@ -192,7 +194,7 @@ const LogsReposTable = ({ }) => {
             _vizData = Object.values(buckets)
 
             if (_vizData.length) {
-                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + '-2')
+                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
                 xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
             }
 

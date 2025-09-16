@@ -50,7 +50,7 @@ function Line({
             return {
                 name: group,
                 values: data.map(function (d) {
-                    return { xValue: d.xValue, yValue: d[group] || 0 };
+                    return { xValue: d.xValue, yValue: d[group] || 0, group };
                 })
             };
         });
@@ -126,6 +126,10 @@ function Line({
             })
             .style("stroke-width", 4)
             .style("fill", "none")
+            .transition()
+            .duration(1000) // 1 second duration
+            .delay(200)    // 200ms delay
+            .ease(d3.easeCubic)
 
         // Add the points
         g
@@ -142,8 +146,9 @@ function Line({
             .attr("cy", d => y(d.yValue))
             .attr("r", 5)
             .attr('pointer-events', 'all')
+            .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
             .attr('data-value', (d) => formatVal(d.yValue) )
-            .attr('data-label', (d) => d.xValue)
+            .attr('data-label', (d) => `${d.group}\n${d.xValue}`)
 
         // Add a legend at the end of each line
         g
@@ -154,9 +159,11 @@ function Line({
             .datum(d => { return { name: d.name, value: d.values[d.values.length - 1] }; }) // keep only the last value of each time series
             .attr("transform", d => `translate(${x(d.value.xValue)},${y(d.value.yValue)})`) // Put the text at the position of the last point
             .attr("x", 12) // shift the text a bit more right
+            .attr('class', (d) => `line--${d.name.replaceAll(':', '_')}`)
             .text(d => d.name)
             .style("fill", d => colorScale(d.name))
             .style("font-size", 10)
+            .style("opacity", 0)
 
         
         svg.selectAll("circle")
@@ -191,7 +198,7 @@ function Line({
     }, [filters])
 
     return (
-        <div className={`c-visualizations__chart c-visualizations__line`} id={`c-visualizations__line--${chartId}`}></div>
+        <div className={`c-visualizations__chart c-visualizations__line`} id={`c-visualizations__line--${chartId}`} data-type='line'></div>
     )
 }
 

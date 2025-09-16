@@ -35,7 +35,8 @@ const LogsFilesTable = ({ }) => {
         determineCalendarInterval,
         getAxisTick,
         selectedRows, setSelectedRows,
-        getUrl
+        getUrl,
+        getDatePart
 
     } = useContext(LogsContext)
 
@@ -219,10 +220,8 @@ const LogsFilesTable = ({ }) => {
             let buckets = {}
 
             if (_data.length) {
-                const prevMonth = new Date(_data[0].calendarHistogram.buckets[0].key_as_string + '-2')
-                // prevMonth.setMonth(prevMonth.getMonth() - 1)
-                // xAxis.current.prefix = `${prevMonth.getFullYear()}-${prevMonth.getMonth() + 1}` 
-                xAxis.current.prefix = getAxisTick(prevMonth, histogramOps)
+                const prevDate = new Date(_data[0].calendarHistogram.buckets[0].key_as_string + getDatePart(histogramOps))
+                xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
             }
 
             for (let d of _data) {
@@ -235,10 +234,8 @@ const LogsFilesTable = ({ }) => {
             let datasets = []
 
             if (_vizData.length) {
-                const nextMonth = new Date(_vizData[_vizData.length - 1].xValue + '-2')
-                // nextMonth.setMonth(nextMonth.getMonth() + 1)
-                // xAxis.current.suffix = `${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}`
-                xAxis.current.suffix = getAxisTick(nextMonth, histogramOps, 1)
+                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
+                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
             }
 
             for (let id of selectedRows) {

@@ -170,6 +170,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     return url
   }
 
+  const getDatePart = (histogramOps) => ['month', 'year'].comprises(histogramOps.interval) ? '-2' : ''
+
   return <LogsContext.Provider value={{
     tableData, setTableData,
     isBusy, setIsBusy,
@@ -190,7 +192,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     indexKey,
     determineCalendarInterval,
     getAxisTick,
-    getUrl
+    getUrl,
+    getDatePart
 
   }}>{children}</LogsContext.Provider>
 }
