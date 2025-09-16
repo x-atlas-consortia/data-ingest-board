@@ -287,7 +287,7 @@ const Logs = () => {
                 getCards(data)
             })
         }
-    }, [globusToken, fromDate]);
+    }, [globusToken, fromDate, toDate]);
 
     useEffect(() => {
         exportData.current = {}
