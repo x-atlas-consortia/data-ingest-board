@@ -153,6 +153,15 @@ const Logs = () => {
         return _cols
     }
 
+    const getTabId = (key) => `tab-${key}`
+
+    const highlightSection = (e, key) => {
+        const className = 'is-highlighted'
+        $('.c-logCard').removeClass(className)
+        setActiveSection(getTabId(key))
+        $(e.currentTarget).addClass(className)
+    }
+
     const getTabContent = (key, data) => {
         const cols = getColumnsByKey(key)
         let tableData = []
@@ -224,18 +233,18 @@ const Logs = () => {
         let comps = []
         let _tabs = []
         for (let s in indicesSections.current) {
-            comps.push(<Card title={_cards[s].title} key={s} variant="borderless" style={{ width: 300 }}>
+            comps.push(<Card className='c-logCard' title={_cards[s].title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
                 label: `${_cards[s].title}`,
-                key: `tab-${s}`,
+                key: getTabId(s),
                 children: getTabContent(s, data),
             })
         }
         setCards(comps)
         setTabs(_tabs)
-        setActiveSection(`tab-${Object.keys(indicesSections.current)[0]}`)
+        setActiveSection(getTabId(indicesSections.current)[0])
         setIsBusy(false)
     }
 
@@ -325,6 +334,7 @@ const Logs = () => {
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
                         defaultActiveKey={activeSection}
+                        activeKey={activeSection}
                         type="card"
                         size={'middle'}
                         style={{ marginBottom: 32, width: '100%' }}
