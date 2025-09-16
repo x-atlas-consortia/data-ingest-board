@@ -3,6 +3,7 @@ import { createContext, useEffect, useState, useRef } from 'react'
 import { SettingOutlined } from "@ant-design/icons";
 import { Dropdown, Space } from 'antd';
 import { eq } from "@/lib/helpers/general";
+import ENVS from "@/lib/helpers/envs";
 
 const LogsContext = createContext({})
 
@@ -14,8 +15,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const afterKey = useRef(null)
   const [selectedMenuItem, setSelectedMenuItem] = useState(defaultMenuItem)
   const [numOfRows, setNumOfRows] = useState(20)
-  const [vizData, setVizData] = useState([])
+  const [vizData, setVizData] = useState({})
   const [menuItems, setMenuItems] = useState([])
+  const [selectedRows, setSelectedRows] = useState([])
 
   const menuProps = () => {
     return {
@@ -116,10 +118,10 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
 
   const determineCalendarInterval = () => {
     let diff = getDateDifference(new Date(fromDate), new Date(toDate));
-    if (diff.years > 1) return {interval: 'year',  format: 'yyyy'}
-    if (diff.months >= 1) return {interval: 'month', format: 'yyyy-MM'}
-    if (diff.weeks > 1) return {interval: 'week', format: 'yyyy-MM-dd'}
-    if (diff.weeks <= 1) return {interval: 'day', format: 'yyyy-MM-dd'}
+    if (diff.years > 1) return { interval: 'year', format: 'yyyy' }
+    if (diff.months >= 1) return { interval: 'month', format: 'yyyy-MM' }
+    if (diff.weeks > 1) return { interval: 'week', format: 'yyyy-MM-dd' }
+    if (diff.weeks <= 1) return { interval: 'day', format: 'yyyy-MM-dd' }
   }
 
   const getAxisTick = (date, calendarInterval, operator = -1) => {
@@ -159,6 +161,15 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
   }
 
+  const getUrl = () => {
+    let config = ENVS.logsIndicies()
+    let i = config[indexKey]
+    if (!i) return null
+
+    let url = ENVS.urlFormat.search(`/${i}/search`)
+    return url
+  }
+
   return <LogsContext.Provider value={{
     tableData, setTableData,
     isBusy, setIsBusy,
@@ -169,6 +180,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     vizData, setVizData,
     menuItems, setMenuItems,
     extraActions, setExtraActions,
+    selectedRows, setSelectedRows,
     updateTableData,
     getMenuItemClassName,
     getRowsPerLoadMore,
@@ -177,7 +189,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getFromDate, getToDate,
     indexKey,
     determineCalendarInterval,
-    getAxisTick
+    getAxisTick,
+    getUrl
 
   }}>{children}</LogsContext.Provider>
 }

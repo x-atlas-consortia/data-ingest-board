@@ -98,18 +98,49 @@ const ESQ = {
     ownerFilter: (from, to) => {
         return ESQ.filter(from, to, 'owner', [`${ENVS.appContext().toLowerCase()}consortium`])
     },
-    calendarHistogram: ({interval = 'month', format = 'yyyy-MM'}) => {
+    reposAggs: (field = 'type') => {
+        return {
+            [`${field}.keyword`]: {
+                terms: {
+                    field: `${field}.keyword`
+                },
+                aggs: {
+                    count: ESQ.sum('count'),
+                    unique: ESQ.sum('uniques')
+                }
+            }
+
+        }
+    },
+    calendarHistogram: ({ interval = 'month', format = 'yyyy-MM', field = 'timestamp' }) => {
         return {
             date_histogram: {
-                field: "download_date_time",
+                field,
                 calendar_interval: interval,
                 format
-            },
+            }
+        }
+    },
+    filesCalendarHistogram: (ops) => {
+        return {
+            ...ESQ.calendarHistogram({ ...ops, field: "download_date_time" }),
             aggs: {
                 totalBytes: ESQ.sum('bytes_transferred'),
             }
         }
-
+    },
+    reposCalendarHistogram: (ops) => {
+        return {
+            ...ESQ.calendarHistogram(ops),
+            aggs: {
+                'type.keyword': {
+                    "terms": {
+                        "field": "type.keyword"
+                    },
+                    aggs: ESQ.reposAggs('repository')
+                }
+            }
+        }
     },
     indexQueries: ({ from, to, list, collapse, size = 0, field = 'uuid' }) => {
         const queryField = from ? 'range' : 'match_all'
@@ -149,20 +180,23 @@ const ESQ = {
                 aggs: {
                     buckets: {
                         composite: ESQ.composite(['repository'], size),
-                        aggs: {
-                            'type.keyword': {
-                                terms: {
-                                    field: 'type.keyword'
-                                },
-                                aggs: {
-                                    count: ESQ.sum('count'),
-                                    unique: ESQ.sum('uniques')
-                                }
-                            }
-
-                        }
+                        aggs: ESQ.reposAggs()
                     }
-
+                }
+            },
+            openSourceReposHistogram: (ops) => {
+                let query = ESQ.ownerFilter(from, to)
+                query.bool.filter.push({
+                    terms: {
+                        ['repository.keyword']: list
+                    }
+                })
+                return {
+                    query,
+                    size: 0,
+                    aggs: {
+                        calendarHistogram: ESQ.reposCalendarHistogram(ops)
+                    }
                 }
             },
             apiUsage: {
@@ -204,13 +238,13 @@ const ESQ = {
                     }
                 }
             },
-            fileDownloadsHistogram: (ops = {}) =>({
+            fileDownloadsHistogram: (ops = {}) => ({
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 size: 0,
                 aggs: {
-                    calendarHistogram: ESQ.calendarHistogram(ops)
+                    calendarHistogram: ESQ.filesCalendarHistogram(ops)
                 }
             }),
             fileDownloadsDatasetsHistogram: (ops = {}) => ({
@@ -222,7 +256,7 @@ const ESQ = {
                             "field": "dataset_uuid.keyword"
                         },
                         aggs: {
-                            calendarHistogram: ESQ.calendarHistogram(ops)
+                            calendarHistogram: ESQ.filesCalendarHistogram(ops)
                         }
                     }
                 }
@@ -231,6 +265,6 @@ const ESQ = {
         }
     }
 
-    }
+}
 
 export default ESQ

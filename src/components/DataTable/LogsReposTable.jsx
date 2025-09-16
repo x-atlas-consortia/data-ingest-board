@@ -1,12 +1,12 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { Table, Button } from 'antd';
 import ESQ from "@/lib/helpers/esq";
-import ENVS from "@/lib/helpers/envs";
 import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 
 import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "../Visualizations/StackedBarWithLegend";
+import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -15,24 +15,30 @@ const LogsReposTable = ({ }) => {
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
         afterKey,
-        numOfRows, 
+        numOfRows,
         vizData, setVizData,
         updateTableData,
         fromDate, toDate,
-        indexKey
+        indexKey,
+        selectedRows, setSelectedRows,
+        getUrl,
+        determineCalendarInterval,
+        getAxisTick
 
     } = useContext(LogsContext)
 
     const subgroupLabels = useRef({})
+    const repos = useRef([])
+    const xAxis = useRef({})
+    const [selectedRowObjects, setSelectedRowObjects] = useState([])
 
-    let config = ENVS.logsIndicies()
 
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
-        let i = config[indexKey]
-        if (!i) return
-        let url = ENVS.urlFormat.search(`/${i}/search`)
+
+        let url = getUrl()
+        if (!url) return
         let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
@@ -133,9 +139,12 @@ const LogsReposTable = ({ }) => {
 
     useEffect(() => {
         setTableData([])
-        setVizData([])
+        setVizData({})
         afterKey.current = null
         fetchData(false)
+        xAxis.current = {}
+        repos.current = []
+        setSelectedRows([])
     }, [fromDate, toDate])
 
 
@@ -145,19 +154,84 @@ const LogsReposTable = ({ }) => {
         }
     }, [])
 
+    const buildLineChart = async () => {
+        if (!fromDate && !toDate) return
+        let url = getUrl()
+        if (!url) return
+
+        let histogramOps = determineCalendarInterval()
+
+        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}Histogram`](histogramOps)
+        let headers = getHeadersWith(globusToken).headers
+
+        // Get page for grouped Ids
+        let res = await callService(url, headers, q, 'POST')
+        let _vizData = []
+        if (res.status == 200) {
+            let _data = res.data?.aggregations?.calendarHistogram?.buckets
+            let buckets = {}
+
+            if (_data?.length) {
+                const prevDate = new Date(_data[0].key_as_string + '-2')
+                xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
+            }
+
+            let _repos = new Set()
+            let cKey
+            for (let d of _data) {
+                buckets[d.key_as_string] = buckets[d.key_as_string] || { xValue: d.key_as_string }
+                for (let t of d['type.keyword'].buckets) {
+                    for (let r of t['repository.keyword'].buckets) {
+                        cKey = `${r.key}:${t.key}`
+                        _repos.add(cKey)
+                        buckets[d.key_as_string][cKey] = r.count.value
+                    }
+
+                }
+            }
+            _vizData = Object.values(buckets)
+
+            if (_vizData.length) {
+                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + '-2')
+                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
+            }
+
+
+            repos.current = Array.from(_repos)
+            Addon.log(`${indexKey}.buildLineChart`, {data: _vizData})
+
+            setVizData({ ...vizData, line: _vizData })
+        }
+    }
+
+    useEffect(() => {
+        if (selectedRows.length < 10) {
+            if (!fromDate) {
+                setVizData({ ...vizData, stackedBar: selectedRowObjects })
+            } else {
+                buildLineChart()
+            }
+        } else {
+            setVizData({ ...vizData, line: [] })
+        }
+    }, [selectedRows])
+
 
     const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            if (selectedRows.length < 10) {
-                setVizData(selectedRows)
-            }
+        selectedRowKeys: selectedRows,
+        onChange: (rowKeys, rows) => {
+            setSelectedRowObjects(rows)
+            setSelectedRows(rowKeys)
+
             //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         },
     };
 
+    const yAxis = { label: "↑ Views" }
 
     return (<>
-        {vizData.length > 0 && <StackedBarWithLegend yAxis={{label: "↑ Views"}} xAxis={{formatter: formatNum}} data={vizData} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current} yAxis={yAxis} data={vizData.line} chartId={'reposHistogram'} />}
 
         <Table
             rowSelection={{ type: 'checkbox', ...rowSelection }}

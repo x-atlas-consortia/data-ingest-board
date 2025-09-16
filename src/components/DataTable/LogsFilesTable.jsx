@@ -13,9 +13,8 @@ import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
-    const [selectedRows, setSelectedRows] = useState([])
     const xAxis = useRef({})
-    const [vizData, setVizData] = useState({})
+    
     const entities = useRef({})
     const datasetGroups = useRef([])
     const byDatasetTypes = useRef([])
@@ -32,21 +31,13 @@ const LogsFilesTable = ({ }) => {
         updateTableData,
         getMenuItemClassName,
         fromDate, toDate,
-        getFromDate, getToDate,
+        vizData, setVizData,
         determineCalendarInterval,
-        getAxisTick
+        getAxisTick,
+        selectedRows, setSelectedRows,
+        getUrl
 
     } = useContext(LogsContext)
-
-    let config = ENVS.logsIndicies()
-
-    const getUrl = () => {
-        let i = config[indexKey]
-        if (!i) return null
-
-        let url = ENVS.urlFormat.search(`/${i}/search`)
-        return url
-    }
 
     const parseByDatasetType = (_data) => {
         let types = {}
@@ -262,7 +253,7 @@ const LogsFilesTable = ({ }) => {
     const rowSelection = {
         selectedRowKeys: selectedRows,
         onChange: (rowKeys, rows) => {
-            console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
+            //console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
             setSelectedRows(rowKeys)
 
         },

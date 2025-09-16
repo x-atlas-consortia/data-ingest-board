@@ -59,8 +59,13 @@ function Line({
         let minY = Infinity;
         for (let d of data) {
             let list = Object.values(d)
-            maxY = Math.max(maxY, list[list.length - 1])
-            minY = Math.min(minY, list[0])
+            for (let x of list) {
+                if (typeof x === 'number') {
+                    maxY = Math.max(maxY, x)
+                    minY = Math.min(minY, x)
+                }
+            }
+            
         }
 
         let xGroups = data.map((d) => d.xValue)
