@@ -10,6 +10,11 @@ import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 import LogsReposTable from '@/components/DataTable/LogsReposTable';
 import { LogsProvider } from '@/context/LogsContext';
 import TABLE from '@/lib/helpers/table';
+import {
+    DownloadOutlined,
+    ApiOutlined,
+    CodeOutlined,
+} from "@ant-design/icons";
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -220,26 +225,30 @@ const Logs = () => {
     const getCards = (data) => {
         let _cards = {
             openSourceRepos: {
-                title: 'Open Source Repositories'
+                title: 'Open Source Repositories',
+                icon: <CodeOutlined />
             },
             apiUsage: {
-                title: 'Microservices'
+                title: 'Microservices',
+                icon: <ApiOutlined />
             },
             fileDownloads: {
-                title: 'Data Transfers'
+                title: 'Data Transfers',
+                icon: <DownloadOutlined />
             }
         }
 
         let comps = []
         let _tabs = []
         for (let s in indicesSections.current) {
-            comps.push(<Card className='c-logCard' title={_cards[s].title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className='c-logCard' title={<>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}</span></>} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
                 label: `${_cards[s].title}`,
                 key: getTabId(s),
                 children: getTabContent(s, data),
+                icon: _cards[s].icon
             })
         }
         setCards(comps)
