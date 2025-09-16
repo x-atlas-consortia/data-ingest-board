@@ -252,16 +252,12 @@ const Logs = () => {
             })
         }
         setCards(comps)
+        setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
         setTabs(_tabs)
-        setActiveSection(getTabId(indicesSections.current)[0])
         setIsBusy(false)
     }
 
     const onTabChange = (active) => {
-        // for (let act in extraActions) {
-        //  _tabActions.current[act] = extraActions[act]
-        // }
-        // setExtraActions(_tabActions.current)
         setActiveSection(active)
     }
 
@@ -342,7 +338,7 @@ const Logs = () => {
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
-                        defaultActiveKey={activeSection}
+                       
                         activeKey={activeSection}
                         type="card"
                         size={'middle'}

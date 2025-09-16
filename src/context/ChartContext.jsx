@@ -88,7 +88,6 @@ export const ChartProvider = ({ children }) => {
             },
             mouseleave: function (e, d) {
                 e.stopPropagation()
-                console.log('mouse leave', e)
                 getTooltip(id)
                     .style('opacity', 0)
                 d3.select(this)

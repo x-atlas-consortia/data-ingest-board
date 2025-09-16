@@ -98,12 +98,12 @@ const ESQ = {
     ownerFilter: (from, to) => {
         return ESQ.filter(from, to, 'owner', [`${ENVS.appContext().toLowerCase()}consortium`])
     },
-    monthlyHistogram: () => {
+    calendarHistogram: ({interval = 'month', format = 'yyyy-MM'}) => {
         return {
             date_histogram: {
                 field: "download_date_time",
-                calendar_interval: "month",
-                format: "yyyy-MM"
+                calendar_interval: interval,
+                format
             },
             aggs: {
                 totalBytes: ESQ.sum('bytes_transferred'),
@@ -204,16 +204,16 @@ const ESQ = {
                     }
                 }
             },
-            fileDownloadsHistogram: {
+            fileDownloadsHistogram: (ops = {}) =>({
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 size: 0,
                 aggs: {
-                    monthly: ESQ.monthlyHistogram()
+                    calendarHistogram: ESQ.calendarHistogram(ops)
                 }
-            },
-            fileDownloadsDatasetsHistogram: {
+            }),
+            fileDownloadsDatasetsHistogram: (ops = {}) => ({
                 query: ESQ.filter(from, to, 'dataset_uuid', list, ESQ.fileDownloadDateRange),
                 size: 0,
                 aggs: {
@@ -222,12 +222,12 @@ const ESQ = {
                             "field": "dataset_uuid.keyword"
                         },
                         aggs: {
-                            monthly: ESQ.monthlyHistogram()
+                            calendarHistogram: ESQ.calendarHistogram(ops)
                         }
                     }
                 }
 
-            }
+            })
         }
     }
 
