@@ -301,7 +301,12 @@ const Logs = () => {
         // TODO improve for dynamic export
         let indexKey = activeSection.replace('tab-', '')
         let _data = exportData.current[indexKey] || []
-        let cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
+        let cols = []
+        if (isRepos(indexKey)) {
+            cols = ['group', 'views', 'uniqueViews', 'clones', 'uniqueClones']
+        } else {
+            cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
+        }
 
         if (_data.length) {
             TABLE.generateCSVFile(_data, indexKey + '.csv', cols)
