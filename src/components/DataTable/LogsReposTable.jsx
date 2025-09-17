@@ -1,12 +1,13 @@
 import { useEffect, useState, useContext, useRef } from "react";
-import { Table, Button } from 'antd';
+import { Button } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 
 import LogsContext from "@/context/LogsContext";
-import StackedBarWithLegend from "../Visualizations/StackedBarWithLegend";
+import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
+import SearchFilterTable from "./SearchFilterTable";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -235,13 +236,15 @@ const LogsReposTable = ({ }) => {
         {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
         {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current} yAxis={yAxis} data={vizData.line} chartId={'reposHistogram'} />}
 
-        <Table
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
-            pagination={false}
-            loading={isBusy}
-            rowKey={'group'}
-            scroll={{ y: 'calc(100vh - 200px)' }}
-            dataSource={tableData} columns={cols} />
+        <SearchFilterTable data={tableData} columns={cols}
+                formatters={{bytes: formatNum}}
+                tableProps={{
+                    rowKey: 'group',
+                    rowSelection: { type: 'checkbox', ...rowSelection },
+                    pagination: false,
+                    loading: isBusy,
+                    scroll: { y: 'calc(100vh - 200px)' }
+                }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More
         </Button>}

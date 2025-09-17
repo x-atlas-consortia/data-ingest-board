@@ -7,7 +7,7 @@ import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/h
 import AppContext from "@/context/AppContext";
 import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
-import BarWithLegend from "../Visualizations/BarWithLegend";
+import BarWithLegend from "@/components/Visualizations/BarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 
