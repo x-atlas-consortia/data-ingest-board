@@ -202,6 +202,10 @@ const TABLE = {
                     item[key] = toDateString(item[key])
                 }
 
+                if (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n')) {
+                    item[key] = item[key].replace(/"/g, '""')
+                }
+
                 if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
                     delete item[key]
                 }
