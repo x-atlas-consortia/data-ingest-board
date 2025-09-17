@@ -10,6 +10,7 @@ import {
 import AppContext from "@/context/AppContext";
 import { Navbar } from "react-bootstrap";
 import { eq } from '@/lib/helpers/general';
+import ENVS from '@/lib/helpers/envs';
 const { Sider } = Layout;
 function AppSideNavBar({ exportHandler }) {
     const { handleLogout, isAuthenticated, t, getUserEmail } = useContext(AppContext)
@@ -42,6 +43,8 @@ function AppSideNavBar({ exportHandler }) {
     const handleMenuClick = (e) => {
         if (eq(e.key, 'export')) {
             exportHandler()
+        } else if (eq(e.key, 'help')) {
+            window.open(`https://docs.${ENVS.appContext().toLowerCase()}consortium.org/`, '_blank')
         }
     }
 

@@ -319,15 +319,16 @@ const Logs = () => {
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <Row>
-                        <Col span={18} push={6}>
-                            <RangePicker onChange={handleDateRange} />
-                        </Col>
-                        <Col span={6} pull={18}>
+                        <Col md={{span: 8}} lg={{span: 5}} xlg={{span: 4}}>
                             <div style={{ padding: '10px 24px' }}>
                                 <h2>Dashboard</h2>
                             </div>
 
                         </Col>
+                        <Col md={{span: 8}} className='d-md'>
+                            <RangePicker onChange={handleDateRange} />
+                        </Col>
+                        
                     </Row>
                 </Header>
                 <Content
@@ -339,6 +340,9 @@ const Logs = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
+                    <Col md={{span: 6}} className='d-sm mx-2 mb-2'>
+                            <RangePicker onChange={handleDateRange} />
+                        </Col>
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}

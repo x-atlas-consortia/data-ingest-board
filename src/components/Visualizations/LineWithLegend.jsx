@@ -14,7 +14,7 @@ function LineWithLegend({ chartId, data, groups, yAxis, xAxis }) {
 
     return (
         <Row>
-            <Col span={18} push={6}>
+            <Col md={{span: 18, push: 6}}>
                 <ChartProvider>
                     <Line
                         xAxis={xAxis}
@@ -26,7 +26,7 @@ function LineWithLegend({ chartId, data, groups, yAxis, xAxis }) {
                         chartId={chartId} />
                 </ChartProvider>
             </Col>
-            <Col span={5} pull={18} className='pe-4'>
+            <Col md={{span: 5, pull: 18}} className='pe-4'>
                 <Legend legend={legend} sortLegend={false} />
             </Col>
         </Row>

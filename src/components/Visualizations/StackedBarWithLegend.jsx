@@ -14,7 +14,7 @@ function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis}) {
 
     return (
         <Row>
-            <Col span={18} push={6}>
+            <Col md={{span: 18, push: 6}}>
                 <ChartProvider>
                     <StackedBar
                         reload={false}
@@ -26,7 +26,7 @@ function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis}) {
                         chartId={chartId} />
                 </ChartProvider>
             </Col>
-            <Col span={5} pull={18}>
+            <Col md={{span: 5, pull: 18}} >
                 <Legend legend={legend} sortLegend={false} />
             </Col>
         </Row>
