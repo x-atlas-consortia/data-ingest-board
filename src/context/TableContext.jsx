@@ -23,9 +23,11 @@ const AppTableContext = createContext({})
 export const TABLE_COL_ORDER_KEY = 'table.orderedColumns.'
 export const TABLE_COL_HIDDEN_KEY = 'table.hiddenColumns.'
 
+const DragIndexContext = createContext({ active: -1, over: -1 })
+
 export const AppTableProvider = ({ children,  context, baseColumns, initialColumnsToHide = [] }) => {
     let _a;
-    const DragIndexContext = createContext({ active: -1, over: -1 })
+
     const [dragIndex, setDragIndex] = useState({ active: -1, over: -1 })
     const orderedColumnsStoreKey = storageKey(`${TABLE_COL_ORDER_KEY}${context}`)
     const hiddenColumnsStoreKey = storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`)
@@ -33,6 +35,13 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const [_, setHiddenColumns] = useState(initialColumnsToHide)
     const {setFilters, setPage, setPageSize} = useContext(RouterContext)
     const sortingInfo = useRef(null)
+    const adjustedFilters = useRef(null)
+
+    useEffect(() => {
+        $('body').on('click', '.ant-table-filter-dropdown-btns', (e)=> {
+            setFilters(adjustedFilters.current)
+        })
+    }, []);
 
     const getColumnsDict = (cols) => {
         let dict = {}
@@ -249,7 +258,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             }
 
         } else {
-            setFilters(correctedFilters)
+            adjustedFilters.current = correctedFilters
             clearSort()
         }
         Object.keys(correctedFilters).forEach(key => {

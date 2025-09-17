@@ -5,7 +5,7 @@ import {
     FileExcelOutlined,
     EditOutlined,
     FileTextOutlined,
-    ThunderboltOutlined, BugOutlined
+    ExportOutlined, BugOutlined
 } from "@ant-design/icons";
 import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
 import React from "react";
@@ -26,6 +26,10 @@ import {STATUS} from "../constants";
 import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {TABLE_COL_HIDDEN_KEY, TABLE_COL_ORDER_KEY} from "@/context/TableContext";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
+import ModalOver from "@/components/ModalOver";
+import ModalOverComponent from "@/components/ModalOverComponent";
+import IdLinkDropdown from "@/components/IdLinkDropdown";
+import IdLink from "@/components/IdLink";
 
 const TABLE = {
     cols: {
@@ -196,6 +200,10 @@ const TABLE = {
             for (const key in item) {
                 if (['last_touch', 'created_timestamp', 'published_timestamp'].comprises(key)) {
                     item[key] = toDateString(item[key])
+                }
+
+                if (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n')) {
+                    item[key] = item[key].replace(/"/g, '""')
                 }
 
                 if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
@@ -442,6 +450,62 @@ const TABLE = {
                     </Tooltip>
                 )
             },
+            errorMessage: () => (
+                {
+                    title: "Error Message",
+                    width: 200,
+                    dataIndex: "error_message",
+                    align: "left",
+                    defaultSortOrder: defaultSortOrder["error_message"] || null,
+                    sorter: (a,b) => a?.error_message?.localeCompare(b?.error_message),
+                    ellipsis: true,
+                    render: (content, record) => {
+                        return <ModalOver content={content} />
+                    }
+                }
+            ),
+            uuidList: ({name, field}) => ({
+                title: name,
+                width: 250,
+                dataIndex: field,
+                align: "left",
+                defaultSortOrder: defaultSortOrder[field] || null,
+                sorter: (a,b) => {
+                    let _a = (!a[field] || !a[field].length) ? '' : `${a[field][0][TABLE.cols.f('id')]}`
+                    let _b = (!b[field] || !b[field].length) ? '' : `${b[field][0][TABLE.cols.f('id')]}`
+                    if (!a[field] || !b[field] || !a[field].length || !b[field].length) return 0
+                    return _a.localeCompare(_b)
+                },
+                ellipsis: false,
+                render: (uuids, record) => {
+                    if (!uuids || !uuids.length) return null
+                    let res = []
+                    for (let id of uuids) {
+                        res.push(<li key={id.uuid} className={'list-group-item'}><IdLink data={id} /></li>)
+                    }
+                    const titles = {
+                        blocks: 'Sample Blocks',
+                        parent_ancestors: name
+                    }
+                    const display = <IdLink data={uuids[0]} />
+                    if (uuids.length > 1) {
+                        return (<ModalOverComponent modalContent={
+                            <div className='c-table__colTags'>
+                                <h3 className={'fs-5'}>
+                                    <IdLinkDropdown data={record} />
+                                    {record.dataset_type && <span className='badge bg-secondary p-2 mx-2'>{record.dataset_type}</span>}</h3>
+                                <h4 className={'fs-6 mt-3'}>{titles[field]}</h4>
+                                <ul className={'list-group list-scrollable mt-3'}>{res}</ul>
+                            </div>}>
+
+                            {display}
+                        </ModalOverComponent>)
+                    }
+
+                    return display
+
+                }
+            }),
             priorityProjectList: (uniquePriorityPList, filters) => ({
                 title: "Priority Project List",
                 width: 250,

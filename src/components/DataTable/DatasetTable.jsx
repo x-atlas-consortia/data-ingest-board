@@ -1,4 +1,3 @@
-import {Modal} from "antd";
 import {ExportOutlined, ThunderboltOutlined, CloudUploadOutlined} from "@ant-design/icons";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
@@ -6,7 +5,7 @@ import axios from "axios";
 import ENVS from "@/lib/helpers/envs";
 import TABLE from "@/lib/helpers/table";
 import URLS from "@/lib/helpers/urls";
-import {callService, eq, getHeadersWith, getUBKGName} from "@/lib/helpers/general";
+import {eq, getHeadersWith, getUBKGName} from "@/lib/helpers/general";
 import ModalOver from "../ModalOver";
 import ModalOverData from "../ModalOverData";
 import AppContext from "@/context/AppContext";
@@ -18,6 +17,7 @@ import {ChartProvider} from "@/context/ChartContext";
 import {AppTableProvider} from "@/context/TableContext";
 import AppTable from "@/components/DataTable/AppTable";
 import RouterContext from "@/context/RouterContext";
+import AppModal from "@/components/AppModal";
 
 const DatasetTable = ({
     data,
@@ -94,7 +94,7 @@ const DatasetTable = ({
             ellipsis: true,
             render: (processed_datasets, record) => {
                 return <ModalOverData args={{urlParamFilters, urlSortOrder, record}} content={Array.isArray(processed_datasets) ? processed_datasets : []}
-                                      modal={modal} setModal={setModal} />
+                                       />
             }
         },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters, {}).assignedToGroupName(uniqueDataFilters['assigned_to_group_name']),
@@ -107,7 +107,7 @@ const DatasetTable = ({
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} modal={modal} setModal={setModal} />
+                return <ModalOver content={task} />
             }
         },
         {
@@ -267,6 +267,9 @@ const DatasetTable = ({
                 width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Blocks', field: 'blocks'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Parent Ancestors', field: 'parent_ancestors'}),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage(),
     ]
 
     // Exclude named columns in .env from table
@@ -429,19 +432,8 @@ const DatasetTable = ({
                                   rowSelection={rowSelection}  />
                     </AppTableProvider>
 
-                    <Modal
-                        className={modal.className}
-                        width={modal.width}
-                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
-                        closable={false}
-                        open={modal.open}
-                        okText={modal.okText}
-                        onCancel={closeModal}
-                        onOk={handleModalOk}
-                        okButtonProps={modal.okButtonProps}
-                    >
-                        {modal.body}
-                    </Modal>
+                    <AppModal modal={modal} setModal={setModal} handleModalOk={handleModalOk} />
+
                 </>
             )}
         </div>

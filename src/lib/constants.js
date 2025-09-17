@@ -10,3 +10,5 @@ export const STATUS = {
         {text: 'Reorganized', value: 'reorganized'},
     ]
 }
+
+export const modalDefault = {cancelCSS: 'none', okText: 'OK'}

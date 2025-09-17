@@ -1,4 +1,4 @@
-import {Button,Modal} from "antd";
+import {Button} from "antd";
 import React, {useContext, useEffect, useState} from "react";
 import Spinner from "../Spinner";
 import {eq, getUBKGName} from "@/lib/helpers/general";
@@ -7,12 +7,13 @@ import TABLE from "@/lib/helpers/table";
 import URLS from "@/lib/helpers/urls";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
-import {STATUS} from "@/lib/constants";
+import {modalDefault, STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import AppTable from "@/components/DataTable/AppTable";
 import {AppTableProvider} from "@/context/TableContext";
 import RouterContext from "@/context/RouterContext";
+import AppModal from "@/components/AppModal";
 
 const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, clearBasicFilters}) => {
     const {sortField, sortOrder, filters} = useContext(RouterContext)
@@ -38,7 +39,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
         }
     }, [selectedEntities])
 
-    const [modal, setModal] = useState({cancelCSS: 'none'})
+    const [modal, setModal] = useState(modalDefault)
 
     const excludedColumns = ENVS.excludeTableColumnsUploads()
     const filterField = (f) => {
@@ -140,7 +141,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
             sorter: (a,b) => a.ingest_task.localeCompare(b.ingest_task),
             ellipsis: true,
             render: (task, record) => {
-                return <ModalOver content={task} modal={modal} setModal={setModal} />
+                return <ModalOver content={task} />
             }
         },
         {
@@ -187,6 +188,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
             ellipsis: true,
         },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
+        TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage(),
     ];
 
     // Exclude named columns in .env from table
@@ -289,17 +291,8 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
                                   loading={loading}
                                   rowSelection={rowSelection}  />
                     </AppTableProvider>
-                    <Modal
-                        className={modal.className}
-                        cancelButtonProps={{ style: { display: modal.cancelCSS } }}
-                        width={modal.width}
-                        closable={false}
-                        open={modal.open}
-                        onCancel={closeModal}
-                        onOk={handleModalOk}
-                    >
-                        {modal.body}
-                    </Modal>
+
+                    <AppModal modal={modal} setModal={setModal} handleModalOk={handleModalOk} />
                 </>
             )}
         </div>
