@@ -18,6 +18,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [vizData, setVizData] = useState({})
   const [menuItems, setMenuItems] = useState([])
   const [selectedRows, setSelectedRows] = useState([])
+  const [selectedRowObjects, setSelectedRowObjects] = useState([])
 
   const menuProps = () => {
     return {
@@ -183,6 +184,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     menuItems, setMenuItems,
     extraActions, setExtraActions,
     selectedRows, setSelectedRows,
+    selectedRowObjects, setSelectedRowObjects,
     updateTableData,
     getMenuItemClassName,
     getRowsPerLoadMore,

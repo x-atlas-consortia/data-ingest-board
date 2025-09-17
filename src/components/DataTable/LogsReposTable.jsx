@@ -21,6 +21,7 @@ const LogsReposTable = ({ }) => {
         fromDate, toDate,
         indexKey,
         selectedRows, setSelectedRows,
+        selectedRowObjects, setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
         getAxisTick,
@@ -31,7 +32,6 @@ const LogsReposTable = ({ }) => {
     const subgroupLabels = useRef({})
     const repos = useRef([])
     const xAxis = useRef({})
-    const [selectedRowObjects, setSelectedRowObjects] = useState([])
 
 
     const fetchData = async (includePrevData = true) => {

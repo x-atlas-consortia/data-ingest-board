@@ -35,6 +35,7 @@ const LogsFilesTable = ({ }) => {
         determineCalendarInterval,
         getAxisTick,
         selectedRows, setSelectedRows,
+        selectedRowObjects, setSelectedRowObjects,
         getUrl,
         getDatePart
 
@@ -168,8 +169,16 @@ const LogsFilesTable = ({ }) => {
     }, [fromDate, toDate])
 
     useEffect(() => {
-        if (selectedRows.length) {
-            buildLineChart()
+        if (selectedRows.length < 10) {
+            if (!fromDate) {
+                let _data = selectedRowObjects.map((d)=> {
+                    return {id: d.uuid, label: d.entityId || d.uuid, value: d.bytes}
+                })
+            
+                setVizData({ ...vizData, barById: _data })
+            } else {
+                buildLineChart()
+            }
         } else {
             setVizData({ ...vizData, line: [] })
         }
@@ -252,7 +261,7 @@ const LogsFilesTable = ({ }) => {
         onChange: (rowKeys, rows) => {
             //console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
             setSelectedRows(rowKeys)
-
+            setSelectedRowObjects(rows)
         },
     };
 
@@ -291,6 +300,7 @@ const LogsFilesTable = ({ }) => {
     return (<>
         {vizData.bar?.length > 0 && selectedRows.length == 0 && logByDatasetID && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
         {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
+        {vizData.barById?.length > 0 && !logByType && <BarWithLegend yAxis={yAxis} data={vizData.barById} chartId={'filesById'} />}
         {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}
 
 

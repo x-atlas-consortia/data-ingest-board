@@ -23,6 +23,7 @@ function Bar({
         appendTooltip } = useContext(ChartContext)
 
     const colors = {}
+    const chartData = useRef([])
 
     const truncateLabel = (label) => {
         return label.length > 30 ? label.substring(0, 27) + "..." : label;
@@ -165,8 +166,9 @@ function Bar({
         }
     }
     useEffect(() => {
-        if (reload || !hasLoaded.current) {
+        if (reload || chartData.current.length !== data.length || !hasLoaded.current) {
             hasLoaded.current = true
+            chartData.current = Array.from(data)
             updateChart()
         }
 
