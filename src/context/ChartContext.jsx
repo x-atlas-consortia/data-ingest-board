@@ -66,7 +66,7 @@ export const ChartProvider = ({ children }) => {
         handleLineLabel(id, e, '1')
 
         getTooltip(id)
-            .html(`<span>${label}</span>: ${value}`)
+            .html(`<em>${label}</em>: <strong>${value}</strong>`)
             .style('left', xPos + 'px')
             .style('top', yPos + 'px')
     }

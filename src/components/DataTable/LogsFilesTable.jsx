@@ -83,7 +83,7 @@ const LogsFilesTable = ({ }) => {
 
             // Find out info about these ids
             q = ESQ.indexQueries({ list: ids }).filter
-            q._source = ['uuid', 'dataset_type', TABLE.cols.f('id')]
+            q._source = ['uuid', 'dataset_type', 'hubmap_id', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
             let entitiesSearch = await callService(ENVS.urlFormat.search(`/entities/search`),
                 headers,
                 q,
@@ -114,6 +114,8 @@ const LogsFilesTable = ({ }) => {
             }
 
             parseByDatasetType(_data.buckets)
+
+            Addon.log('LogsFilesTable.fetchData', {data: _tableData})
 
             updateTableData(includePrevData, _tableData)
 

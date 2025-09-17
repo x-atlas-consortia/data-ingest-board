@@ -148,7 +148,7 @@ function Line({
             .attr('pointer-events', 'all')
             .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
             .attr('data-value', (d) => formatVal(d.yValue) )
-            .attr('data-label', (d) => `${d.group}\n${d.xValue}`)
+            .attr('data-label', (d) => `${d.group} \n ${d.xValue}`)
 
         // Add a legend at the end of each line
         g
