@@ -9,12 +9,13 @@ import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
 import BarWithLegend from "../Visualizations/BarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
+import SearchFilterTable from "./SearchFilterTable";
 
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
     const xAxis = useRef({})
-    
+
     const entities = useRef({})
     const datasetGroups = useRef([])
     const byDatasetTypes = useRef([])
@@ -171,10 +172,10 @@ const LogsFilesTable = ({ }) => {
     useEffect(() => {
         if (selectedRows.length < 10) {
             if (!fromDate) {
-                let _data = selectedRowObjects.map((d)=> {
-                    return {id: d.uuid, label: d.entityId || d.uuid, value: d.bytes}
+                let _data = selectedRowObjects.map((d) => {
+                    return { id: d.uuid, label: d.entityId || d.uuid, value: d.bytes }
                 })
-            
+
                 setVizData({ ...vizData, barById: _data })
             } else {
                 buildLineChart()
@@ -305,24 +306,29 @@ const LogsFilesTable = ({ }) => {
 
 
         {logByDatasetID && <>
-            <Table
-                rowSelection={{ type: 'checkbox', ...rowSelection }}
-                pagination={false}
-                loading={isBusy}
-                rowKey={'uuid'}
-                scroll={{ y: 'calc(100vh - 200px)' }}
-                dataSource={tableData} columns={cols} />
+            <SearchFilterTable data={tableData} columns={cols}
+                formatters={{bytes: formatBytes}}
+                tableProps={{
+                    rowKey: 'uuid',
+                    rowSelection: { type: 'checkbox', ...rowSelection },
+                    pagination: false,
+                    loading: isBusy,
+                    scroll: { y: 'calc(100vh - 200px)' }
+                }} />
+
             {hasMoreData && <Button onClick={fetchData} type="primary" block>
                 Load More
             </Button>}
         </>}
 
         {logByType && <>
-            <Table
-                rowSelection={{ type: 'checkbox', ...rowSelection }}
-                loading={isBusy}
-                rowKey={'id'}
-                dataSource={vizData.barByTypes} columns={byTypeCols} />
+            <SearchFilterTable data={vizData.barByTypes} columns={byTypeCols}
+                formatters={{bytes: formatBytes}}
+                tableProps={{
+                    rowKey: 'id',
+                    rowSelection: { type: 'checkbox', ...rowSelection },
+                    loading: isBusy
+                }} />
         </>}
 
     </>)
