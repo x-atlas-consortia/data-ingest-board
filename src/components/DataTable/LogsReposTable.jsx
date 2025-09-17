@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { Button } from 'antd';
 import ESQ from "@/lib/helpers/esq";
-import { callService, formatNum, eq, getHeadersWith } from "@/lib/helpers/general";
+import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 
 import LogsContext from "@/context/LogsContext";

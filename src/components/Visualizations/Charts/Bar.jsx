@@ -68,10 +68,12 @@ function Bar({
             .range([marginLeft, width - marginRight])
             .padding(0.1);
 
+        const scaleRange = data.length <= 1 ? 2 : data.length
+
         // Create the color scale.
-        const colorS = d3.scaleOrdinal()
+        const colorScale = d3.scaleOrdinal()
             .domain(data.map(d => d.label))
-            .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length))
+            .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), scaleRange))
 
         // Bar must have a minimum height to be able to click. 2% of the max value seems good
         const maxY = d3.max(data, (d) => d.value);
@@ -98,7 +100,7 @@ function Bar({
             .attr("x", (d) => x(d.label))
             .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.value) : d.value)
             .attr("fill", function (d) {
-                const color = colorMethods[column] ? colorMethods[column](d.label) : colorS(d.label);
+                const color = colorMethods[column] ? colorMethods[column](d.label) : colorScale(d.label);
                 colors[d.label] = {color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label};
                 return color; })
             .attr("y", (d) => y(yStartPos))
