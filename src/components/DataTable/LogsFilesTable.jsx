@@ -105,10 +105,10 @@ const LogsFilesTable = ({ }) => {
                 uuid = d.key['dataset_uuid.keyword']
                 _tableData.push(
                     {
+                        uuid,
+                        ...(entities.current[uuid] || {}),
                         files: d.doc_count,
                         bytes: d.totalBytes.value,
-                        uuid,
-                        ...(entities.current[uuid] || {})
                     }
                 )
             }

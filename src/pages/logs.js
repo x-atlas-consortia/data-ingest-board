@@ -52,7 +52,7 @@ const Logs = () => {
     const isFiles = (key) => eq(key, 'fileDownloads')
 
     const getCardDetail = (key, data) => {
-       
+
         let repos, totalClones, totalViews = 0
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
@@ -137,7 +137,7 @@ const Logs = () => {
     }
 
     const getTabContent = (key, data) => {
-    
+
         let tableData = []
 
         if (isRepos(key)) {
@@ -154,7 +154,7 @@ const Logs = () => {
             </>
         }
         if (isApi(key)) {
-           
+
             for (let d of data[key].data.aggregations.services.buckets) {
                 tableData.push(
                     {
@@ -164,7 +164,7 @@ const Logs = () => {
                     }
                 )
             }
-        
+
             return <>
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
@@ -277,16 +277,36 @@ const Logs = () => {
         let indexKey = activeSection.replace('tab-', '')
         let _data = exportData.current[indexKey] || []
         let cols = []
-        
-        if (isRepos(indexKey)) {
-            cols = ['group', 'views', 'uniqueViews', 'clones', 'uniqueClones']
-        } else if (isApi(indexKey)) {
-            cols = ['name', 'endpoints', 'requests']
-        } else {
-            cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
-        }
 
         if (_data.length) {
+           
+            for (let d of _data) {
+
+                // rename group (used in stackedBar viz) to repository
+                if (d.group) {
+                    d.repository = d.group
+                    delete d.group
+                }
+
+                // We don't want undefined values in csv, just blank
+                if (d.uuid) {
+                    if (!d[TABLE.cols.f('id')]) {
+                        d[TABLE.cols.f('id')] = ''
+                    }
+                    if (!d.datasetType) {
+                        d.datasetType = ''
+                    }
+                    delete d.entityId
+                }
+                
+            }
+            cols = Object.keys(_data[0])
+            if (_data[0].repository) {
+                // move repository column to front
+                let c = cols.pop()
+                cols.unshift(c)
+            }
+
             TABLE.generateCSVFile(_data, indexKey + '.csv', cols)
         }
     }
@@ -297,16 +317,16 @@ const Logs = () => {
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <Row>
-                        <Col md={{span: 8}} lg={{span: 5}} xlg={{span: 4}}>
+                        <Col md={{ span: 8 }} lg={{ span: 5 }} xlg={{ span: 4 }}>
                             <div style={{ padding: '10px 24px' }}>
                                 <h2>Dashboard</h2>
                             </div>
 
                         </Col>
-                        <Col md={{span: 8}} className='d-md'>
+                        <Col md={{ span: 8 }} className='d-md'>
                             <RangePicker onChange={handleDateRange} />
                         </Col>
-                        
+
                     </Row>
                 </Header>
                 <Content
@@ -318,14 +338,14 @@ const Logs = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <Col md={{span: 6}} className='d-sm mx-2 mb-2'>
-                            <RangePicker onChange={handleDateRange} />
-                        </Col>
+                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2'>
+                        <RangePicker onChange={handleDateRange} />
+                    </Col>
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
-                       
+
                         activeKey={activeSection}
                         type="card"
                         size={'middle'}
