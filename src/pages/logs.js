@@ -15,6 +15,7 @@ import {
     ApiOutlined,
     CodeOutlined,
 } from "@ant-design/icons";
+import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -126,38 +127,6 @@ const Logs = () => {
         },
     };
 
-    const getColumnsByKey = (key) => {
-        const col = {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-        }
-        const columns = {
-
-            apiUsage: [
-                {
-                    title: 'Endpoints',
-                    dataIndex: 'endpoints',
-                    key: 'endpoints',
-                },
-                {
-                    title: 'Requests',
-                    dataIndex: 'hits',
-                    key: 'hits',
-                    render: (v, r) => {
-                        return <span data-field="files">{formatNum(v)}</span>
-                    }
-                }
-            ]
-        }
-        const _cols = Array.from(columns[key] || [])
-        if (!isFiles(key)) {
-            _cols.unshift(col)
-        }
-
-        return _cols
-    }
-
     const getTabId = (key) => `tab-${key}`
 
     const highlightSection = (e, key) => {
@@ -168,7 +137,7 @@ const Logs = () => {
     }
 
     const getTabContent = (key, data) => {
-        const cols = getColumnsByKey(key)
+    
         let tableData = []
 
         if (isRepos(key)) {
@@ -195,13 +164,17 @@ const Logs = () => {
                     }
                 )
             }
-            // TODO Add visualization of microservice against usage counts
+        
             return <>
-                <Table
-                    rowKey={'name'}
-                    pagination={false}
-                    rowSelection={{ type: 'checkbox', ...rowSelection }}
-                    dataSource={tableData} columns={cols} />
+                <LogsProvider defaultMenuItem={'numOfRows'}
+                    indexKey={key}
+                    exportData={exportData}
+                    fromDate={fromDate} toDate={toDate}
+                    tabExtraActions={tabExtraActions}
+                    setExtraActions={setExtraActions}
+                    extraActions={extraActions} >
+                    <LogsApiUsageTable data={tableData} />
+                </LogsProvider>
             </>
         }
 
