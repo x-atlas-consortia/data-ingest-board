@@ -132,12 +132,8 @@ function StackedBar({
                 return subGroupLabels[d.key]
             })
             .attr("x", d => x(d.data.group))
-            .attr("y", d => {
-                return y(d[1] - d[0])
-            })
-            .attr("height", d => {
-                return y(d[0]) - y(d[1])
-            })
+            .attr("y", height)
+            .attr("height", 0)
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
@@ -148,6 +144,16 @@ function StackedBar({
             .on("mouseover", toolTipHandlers(chartId, chartType).mouseover)
             .on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
             .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
+
+        svg.selectAll("rect")
+            .transition()
+            .duration(800)
+            .attr("height", d => {
+                return y(d[0]) - y(d[1])
+            })
+            .attr("y", d => {
+                return y(d[1] - d[0])
+            })
 
         return svg.node();
     }

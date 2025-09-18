@@ -38,11 +38,11 @@ function Line({
         const svg = d3.create("svg")
             .attr("width", width + marginX)
             .attr("height", height + marginY)
-            //.attr("viewBox", [0, 0, width + marginX, height + marginY])
+        //.attr("viewBox", [0, 0, width + marginX, height + marginY])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left+20},${margin.top+50})`)
+            .attr("transform", `translate(${margin.left + 20},${margin.top + 50})`)
 
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -65,7 +65,7 @@ function Line({
                     minY = Math.min(minY, x)
                 }
             }
-            
+
         }
 
         let xGroups = data.map((d) => d.xValue)
@@ -92,25 +92,26 @@ function Line({
 
         // Add Y axis
         const y = d3.scaleLinear()
-            .domain([yStartPos, maxY*1.02])
+            .domain([yStartPos, maxY * 1.02])
             .range([height, 0]);
         g.append("g")
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
             .call(g => g.append("text")
                 .attr("x", -margin.left)
-                .attr("y", -margin.top*3)
+                .attr("y", -margin.top * 3)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "start")
                 .text(yAxis.label || "↑ Frequency"))
             .selectAll("text")
-            .style("font-size", "11px"); 
+            .style("font-size", "11px");
 
         // Add the lines
         const line = d3.line()
             .x(d => x(d.xValue))
             .y(d => y(d.yValue))
-            
-        g.selectAll("line--lines")
+
+
+        const paths = g.selectAll("line--lines")
             .data(dataReady)
             .join("path")
             .attr("d", d => {
@@ -126,10 +127,7 @@ function Line({
             })
             .style("stroke-width", 4)
             .style("fill", "none")
-            .transition()
-            .duration(1000) // 1 second duration
-            .delay(200)    // 200ms delay
-            .ease(d3.easeCubic)
+
 
         // Add the points
         g
@@ -147,7 +145,7 @@ function Line({
             .attr("r", 5)
             .attr('pointer-events', 'all')
             .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
-            .attr('data-value', (d) => formatVal(d.yValue) )
+            .attr('data-value', (d) => formatVal(d.yValue))
             .attr('data-label', (d) => `${d.group} \n ${d.xValue}`)
 
         // Add a legend at the end of each line
@@ -165,10 +163,30 @@ function Line({
             .style("font-size", 10)
             .style("opacity", 0)
 
-        
+
         svg.selectAll("circle")
             .on("mouseenter", toolTipHandlers(chartId, chartType).mouseenter)
             .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
+
+        let path, length
+
+
+        paths
+            .each(function (d, i) {
+
+                path = d3.select(this)
+                length = path.node().getTotalLength()
+
+                path
+                    .attr("stroke-dasharray", length + " " + length)
+                    .attr("stroke-dashoffset", length)
+                    .transition()
+                    .ease(d3.easeLinear)
+                    .attr("stroke-dashoffset", 0)
+                    .duration(500)
+
+            })
+
 
         return svg.node();
     }
