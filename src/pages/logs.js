@@ -45,7 +45,7 @@ const Logs = () => {
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
-    const isMicro = (key) => eq(key, 'apiUsage')
+    const isApi = (key) => eq(key, 'apiUsage')
 
     const isRepos = (key) => eq(key, 'openSourceRepos')
 
@@ -61,7 +61,7 @@ const Logs = () => {
         let indexData = data[key].data
         agg = indexData.aggregations
 
-        if (isMicro(key)) {
+        if (isApi(key)) {
             totalHits = indexData.hits?.total?.value
         } else if (isFiles(key)) {
             totalHits = indexData.hits.total?.value
@@ -89,7 +89,7 @@ const Logs = () => {
             </>)
         }
 
-        if (isMicro(key)) {
+        if (isApi(key)) {
             let ms = []
             for (let d of indexData.aggregations.services.buckets) {
                 ms.push(
@@ -153,7 +153,7 @@ const Logs = () => {
                 </LogsProvider>
             </>
         }
-        if (isMicro(key)) {
+        if (isApi(key)) {
            
             for (let d of data[key].data.aggregations.services.buckets) {
                 tableData.push(
@@ -202,7 +202,7 @@ const Logs = () => {
                 icon: <CodeOutlined />
             },
             apiUsage: {
-                title: 'Microservices',
+                title: 'API Usage',
                 icon: <ApiOutlined />
             },
             fileDownloads: {
@@ -277,6 +277,8 @@ const Logs = () => {
         let cols = []
         if (isRepos(indexKey)) {
             cols = ['group', 'views', 'uniqueViews', 'clones', 'uniqueClones']
+        } else if (isApi(indexKey)) {
+            cols = ['name', 'endpoints', 'hits']
         } else {
             cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
         }

@@ -32,8 +32,13 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   useEffect(() => {
-    exportData.current[indexKey] = tableData
-  }, [tableData])
+    if (selectedRowObjects.length > 0) {
+      exportData.current[indexKey] = selectedRowObjects
+    } else {
+      exportData.current[indexKey] = tableData
+    }
+    
+  }, [tableData, selectedRowObjects])
 
   const getFromDate = () => {
     if (fromDate) return fromDate
