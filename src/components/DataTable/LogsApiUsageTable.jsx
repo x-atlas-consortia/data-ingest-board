@@ -38,7 +38,7 @@ const LogsApiUsageTable = ({ data }) => {
         for (let d of _data) {
             _viz.push({ label: d.name, value: d.hits })
         }
-        setVizData({ ...vizData, bar: _viz })
+        setVizData({ bar: _viz })
     }
 
 
@@ -72,7 +72,7 @@ const LogsApiUsageTable = ({ data }) => {
             dataIndex: 'hits',
             key: 'hits',
             render: (v, r) => {
-                return <span data-field="files">{formatNum(v)}</span>
+                return <span data-field="hits">{formatNum(v)}</span>
             }
         }
     ]
@@ -81,7 +81,6 @@ const LogsApiUsageTable = ({ data }) => {
         setTableData([])
         setVizData({})
         fetchData(false)
-        prepareBarChartData(data)
         xAxis.current = {}
         apis.current = []
         setSelectedRows([])
@@ -118,7 +117,7 @@ const LogsApiUsageTable = ({ data }) => {
                 for (let t of d['host.keyword'].buckets) {
                     cKey = `${t.key}`
                     _apis.add(cKey)
-                    buckets[d.key_as_string][cKey] = r.count.value
+                    buckets[d.key_as_string][cKey] = t.doc_count
 
                 }
             }
@@ -145,7 +144,7 @@ const LogsApiUsageTable = ({ data }) => {
                 buildLineChart()
             }
         } else {
-            setVizData({ ...vizData, line: [] })
+            prepareBarChartData(data)
         }
     }, [selectedRows])
 
@@ -161,7 +160,7 @@ const LogsApiUsageTable = ({ data }) => {
     const yAxis = { label: "↑ Requests" }
 
     return (<>
-        {vizData.bar?.length > 0 && <BarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.bar} chartId={'apiUsage'} />}
+        {vizData.bar?.length > 0 && selectedRows.length == 0 && <BarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.bar} chartId={'apiUsage'} />}
         {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}

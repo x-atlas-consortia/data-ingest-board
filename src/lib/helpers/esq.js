@@ -12,6 +12,9 @@ const ESQ = {
     fileDownloadDateRange: (from, to) => {
         return ESQ.dateRange(from, to, 'download_date_time')
     },
+    timeDateRange: (from, to) => {
+        return ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime())
+    },
     groupByField: ({ size = 10, field = 'dataset_uuid' }) => {
         return {
             "field": `${field}.keyword`,
@@ -134,10 +137,22 @@ const ESQ = {
             ...ESQ.calendarHistogram(ops),
             aggs: {
                 'type.keyword': {
-                    "terms": {
-                        "field": "type.keyword"
+                    terms: {
+                        field: "type.keyword"
                     },
                     aggs: ESQ.reposAggs('repository')
+                }
+            }
+        }
+    },
+    apiUsageCalendarHistogram: (ops) => {
+        return {
+            ...ESQ.calendarHistogram({ ...ops }),
+            aggs: {
+                'host.keyword': {
+                    terms: {
+                        field: "host.keyword"
+                    }
                 }
             }
         }
@@ -201,15 +216,23 @@ const ESQ = {
             },
             apiUsage: {
                 query: {
-                    [queryField]: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {}
+                    [queryField]: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {} //TODO update date format
                 },
                 track_total_hits: true,
-                size: size,
+                size: 0,
                 aggs: {
                     services: ESQ.bucket('host'),
                     endpoints: ESQ.bucket('resource_path_parameter')
                 }
             },
+            apiUsageHistogram: (ops = {}) => ({
+                query: ESQ.filter(from, to, 'host.keyword', list, ESQ.timeDateRange), //TODO change from timestamp
+                track_total_hits: true,
+                size: 0,
+                aggs: {
+                    calendarHistogram: ESQ.apiUsageCalendarHistogram(ops)
+                }
+            }),
             fileDownloads: {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
