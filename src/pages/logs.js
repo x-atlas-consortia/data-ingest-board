@@ -159,7 +159,7 @@ const Logs = () => {
                 tableData.push(
                     {
                         name: d.key,
-                        hits: d.doc_count,
+                        requests: d.doc_count,
                         endpoints: 'TODO' // todo
                     }
                 )
@@ -225,7 +225,9 @@ const Logs = () => {
             })
         }
         setCards(comps)
-        setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
+        if (activeSection == null) {
+            setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
+        }
         setTabs(_tabs)
         setIsBusy(false)
     }
@@ -275,10 +277,11 @@ const Logs = () => {
         let indexKey = activeSection.replace('tab-', '')
         let _data = exportData.current[indexKey] || []
         let cols = []
+        
         if (isRepos(indexKey)) {
             cols = ['group', 'views', 'uniqueViews', 'clones', 'uniqueClones']
         } else if (isApi(indexKey)) {
-            cols = ['name', 'endpoints', 'hits']
+            cols = ['name', 'endpoints', 'requests']
         } else {
             cols = ['uuid', 'datasetType', TABLE.cols.f('id'), 'bytes']
         }
