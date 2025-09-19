@@ -157,7 +157,7 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "↑ Requests" }
+    const yAxis = { label: "↑ Requests", formatter: formatNum }
 
     return (<>
         {vizData.bar?.length > 0 && (!fromDate || selectedRows.length == 0) && <BarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.bar} chartId={'apiUsage'} />}
