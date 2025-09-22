@@ -235,7 +235,7 @@ const LogsReposTable = ({ }) => {
 
     return (<>
         {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current} yAxis={yAxis} data={vizData.line} chartId={'reposHistogram'} />}
+        {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current} colorGroups={['view', 'clone']} yAxis={yAxis} data={vizData.line} chartId={'reposHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatNum}}
