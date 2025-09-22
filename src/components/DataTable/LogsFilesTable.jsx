@@ -166,26 +166,30 @@ const LogsFilesTable = ({ }) => {
         entities.current = {}
         byDatasetTypes.current = []
         setSelectedRows([])
+        setSelectedRowObjects([])
         xAxis.current = {}
         fetchData(false)
-        buildBarChart()
+        
     }, [fromDate, toDate])
 
     useEffect(() => {
-        if (selectedRows.length < 10) {
+        if (selectedRows.length > 0 && selectedRows.length < 10) {
             if (!fromDate) {
                 let _data = selectedRowObjects.map((d) => {
                     return { id: d.uuid, label: d.entityId || d.uuid, value: d.bytes }
                 })
-
                 setVizData({ ...vizData, barById: _data })
             } else {
                 buildLineChart()
             }
         } else {
-            setVizData({ ...vizData, line: [] })
+            
+            if (vizData.line?.length || vizData.barById?.length) {
+               setVizData({ ...vizData, line: [], barById: [] }) 
+            }
+            buildBarChart()
         }
-    }, [selectedRows])
+    }, [selectedRows, fromDate, toDate])
 
 
     const buildBarChart = async () => {

@@ -84,6 +84,7 @@ const LogsApiUsageTable = ({ data }) => {
         xAxis.current = {}
         apis.current = []
         setSelectedRows([])
+        setSelectedRowObjects([])
     }, [fromDate, toDate])
 
 
@@ -146,7 +147,7 @@ const LogsApiUsageTable = ({ data }) => {
         } else {
             prepareBarChartData(data)
         }
-    }, [selectedRows])
+    }, [selectedRows, fromDate, toDate])
 
 
     const rowSelection = {

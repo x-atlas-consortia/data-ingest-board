@@ -147,6 +147,7 @@ const LogsReposTable = ({ }) => {
         xAxis.current = {}
         repos.current = []
         setSelectedRows([])
+        setSelectedRowObjects([])
     }, [fromDate, toDate])
 
 
@@ -208,16 +209,18 @@ const LogsReposTable = ({ }) => {
     }
 
     useEffect(() => {
-        if (selectedRows.length < 10) {
+        if (selectedRows.length > 0 && selectedRows.length < 10) {
             if (!fromDate) {
                 setVizData({ ...vizData, stackedBar: selectedRowObjects })
             } else {
                 buildLineChart()
             }
         } else {
-            setVizData({ ...vizData, line: [] })
+            if (vizData.line?.length) {
+               setVizData({ ...vizData, line: [] }) 
+            }
         }
-    }, [selectedRows])
+    }, [selectedRows, fromDate, toDate])
 
 
     const rowSelection = {
@@ -225,8 +228,6 @@ const LogsReposTable = ({ }) => {
         onChange: (rowKeys, rows) => {
             setSelectedRowObjects(rows)
             setSelectedRows(rowKeys)
-
-            //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         },
     };
 
