@@ -227,7 +227,7 @@ function Line({
         $(getChartSelector(chartId, chartType)).append(buildChart())
 
         if (setLegend) {
-            setLegend(colors.current)
+            setLegend(Object.keys(colors.current).keySort(colors.current))
         }
     }
 

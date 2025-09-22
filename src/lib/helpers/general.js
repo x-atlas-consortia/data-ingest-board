@@ -50,8 +50,22 @@ export const formatBytes = (bytes, decimals = 2) => {
 Object.assign(Array.prototype, {
     comprises(needle, insensitive = true) {
         return this.some((i) => eq(i, needle, insensitive))
+    },
+    keySort(obj) {
+        const keys = this
+        
+        keys.sort();
+
+        // Create a new object with sorted keys
+        const sortedObject = {};
+        for (const key of keys) {
+            sortedObject[key] = obj[key];
+        }
+        return sortedObject
     }
 })
+
+
 
 String.prototype.format = function() {
     let args = arguments;
