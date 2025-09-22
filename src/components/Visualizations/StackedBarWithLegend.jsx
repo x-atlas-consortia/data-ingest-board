@@ -1,20 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Col, Row } from 'antd';
-import Legend from "@/components/Visualizations/Legend";
+import React, { useState } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import StackedBar, { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
+import WithChart from './WithChart';
 
-function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis}) {
+function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }) {
     const [legend, setLegend] = useState({})
-    const [_, setRefresh] = useState(null)
-
-    useEffect(() =>{
-        setRefresh(new Date().getTime())
-    }, [data])
 
     return (
-        <Row>
-            <Col md={{span: 16, push: 6}}>
+        <WithChart legend={legend} data={data}>
                 <ChartProvider>
                     <StackedBar
                         reload={false}
@@ -25,11 +18,7 @@ function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis}) {
                         xAxis={xAxis}
                         chartId={chartId} />
                 </ChartProvider>
-            </Col>
-            <Col md={{span: 6, pull: 16}} >
-                <Legend legend={legend} sortLegend={false} />
-            </Col>
-        </Row>
+        </WithChart>
     )
 }
 

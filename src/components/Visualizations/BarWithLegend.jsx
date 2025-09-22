@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { Col, Row } from 'antd';
-import Legend from "@/components/Visualizations/Legend";
+import React, { useState } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import Bar from '@/components/Visualizations/Charts/Bar';
+import WithChart from './WithChart';
 
 function BarWithLegend({ chartId, data, yAxis }) {
     const [legend, setLegend] = useState({})
-    const [_, setRefresh] = useState(null)
-
-    useEffect(() =>{
-        setRefresh(new Date().getTime())
-    }, [data])
 
     return (
-        <Row>
-            <Col md={{span: 16, push: 6}}>
+        <WithChart legend={legend} data={data}>
                 <ChartProvider>
                     <Bar
                         yAxis={yAxis}
@@ -23,11 +16,7 @@ function BarWithLegend({ chartId, data, yAxis }) {
                         data={data}
                         chartId={chartId} />
                 </ChartProvider>
-            </Col>
-            <Col md={{span: 6, pull: 16}} className='pe-4'>
-                <Legend legend={legend} sortLegend={false} />
-            </Col>
-        </Row>
+        </WithChart>
     )
 }
 
