@@ -4,7 +4,7 @@ import Legend from "@/components/Visualizations/Legend";
 import { ChartProvider } from '@/context/ChartContext';
 import Line from '@/components/Visualizations/Charts/Line';
 
-function LineWithLegend({ chartId, data, groups, yAxis, xAxis }) {
+function LineWithLegend({ chartId, data, groups, yAxis, xAxis, colorGroups }) {
     const [legend, setLegend] = useState({})
     const [_, setRefresh] = useState(null)
 
@@ -17,6 +17,7 @@ function LineWithLegend({ chartId, data, groups, yAxis, xAxis }) {
             <Col md={{span: 18, push: 6}}>
                 <ChartProvider>
                     <Line
+                        colorGroups={colorGroups}
                         xAxis={xAxis}
                         yAxis={yAxis}
                         groups={groups}

@@ -2,6 +2,7 @@ import React from 'react'
 import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
+import THEME from "@/lib/helpers/theme";
 
 function Line({
     setLegend,
@@ -10,6 +11,7 @@ function Line({
     reload = true,
     groups = [],
     chartId = 'modal',
+    colorGroups = [],
     yAxis = {},
     xAxis = {}
 }) {
@@ -80,6 +82,27 @@ function Line({
         // A color scale: one color for each group
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
+        const groupColor = (d) => {
+            let pos = -1
+            let name = d.name
+            for (let i = 0; i < colorGroups.length; i++) {
+                if (d.name.includes(colorGroups[i])) {
+                    pos = (i + 1) * 20;
+                    name = name.replace(colorGroups[i], '')
+                    break;
+                }
+            }
+            let gColor = colorScale(name)
+            let color = gColor
+          
+            if (pos !== -1) {
+                gColor = THEME.lightenDarkenColor(gColor, pos)
+            }
+
+            return {color, gColor}
+
+        }
+
         const formatVal = (v) => yAxis.formatter ? yAxis.formatter(v) : v
 
         // Add X axis --> it is a date format
@@ -119,10 +142,11 @@ function Line({
             })
             .attr('pointer-events', 'none')
             .attr("stroke", d => {
-                const color = colorScale(d.name)
+
+                const {color, gColor} = groupColor(d)
                 const label = d.name
                 const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
-                colors.current[label] = { color, label, value: formatVal(sum) }
+                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal(sum) }
                 return color
             })
             .style("stroke-width", 4)
@@ -135,7 +159,10 @@ function Line({
             .selectAll("line--nodes")
             .data(dataReady)
             .join('g')
-            .style("fill", d => colorScale(d.name))
+            .style("fill", d => {
+                const {gColor} = groupColor(d)
+                return gColor
+            })
             // Second we need to enter in the 'values' part of this group
             .selectAll("line--dots")
             .data(d => d.values)
@@ -159,7 +186,10 @@ function Line({
             .attr("x", 12) // shift the text a bit more right
             .attr('class', (d) => `line--${d.name.replaceAll(':', '_')}`)
             .text(d => d.name)
-            .style("fill", d => colorScale(d.name))
+            .style("fill", d => {
+                const {gColor} = groupColor(d)
+                return gColor
+            })
             .style("font-size", 10)
             .style("opacity", 0)
 

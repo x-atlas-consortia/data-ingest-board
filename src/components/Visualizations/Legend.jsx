@@ -23,7 +23,7 @@ function Legend({legend, sortLegend = true, selectedValues = [], onItemClick}) {
             }
             res.push(
                 <li onClick={() => handleItemClick(l.label)} className={className} key={l.label}>
-                    <span className='c-legend__item__col' style={{backgroundColor: l.color}}></span>
+                    <span className='c-legend__item__col' style={{backgroundColor: l.color, ...(l.style || {})}}></span>
                     <span className='c-legend__item__label'>{l.label}</span>
                     <span className='c-legend__item__value'>({l.value})</span>
                 </li>
