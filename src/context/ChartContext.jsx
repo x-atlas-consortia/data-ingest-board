@@ -19,14 +19,14 @@ export const ChartProvider = ({ children }) => {
     const randomColor = () => {
         let colors = THEME.lightColors()
 
-        let color = THEME.lightenDarkenColor(colors[currentColorIndex].substr(1), currentColorPointer * -5);
+        let color = THEME.lightenDarkenColor(colors[currentColorIndex].slice(1), currentColorPointer * -5);
         currentColorPointer++
         currentColorIndex++
         if (currentColorPointer >= colors.length) {
             currentColorPointer = 1
             currentColorIndex = 0
         }
-        return { color: '#' + color }
+        return { color }
     }
 
     const appendTooltip = (id, chart = 'bar') => {

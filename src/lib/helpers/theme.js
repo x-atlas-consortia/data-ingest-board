@@ -6,13 +6,26 @@ const THEME = {
     colors: () => {
         return THEME.lightColors().concat(THEME.darkColors())
     },
-    lightenDarkenColor: (col, amt) => {
-        const num = parseInt(col, 16);
-        const r = (num >> 16) + amt;
-        const b = ((num >> 8) & 0x00FF) + amt;
-        const g = (num & 0x0000FF) + amt;
-        const newColor = g | (b << 8) | (r << 16);
-        return newColor.toString(16);
+    lightenDarkenColor: (hex, percent) => {
+        hex = hex.replace(/^#/, '');
+
+        // Convert hex to RGB
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+
+        // Calculate the amount to add to each component
+        const amt = Math.round(2.55 * percent);
+
+        // Increase each component and cap at 255
+        r = Math.min(255, r + amt);
+        g = Math.min(255, g + amt);
+        b = Math.min(255, b + amt);
+
+        // Convert RGB back to hex and ensure two digits
+        const toHex = (c) => ('0' + c.toString(16)).slice(-2);
+
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     },
     lightColors: () => {
         return [
@@ -53,11 +66,11 @@ const THEME = {
     },
     randomColor: () => {
         let hexTab = "5555556789ABCDEF";
-        let r = hexTab[ Math.floor( Math.random() * 16) ];
-        let g = hexTab[ Math.floor( Math.random() * 16) ];
-        let b = hexTab[ Math.floor( Math.random() * 16) ];
+        let r = hexTab[Math.floor(Math.random() * 16)];
+        let g = hexTab[Math.floor(Math.random() * 16)];
+        let b = hexTab[Math.floor(Math.random() * 16)];
         let color = "#" + r + g + b
-        return {color, light: THEME.isLightColor(color)};
+        return { color, light: THEME.isLightColor(color) };
     },
     cssProps: () => {
         const themeConfig = ENVS.theme()
@@ -76,10 +89,10 @@ const THEME = {
             THEME_CONFIG = ENVS.theme()
         }
         const statusColors = THEME_CONFIG.statusColors || {}
-        const colors =  statusColors[status]?.split(':')
+        const colors = statusColors[status]?.split(':')
         const bg = colors ? colors[0] : (statusColors.default || 'darkgrey')
         const text = colors && colors.length > 1 ? colors[1] : 'white'
-        return {bg, text}
+        return { bg, text }
     }
 }
 
