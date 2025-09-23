@@ -40,8 +40,8 @@ function Bar({
         let height = 500;
         const marginTop = 30;
         const marginRight = 0;
-        let marginBottom = 30;
-        let marginLeft = 80;
+        let marginBottom = 30 *1.5;
+        let marginLeft = 90 *1.2;
 
         if (showXLabels()) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
@@ -147,25 +147,35 @@ function Bar({
             .attr("transform", `translate(${marginLeft},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
             //.call(g => g.select(".domain").remove())
-            .call(g => g.append("text")
-                .attr("x", -marginLeft)
-                .attr("y", 10)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "start")
-                .text(yAxis.label || "↑ Frequency"))
-            .selectAll("text")
-            .style("font-size", "11px");
+            // .call(g => g.append("text")
+            //     .attr("x", -marginLeft)
+            //     .attr("y", 10)
+            //     .attr("fill", "currentColor")
+            //     .attr("text-anchor", "start")
+            //     .text(yAxis.label || "↑ Frequency"))
+            // .selectAll("text")
+            // .style("font-size", "11px")
 
-        if (xAxis.description) {
-           svg.append("g")
+        svg.append("g")
             .append("text")
-            .attr("class", "x label")
+            .attr("class", "y label")
             .attr("text-anchor", "end")
-            .attr("x", width / 1.5)
-            .attr("y", height - 2)
-            .text(xAxis.description) 
+            .attr("y", 0)
+            .attr("x", (height/3) * -1)
+            .attr("dy", ".74em")
+            .attr("transform", "rotate(-90)")
+            .text(yAxis.label || "↑ Frequency")
+            
+        if (xAxis.description) {
+            svg.append("g")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width / 1.5)
+                .attr("y", height - 2)
+                .text(xAxis.description)
         }
-        
+
         // Return the SVG element.
         return svg.node();
     }

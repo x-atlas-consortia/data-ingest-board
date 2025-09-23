@@ -277,7 +277,7 @@ const ESQ = {
                 size: 0,
                 aggs: {
                     buckets: {
-                        composite: ESQ.composite(['dataset_uuid']),
+                        composite: ESQ.composite(['dataset_uuid'], size),
                         aggs: {
                             totalBytes: ESQ.sum('bytes_transferred'),
                         }

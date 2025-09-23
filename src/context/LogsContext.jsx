@@ -19,6 +19,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [menuItems, setMenuItems] = useState([])
   const [selectedRows, setSelectedRows] = useState([])
   const [selectedRowObjects, setSelectedRowObjects] = useState([])
+  const [histogramDetails, setHistogramDetails] = useState({})
 
   const menuProps = () => {
     return {
@@ -200,7 +201,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     determineCalendarInterval,
     getAxisTick,
     getUrl,
-    getDatePart
+    getDatePart,
+    histogramDetails, setHistogramDetails
 
   }}>{children}</LogsContext.Provider>
 }
