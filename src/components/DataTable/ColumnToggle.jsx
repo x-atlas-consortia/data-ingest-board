@@ -11,7 +11,7 @@ const ColumnToggle = ({columns, handleSelectionChange, hiddenColumns}) => {
     }
     const handleChange = value => {
         handleSelectionChange(value)
-        console.log(`selected ${value}`);
+        Addon.log(`selected ${value}`);
     };
 
     return (<Space className='c-table__columnToggle' direction="vertical">
