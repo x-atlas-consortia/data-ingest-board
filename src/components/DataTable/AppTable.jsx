@@ -19,7 +19,7 @@ import AppContext from "@/context/AppContext";
  */
 function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, loading, menuProps}) {
     const {filters, page, pageSize, sortOrder} = useContext(RouterContext)
-    const {columns, TableBodyCell, TableHeaderCell, handleHiddenColumns, context, getHiddenColumns, handleTableChange, baseColumns, getColumnsDict} = useContext(AppTableContext)
+    const {columns, TableBodyCell, TableHeaderCell, dragIndex, handleHiddenColumns, hiddenColumns, context, getHiddenColumns, handleTableChange, baseColumns, getColumnsDict} = useContext(AppTableContext)
     const {selectedEntities} = useContext(AppContext)
     const [tableColumns, setTableColumns] = useState(columns)
 
@@ -32,7 +32,7 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
         }
         setTableColumns(result)
 
-    }, [filters, sortOrder])
+    }, [filters, sortOrder, hiddenColumns, dragIndex])
 
     return (
         <>
