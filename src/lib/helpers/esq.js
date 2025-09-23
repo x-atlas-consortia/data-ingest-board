@@ -2,6 +2,13 @@ import ENVS from "./envs"
 
 const ESQ = {
     dateRange: (from, to, field = 'timestamp') => {
+        const isoSuffix = 'T00:00:00'
+        if (typeof from === 'string') {
+            from = from + isoSuffix
+        }
+        if (to && typeof to === 'string') {
+            to = to + isoSuffix
+        }
         return {
             [field]: {
                 "gte": from,
@@ -172,6 +179,22 @@ const ESQ = {
                             }
                         ]
                     }
+                }
+            },
+            minDate: (dateField = 'timestamp') => {
+                return {
+                    "size": 1,
+                    "sort": [
+                        {
+                            [dateField]: {
+                                "order": "asc"
+                            }
+                        }
+                    ],
+                    "query": {
+                        "match_all": {}
+                    },
+                    _source: [dateField]
                 }
             },
             openSourceRepos: {

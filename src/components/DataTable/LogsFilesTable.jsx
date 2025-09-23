@@ -297,7 +297,7 @@ const LogsFilesTable = ({ }) => {
         setVizData({ ...vizData, barByTypes: byDatasetTypes.current })
     }, [selectedMenuItem])
 
-    const yAxis = { formatter: formatBytes, label: '↑ Bytes Downloaded' }
+    const yAxis = { formatter: formatBytes, label: 'Bytes Downloaded' }
 
     const logByDatasetID = eq(selectedMenuItem, 'byDatasetID')
     const logByType = eq(selectedMenuItem, 'byDatasetType')
@@ -305,7 +305,7 @@ const LogsFilesTable = ({ }) => {
     byTypeCols.shift()
 
     return (<>
-        {vizData.bar?.length > 0 && selectedRows.length == 0 && logByDatasetID && <BarWithLegend yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
+        {vizData.bar?.length > 0 && selectedRows.length == 0 && logByDatasetID && <BarWithLegend xAxis={{monoColor: '#4288b5', description: 'Bytes downloded per '}} yAxis={yAxis} data={vizData.bar} chartId={'files'} />}
         {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
         {vizData.barById?.length > 0 && !logByType && <BarWithLegend yAxis={yAxis} data={vizData.barById} chartId={'filesById'} />}
         {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />}

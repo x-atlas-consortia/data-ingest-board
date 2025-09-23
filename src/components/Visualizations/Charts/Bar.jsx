@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import {useContext, useEffect, useRef} from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext';
 
@@ -8,12 +8,11 @@ function Bar({
     column,
     filters,
     data = [],
-    colorMethods = {},
     chartId = 'modal',
     reload = true,
-    showXLabels = true,
     onSectionClick,
-    yAxis ={},
+    yAxis = {},
+    xAxis = {},
 }) {
 
     const hasLoaded = useRef(false)
@@ -29,7 +28,9 @@ function Bar({
         return label.length > 30 ? label.substring(0, 27) + "..." : label;
     }
 
-    const buildChart = ()  => {
+    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
+
+    const buildChart = () => {
         data.sort((a, b) => b.value - a.value)
         const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
         const names = groups.map((g) => g)
@@ -42,9 +43,9 @@ function Bar({
         let marginBottom = 30;
         let marginLeft = 80;
 
-        if (showXLabels) {
+        if (showXLabels()) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
-            const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden"); 
+            const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden");
             let maxLabelWidth = 0;
             names.forEach(name => {
                 const truncName = truncateLabel(name);
@@ -100,13 +101,14 @@ function Bar({
             .attr("x", (d) => x(d.label))
             .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.value) : d.value)
             .attr("fill", function (d) {
-                const color = colorMethods[column] ? colorMethods[column](d.label) : colorScale(d.label);
-                colors[d.label] = {color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label};
-                return color; })
+                const color = xAxis?.colorMethods && xAxis?.colorMethods[column] ? xAxis?.colorMethods[column](d.label) : (xAxis.monoColor ? xAxis.monoColor : colorScale(d.label));
+                colors[d.label] = { color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label };
+                return color;
+            })
             .attr("y", (d) => y(yStartPos))
             .attr("height", (d) => y(yStartPos) - y(yStartPos))
             .attr("width", x.bandwidth())
-            .on("click", function(event, d) {
+            .on("click", function (event, d) {
                 if (onSectionClick) {
                     onSectionClick(d.label)
                 }
@@ -117,8 +119,8 @@ function Bar({
             .transition()
             .duration(800)
             .attr("y", (d) => y(d.value))
-            .attr("height", function(d) { return y(yStartPos) - y(d.value); })
-            .delay(function(d,i){return(i*100)})
+            .attr("height", function (d) { return y(yStartPos) - y(d.value); })
+            .delay(function (d, i) { return (i * 100) })
 
         svg.selectAll("rect")
             .on("mouseover", toolTipHandlers(chartId).mouseover)
@@ -130,20 +132,20 @@ function Bar({
             .attr("transform", `translate(0,${height - marginBottom})`)
             .call(d3.axisBottom(x).tickSizeOuter(0))
             .selectAll("text")
-            .style("display", showXLabels ? "block" : "none")
+            .style("display", showXLabels() ? "block" : "none")
             .style("text-anchor", "end")
             .style("font-size", "11px")
             .attr("dx", "-0.8em")
             .attr("dy", "0.15em")
             .attr("transform", "rotate(-45)")
-            .text(function(d) {
+            .text(function (d) {
                 return truncateLabel(d);
             });
 
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
-            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) :  (y).toFixed()))
+            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
             //.call(g => g.select(".domain").remove())
             .call(g => g.append("text")
                 .attr("x", -marginLeft)
@@ -152,8 +154,18 @@ function Bar({
                 .attr("text-anchor", "start")
                 .text(yAxis.label || "↑ Frequency"))
             .selectAll("text")
-            .style("font-size", "11px"); 
+            .style("font-size", "11px");
 
+        if (xAxis.description) {
+           svg.append("g")
+            .append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width / 1.5)
+            .attr("y", height - 2)
+            .text(xAxis.description) 
+        }
+        
         // Return the SVG element.
         return svg.node();
     }

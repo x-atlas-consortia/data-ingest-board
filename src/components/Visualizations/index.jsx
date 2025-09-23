@@ -195,9 +195,8 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 filters={filters}
                                 column={c.key}
                                 chartId={i.toString()}
-                                colorMethods={colorMethods}
-                                showXLabels={false}
                                 reload={false}
+                                xAxis={{showLabels: false, colorMethods }}
                             />
                         )}
                         {hasInitViz && isPie(c.key) && (
@@ -205,7 +204,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 data={_data}
                                 column={c.key}
                                 chartId={i.toString()}
-                                colorMethods={colorMethods}
+                                xAxis={{ colorMethods }}
                             />
                         )}
                         <div className='text-center'>
@@ -311,9 +310,8 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     setLegend={setLegend}
                                                     data={chartData}
                                                     column={column}
-                                                    colorMethods={colorMethods}
-                                                    showXLabels={true}
                                                     onSectionClick={handleChartItemClick}
+                                                    xAxis={{showLabels: true, colorMethods }}
                                                 />
                                             )}
                                             {isPie(column) && hasMeaningfulData() && (
@@ -321,7 +319,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     setLegend={setLegend}
                                                     data={chartData}
                                                     column={column}
-                                                    colorMethods={colorMethods}
+                                                    xAxis={{ colorMethods }}
                                                     onSectionClick={handleChartItemClick}
                                                 />
                                             )}

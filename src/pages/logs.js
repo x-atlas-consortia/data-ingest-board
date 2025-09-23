@@ -14,8 +14,10 @@ import {
     DownloadOutlined,
     ApiOutlined,
     CodeOutlined,
+    CalendarOutlined
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
+import dayjs from 'dayjs';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -27,8 +29,17 @@ const Logs = () => {
 
     const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
 
-    const [fromDate, setFromDate] = useState(null)
-    const [toDate, setToDate] = useState(null)
+    const formatDate = (date, month, day) => {
+        let m = month ? month : date.getMonth()+1
+        if (m.toString().length == 1) {
+            m = '0'+m
+        }
+        return `${date.getFullYear()}-${m}-${day || date.getDate()}`
+    }
+
+    const currentDate = new Date()
+    const [fromDate, setFromDate] = useState(formatDate(currentDate, '01', '01'))
+    const [toDate, setToDate] = useState(formatDate(currentDate))
     const [cards, setCards] = useState(null)
     const [tabs, setTabs] = useState(null)
     const [activeSection, setActiveSection] = useState(null)
@@ -36,12 +47,28 @@ const Logs = () => {
     const [isBusy, setIsBusy] = useState(true)
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
-    const isoSuffix = 'T00:00:00'
+    
     const exportData = useRef({})
 
+    let _cards = {
+            openSourceRepos: {
+                title: 'Open Source Repositories',
+                icon: <CodeOutlined />
+            },
+            apiUsage: {
+                title: 'API Usage',
+                icon: <ApiOutlined />
+            },
+            fileDownloads: {
+                title: 'Data Transfers',
+                icon: <DownloadOutlined />,
+                dateField: 'download_date_time'
+            }
+        }
+
     const handleDateRange = (dates, dateStrings) => {
-        setFromDate(dateStrings[0] + isoSuffix)
-        setToDate(dateStrings[1] + isoSuffix)
+        setFromDate(dateStrings[0])
+        setToDate(dateStrings[1])
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
@@ -58,7 +85,7 @@ const Logs = () => {
         let totalBytes, datasetGroups, totalFiles = 0
         let agg
 
-        let indexData = data[key].data
+        let indexData = data[key]
         agg = indexData.aggregations
 
         if (isApi(key)) {
@@ -155,7 +182,7 @@ const Logs = () => {
         }
         if (isApi(key)) {
 
-            for (let d of data[key].data.aggregations.services.buckets) {
+            for (let d of data[key].aggregations.services.buckets) {
                 tableData.push(
                     {
                         name: d.key,
@@ -196,25 +223,20 @@ const Logs = () => {
     }
 
     const getCards = (data) => {
-        let _cards = {
-            openSourceRepos: {
-                title: 'Open Source Repositories',
-                icon: <CodeOutlined />
-            },
-            apiUsage: {
-                title: 'API Usage',
-                icon: <ApiOutlined />
-            },
-            fileDownloads: {
-                title: 'Data Transfers',
-                icon: <DownloadOutlined />
-            }
-        }
+        
 
         let comps = []
         let _tabs = []
+        let title, date
         for (let s in indicesSections.current) {
-            comps.push(<Card className='c-logCard' title={<>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}</span></>} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            let from = fromDate || (data[`${s}MinDate`] ? data[`${s}MinDate`].hits.hits[0].sort[0] : null)
+            if (eq(typeof from, 'number')) {
+                date = new Date(from)
+                from = formatDate(date)
+            }
+            let to = toDate || 'now'
+            title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
+            comps.push(<Card className='c-logCard' title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -239,17 +261,25 @@ const Logs = () => {
     const fetchData = async () => {
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
-        let q, url, headers
+        let q, url, headers, res
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
             if (!_data[s]) {
                 url = ENVS.urlFormat.search(`/${index}/search`)
                 q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
                 headers = getHeadersWith(globusToken).headers
-                _data[s] = await callService(url,
+                res = await callService(url,
                     headers,
                     q,
                     'POST')
+                _data[s] = res.data
+                
+                q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
+                res = await callService(url,
+                    headers,
+                    q,
+                    'POST')
+                _data[`${s}MinDate`] = res.data
 
             }
         }
@@ -311,6 +341,8 @@ const Logs = () => {
         }
     }
 
+    const dateFormat = 'YYYY-MM-DD';
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <AppSideNavBar exportHandler={exportHandler} />
@@ -324,7 +356,9 @@ const Logs = () => {
 
                         </Col>
                         <Col md={{ span: 8 }} className='d-md'>
-                            <RangePicker onChange={handleDateRange} />
+                            <RangePicker 
+                            defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
+                            onChange={handleDateRange} />
                         </Col>
 
                     </Row>
@@ -339,7 +373,9 @@ const Logs = () => {
                     }}
                 >
                     <Col md={{ span: 6 }} className='d-sm mx-2 mb-2'>
-                        <RangePicker onChange={handleDateRange} />
+                        <RangePicker 
+                        defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
+                        onChange={handleDateRange} />
                     </Col>
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs
