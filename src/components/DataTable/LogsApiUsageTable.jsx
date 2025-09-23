@@ -158,10 +158,10 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "↑ Requests", formatter: formatNum }
+    const yAxis = { label: "Requests", formatter: formatNum }
 
     return (<>
-        {vizData.bar?.length > 0 && (!fromDate || selectedRows.length == 0) && <BarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.bar} chartId={'apiUsage'} />}
+        {vizData.bar?.length > 0 && (!fromDate || selectedRows.length == 0) && <BarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum, description: 'Requests per' }} data={vizData.bar} chartId={'apiUsage'} />}
         {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}

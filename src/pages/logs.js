@@ -327,6 +327,7 @@ const Logs = () => {
                         d.datasetType = ''
                     }
                     delete d.entityId
+                    delete d._bytesByInterval
                 }
                 
             }

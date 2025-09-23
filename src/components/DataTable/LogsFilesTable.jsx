@@ -102,7 +102,24 @@ const LogsFilesTable = ({ }) => {
                 }
             }
 
+            let histogramOps = determineCalendarInterval()
             let uuid
+            let histogramBucketsExport, histogramBuckets
+
+            q = ESQ.indexQueries({ from: fromDate, to: toDate, list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
+            res = await callService(url, headers, q, 'POST')
+            
+            for (let d of res.data.aggregations.buckets.buckets) {
+                uuid = d.key
+                histogramBucketsExport = []
+                histogramBuckets = {}
+                for (let h of d.calendarHistogram.buckets) {
+                    histogramBucketsExport.push({label: h.key_as_string, value: h.totalBytes.value})
+                    histogramBuckets[h.key_as_string] = h.totalBytes.value
+                }
+                entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _bytesByInterval: histogramBuckets}
+            }
+
             let _tableData = []
             for (let d of _data.buckets) {
                 uuid = d.key['dataset_uuid.keyword']
@@ -148,6 +165,7 @@ const LogsFilesTable = ({ }) => {
             width: '33%',
             sorter: (a, b) => a.datasetType?.localeCompare(b?.datasetType),
         },
+        Table.EXPAND_COLUMN,
         {
             title: 'Bytes Downloaded',
             dataIndex: 'bytes',
@@ -270,7 +288,6 @@ const LogsFilesTable = ({ }) => {
     const rowSelection = {
         selectedRowKeys: selectedRows,
         onChange: (rowKeys, rows) => {
-            //console.log(`selectedRowKeys: ${rowKeys}`, 'selectedRows: ', rows);
             setSelectedRows(rowKeys)
             setSelectedRowObjects(rows)
         },
@@ -319,6 +336,23 @@ const LogsFilesTable = ({ }) => {
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
+                    expandable: {
+                        expandedRowRender: row => {
+                            Addon.log('Expandable', {data: row._bytesByInterval})
+                            let cols = []
+                            for (let i of Object.keys(row._bytesByInterval)) {
+                                cols.push({
+                                title: i,
+                                dataIndex: i,
+                                key: i,
+                                render: (v, r) => {
+                                    return <span>{formatBytes(v)}</span>
+                                }
+                            },)
+                            }
+                            return <Table pagination={false}  rowKey={'uuid'} columns={cols} dataSource={[{...row._bytesByInterval, uuid: row.uuid}]} />
+                        },
+                    },
                     rowKey: 'uuid',
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,

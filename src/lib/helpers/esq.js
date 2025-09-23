@@ -299,6 +299,7 @@ const ESQ = {
                 aggs: {
                     "buckets": {
                         "terms": {
+                            size: list.length,
                             "field": "dataset_uuid.keyword"
                         },
                         aggs: {
