@@ -196,6 +196,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 column={c.key}
                                 chartId={i.toString()}
                                 reload={false}
+                                yAxis={{showLabels: false}}
                                 xAxis={{showLabels: false, colorMethods }}
                             />
                         )}

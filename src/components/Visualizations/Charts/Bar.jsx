@@ -30,6 +30,8 @@ function Bar({
 
     const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
 
+    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
+
     const buildChart = () => {
         data.sort((a, b) => b.value - a.value)
         const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
@@ -92,6 +94,17 @@ function Bar({
             .attr("viewBox", [0, 0, width, height])
             .attr("style", "max-width: 100%; height: auto;");
 
+        svg.selectAll(".y-grid")
+            .data(y.ticks())
+            .enter().append("line")
+            .attr("class", "y-grid")
+            .attr("x1", marginLeft)
+            .attr("y1", d => Math.ceil(y(d)))
+            .attr("x2", width - marginRight)
+            .attr("y2", d => Math.ceil(y(d)))
+            .style("stroke", "#eee") // Light gray
+            .style("stroke-width", "1px")
+
         // Add a rect for each bar.
         svg.append("g")
             .selectAll()
@@ -146,34 +159,28 @@ function Bar({
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
-            //.call(g => g.select(".domain").remove())
-            // .call(g => g.append("text")
-            //     .attr("x", -marginLeft)
-            //     .attr("y", 10)
-            //     .attr("fill", "currentColor")
-            //     .attr("text-anchor", "start")
-            //     .text(yAxis.label || "↑ Frequency"))
-            // .selectAll("text")
-            // .style("font-size", "11px")
 
-        svg.append("g")
+        if (showYLabels()) {
+            svg.append("g")
             .append("text")
             .attr("class", "y label")
             .attr("text-anchor", "end")
-            .attr("y", 0)
+            .attr("y",  yAxis.labelPadding || 40)
             .attr("x", (height/3) * -1)
             .attr("dy", ".74em")
             .attr("transform", "rotate(-90)")
-            .text(yAxis.label || "↑ Frequency")
+            .text(yAxis.label || "Frequency")
+        }
+        
             
-        if (xAxis.description) {
+        if (xAxis.label && showXLabels()) {
             svg.append("g")
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "end")
                 .attr("x", width / 1.5)
                 .attr("y", height - 2)
-                .text(xAxis.description)
+                .text(xAxis.label)
         }
 
         // Return the SVG element.

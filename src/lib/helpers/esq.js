@@ -6,7 +6,7 @@ const ESQ = {
         if (typeof from === 'string') {
             from = from + isoSuffix
         }
-        if (to && typeof to === 'string') {
+        if (to && typeof to === 'string' && to !== 'now') {
             to = to + isoSuffix
         }
         return {

@@ -132,6 +132,17 @@ function Line({
         const line = d3.line()
             .x(d => x(d.xValue))
             .y(d => y(d.yValue))
+        
+        g.selectAll(".y-grid")
+            .data(y.ticks())
+            .enter().append("line")
+            .attr("class", "y-grid")
+            .attr("x1", 0)
+            .attr("y1", d => Math.ceil(y(d)))
+            .attr("x2", width)
+            .attr("y2", d => Math.ceil(y(d)))
+            .style("stroke", "#eee") // Light gray
+            .style("stroke-width", "1px")
 
 
         const paths = g.selectAll("line--lines")

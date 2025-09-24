@@ -17,7 +17,6 @@ const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
     const xAxis = useRef({})
-
     const entities = useRef({})
     const datasetGroups = useRef([])
     const byDatasetTypes = useRef([])
@@ -34,6 +33,7 @@ const LogsFilesTable = ({ }) => {
         updateTableData,
         getMenuItemClassName,
         fromDate, toDate,
+        getFromDate, getToDate,
         vizData, setVizData,
         determineCalendarInterval,
         getAxisTick,
@@ -64,7 +64,7 @@ const LogsFilesTable = ({ }) => {
 
         let url = getUrl()
         if (!url) return
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
+        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {
@@ -106,18 +106,21 @@ const LogsFilesTable = ({ }) => {
             let uuid
             let histogramBucketsExport, histogramBuckets
 
-            q = ESQ.indexQueries({ from: fromDate, to: toDate, list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
+            ////TODO write method to always get defaults
+            q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
             res = await callService(url, headers, q, 'POST')
             
-            for (let d of res.data.aggregations.buckets.buckets) {
-                uuid = d.key
-                histogramBucketsExport = []
-                histogramBuckets = {}
-                for (let h of d.calendarHistogram.buckets) {
-                    histogramBucketsExport.push({label: h.key_as_string, value: h.totalBytes.value})
-                    histogramBuckets[h.key_as_string] = h.totalBytes.value
+            if (res.status == 200) {
+                for (let d of res.data.aggregations.buckets.buckets) {
+                    uuid = d.key
+                    histogramBucketsExport = []
+                    histogramBuckets = {}
+                    for (let h of d.calendarHistogram.buckets) {
+                        histogramBucketsExport.push({label: h.key_as_string, value: h.totalBytes.value})
+                        histogramBuckets[h.key_as_string] = h.totalBytes.value
+                    }
+                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _bytesByInterval: histogramBuckets}
                 }
-                entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _bytesByInterval: histogramBuckets}
             }
 
             let _tableData = []
@@ -214,14 +217,14 @@ const LogsFilesTable = ({ }) => {
 
 
     const buildBarChart = async () => {
-        if (!fromDate && !toDate) return
+      
         let url = getUrl()
         if (!url) return
 
         let histogramOps = determineCalendarInterval()
         setHistogramDetails(histogramOps)
 
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate })[`${indexKey}Histogram`](histogramOps)
+        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate() })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         // Get page for grouped Ids
@@ -318,7 +321,7 @@ const LogsFilesTable = ({ }) => {
         setVizData({ ...vizData, barByTypes: byDatasetTypes.current })
     }, [selectedMenuItem])
 
-    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded' }
+    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1 }
 
     const logByDatasetID = eq(selectedMenuItem, 'byDatasetID')
     const logByType = eq(selectedMenuItem, 'byDatasetType')
@@ -326,7 +329,7 @@ const LogsFilesTable = ({ }) => {
     byTypeCols.shift()
 
     return (<>
-        {vizData.bar?.length > 0 && selectedRows.length == 0 && logByDatasetID && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', description: `Bytes downloded per ${histogramDetails.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
+        {vizData.bar?.length > 0 && logByDatasetID && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
         {/* {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
         {vizData.barById?.length > 0 && !logByType && <BarWithLegend yAxis={yAxis} data={vizData.barById} chartId={'filesById'} />}
         {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />} */}

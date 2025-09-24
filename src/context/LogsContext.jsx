@@ -7,7 +7,7 @@ import ENVS from "@/lib/helpers/envs";
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, defaultDates }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -43,13 +43,15 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
 
   const getFromDate = () => {
     if (fromDate) return fromDate
+    if (defaultDates?.from) return defaultDates?.from
     let t = new Date()
     t.setDate(t.getDate() - 1)
     return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`
   }
+
   const getToDate = () => {
     if (toDate) return toDate
-    return 'now'
+    return defaultDates?.to || 'now'
   }
 
   useEffect(() => {
@@ -124,7 +126,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   const determineCalendarInterval = () => {
-    let diff = getDateDifference(new Date(fromDate), new Date(toDate));
+    let to = getToDate()
+    to = to === 'now' ? new Date() : new Date(to)
+    let diff = getDateDifference(new Date(getFromDate()), to);
     if (diff.years > 1) return { interval: 'year', format: 'yyyy' }
     if (diff.months >= 1) return { interval: 'month', format: 'yyyy-MM' }
     if (diff.weeks > 1) return { interval: 'week', format: 'yyyy-MM-dd' }

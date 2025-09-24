@@ -172,6 +172,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     exportData={exportData}
+                    defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
@@ -196,6 +197,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     exportData={exportData}
+                    defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
@@ -211,6 +213,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'byDatasetID'}
                     indexKey={key}
                     exportData={exportData}
+                    defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
@@ -235,6 +238,7 @@ const Logs = () => {
                 from = formatDate(date)
             }
             let to = toDate || 'now'
+            _cards[s].dates = {from, to}
             title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
             comps.push(<Card className='c-logCard' title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
