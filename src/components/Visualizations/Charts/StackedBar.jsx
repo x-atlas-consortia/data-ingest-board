@@ -44,12 +44,16 @@ function StackedBar({
         return sum
     }
 
+    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
+
+    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
+
     const buildChart = () => {
 
         const dyWidth = Math.max(460, data.length * 150)
         const margin = { top: 10, right: 30, bottom: 20, left: 50 },
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 300 - margin.top - margin.bottom;
+            height = 420 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 3
         const marginX = margin.left + margin.right
 
@@ -97,19 +101,45 @@ function StackedBar({
             .range([height, 0]);
         g.append("g")
             .call(d3.axisLeft(y))
-            .call(g => g.append("text")
-                .attr("x", -margin.left)
-                .attr("y", -margin.top*3)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "start")
-                .text(yAxis.label || "↑ Frequency"))
-            .selectAll("text")
-            .style("font-size", "11px"); 
+            
+        if (showYLabels()) {
+            svg.append("g")
+            .append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("y",  yAxis.labelPadding || 0)
+            .attr("x", (height/2) * -1)
+            .attr("dy", ".74em")
+            .attr("transform", "rotate(-90)")
+            .text(yAxis.label || "Frequency")
+        }
+        
+            
+        if (xAxis.label && showXLabels()) {
+            svg.append("g")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width / 1.5)
+                .attr("y", height - 2)
+                .text(xAxis.label)
+        }
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
         const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
+
+        g.selectAll(".y-grid")
+            .data(y.ticks())
+            .enter().append("line")
+            .attr("class", "y-grid")
+            .attr("x1", 0)
+            .attr("y1", d => Math.ceil(y(d)))
+            .attr("x2", width)
+            .attr("y2", d => Math.ceil(y(d)))
+            .style("stroke", "#eee") // Light gray
+            .style("stroke-width", "1px")
 
         // Show the bars
         g.append("g")

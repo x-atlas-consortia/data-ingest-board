@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
-
+import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
@@ -27,7 +27,8 @@ const LogsReposTable = ({ }) => {
         getUrl,
         determineCalendarInterval,
         getAxisTick,
-        getDatePart
+        getDatePart,
+        histogramDetails, setHistogramDetails
 
     } = useContext(LogsContext)
 
@@ -42,7 +43,7 @@ const LogsReposTable = ({ }) => {
 
         let url = getUrl()
         if (!url) return
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, collapse: true, size: dataSize })[`${indexKey}Table`]
+        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), collapse: true, size: dataSize })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {
@@ -59,41 +60,83 @@ const LogsReposTable = ({ }) => {
 
             /// 
 
-            let repo, types, r
+            let repo, types
             let repos = {}
             let list = _data?.buckets
             let _tableData = []
+            let _histogram = {}
+            let histogramOps = determineCalendarInterval()
+
+            const valuesObj = (t) => {
+                return { [`unique${t.key.upCaseFirst()}s`]: t.unique?.value, [`${t.key}s`]: t.count?.value }
+            }
 
             if (list.length) {
-
+                let i = 0
                 for (let d of list) {
                     types = d['type.keyword'].buckets
                     repo = d.key['repository.keyword']
                     repos[repo] = {}
                     for (let t of types) {
-                        repos[repo] = { ...repos[repo], [t.key]: { unique: t.unique.value, count: t.count.value } }
+                        repos[repo] = { ...repos[repo], ...valuesObj(t) }
                     }
 
-                    r = repos[repo]
-
-                    _tableData.push(
-                        {
-                            group: repo,
-                            views: r.view?.count || 0,
-                            uniqueViews: r.view?.unique || 0,
-                            clones: r.clone?.count || 0,
-                            uniqueClones: r.clone?.unique || 0
-
-                        })
-
+                    _tableData.push({
+                        group: repo,
+                        _countByInterval: {},
+                        ...repos[repo]
+                    })
+                    repos[repo] = { ...repos[repo], i }
+                    i++
                 }
+
+                Addon.log(`${indexKey}.Table`, { data: _tableData })
+
+                // Get per repo histogram for table
+                q = ESQ.indexQueries({ from: fromDate, to: toDate, list: Object.keys(repos) })[`${indexKey}RepoHistogram`](histogramOps)
+                res = await callService(url, headers, q, 'POST')
+                if (res.status == 200) {
+
+                    let _data = res.data?.aggregations?.calendarHistogram?.buckets
+                    Addon.log(`${indexKey}.RepoHistogram`, { data: _data })
+
+                    for (let d of _data) {
+                        _histogram = {}
+                        for (let t of d['type.keyword'].buckets) {
+
+                            for (let r of t['repository.keyword'].buckets) {
+                                repo = r.key
+                                _histogram[repo] = { ...(_histogram[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
+                            }
+                        }
+                        for (let r in _histogram) {
+                            _tableData[repos[r].i]._countByInterval[d.key_as_string] = _histogram[r]
+                        }
+
+                    }
+                }
+
+                // Get data for stackedBar
+                q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}Histogram`](histogramOps)
+                res = await callService(url, headers, q, 'POST')
+
+                if (res.status == 200) {
+                    _histogram = {}
+                    let dKey
+                    for (let d of res.data.aggregations?.calendarHistogram?.buckets) {
+                        dKey = d.key_as_string
+                        _histogram[dKey] = { group: dKey }
+                        for (let t of d['type.keyword'].buckets) {
+                            _histogram[dKey] = { ..._histogram[dKey], ...valuesObj(t) }
+                        }
+                    }
+                    setVizData({ ...vizData, stackedBar: Object.values(_histogram) })
+                }
+                // end get data for stackedBar
             }
 
             /// END
-
             updateTableData(includePrevData, _tableData)
-
-
         } else {
             setHasMoreData(false)
         }
@@ -158,71 +201,41 @@ const LogsReposTable = ({ }) => {
         }
     }, [])
 
-    const buildLineChart = async () => {
-        if (!fromDate && !toDate) return
-        let url = getUrl()
-        if (!url) return
+    const buildLineChart = (_data = []) => {
 
         let histogramOps = determineCalendarInterval()
-        
-
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}Histogram`](histogramOps)
-        let headers = getHeadersWith(globusToken).headers
-
-        // Get page for grouped Ids
-        let res = await callService(url, headers, q, 'POST')
         let _vizData = []
-        if (res.status == 200) {
-            let _data = res.data?.aggregations?.calendarHistogram?.buckets
-            let buckets = {}
+        let buckets = {}
 
-            if (_data?.length) {
-                const prevDate = new Date(_data[0].key_as_string + getDatePart(histogramOps))
+        let _repos = new Set()
+        let cKey
+        let i = 0
+        for (let d in _data._countByInterval) {
+            buckets[d] = buckets[d] || { xValue: d }
+            for (let t in _data._countByInterval[d]) {
+                cKey = `${_data.group}:${t}`
+                _repos.add(cKey)
+                buckets[d][cKey] = _data._countByInterval[d][t]
+            }
+
+            if (i == 0) {
+                const prevDate = new Date(d + getDatePart(histogramOps))
                 xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
             }
-
-            let _repos = new Set()
-            let cKey
-            for (let d of _data) {
-                buckets[d.key_as_string] = buckets[d.key_as_string] || { xValue: d.key_as_string }
-                for (let t of d['type.keyword'].buckets) {
-                    for (let r of t['repository.keyword'].buckets) {
-                        cKey = `${r.key}:${t.key}`
-                        _repos.add(cKey)
-                        buckets[d.key_as_string][cKey] = r.count.value
-                    }
-
-                }
-            }
-            _vizData = Object.values(buckets)
-
-            if (_vizData.length) {
-                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
-                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
-            }
-
-
-            repos.current = Array.from(_repos)
-            Addon.log(`${indexKey}.buildLineChart`, {data: _vizData})
-
-            setVizData({ ...vizData, line: _vizData })
+            i++
         }
+        _vizData = Object.values(buckets)
+
+        if (_vizData.length) {
+            const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
+            xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
+        }
+
+        repos.current = Array.from(_repos)
+        Addon.log(`${indexKey}.buildLineChart`, { data: _vizData })
+
+       return _vizData
     }
-
-    useEffect(() => {
-        if (selectedRows.length > 0 && selectedRows.length < 10) {
-            if (!fromDate) {
-                setVizData({ ...vizData, stackedBar: selectedRowObjects })
-            } else {
-                buildLineChart()
-            }
-        } else {
-            if (vizData.line?.length) {
-               setVizData({ ...vizData, line: [] }) 
-            }
-        }
-    }, [selectedRows, fromDate, toDate])
-
 
     const rowSelection = {
         selectedRowKeys: selectedRows,
@@ -234,19 +247,32 @@ const LogsReposTable = ({ }) => {
 
     const yAxis = { label: "Views/Clones" }
 
+    const formatAnalytics = (v) => {
+        return JSON.stringify(v)
+    }
+
+    const repoLineChart = (row) => {
+        const _vizData = buildLineChart(row)
+        //colorGroups={['views', 'clones', 'uniqueClones', 'uniqueViews']}
+        return <>
+            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current}  yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+        </>
+    }
+
     return (<>
         {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.line?.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current} colorGroups={['view', 'clone']} yAxis={yAxis} data={vizData.line} chartId={'reposHistogram'} />}
+
 
         <SearchFilterTable data={tableData} columns={cols}
-                formatters={{bytes: formatNum}}
-                tableProps={{
-                    rowKey: 'group',
-                    rowSelection: { type: 'checkbox', ...rowSelection },
-                    pagination: false,
-                    loading: isBusy,
-                    scroll: { y: 'calc(100vh - 200px)' }
-                }} />
+            formatters={{ bytes: formatNum }}
+            tableProps={{
+                ...TABLE.expandableHistogram('group', formatAnalytics, repoLineChart),
+                rowKey: 'group',
+                rowSelection: { type: 'checkbox', ...rowSelection },
+                pagination: false,
+                loading: isBusy,
+                scroll: { y: 'calc(100vh - 200px)' }
+            }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More
         </Button>}

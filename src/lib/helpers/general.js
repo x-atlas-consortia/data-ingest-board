@@ -33,7 +33,7 @@ export function toDateString(timestamp) {
     return date.toUTCString()
 }
 
-export const formatNum = (num) => new Intl.NumberFormat().format(num)
+export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberFormat().format(num) : 0
 
 export const formatBytes = (bytes, decimals = 2) => {
         if (!+bytes) return '0 Bytes'
@@ -75,6 +75,13 @@ String.prototype.format = function() {
             : match
             ;
     });
+};
+
+String.prototype.upCaseFirst = function() {
+    if (this.length === 0) {
+        return "";
+    }
+    return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
 export const getUBKGName = (o) => {

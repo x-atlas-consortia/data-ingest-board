@@ -646,11 +646,10 @@ const TABLE = {
             })
         }
     },
-    expandableHistogram: (rowKey, formatter) => {
+    expandableHistogram: (rowKey, formatter, otherComponent) => {
         return {
             expandable: {
                 expandedRowRender: row => {
-                    Addon.log('Expandable', {data: row._countByInterval})
                     let cols = []
                     for (let i of Object.keys(row._countByInterval)) {
                         cols.push({
@@ -662,7 +661,10 @@ const TABLE = {
                         }
                     },)
                     }
-                    return <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row._countByInterval, [rowKey]: row[rowKey]}]} />
+                    return <>
+                        <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row._countByInterval, [rowKey]: row[rowKey]}]} />
+                        {otherComponent && <>{otherComponent(row)}</>}
+                    </>
                 },
             }
         }

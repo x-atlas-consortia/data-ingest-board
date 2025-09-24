@@ -342,7 +342,7 @@ const Logs = () => {
                 cols.unshift(c)
             }
 
-            TABLE.generateCSVFile(_data, indexKey + '.csv', cols)
+            TABLE.generateCSVFile(TABLE.flattenDataForCSV(_data), indexKey + '.csv', cols)
         }
     }
 

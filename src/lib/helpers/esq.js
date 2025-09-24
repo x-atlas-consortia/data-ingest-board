@@ -108,10 +108,11 @@ const ESQ = {
     ownerFilter: (from, to) => {
         return ESQ.filter(from, to, 'owner', [`${ENVS.appContext().toLowerCase()}consortium`])
     },
-    reposAggs: (field = 'type') => {
+    reposAggs: (field = 'type', size = 20) => {
         return {
             [`${field}.keyword`]: {
                 terms: {
+                    size,
                     field: `${field}.keyword`
                 },
                 aggs: {
@@ -150,7 +151,23 @@ const ESQ = {
                     terms: {
                         field: "type.keyword"
                     },
-                    aggs: ESQ.reposAggs('repository')
+                    aggs: {
+                        count: ESQ.sum('count'),
+                        unique: ESQ.sum('uniques')
+                    }
+                }
+            }
+        }
+    },
+    reposRepoCalendarHistogram: (ops, size) => {
+        return {
+            ...ESQ.calendarHistogram(ops),
+            aggs: {
+                'type.keyword': {
+                    terms: {
+                        field: "type.keyword"
+                    },
+                    aggs: ESQ.reposAggs('repository', size)
                 }
             }
         }
@@ -237,6 +254,21 @@ const ESQ = {
                     size: 0,
                     aggs: {
                         calendarHistogram: ESQ.reposCalendarHistogram(ops)
+                    }
+                }
+            },
+            openSourceReposRepoHistogram: (ops) => {
+                let query = ESQ.ownerFilter(from, to)
+                query.bool.filter.push({
+                    terms: {
+                        ['repository.keyword']: list
+                    }
+                })
+                return {
+                    query,
+                    size: 0,
+                    aggs: {
+                        calendarHistogram: ESQ.reposRepoCalendarHistogram(ops, list.length)
                     }
                 }
             },
