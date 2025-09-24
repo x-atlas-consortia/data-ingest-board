@@ -331,8 +331,8 @@ const Logs = () => {
                         d.datasetType = ''
                     }
                     delete d.entityId
-                    delete d._bytesByInterval
                 }
+                delete d._countByInterval
                 
             }
             cols = Object.keys(_data[0])

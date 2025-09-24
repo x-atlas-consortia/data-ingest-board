@@ -106,7 +106,7 @@ const LogsFilesTable = ({ }) => {
             let uuid
             let histogramBucketsExport, histogramBuckets
 
-            ////TODO write method to always get defaults
+           
             q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
             res = await callService(url, headers, q, 'POST')
             
@@ -119,7 +119,7 @@ const LogsFilesTable = ({ }) => {
                         histogramBucketsExport.push({label: h.key_as_string, value: h.totalBytes.value})
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
-                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _bytesByInterval: histogramBuckets}
+                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _countByInterval: histogramBuckets}
                 }
             }
 
@@ -178,7 +178,7 @@ const LogsFilesTable = ({ }) => {
             render: (v, r) => {
                 return <Popover content={<span>{formatNum(r.files)} files downloaded</span>} placement={'right'}>{formatBytes(v)}</Popover>
             }
-            //bar chart by month of total downloaded bytes
+            
         }
     ]
 
@@ -339,23 +339,7 @@ const LogsFilesTable = ({ }) => {
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
-                    expandable: {
-                        expandedRowRender: row => {
-                            Addon.log('Expandable', {data: row._bytesByInterval})
-                            let cols = []
-                            for (let i of Object.keys(row._bytesByInterval)) {
-                                cols.push({
-                                title: i,
-                                dataIndex: i,
-                                key: i,
-                                render: (v, r) => {
-                                    return <span>{formatBytes(v)}</span>
-                                }
-                            },)
-                            }
-                            return <Table pagination={false}  rowKey={'uuid'} columns={cols} dataSource={[{...row._bytesByInterval, uuid: row.uuid}]} />
-                        },
-                    },
+                    ...TABLE.expandableHistogram('uuid', formatBytes),
                     rowKey: 'uuid',
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,

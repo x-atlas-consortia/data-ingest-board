@@ -7,7 +7,7 @@ import {
     FileTextOutlined,
     ExportOutlined, BugOutlined
 } from "@ant-design/icons";
-import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
+import {Button, Dropdown, Space, Tooltip, Tag, Table} from "antd";
 import React from "react";
 import {
     autoBlobDownloader,
@@ -17,7 +17,7 @@ import {
     getUBKGName,
     some,
     storageKey,
-    toDateString
+    toDateString,
 } from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
@@ -644,6 +644,27 @@ const TABLE = {
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),
             })
+        }
+    },
+    expandableHistogram: (rowKey, formatter) => {
+        return {
+            expandable: {
+                expandedRowRender: row => {
+                    Addon.log('Expandable', {data: row._countByInterval})
+                    let cols = []
+                    for (let i of Object.keys(row._countByInterval)) {
+                        cols.push({
+                        title: i,
+                        dataIndex: i,
+                        key: i,
+                        render: (v, r) => {
+                            return <span>{formatter(v)}</span>
+                        }
+                    },)
+                    }
+                    return <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row._countByInterval, [rowKey]: row[rowKey]}]} />
+                },
+            }
         }
     }
 }
