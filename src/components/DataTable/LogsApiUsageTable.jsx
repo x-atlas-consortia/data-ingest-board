@@ -83,9 +83,10 @@ const LogsApiUsageTable = ({ data }) => {
     }, [fromDate, toDate])
 
 
-    const _configureDate = (timestamp, histogramOps) => {
+    const _configureDate = (timestamp, histogramOps, asDate= true) => {
         const d = new Date(timestamp)
-        return new Date(`${d.getFullYear()}-${d.getMonth()+1}${getDatePart(histogramOps)}`)
+        const str = `${d.getFullYear()}-${(d.getMonth()+1)}${getDatePart(histogramOps)}`
+        return asDate ? new Date(str) : str
     }
 
 
@@ -95,7 +96,10 @@ const LogsApiUsageTable = ({ data }) => {
 
         let histogramOps = determineCalendarInterval()
 
-        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
+        // TODO not use timestamp on update of api_usage, also in ESQ
+        let _to = getToDate()
+        _to = _to == 'now' ? new Date().getTime() : _to
+        let q = ESQ.indexQueries({ from: getFromDate(), to: _to, list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         let res = await callService(url, headers, q, 'POST')
@@ -117,31 +121,34 @@ const LogsApiUsageTable = ({ data }) => {
             }
             let _tableData = Array.from(data)
 
+
             let _apis = new Set()
-            let apiName
+            let apiName, bKey
             for (let d of _data) {
-                buckets[d.key_as_string] = buckets[d.key_as_string] || { xValue: d.key_as_string }
+                bKey = _configureDate(d.key, histogramOps)
+                bKey = getAxisTick(bKey, histogramOps, 0)
+                buckets[bKey] = buckets[bKey] || { xValue: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
                     _apis.add(apiName)
-                    buckets[d.key_as_string][apiName] = t.doc_count
-                    _tableData[apiListIndexes[apiName]]._countByInterval[d.key_as_string] = t.doc_count
+                    buckets[bKey][apiName] = t.doc_count
+                    _tableData[apiListIndexes[apiName]]._countByInterval[bKey] = t.doc_count
                 }
             }
 
             _vizData = Object.values(buckets)
 
             if (_vizData.length) {
-                // const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
-                // xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
+                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
+                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
             }
-
 
             apis.current = Array.from(_apis)
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
 
             setVizData({ ...vizData, line: _vizData })
             updateTableData(includePrevData, _tableData)
+            setHistogramDetails(histogramOps)
         }
     }
 
@@ -159,7 +166,7 @@ const LogsApiUsageTable = ({ data }) => {
    
     return (<>
 
-        {vizData.line?.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.line?.length > 0 && <LineWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

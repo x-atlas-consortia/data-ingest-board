@@ -20,6 +20,7 @@ const LogsReposTable = ({ }) => {
         vizData, setVizData,
         updateTableData,
         fromDate, toDate,
+        getFromDate, getToDate,
         indexKey,
         selectedRows, setSelectedRows,
         selectedRowObjects, setSelectedRowObjects,

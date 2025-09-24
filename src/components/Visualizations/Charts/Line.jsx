@@ -27,12 +27,16 @@ function Line({
         appendTooltip,
     } = useContext(ChartContext)
 
+    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
+
+    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
+
     const buildChart = () => {
 
         const dyWidth = Math.max(460, data.length * 150)
         const margin = { top: 10, right: 30, bottom: 30, left: 50 },
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 300 - margin.top - margin.bottom;
+            height = 430 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 3
         const marginX = (margin.left + margin.right) * 3
 
@@ -119,14 +123,29 @@ function Line({
             .range([height, 0]);
         g.append("g")
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
-            .call(g => g.append("text")
-                .attr("x", -margin.left)
-                .attr("y", -margin.top * 3)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "start")
-                .text(yAxis.label || "↑ Frequency"))
-            .selectAll("text")
-            .style("font-size", "11px");
+        
+        if (showYLabels()) {
+            svg.append("g")
+            .append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("y",  yAxis.labelPadding || 0)
+            .attr("x", (height/1.7) * -1)
+            .attr("dy", ".74em")
+            .attr("transform", "rotate(-90)")
+            .text(yAxis.label || "Frequency")
+        }
+        
+            
+        if (xAxis.label && showXLabels()) {
+            svg.append("g")
+                .append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width / 1.3)
+                .attr("y", height * 1.3)
+                .text(xAxis.label)
+        }
 
         // Add the lines
         const line = d3.line()

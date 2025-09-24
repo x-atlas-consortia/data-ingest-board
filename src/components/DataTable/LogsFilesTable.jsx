@@ -329,7 +329,7 @@ const LogsFilesTable = ({ }) => {
     byTypeCols.shift()
 
     return (<>
-        {vizData.bar?.length > 0 && logByDatasetID && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
+        {vizData.bar?.length > 0 && logByDatasetID && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
         {/* {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
         {vizData.barById?.length > 0 && !logByType && <BarWithLegend yAxis={yAxis} data={vizData.barById} chartId={'filesById'} />}
         {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />} */}

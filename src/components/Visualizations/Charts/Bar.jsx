@@ -33,17 +33,19 @@ function Bar({
     const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
 
     const buildChart = () => {
-        data.sort((a, b) => b.value - a.value)
-        const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
-        const names = groups.map((g) => g)
-
+        let names 
+        if (xAxis.noSortLabels) {
+            names = data.map((d) => d.label)
+        } else {
+            data.sort((a, b) => b.value - a.value)
+            const groups = d3.groupSort(data, ([d]) => -d.value, (d) => d.label);
+            names = groups.map((g) => g)
+        }
+    
         // Declare the chart dimensions and margins.
         const width = 928;
         let height = 500;
-        const marginTop = 30;
-        const marginRight = 0;
-        let marginBottom = 30 *1.5;
-        let marginLeft = 90 *1.2;
+        const margin = {top: 30, right: 0, bottom: 30 * 1.5, left: 90 * 1.2}
 
         if (showXLabels()) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
@@ -61,14 +63,14 @@ function Bar({
             tempSvg.remove();
 
             // Adjust the bottom margin and height to not cut off the labels.
-            marginBottom = marginBottom + maxLabelWidth * Math.sin(Math.PI / 4);
+            margin.bottom = margin.bottom + maxLabelWidth * Math.sin(Math.PI / 4);
             height = height + maxLabelWidth * Math.sin(Math.PI / 4);
         }
 
         // Declare the x (horizontal position) scale.
         const x = d3.scaleBand()
             .domain(names) // descending value
-            .range([marginLeft, width - marginRight])
+            .range([margin.left, width - margin.right])
             .padding(0.1);
 
         const scaleRange = data.length <= 1 ? 2 : data.length
@@ -85,7 +87,7 @@ function Bar({
         // Declare the y (vertical position) scale.
         const y = d3.scaleLinear()
             .domain([yStartPos, maxY])
-            .range([height - marginBottom, marginTop]);
+            .range([height - margin.bottom, margin.top]);
 
         // Create the SVG container.
         const svg = d3.create("svg")
@@ -98,9 +100,9 @@ function Bar({
             .data(y.ticks())
             .enter().append("line")
             .attr("class", "y-grid")
-            .attr("x1", marginLeft)
+            .attr("x1", margin.left)
             .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width - marginRight)
+            .attr("x2", width - margin.right)
             .attr("y2", d => Math.ceil(y(d)))
             .style("stroke", "#eee") // Light gray
             .style("stroke-width", "1px")
@@ -142,7 +144,7 @@ function Bar({
 
         // Add the x-axis and label.
         svg.append("g")
-            .attr("transform", `translate(0,${height - marginBottom})`)
+            .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x).tickSizeOuter(0))
             .selectAll("text")
             .style("display", showXLabels() ? "block" : "none")
@@ -157,7 +159,7 @@ function Bar({
 
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
-            .attr("transform", `translate(${marginLeft},0)`)
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
 
         if (showYLabels()) {

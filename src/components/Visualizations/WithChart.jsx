@@ -8,7 +8,7 @@ import {
 
 function WithChart({ children, legend, data }) {
     const [_, setRefresh] = useState(null)
-    const [collapsed, setCollapsed] = useState(false)
+    const [collapsed, setCollapsed] = useState(true)
 
     useEffect(() =>{
         setRefresh(new Date().getTime())

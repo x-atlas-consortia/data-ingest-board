@@ -127,7 +127,10 @@ const ESQ = {
             date_histogram: {
                 field,
                 calendar_interval: interval,
-                format
+                format,
+                order: {
+                    _key: 'asc'
+                }
             }
         }
     },
