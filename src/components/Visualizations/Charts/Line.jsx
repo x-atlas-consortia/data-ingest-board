@@ -122,7 +122,7 @@ function Line({
             .domain([yStartPos, maxY * 1.02])
             .range([height, 0]);
         g.append("g")
-            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
+            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : y))
         
         if (showYLabels()) {
             svg.append("g")

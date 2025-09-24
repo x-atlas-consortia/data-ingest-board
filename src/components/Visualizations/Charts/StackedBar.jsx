@@ -51,7 +51,7 @@ function StackedBar({
     const buildChart = () => {
 
         const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 20, left: 50 },
+        const margin = { top: 10, right: 30, bottom: 40, left: 50 },
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 420 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 3
@@ -121,7 +121,7 @@ function StackedBar({
                 .attr("class", "x label")
                 .attr("text-anchor", "end")
                 .attr("x", width / 1.5)
-                .attr("y", height - 2)
+                .attr("y", height * 1.3)
                 .text(xAxis.label)
         }
 

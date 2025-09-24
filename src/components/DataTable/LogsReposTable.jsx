@@ -53,7 +53,6 @@ const LogsReposTable = ({ }) => {
         let res = await callService(url, headers, q, 'POST')
         let _data = res.data?.aggregations?.buckets
 
-        let ids = []
         if (res.status === 200 && _data?.buckets.length) {
 
             afterKey.current = _data.after_key
@@ -135,6 +134,7 @@ const LogsReposTable = ({ }) => {
                 // end get data for stackedBar
             }
 
+            setHistogramDetails(histogramOps)
             /// END
             updateTableData(includePrevData, _tableData)
         } else {
@@ -246,6 +246,7 @@ const LogsReposTable = ({ }) => {
     };
 
     const yAxis = { label: "Views/Clones" }
+    const _xAxis = {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
 
     const formatAnalytics = (v) => {
         return JSON.stringify(v)
@@ -255,12 +256,12 @@ const LogsReposTable = ({ }) => {
         const _vizData = buildLineChart(row)
         //colorGroups={['views', 'clones', 'uniqueClones', 'uniqueViews']}
         return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={xAxis.current} groups={repos.current}  yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>
     }
 
     return (<>
-        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={{ formatter: formatNum }} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
 
         <SearchFilterTable data={tableData} columns={cols}
