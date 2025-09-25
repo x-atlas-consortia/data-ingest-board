@@ -8,6 +8,7 @@ import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -275,7 +276,6 @@ const LogsReposTable = ({ }) => {
 
     return (<>
         {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

@@ -14,6 +14,7 @@ import { ChartProvider } from '@/context/ChartContext';
 import {modalDefault} from "@/lib/constants";
 import AppModal from "@/components/AppModal";
 import {
+    BarChartOutlined,
     DownloadOutlined,
 } from "@ant-design/icons";
 
@@ -242,6 +243,7 @@ const LogsFilesTable = ({ }) => {
     const items = [
         {
             key: 'byDatasetType',
+            icon: <BarChartOutlined />,
             label: <Popover content={'Currently loaded table items are aggregated by dataset type and shown in bar chart.'} placement={'left'}><span>View By Dataset Type</span></Popover>,
         }
     ];
@@ -291,7 +293,7 @@ const LogsFilesTable = ({ }) => {
         {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
     
 
-        { <>
+        <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
@@ -306,7 +308,7 @@ const LogsFilesTable = ({ }) => {
             {hasMoreData && <Button onClick={fetchData} type="primary" block>
                 Load More
             </Button>}
-        </>}
+        </>
 
         <AppModal modal={modal} setModal={setModal} />
 

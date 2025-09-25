@@ -1,13 +1,13 @@
 import React from 'react'
 import { createContext, useEffect, useState, useRef } from 'react'
-import { SettingOutlined } from "@ant-design/icons";
+import { DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
 import { Dropdown, Space } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, defaultDates }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -27,8 +27,15 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       items: [...menuItems, {
         key: 'numOfRows',
         label: 'Rows Per Load More',
+        icon: <TableOutlined />,
         children: getRowsPerLoadMore(),
-      }],
+      },
+      {
+        key: 'export',
+        label: 'Export',
+        icon: <DownloadOutlined />
+      }
+    ],
       onClick: handleMenuClick,
     }
   }
@@ -172,6 +179,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       setNumOfRows(Number(e.key))
     } else {
       setSelectedMenuItem(e.key)
+    }
+    if (eq(e.key, 'export')) {
+      exportHandler()
     }
     if (sectionHandleMenuItemClick.current) {
       sectionHandleMenuItemClick.current(e)

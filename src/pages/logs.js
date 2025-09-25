@@ -172,6 +172,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     exportData={exportData}
+                    exportHandler={exportHandler}
                     defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
@@ -197,6 +198,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     exportData={exportData}
+                    exportHandler={exportHandler}
                     defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
@@ -213,6 +215,7 @@ const Logs = () => {
                 <LogsProvider defaultMenuItem={'byDatasetID'}
                     indexKey={key}
                     exportData={exportData}
+                    exportHandler={exportHandler}
                     defaultDates={_cards[key].dates}
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
@@ -307,7 +310,6 @@ const Logs = () => {
     }
 
     const exportHandler = () => {
-        // TODO improve for dynamic export
         let indexKey = activeSection.replace('tab-', '')
         let _data = exportData.current[indexKey] || []
         let cols = []
