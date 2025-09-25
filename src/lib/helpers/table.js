@@ -202,7 +202,8 @@ const TABLE = {
                     item[key] = toDateString(item[key])
                 }
 
-                if (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n')) {
+            
+                if (typeof item[key] === 'string' && (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n'))) {
                     item[key] = item[key].replace(/"/g, '""')
                 }
 
@@ -661,10 +662,10 @@ const TABLE = {
                         }
                     },)
                     }
-                    return <>
+                    return <div style={{maxWidth: '100%', overflowX: 'auto'}}>
                         <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row._countByInterval, [rowKey]: row[rowKey]}]} />
                         {otherComponent && <>{otherComponent(row)}</>}
-                    </>
+                    </div>
                 },
             }
         }

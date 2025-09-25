@@ -104,8 +104,7 @@ const LogsFilesTable = ({ }) => {
 
             let histogramOps = determineCalendarInterval()
             let uuid
-            let histogramBucketsExport, histogramBuckets
-
+            let histogramBuckets
            
             q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
             res = await callService(url, headers, q, 'POST')
@@ -113,13 +112,11 @@ const LogsFilesTable = ({ }) => {
             if (res.status == 200) {
                 for (let d of res.data.aggregations.buckets.buckets) {
                     uuid = d.key
-                    histogramBucketsExport = []
                     histogramBuckets = {}
                     for (let h of d.calendarHistogram.buckets) {
-                        histogramBucketsExport.push({label: h.key_as_string, value: h.totalBytes.value})
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
-                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval, bytesByInterval: histogramBucketsExport, _countByInterval: histogramBuckets}
+                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval,  _countByInterval: histogramBuckets}
                 }
             }
 

@@ -5,7 +5,7 @@ import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
-import BarWithLegend from "@/components/Visualizations/BarWithLegend";
+import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 
@@ -121,13 +121,12 @@ const LogsApiUsageTable = ({ data }) => {
             }
             let _tableData = Array.from(data)
 
-
             let _apis = new Set()
             let apiName, bKey
             for (let d of _data) {
                 bKey = _configureDate(d.key, histogramOps)
                 bKey = getAxisTick(bKey, histogramOps, 0)
-                buckets[bKey] = buckets[bKey] || { xValue: bKey }
+                buckets[bKey] = buckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
                     _apis.add(apiName)
@@ -138,10 +137,10 @@ const LogsApiUsageTable = ({ data }) => {
 
             _vizData = Object.values(buckets)
 
-            if (_vizData.length) {
-                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
-                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
-            }
+            // if (_vizData.length) {
+            //     const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
+            //     xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
+            // }
 
             apis.current = Array.from(_apis)
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
@@ -166,7 +165,9 @@ const LogsApiUsageTable = ({ data }) => {
    
     return (<>
 
-        {vizData.line?.length > 0 && <LineWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {/* {vizData.line?.length > 0 && <LineWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />} */}
+
+        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

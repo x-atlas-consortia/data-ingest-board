@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from "react";
-import { Button } from 'antd';
+import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
@@ -92,7 +92,7 @@ const LogsReposTable = ({ }) => {
                 Addon.log(`${indexKey}.Table`, { data: _tableData })
 
                 // Get per repo histogram for table
-                q = ESQ.indexQueries({ from: fromDate, to: toDate, list: Object.keys(repos) })[`${indexKey}RepoHistogram`](histogramOps)
+                q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}RepoHistogram`](histogramOps)
                 res = await callService(url, headers, q, 'POST')
                 if (res.status == 200) {
 
@@ -122,7 +122,7 @@ const LogsReposTable = ({ }) => {
                 if (res.status == 200) {
                     _histogram = {}
                     let dKey
-                    for (let d of res.data.aggregations?.calendarHistogram?.buckets) {
+                    for (let d of res.data?.aggregations?.calendarHistogram?.buckets) {
                         dKey = d.key_as_string
                         _histogram[dKey] = { group: dKey }
                         for (let t of d['type.keyword'].buckets) {
@@ -251,7 +251,18 @@ const LogsReposTable = ({ }) => {
     }
 
     const formatAnalytics = (v) => {
-        return JSON.stringify(v)
+        let cols = []
+        for (let i of Object.keys(v)) {
+            cols.push({
+            title: <span className="text-muted">{subgroupLabels.current[i]}</span>,
+            dataIndex: i,
+            key: i,
+            render: (v, r) => {
+                return <span>{formatNum(v)}</span>
+            }
+        },)
+        }
+        return <Table pagination={false} columns={cols} dataSource={[v]} />
     }
 
     const repoLineChart = (row) => {
@@ -267,7 +278,7 @@ const LogsReposTable = ({ }) => {
 
 
         <SearchFilterTable data={tableData} columns={cols}
-            formatters={{ bytes: formatNum }}
+            formatters={{}}
             tableProps={{
                 ...TABLE.expandableHistogram('group', formatAnalytics, repoLineChart),
                 rowKey: 'group',

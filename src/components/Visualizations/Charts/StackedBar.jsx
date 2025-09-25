@@ -130,6 +130,8 @@ function StackedBar({
 
         const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
 
+        const getSubgroupLabel = (v) => subGroupLabels[v] || v
+
         g.selectAll(".y-grid")
             .data(y.ticks())
             .enter().append("line")
@@ -149,7 +151,7 @@ function StackedBar({
             .join("g")
             .attr("fill", d => {
                 const color = colorScale(d.key)
-                const label = subGroupLabels[d.key]
+                const label = getSubgroupLabel(d.key)
                 colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
                 return color
             })
@@ -159,7 +161,7 @@ function StackedBar({
             .join("rect")
             .attr('data-value', d => formatVal(d[1] - d[0]))
             .attr('data-label', d => {
-                return subGroupLabels[d.key]
+                return getSubgroupLabel(d.key)
             })
             .attr("x", d => x(d.data.group))
             .attr("y", height)
@@ -167,7 +169,7 @@ function StackedBar({
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.data.group}\n${subGroupLabels[d.key]}: ${formatVal(d[1] - d[0])}`
+                return `${d.data.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d[1] - d[0])}`
             })
 
         svg.selectAll("rect")
