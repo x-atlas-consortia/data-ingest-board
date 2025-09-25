@@ -652,7 +652,7 @@ const TABLE = {
             expandable: {
                 expandedRowRender: row => {
                     let cols = []
-                    for (let i of Object.keys(row._countByInterval)) {
+                    for (let i of Object.keys(row.histogram)) {
                         cols.push({
                         title: i,
                         dataIndex: i,
@@ -663,7 +663,7 @@ const TABLE = {
                     },)
                     }
                     return <div style={{maxWidth: '100%', overflowX: 'auto'}}>
-                        <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row._countByInterval, [rowKey]: row[rowKey]}]} />
+                        <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row.histogram, [rowKey]: row[rowKey]}]} />
                         {otherComponent && <>{otherComponent(row)}</>}
                     </div>
                 },

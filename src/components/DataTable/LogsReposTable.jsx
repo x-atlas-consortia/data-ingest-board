@@ -8,7 +8,6 @@ import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
-import { DownloadOutlined } from "@ant-design/icons";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -64,7 +63,7 @@ const LogsReposTable = ({ }) => {
             let repos = {}
             let list = _data?.buckets
             let _tableData = []
-            let _histogram = {}
+            let _histogramBuckets = {}
             let histogramOps = determineCalendarInterval()
 
             const valuesObj = (t) => {
@@ -83,7 +82,7 @@ const LogsReposTable = ({ }) => {
 
                     _tableData.push({
                         group: repo,
-                        _countByInterval: {},
+                        histogram: {},
                         ...repos[repo]
                     })
                     repos[repo] = { ...repos[repo], i }
@@ -101,16 +100,16 @@ const LogsReposTable = ({ }) => {
                     Addon.log(`${indexKey}.RepoHistogram`, { data: _data })
 
                     for (let d of _data) {
-                        _histogram = {}
+                        _histogramBuckets = {}
                         for (let t of d['type.keyword'].buckets) {
 
                             for (let r of t['repository.keyword'].buckets) {
                                 repo = r.key
-                                _histogram[repo] = { ...(_histogram[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
+                                _histogramBuckets[repo] = { ...(_histogramBuckets[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
                             }
                         }
-                        for (let r in _histogram) {
-                            _tableData[repos[r].i]._countByInterval[d.key_as_string] = _histogram[r]
+                        for (let r in _histogramBuckets) {
+                            _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
                         }
 
                     }
@@ -121,16 +120,16 @@ const LogsReposTable = ({ }) => {
                 res = await callService(url, headers, q, 'POST')
 
                 if (res.status == 200) {
-                    _histogram = {}
+                    _histogramBuckets = {}
                     let dKey
                     for (let d of res.data?.aggregations?.calendarHistogram?.buckets) {
                         dKey = d.key_as_string
-                        _histogram[dKey] = { group: dKey }
+                        _histogramBuckets[dKey] = { group: dKey }
                         for (let t of d['type.keyword'].buckets) {
-                            _histogram[dKey] = { ..._histogram[dKey], ...valuesObj(t) }
+                            _histogramBuckets[dKey] = { ..._histogramBuckets[dKey], ...valuesObj(t) }
                         }
                     }
-                    setVizData({ ...vizData, stackedBar: Object.values(_histogram) })
+                    setVizData({ ...vizData, stackedBar: Object.values(_histogramBuckets) })
                 }
                 // end get data for stackedBar
             }
@@ -144,6 +143,12 @@ const LogsReposTable = ({ }) => {
         setIsBusy(false)
     }
 
+    const sorter = (a, b, k) => {
+        const _a = a[k] || 0
+        const _b = b[k] || 0
+        return _a - _b
+    }
+
     const cols = [
         {
             title: 'Name',
@@ -154,6 +159,7 @@ const LogsReposTable = ({ }) => {
             title: 'Total Views',
             dataIndex: 'views',
             key: 'views',
+            sorter: (a, b) => sorter(a, b, 'views'),
             render: (v, r) => {
                 return <span data-field="views">{formatNum(v)}</span>
             }
@@ -162,6 +168,7 @@ const LogsReposTable = ({ }) => {
             title: 'Unique Views',
             dataIndex: 'uniqueViews',
             key: 'uniqueViews',
+            sorter: (a, b) => sorter(a, b, 'uniqueViews'),
             render: (v, r) => {
                 return <span data-field="uniqueViews">{formatNum(v)}</span>
             }
@@ -170,6 +177,7 @@ const LogsReposTable = ({ }) => {
             title: 'Total Clones',
             dataIndex: 'clones',
             key: 'clones',
+            sorter: (a, b) => sorter(a, b, 'clones'),
             render: (v, r) => {
                 return <span data-field="clones">{v > 0 ? formatNum(v) : '-'}</span>
             }
@@ -178,6 +186,7 @@ const LogsReposTable = ({ }) => {
             title: 'Unique Clones',
             dataIndex: 'uniqueClones',
             key: 'uniqueClones',
+            sorter: (a, b) => sorter(a, b, 'uniqueClones'),
             render: (v, r) => {
                 return <span data-field="uniqueClones">{v > 0 ? formatNum(v) : '-'}</span>
             }
@@ -211,12 +220,12 @@ const LogsReposTable = ({ }) => {
         let _repos = new Set()
         let cKey
         let i = 0
-        for (let d in _data._countByInterval) {
+        for (let d in _data.histogram) {
             buckets[d] = buckets[d] || { xValue: d }
-            for (let t in _data._countByInterval[d]) {
+            for (let t in _data.histogram[d]) {
                 cKey = `${_data.group}:${t}`
                 _repos.add(cKey)
-                buckets[d][cKey] = _data._countByInterval[d][t]
+                buckets[d][cKey] = _data.histogram[d][t]
             }
 
             if (i == 0) {

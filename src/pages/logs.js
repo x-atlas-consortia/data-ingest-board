@@ -310,8 +310,8 @@ const Logs = () => {
     }
 
     const exportHandler = () => {
-        let indexKey = activeSection.replace('tab-', '')
-        let _data = exportData.current[indexKey] || []
+        let indexKey = activeSection?.replace('tab-', '') || Object.keys(indicesSections.current)[0]
+        let _data = JSON.parse(JSON.stringify(exportData.current[indexKey])) || []
         let cols = []
 
         if (_data.length) {
@@ -333,9 +333,7 @@ const Logs = () => {
                         d.datasetType = ''
                     }
                     delete d.entityId
-                }
-                delete d._countByInterval
-                
+                }   
             }
             cols = Object.keys(_data[0])
             if (_data[0].repository) {
@@ -388,7 +386,6 @@ const Logs = () => {
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
-
                         activeKey={activeSection}
                         type="card"
                         size={'middle'}

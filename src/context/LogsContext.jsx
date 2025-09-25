@@ -137,7 +137,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     let to = getToDate()
     to = to === 'now' ? new Date() : new Date(to)
     let diff = getDateDifference(new Date(getFromDate()), to);
-    if (diff.years > 1) return { interval: 'year', format: 'yyyy' }
+    if (diff.years > 0) return { interval: 'year', format: 'yyyy' }
     if (diff.months >= 1) return { interval: 'month', format: 'yyyy-MM' }
     if (diff.weeks > 1) return { interval: 'week', format: 'yyyy-MM-dd' }
     if (diff.weeks <= 1) return { interval: 'day', format: 'yyyy-MM-dd' }

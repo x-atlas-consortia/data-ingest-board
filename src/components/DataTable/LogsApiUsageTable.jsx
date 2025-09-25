@@ -39,7 +39,7 @@ const LogsApiUsageTable = ({ data }) => {
         setIsBusy(true)
 
         if (data.length) {
-            buildLineChart(includePrevData)
+            buildStackedBarChart(includePrevData)
             
             if (data.length < numOfRows) {
                 setHasMoreData(false)
@@ -66,6 +66,7 @@ const LogsApiUsageTable = ({ data }) => {
             title: 'Requests',
             dataIndex: 'requests',
             key: 'requests',
+            sorter: (a, b) => a.requests - b.requests,
             render: (v, r) => {
                 return <span data-field="requests">{formatNum(v)}</span>
             }
@@ -90,7 +91,7 @@ const LogsApiUsageTable = ({ data }) => {
     }
 
 
-    const buildLineChart = async (includePrevData) => {
+    const buildStackedBarChart = async (includePrevData) => {
         let url = getUrl()
         if (!url) return
 
@@ -106,11 +107,11 @@ const LogsApiUsageTable = ({ data }) => {
         let _vizData = []
         if (res.status == 200) {
             let _data = res.data?.aggregations?.calendarHistogram?.buckets
-            let buckets = {}
+            let histogramBuckets = {}
 
             let apiListIndexes = {}
             for (let i = 0; i < data.length; i++) {
-                data[i]._countByInterval = {}
+                data[i].histogram = {}
                 apiListIndexes[data[i].name] = i
             }
             let _tableData = Array.from(data)
@@ -120,16 +121,16 @@ const LogsApiUsageTable = ({ data }) => {
             for (let d of _data) {
                 bKey = _configureDate(d.key, histogramOps)
                 bKey = getAxisTick(bKey, histogramOps, 0)
-                buckets[bKey] = buckets[bKey] || { group: bKey }
+                histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
                     _apis.add(apiName)
-                    buckets[bKey][apiName] = t.doc_count
-                    _tableData[apiListIndexes[apiName]]._countByInterval[bKey] = t.doc_count
+                    histogramBuckets[bKey][apiName] = t.doc_count
+                    _tableData[apiListIndexes[apiName]].histogram[bKey] = t.doc_count
                 }
             }
 
-            _vizData = Object.values(buckets)
+            _vizData = Object.values(histogramBuckets)
 
             apis.current = Array.from(_apis)
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })

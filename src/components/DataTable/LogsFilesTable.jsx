@@ -124,7 +124,7 @@ const LogsFilesTable = ({ }) => {
                     for (let h of d.calendarHistogram.buckets) {
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
-                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval,  _countByInterval: histogramBuckets}
+                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval,  histogram: histogramBuckets}
                 }
             }
 
