@@ -135,19 +135,21 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     if (diff.weeks <= 1) return { interval: 'day', format: 'yyyy-MM-dd' }
   }
 
+  const pad = (num) => String(num).padStart(2, '0')
+
   const getAxisTick = (date, calendarInterval, operator = -1) => {
     if (eq(calendarInterval.interval, 'year')) {
       date.setYear(date.getFullYear() + operator)
       return date.getFullYear().toString()
     } else if (eq(calendarInterval.interval, 'month')) {
       date.setMonth(date.getMonth() + operator)
-      return `${date.getFullYear()}-${(date.getMonth() + 1)}`
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}`
     } else if (eq(calendarInterval.interval, 'week')) {
       date.setDate(date.getDate() + (operator * 7))
-      return `${date.getFullYear()}-${(date.getMonth() + 1)}-${date.getDate()}`
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
     } else {
       date.setDate(date.getDate() + operator)
-      return `${date.getFullYear()}-${(date.getMonth() + 1)}-${date.getDate()}`
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
     }
   }
 

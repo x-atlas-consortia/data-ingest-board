@@ -246,7 +246,9 @@ const LogsReposTable = ({ }) => {
     };
 
     const yAxis = { label: "Views/Clones" }
-    const _xAxis = {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
+    const _xAxis = () => {
+        return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
+    }
 
     const formatAnalytics = (v) => {
         return JSON.stringify(v)
@@ -256,12 +258,12 @@ const LogsReposTable = ({ }) => {
         const _vizData = buildLineChart(row)
         //colorGroups={['views', 'clones', 'uniqueClones', 'uniqueViews']}
         return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>
     }
 
     return (<>
-        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
 
         <SearchFilterTable data={tableData} columns={cols}
