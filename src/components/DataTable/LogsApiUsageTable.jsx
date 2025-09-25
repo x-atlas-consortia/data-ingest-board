@@ -108,12 +108,6 @@ const LogsApiUsageTable = ({ data }) => {
             let _data = res.data?.aggregations?.calendarHistogram?.buckets
             let buckets = {}
 
-            if (_data?.length) {
-                //const prevDate = new Date(_data[0].key_as_string + getDatePart(histogramOps))
-                const prevDate = _configureDate(_data[0].key, histogramOps)
-                xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
-            }
-
             let apiListIndexes = {}
             for (let i = 0; i < data.length; i++) {
                 data[i]._countByInterval = {}
@@ -137,11 +131,6 @@ const LogsApiUsageTable = ({ data }) => {
 
             _vizData = Object.values(buckets)
 
-            // if (_vizData.length) {
-            //     const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
-            //     xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
-            // }
-
             apis.current = Array.from(_apis)
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
 
@@ -164,8 +153,6 @@ const LogsApiUsageTable = ({ data }) => {
 
    
     return (<>
-
-        {/* {vizData.line?.length > 0 && <LineWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />} */}
 
         {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
