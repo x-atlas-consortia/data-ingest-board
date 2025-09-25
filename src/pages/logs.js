@@ -190,7 +190,8 @@ const Logs = () => {
                     {
                         name: d.key,
                         requests: d.doc_count,
-                        endpoints: 'TODO' // todo
+                        endpoints: d.totalEndpoints.value,
+                        endpointsHits: d.endpoints 
                     }
                 )
             }

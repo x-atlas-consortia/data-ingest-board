@@ -62,10 +62,14 @@ const ESQ = {
             }
         }
     },
-    bucketStats: (field) => {
+    bucketHits: (field, count = 20) => {
         return {
-            "stats_bucket": {
-                "buckets_path": `${field}._count`
+            "terms": {
+                "field": `${field}.keyword`,
+                "size": count,
+                "order": {
+                  "_count": "desc"
+                }
             }
         }
     },
@@ -287,8 +291,19 @@ const ESQ = {
                 track_total_hits: true,
                 size: 0,
                 aggs: {
-                    services: ESQ.bucket('host'),
-                    endpoints: ESQ.bucket('resource_path_pattern')
+                    services: {
+                        ...ESQ.bucket('host'),
+                        aggs: {
+                            endpoints: {
+                                ...ESQ.bucketHits('resource_path_pattern'),
+                                aggs: {
+                                    endpoints: ESQ.bucketHits('resource_path')
+                                }
+                            } ,
+                            totalEndpoints: ESQ.bucketCount('resource_path_pattern'),
+                        
+                        }
+                    }
                 }
             },
             apiUsageHistogram: (ops = {}) => ({
