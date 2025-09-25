@@ -1,4 +1,9 @@
 import ENVS from "./envs"
+export const indexFixtures = {
+    openSourceRepos: {date: 'timestamp',},
+    apiUsage:  {date: 'datetime',},
+    fileDownloads:  {date: 'download_date_time'} 
+}
 
 const ESQ = {
     dateRange: (from, to, field = 'timestamp') => {
@@ -17,7 +22,10 @@ const ESQ = {
         }
     },
     fileDownloadDateRange: (from, to) => {
-        return ESQ.dateRange(from, to, 'download_date_time')
+        return ESQ.dateRange(from, to, indexFixtures.fileDownloads.date)
+    },
+    apiUsageDateRange: (from, to) => {
+        return ESQ.dateRange(from, to, indexFixtures.apiUsage.date)
     },
     timeDateRange: (from, to) => {
         return ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime())
@@ -174,7 +182,7 @@ const ESQ = {
     },
     apiUsageCalendarHistogram: (ops) => {
         return {
-            ...ESQ.calendarHistogram({ ...ops }),
+            ...ESQ.calendarHistogram({ ...ops, field: indexFixtures.apiUsage.date }),
             aggs: {
                 'host.keyword': {
                     terms: {
@@ -274,7 +282,7 @@ const ESQ = {
             },
             apiUsage: {
                 query: {
-                    [queryField]: from ? ESQ.dateRange(new Date(from).getTime(), new Date(to).getTime()) : {} //TODO update date format
+                    [queryField]: from ? ESQ.apiUsageDateRange(from, to) : {} //TODO update date format
                 },
                 track_total_hits: true,
                 size: 0,
@@ -284,7 +292,7 @@ const ESQ = {
                 }
             },
             apiUsageHistogram: (ops = {}) => ({
-                query: ESQ.filter(from, to, 'host.keyword', list, ESQ.timeDateRange), //TODO change from timestamp
+                query: ESQ.filter(from, to, 'host.keyword', list, ESQ.apiUsageDateRange), //TODO change from timestamp
                 track_total_hits: true,
                 size: 0,
                 aggs: {

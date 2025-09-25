@@ -55,7 +55,7 @@ function StackedBar({
             width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
             height = 420 - margin.top - margin.bottom;
         const marginY = (margin.top + margin.bottom) * 3
-        const marginX = margin.left + margin.right
+        const marginX = margin.left + margin.right * 3
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
@@ -65,7 +65,7 @@ function StackedBar({
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top + 50})`)
+            .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(data[0]).slice(1)
 

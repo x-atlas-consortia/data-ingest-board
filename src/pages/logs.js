@@ -4,7 +4,7 @@ import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
-import ESQ from "@/lib/helpers/esq";
+import ESQ, { indexFixtures } from "@/lib/helpers/esq";
 import Spinner from '@/components/Spinner';
 import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 import LogsReposTable from '@/components/DataTable/LogsReposTable';
@@ -57,12 +57,13 @@ const Logs = () => {
             },
             apiUsage: {
                 title: 'API Usage',
-                icon: <ApiOutlined />
+                icon: <ApiOutlined />,
+                dateField: indexFixtures.apiUsage.date
             },
             fileDownloads: {
                 title: 'Data Transfers',
                 icon: <DownloadOutlined />,
-                dateField: 'download_date_time'
+                dateField: indexFixtures.fileDownloads.date
             }
         }
 
