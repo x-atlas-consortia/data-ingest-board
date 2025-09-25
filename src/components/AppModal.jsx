@@ -10,6 +10,7 @@ function AppModal({modal, setModal, handleModalOk, id}) {
     return (
         <Modal
             id={id}
+            footer={modal.footer}
             className={modal.className}
             width={modal.width}
             cancelButtonProps={{ style: { display: modal.cancelCSS } }}

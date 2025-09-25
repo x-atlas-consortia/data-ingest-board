@@ -20,6 +20,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [selectedRows, setSelectedRows] = useState([])
   const [selectedRowObjects, setSelectedRowObjects] = useState([])
   const [histogramDetails, setHistogramDetails] = useState({})
+  const sectionHandleMenuItemClick = useRef(null)
 
   const menuProps = () => {
     return {
@@ -172,6 +173,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     } else {
       setSelectedMenuItem(e.key)
     }
+    if (sectionHandleMenuItemClick.current) {
+      sectionHandleMenuItemClick.current(e)
+    }
   }
 
   const getUrl = () => {
@@ -208,7 +212,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getAxisTick,
     getUrl,
     getDatePart,
-    histogramDetails, setHistogramDetails
+    histogramDetails, setHistogramDetails,
+    sectionHandleMenuItemClick
 
   }}>{children}</LogsContext.Provider>
 }

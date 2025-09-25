@@ -8,10 +8,14 @@ import AppContext from "@/context/AppContext";
 import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
 import BarWithLegend from "@/components/Visualizations/BarWithLegend";
-import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import Bar from "@/components/Visualizations/Charts/Bar";
 import { ChartProvider } from '@/context/ChartContext';
+import {modalDefault} from "@/lib/constants";
+import AppModal from "@/components/AppModal";
+import {
+    DownloadOutlined,
+} from "@ant-design/icons";
 
 const LogsFilesTable = ({ }) => {
 
@@ -20,6 +24,8 @@ const LogsFilesTable = ({ }) => {
     const entities = useRef({})
     const datasetGroups = useRef([])
     const byDatasetTypes = useRef([])
+    const byDatasetTypesSelected = useRef([])
+    const [modal, setModal] = useState(modalDefault)
 
     const {
         indexKey,
@@ -41,7 +47,8 @@ const LogsFilesTable = ({ }) => {
         selectedRowObjects, setSelectedRowObjects,
         getUrl,
         getDatePart,
-        histogramDetails, setHistogramDetails
+        histogramDetails, setHistogramDetails,
+        sectionHandleMenuItemClick
 
     } = useContext(LogsContext)
 
@@ -190,27 +197,11 @@ const LogsFilesTable = ({ }) => {
         setSelectedRowObjects([])
         xAxis.current = {}
         fetchData(false)
+        buildBarChart()
         
     }, [fromDate, toDate])
 
-    useEffect(() => {
-        if (selectedRows.length > 0 && selectedRows.length < 10) {
-            if (!fromDate) {
-                let _data = selectedRowObjects.map((d) => {
-                    return { id: d.uuid, label: d.entityId || d.uuid, value: d.bytes }
-                })
-                setVizData({ ...vizData, barById: _data })
-            } else {
-                buildLineChart()
-            }
-        } else {
-            
-            if (vizData.line?.length || vizData.barById?.length) {
-               setVizData({ ...vizData, line: [], barById: [] }) 
-            }
-            buildBarChart()
-        }
-    }, [selectedRows, fromDate, toDate])
+
 
 
     const buildBarChart = async () => {
@@ -240,51 +231,6 @@ const LogsFilesTable = ({ }) => {
         }
     }
 
-    const buildLineChart = async () => {
-        if (!fromDate && !toDate) return
-        let url = getUrl()
-        if (!url) return
-
-        let histogramOps = determineCalendarInterval()
-
-        let q = ESQ.indexQueries({ from: fromDate, to: toDate, list: selectedRows })[`${indexKey}DatasetsHistogram`](histogramOps)
-        let headers = getHeadersWith(globusToken).headers
-
-        // Get page for grouped Ids
-        let res = await callService(url, headers, q, 'POST')
-        let _vizData = []
-        if (res.status == 200) {
-            let _data = res.data?.aggregations?.buckets?.buckets
-            let buckets = {}
-
-            if (_data.length) {
-                const prevDate = new Date(_data[0].calendarHistogram.buckets[0].key_as_string + getDatePart(histogramOps))
-                xAxis.current.prefix = getAxisTick(prevDate, histogramOps)
-            }
-
-            for (let d of _data) {
-                for (let m of d.calendarHistogram.buckets) {
-                    buckets[m.key_as_string] = buckets[m.key_as_string] || { xValue: m.key_as_string }
-                    buckets[m.key_as_string][entities.current[d.key]?.entityId || d.key] = m.totalBytes.value
-                }
-            }
-            _vizData = Object.values(buckets)
-            let datasets = []
-
-            if (_vizData.length) {
-                const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
-                xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
-            }
-
-            for (let id of selectedRows) {
-                datasets.push(entities.current[id]?.entityId || id)
-            }
-            datasetGroups.current = datasets
-
-            setVizData({ ...vizData, line: _vizData })
-        }
-    }
-
     const rowSelection = {
         selectedRowKeys: selectedRows,
         onChange: (rowKeys, rows) => {
@@ -295,44 +241,57 @@ const LogsFilesTable = ({ }) => {
 
     const items = [
         {
-            key: 'logsType',
-            type: 'group',
-            label: 'View Logs by',
-            children: [
-                {
-                    key: 'byDatasetID',
-                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetID'),
-                    label: 'Dataset ID',
-                },
-                {
-                    key: 'byDatasetType',
-                    className: getMenuItemClassName(selectedMenuItem, 'byDatasetType'),
-                    label: 'Dataset Type',
-                },
-            ],
+            key: 'byDatasetType',
+            label: <Popover content={'Currently loaded table items are aggregated by dataset type and shown in bar chart.'} placement={'left'}><span>View By Dataset Type</span></Popover>,
         }
     ];
 
+    const rowSelectionForByType = {
+        onChange: (rowKeys, rows) => {
+            byDatasetTypesSelected.current = rows
+        },
+    };
+
+    const exportByTypeSelection = (byTypeCols) => {
+        const _data = byDatasetTypesSelected.current.length ? byDatasetTypesSelected.current : byDatasetTypes.current
+        TABLE.generateCSVFile(TABLE.flattenDataForCSV(_data), 'fileDownloadsByTypes.csv', byTypeCols)
+    }
+
+    const _handleMenuItemClick = (e) => {
+        if (eq(e.key, 'byDatasetType')) {
+            const byTypeCols = []
+            byTypeCols.push(cols[1])
+            byTypeCols.push(cols[3])
+            const body = <>
+            <BarWithLegend yAxis={yAxis} data={byDatasetTypes.current} chartId={'filesByTypes'} />
+            <SearchFilterTable data={byDatasetTypes.current} columns={byTypeCols}
+                formatters={{bytes: formatBytes}}
+                tableProps={{
+                    rowKey: 'datasetType',
+                    rowSelection: { type: 'checkbox', ...rowSelectionForByType },
+                    loading: false
+                }} />
+            </>
+            const footer = [
+                <Button icon={<DownloadOutlined />} onClick={()=>exportByTypeSelection(byTypeCols.map((c) => c.dataIndex))}> Download CSV Data</Button>,
+                <Button color="primary" variant="solid" onClick={()=>setModal({...modal, open:false})}> Close</Button>
+            ]
+            setModal({...modal, footer, body, open: true, width: '90%'})
+        }
+    }
+
     useEffect(() => {
-        //setMenuItems(items)
-        setVizData({ ...vizData, barByTypes: byDatasetTypes.current })
-    }, [selectedMenuItem])
+        sectionHandleMenuItemClick.current = _handleMenuItemClick
+        setMenuItems(items)
+    }, [])
 
     const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1 }
 
-    const logByDatasetID = eq(selectedMenuItem, 'byDatasetID')
-    const logByType = eq(selectedMenuItem, 'byDatasetType')
-    const byTypeCols = Array.from(cols)
-    byTypeCols.shift()
-
     return (<>
-        {vizData.bar?.length > 0 && logByDatasetID && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
-        {/* {vizData.barByTypes?.length > 0 && logByType && <BarWithLegend yAxis={yAxis} data={vizData.barByTypes} chartId={'filesByTypes'} />}
-        {vizData.barById?.length > 0 && !logByType && <BarWithLegend yAxis={yAxis} data={vizData.barById} chartId={'filesById'} />}
-        {vizData.line?.length > 0 && selectedRows.length > 0 && <LineWithLegend xAxis={xAxis.current} groups={datasetGroups.current} yAxis={yAxis} data={vizData.line} chartId={'filesDataset'} />} */}
+        {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
+    
 
-
-        {logByDatasetID && <>
+        { <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
@@ -349,15 +308,7 @@ const LogsFilesTable = ({ }) => {
             </Button>}
         </>}
 
-        {logByType && <>
-            <SearchFilterTable data={vizData.barByTypes} columns={byTypeCols}
-                formatters={{bytes: formatBytes}}
-                tableProps={{
-                    rowKey: 'id',
-                    rowSelection: { type: 'checkbox', ...rowSelection },
-                    loading: isBusy
-                }} />
-        </>}
+        <AppModal modal={modal} setModal={setModal} />
 
     </>)
 }
