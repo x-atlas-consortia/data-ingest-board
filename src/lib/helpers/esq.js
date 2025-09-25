@@ -282,17 +282,17 @@ const ESQ = {
             },
             apiUsage: {
                 query: {
-                    [queryField]: from ? ESQ.apiUsageDateRange(from, to) : {} //TODO update date format
+                    [queryField]: from ? ESQ.apiUsageDateRange(from, to) : {} 
                 },
                 track_total_hits: true,
                 size: 0,
                 aggs: {
                     services: ESQ.bucket('host'),
-                    endpoints: ESQ.bucket('resource_path_parameter')
+                    endpoints: ESQ.bucket('resource_path_pattern')
                 }
             },
             apiUsageHistogram: (ops = {}) => ({
-                query: ESQ.filter(from, to, 'host.keyword', list, ESQ.apiUsageDateRange), //TODO change from timestamp
+                query: ESQ.filter(from, to, 'host.keyword', list, ESQ.apiUsageDateRange), 
                 track_total_hits: true,
                 size: 0,
                 aggs: {

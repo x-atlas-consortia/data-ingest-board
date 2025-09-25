@@ -119,7 +119,7 @@ function StackedBar({
             svg.append("g")
                 .append("text")
                 .attr("class", "x label")
-                .attr("text-anchor", "end")
+                .attr("text-anchor", "middle")
                 .attr("x", width / 1.5)
                 .attr("y", height * 1.3)
                 .text(xAxis.label)
