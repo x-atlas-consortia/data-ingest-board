@@ -191,7 +191,15 @@ const ESQ = {
                 'host.keyword': {
                     terms: {
                         field: "host.keyword"
-                    }
+                    },
+                    aggs: {
+                            endpoints: {
+                                ...ESQ.bucketHits('resource_path_pattern'),
+                                aggs: {
+                                    endpoints: ESQ.bucketHits('resource_path')
+                                }
+                            } 
+                        }
                 }
             }
         }

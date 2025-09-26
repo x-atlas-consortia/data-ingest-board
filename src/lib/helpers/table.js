@@ -658,7 +658,7 @@ const TABLE = {
                         dataIndex: i,
                         key: i,
                         render: (v, r) => {
-                            return <span>{formatter(v)}</span>
+                            return <>{formatter(v, {field: i, row: r})}</>
                         }
                     },)
                     }

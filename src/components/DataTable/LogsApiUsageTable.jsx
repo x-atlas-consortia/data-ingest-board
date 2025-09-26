@@ -51,6 +51,40 @@ const LogsApiUsageTable = ({ data }) => {
         setIsBusy(false)
     }
 
+    const endpointsDetails = (r, details = {}) => {
+        let list = []
+        const style = { overflowY: 'auto', maxHeight: '500px' }
+
+        for (let e of r.endpointsHits.buckets) {
+            //r.key 
+            //r.doc_count
+            //r.endpoints.buckets
+
+            list.push({
+                key: e.key.replaceAll('/', '_'),
+                label: e.key,
+                children: <div style={style}><List
+                    size="small"
+                    bordered
+                    dataSource={e.endpoints.buckets}
+                    renderItem={(item) => <List.Item actions={[<Badge count={formatNum(item.doc_count)} color="#495057" />]}>{item.key}</List.Item>}
+                /></div>,
+                extra: <Badge count={formatNum(e.doc_count)} color="#495057" />,
+            })
+
+        }
+        let modalContent = <div style={style}>
+            <Collapse
+
+                expandIconPosition={'start'}
+                items={list}
+            /></div>
+        return (<ModalOverComponent modalOps={{ width: '60%', title: <h3>Requests By Endpoints {details.field}</h3> }}
+            modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints.">
+            <span data-field="endpoints" className="txt-lnk">{formatNum(r.endpoints || r.requests)}</span>
+        </ModalOverComponent>)
+    }
+
     const cols = [
         {
             title: 'Name',
@@ -63,36 +97,7 @@ const LogsApiUsageTable = ({ data }) => {
             key: 'endpoints',
             sorter: (a, b) => a.endpoints - b.endpoints,
             render: (v, r) => {
-                let list = []
-                const style = {overflowY: 'auto', maxHeight: '500px'}
-            
-                for (let e of r.endpointsHits.buckets) {
-                    //r.key 
-                    //r.doc_count
-                    //r.endpoints.buckets
-            
-                    list.push({
-                        key: e.key.replaceAll('/', '_'),
-                        label: e.key,
-                        children: <div style={style}><List
-                            size="small"
-                            bordered
-                            dataSource={e.endpoints.buckets}
-                            renderItem={(item) => <List.Item actions={[<Badge count={formatNum(item.doc_count)} color="#495057" />]}>{item.key}</List.Item>}
-                        /></div>,
-                        extra: <Badge count={formatNum(e.doc_count)} color="#495057" />,
-                    })
-
-                }
-                let modalContent = <div style={style}>
-                    
-                    
-                    <Collapse
-                  
-                    expandIconPosition={'start'}
-                    items={list}
-                /></div>
-                return <ModalOverComponent modalOps={{width: '60%', title: <h3>Requests By Endpoints</h3>}} modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints."><span data-field="endpoints" className="txt-lnk">{formatNum(v)}</span></ModalOverComponent>
+                return endpointsDetails(r)
             }
         },
         Table.EXPAND_COLUMN,
@@ -131,10 +136,8 @@ const LogsApiUsageTable = ({ data }) => {
 
         let histogramOps = determineCalendarInterval()
 
-        // TODO not use timestamp on update of api_usage, also in ESQ
-        let _to = getToDate()
-        _to = _to == 'now' ? new Date().getTime() : _to
-        let q = ESQ.indexQueries({ from: getFromDate(), to: _to, list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
+
+        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         let res = await callService(url, headers, q, 'POST')
@@ -153,14 +156,13 @@ const LogsApiUsageTable = ({ data }) => {
             let _apis = new Set()
             let apiName, bKey
             for (let d of _data) {
-                bKey = _configureDate(d.key, histogramOps)
-                bKey = getAxisTick(bKey, histogramOps, 0)
+                bKey = d.key_as_string
                 histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
                     _apis.add(apiName)
                     histogramBuckets[bKey][apiName] = t.doc_count
-                    _tableData[apiListIndexes[apiName]].histogram[bKey] = t.doc_count
+                    _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
                 }
             }
 
@@ -186,6 +188,10 @@ const LogsApiUsageTable = ({ data }) => {
 
     const yAxis = { label: "Requests", formatter: formatNum }
 
+    const formatAnalytics = (v, details) => {
+        return endpointsDetails(v, details)
+    }
+
 
     return (<>
 
@@ -194,7 +200,7 @@ const LogsApiUsageTable = ({ data }) => {
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}
             tableProps={{
-                ...TABLE.expandableHistogram('name', formatNum),
+                ...TABLE.expandableHistogram('name', formatAnalytics),
                 rowKey: 'name',
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
