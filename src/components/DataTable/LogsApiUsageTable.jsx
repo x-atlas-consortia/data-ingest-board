@@ -189,7 +189,7 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, label: `Requests per ${histogramDetails?.interval}` }} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}
