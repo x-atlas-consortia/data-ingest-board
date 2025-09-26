@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from "react";
-import { Button, Table } from 'antd';
+import { Button, Table, Collapse, Badge, List } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
@@ -8,6 +8,7 @@ import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
+import ModalOverComponent from "../ModalOverComponent";
 
 const LogsApiUsageTable = ({ data }) => {
     const { globusToken } = useContext(AppContext)
@@ -40,7 +41,7 @@ const LogsApiUsageTable = ({ data }) => {
 
         if (data.length) {
             buildStackedBarChart(includePrevData)
-            
+
             if (data.length < numOfRows) {
                 setHasMoreData(false)
             }
@@ -60,6 +61,39 @@ const LogsApiUsageTable = ({ data }) => {
             title: 'Endpoints',
             dataIndex: 'endpoints',
             key: 'endpoints',
+            sorter: (a, b) => a.endpoints - b.endpoints,
+            render: (v, r) => {
+                let list = []
+                const style = {overflowY: 'auto', maxHeight: '500px'}
+            
+                for (let e of r.endpointsHits.buckets) {
+                    //r.key 
+                    //r.doc_count
+                    //r.endpoints.buckets
+            
+                    list.push({
+                        key: e.key.replaceAll('/', '_'),
+                        label: e.key,
+                        children: <div style={style}><List
+                            size="small"
+                            bordered
+                            dataSource={e.endpoints.buckets}
+                            renderItem={(item) => <List.Item actions={[<Badge count={formatNum(item.doc_count)} color="#495057" />]}>{item.key}</List.Item>}
+                        /></div>,
+                        extra: <Badge count={formatNum(e.doc_count)} color="#495057" />,
+                    })
+
+                }
+                let modalContent = <div style={style}>
+                    
+                    
+                    <Collapse
+                  
+                    expandIconPosition={'start'}
+                    items={list}
+                /></div>
+                return <ModalOverComponent modalOps={{width: '60%', title: <h3>Requests By Endpoints</h3>}} modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints."><span data-field="endpoints" className="txt-lnk">{formatNum(v)}</span></ModalOverComponent>
+            }
         },
         Table.EXPAND_COLUMN,
         {
@@ -84,9 +118,9 @@ const LogsApiUsageTable = ({ data }) => {
     }, [fromDate, toDate])
 
 
-    const _configureDate = (timestamp, histogramOps, asDate= true) => {
+    const _configureDate = (timestamp, histogramOps, asDate = true) => {
         const d = new Date(timestamp)
-        const str = `${d.getFullYear()}-${(d.getMonth()+1)}${getDatePart(histogramOps)}`
+        const str = `${d.getFullYear()}-${(d.getMonth() + 1)}${getDatePart(histogramOps)}`
         return asDate ? new Date(str) : str
     }
 
@@ -152,10 +186,10 @@ const LogsApiUsageTable = ({ data }) => {
 
     const yAxis = { label: "Requests", formatter: formatNum }
 
-   
+
     return (<>
 
-        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{...xAxis.current, label: `Requests per ${histogramDetails?.interval}`}} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, label: `Requests per ${histogramDetails?.interval}` }} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

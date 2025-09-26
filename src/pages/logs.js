@@ -123,12 +123,12 @@ const Logs = () => {
                 ms.push(
                     <Row className='mb-2' key={d.key}>
                         <Col span={12}><strong>{d.key}</strong>:</Col>
-                        <Col span={12}><span className='txt-lnk'>{formatNum(d.doc_count)}</span></Col>
+                        <Col span={12}><span>{formatNum(d.doc_count)}</span></Col>
                     </Row>
                 )
             }
             return (<>
-                {ms}
+                <div style={{overflowY: 'auto', maxHeight: '100px'}}>{ms}</div>
                 {totalHits > 0 && <span>-----------------------------</span>}
                 <Row className='mt-2'>
                     <Col span={12}><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
