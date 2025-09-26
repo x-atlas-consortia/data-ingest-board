@@ -260,7 +260,7 @@ const LogsReposTable = ({ }) => {
         return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
     }
 
-    const formatAnalytics = (v) => {
+    const formatAnalytics = (v, details) => {
         let cols = []
         for (let i of Object.keys(v)) {
             cols.push({

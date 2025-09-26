@@ -56,10 +56,6 @@ const LogsApiUsageTable = ({ data }) => {
         const style = { overflowY: 'auto', maxHeight: '500px' }
 
         for (let e of r.endpointsHits.buckets) {
-            //r.key 
-            //r.doc_count
-            //r.endpoints.buckets
-
             list.push({
                 key: e.key.replaceAll('/', '_'),
                 label: e.key,
@@ -75,11 +71,10 @@ const LogsApiUsageTable = ({ data }) => {
         }
         let modalContent = <div style={style}>
             <Collapse
-
                 expandIconPosition={'start'}
                 items={list}
             /></div>
-        return (<ModalOverComponent modalOps={{ width: '60%', title: <h3>Requests By Endpoints {details.field}</h3> }}
+        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h3>Requests By Endpoints {details.field}</h3><p className="fs-3">{r.name || details.row?.name}</p></> }}
             modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints.">
             <span data-field="endpoints" className="txt-lnk">{formatNum(r.endpoints || r.requests)}</span>
         </ModalOverComponent>)
@@ -121,13 +116,6 @@ const LogsApiUsageTable = ({ data }) => {
         setSelectedRows([])
         setSelectedRowObjects([])
     }, [fromDate, toDate])
-
-
-    const _configureDate = (timestamp, histogramOps, asDate = true) => {
-        const d = new Date(timestamp)
-        const str = `${d.getFullYear()}-${(d.getMonth() + 1)}${getDatePart(histogramOps)}`
-        return asDate ? new Date(str) : str
-    }
 
 
     const buildStackedBarChart = async (includePrevData) => {

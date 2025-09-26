@@ -363,10 +363,10 @@ const ESQ = {
                 query: ESQ.filter(from, to, 'dataset_uuid', list, ESQ.fileDownloadDateRange),
                 size: 0,
                 aggs: {
-                    "buckets": {
-                        "terms": {
+                    buckets: {
+                        terms: {
                             size: list.length,
-                            "field": "dataset_uuid.keyword"
+                            field: "dataset_uuid.keyword"
                         },
                         aggs: {
                             calendarHistogram: ESQ.filesCalendarHistogram(ops)

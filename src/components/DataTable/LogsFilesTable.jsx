@@ -289,6 +289,10 @@ const LogsFilesTable = ({ }) => {
 
     const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1 }
 
+    const formatAnalytics = (v, details) => {
+        return formatBytes(v, 3)
+    }
+
     return (<>
         {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
     
@@ -297,7 +301,7 @@ const LogsFilesTable = ({ }) => {
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
-                    ...TABLE.expandableHistogram('uuid', formatBytes),
+                    ...TABLE.expandableHistogram('uuid', formatAnalytics),
                     rowKey: 'uuid',
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,
