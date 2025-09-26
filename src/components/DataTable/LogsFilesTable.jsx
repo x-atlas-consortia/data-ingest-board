@@ -94,7 +94,7 @@ const LogsFilesTable = ({ }) => {
 
             // Find out info about these ids
             q = ESQ.indexQueries({ list: ids }).filter
-            q._source = ['uuid', 'dataset_type', 'hubmap_id', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
+            q._source = ['uuid', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
             let entitiesSearch = await callService(ENVS.urlFormat.search(`/entities/search`),
                 headers,
                 q,
@@ -103,8 +103,8 @@ const LogsFilesTable = ({ }) => {
             if (entitiesSearch.status == 200) {
                 for (let d of entitiesSearch.data.hits.hits) {
                     entities.current[d._source.uuid] = {
-                        [TABLE.cols.f('id')]: d._source.hubmap_id,
-                        entityId: d._source.hubmap_id, // TODO change to TABLE.col.f('id')
+                        [TABLE.cols.f('id')]: d._source[TABLE.cols.f('id')],
+                        entityId: d._source[TABLE.cols.f('id')], // TODO change to TABLE.col.f('id')
                         datasetType: d._source.dataset_type,
                     }
                 }

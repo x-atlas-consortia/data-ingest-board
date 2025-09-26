@@ -311,9 +311,9 @@ const Logs = () => {
         window.location = '/'
     }
 
-    const exportHandler = () => {
-        let indexKey = activeSection?.replace('tab-', '') || Object.keys(indicesSections.current)[0]
-        let _data = JSON.parse(JSON.stringify(exportData.current[indexKey])) || []
+    const exportHandler = (indexKey) => {
+        let _indexKey = indexKey || activeSection?.replace('tab-', '') || Object.keys(indicesSections.current)[0]
+        let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
         let cols = []
 
         if (_data.length) {
@@ -343,8 +343,8 @@ const Logs = () => {
                 let c = cols.pop()
                 cols.unshift(c)
             }
-
-            TABLE.generateCSVFile(TABLE.flattenDataForCSV(_data), indexKey + '.csv', cols)
+            _data = TABLE.flattenDataForCSV(_data)
+            TABLE.generateCSVFile(_data, _indexKey + '.csv', cols)
         }
     }
 

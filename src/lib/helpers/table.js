@@ -210,6 +210,9 @@ const TABLE = {
                 if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
                     delete item[key]
                 }
+                if (!Array.isArray(item[key]) && typeof item[key] === 'object') {
+                    item[key] = JSON.stringify(item[key]).replace(/"/g, '""')
+                }
                 if (Array.isArray(item[key])) {
                     // Convert objects to string representations
                     item[key] = item[key].map(element => (typeof element === 'object' ? JSON.stringify(element).replace(/"/g, '""') : element));

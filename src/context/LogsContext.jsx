@@ -181,7 +181,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       setSelectedMenuItem(e.key)
     }
     if (eq(e.key, 'export')) {
-      exportHandler()
+      exportHandler(indexKey)
     }
     if (sectionHandleMenuItemClick.current) {
       sectionHandleMenuItemClick.current(e)
