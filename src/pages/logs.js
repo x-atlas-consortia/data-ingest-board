@@ -267,7 +267,7 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = {from, to}
             title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className='c-logCard' title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className={`c-logCard ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
