@@ -47,7 +47,6 @@ const Logs = () => {
     const [isBusy, setIsBusy] = useState(true)
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
-    
     const exportData = useRef({})
 
     let _cards = {
@@ -107,7 +106,16 @@ const Logs = () => {
             repos = agg.repos.buckets.length
         }
 
+        const exportKey = key + 'Overview'
+        exportData.current[exportKey] = []
         if (isRepos(key)) {
+            exportData.current[exportKey].push({
+                fromDate,
+                toDate,
+                totalRepositories: repos,
+                totalViews,
+                totalClones
+            })
             return (<>
                 <div><h3>{repos}</h3></div>
                 <Row>
@@ -120,6 +128,12 @@ const Logs = () => {
         if (isApi(key)) {
             let ms = []
             for (let d of indexData.aggregations.services.buckets) {
+                exportData.current[exportKey].push({
+                    fromDate,
+                    toDate,
+                    apiName: d.key,
+                    requests: d.doc_count
+                })
                 ms.push(
                     <Row className='mb-2' key={d.key}>
                         <Col span={12}><strong>{d.key}</strong>:</Col>
@@ -137,6 +151,14 @@ const Logs = () => {
         }
 
         if (isFiles(key)) {
+            exportData.current[exportKey].push({
+                    fromDate,
+                    toDate,
+                    totalBytes,
+                    totalDatasets: datasetGroups,
+                    totalFiles,
+                    totalHits
+            })
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
                 <Row className='mt-3'>
@@ -345,6 +367,9 @@ const Logs = () => {
             }
             _data = TABLE.flattenDataForCSV(_data)
             TABLE.generateCSVFile(_data, _indexKey + '.csv', cols)
+            if (!indexKey) {
+                TABLE.generateCSVFile(TABLE.flattenDataForCSV(exportData.current[_indexKey + 'Overview']), _indexKey + 'Overview.csv')
+            }
         }
     }
 

@@ -6,9 +6,9 @@ import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
-import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
+import { InfoCircleOutlined } from "@ant-design/icons";
 
 const LogsApiUsageTable = ({ data }) => {
     const { globusToken } = useContext(AppContext)
@@ -32,7 +32,7 @@ const LogsApiUsageTable = ({ data }) => {
 
     } = useContext(LogsContext)
 
-    const apis = useRef([])
+    const apis = useRef({})
     const xAxis = useRef({})
 
 
@@ -69,12 +69,14 @@ const LogsApiUsageTable = ({ data }) => {
             })
 
         }
+        let apiName = r.name || details.row?.name
         let modalContent = <div style={style}>
+            {apis.current[apiName] > 20 && <p className="alert alert-info"><InfoCircleOutlined /><small className="mx-2">Only the top 20 endpoints are displayed.</small></p>}
             <Collapse
                 expandIconPosition={'start'}
                 items={list}
             /></div>
-        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h3>Requests By Endpoints {details.field}</h3><p className="fs-3">{r.name || details.row?.name}</p></> }}
+        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h4>Top requested endpoints for {apiName} {details.field ? `in ${details.field}` : ''}</h4></> }}
             modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints.">
             <span data-field="endpoints" className="txt-lnk">{formatNum(r.endpoints || r.requests)}</span>
         </ModalOverComponent>)
@@ -85,6 +87,7 @@ const LogsApiUsageTable = ({ data }) => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
             title: 'Endpoints',
@@ -112,7 +115,7 @@ const LogsApiUsageTable = ({ data }) => {
         setVizData({})
         fetchData(false)
         xAxis.current = {}
-        apis.current = []
+        apis.current = {}
         setSelectedRows([])
         setSelectedRowObjects([])
     }, [fromDate, toDate])
@@ -141,14 +144,14 @@ const LogsApiUsageTable = ({ data }) => {
             }
             let _tableData = Array.from(data)
 
-            let _apis = new Set()
+            let endpointsPerApi = {}
             let apiName, bKey
             for (let d of _data) {
                 bKey = d.key_as_string
                 histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
-                    _apis.add(apiName)
+                    endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
                     histogramBuckets[bKey][apiName] = t.doc_count
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
                 }
@@ -156,7 +159,7 @@ const LogsApiUsageTable = ({ data }) => {
 
             _vizData = Object.values(histogramBuckets)
 
-            apis.current = Array.from(_apis)
+            apis.current = endpointsPerApi
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
 
             setVizData({ ...vizData, line: _vizData })
@@ -183,7 +186,7 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} groups={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} groups={Object.keys(apis.current)} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

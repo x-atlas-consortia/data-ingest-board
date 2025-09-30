@@ -154,6 +154,7 @@ const LogsReposTable = ({ }) => {
             title: 'Name',
             dataIndex: 'group',
             key: 'group',
+            sorter: (a, b) => a.group.localeCompare(b.group),
         },
         {
             title: 'Total Views',

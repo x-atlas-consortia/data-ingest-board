@@ -104,7 +104,7 @@ const LogsFilesTable = ({ }) => {
                 for (let d of entitiesSearch.data.hits.hits) {
                     entities.current[d._source.uuid] = {
                         [TABLE.cols.f('id')]: d._source[TABLE.cols.f('id')],
-                        entityId: d._source[TABLE.cols.f('id')], // TODO change to TABLE.col.f('id')
+                        entityId: d._source[TABLE.cols.f('id')], 
                         datasetType: d._source.dataset_type,
                     }
                 }
@@ -117,6 +117,7 @@ const LogsFilesTable = ({ }) => {
             q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
             res = await callService(url, headers, q, 'POST')
             
+            let entity
             if (res.status == 200) {
                 for (let d of res.data.aggregations.buckets.buckets) {
                     uuid = d.key
@@ -124,7 +125,8 @@ const LogsFilesTable = ({ }) => {
                     for (let h of d.calendarHistogram.buckets) {
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
-                    entities.current[uuid] = {...(entities.current[uuid] || {uuid}), interval: histogramOps.interval,  histogram: histogramBuckets}
+                    entity = entities.current[uuid]
+                    entities.current[uuid] = {...(entity || {uuid}), datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
                 }
             }
 
