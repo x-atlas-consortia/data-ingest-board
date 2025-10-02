@@ -267,6 +267,20 @@ const DatasetTable = ({
                 width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
+        {
+            ... TABLE.columnOptions({
+                field: "has_qa_published_derived_dataset",
+                title: "Has QA/Published Derived Datasets",
+                width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
+        },
+        {
+            ... TABLE.columnOptions({
+                field: "has_all_published_datasets",
+                title: "Has All Primary Published",
+                width: 130,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
+        },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Blocks', field: 'blocks'}),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).uuidList({ name: 'Parent Ancestors', field: 'parent_ancestors'}),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage(),
