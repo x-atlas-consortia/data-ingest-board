@@ -30,19 +30,14 @@ const Logs = () => {
     const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
-        let m = month ? month : date.getMonth()+1
+        let m = month || (date.getMonth()+1)
         let d = day || date.getDate()
-        if (m.toString().length == 1) {
-            m = '0'+m
-        }
-        if (date.getDate() < 10) {
-            d = '0'+date.getDate()
-        }
-        return `${date.getFullYear()}-${m}-${d}`
+        const pad = (num) => String(num).padStart(2, '0')
+        return `${date.getFullYear()}-${pad(m)}-${pad(d)}`
     }
 
     const currentDate = new Date()
-    const [fromDate, setFromDate] = useState(formatDate(currentDate, '01', '01'))
+    const [fromDate, setFromDate] = useState(formatDate(currentDate, 1, 1))
     const [toDate, setToDate] = useState(formatDate(currentDate))
     const [cards, setCards] = useState(null)
     const [tabs, setTabs] = useState(null)
