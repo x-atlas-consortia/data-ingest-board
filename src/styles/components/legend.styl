@@ -1,6 +1,12 @@
 .c-legend
   height 100%
   font-size 0.8rem
+  &.c-legend--noHover 
+    .c-legend 
+      &__item 
+        &:hover 
+          background-color inherit 
+          cursor default
   ul
     padding-left 0
   &__title
@@ -21,7 +27,6 @@
     padding 0.25rem 0.5rem
     cursor pointer
     gap: 0.5rem;
-
     &:hover
       background-color #fafafa
     &__selected

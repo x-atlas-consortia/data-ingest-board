@@ -178,6 +178,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
     const getMiniCharts = () => {
         let charts = []
         let i = 0
+        const chartClassName = 'c-visualizations__miniCharts'
         for (let c of columns) {
             let _data = filterChartData(c.key)
             if (_data.length > 1) {
@@ -186,7 +187,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                         onClick={() => openMiniChartInModal(c)}
                         key={i}
                         style={{ ...baseStyle }}
-                        className={c.key === column ? 'is-active' : ''}
+                        className={c.key === column ? chartClassName+' is-active' : chartClassName}
                     >
                         {hasInitViz && isBar(c.key) && (
                             <Bar
@@ -194,9 +195,9 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 filters={filters}
                                 column={c.key}
                                 chartId={i.toString()}
-                                colorMethods={colorMethods}
-                                showXLabels={false}
                                 reload={false}
+                                yAxis={{showLabels: false}}
+                                xAxis={{showLabels: false, colorMethods }}
                             />
                         )}
                         {hasInitViz && isPie(c.key) && (
@@ -204,7 +205,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 data={_data}
                                 column={c.key}
                                 chartId={i.toString()}
-                                colorMethods={colorMethods}
+                                xAxis={{ colorMethods }}
                             />
                         )}
                         <div className='text-center'>
@@ -310,9 +311,8 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     setLegend={setLegend}
                                                     data={chartData}
                                                     column={column}
-                                                    colorMethods={colorMethods}
-                                                    showXLabels={true}
                                                     onSectionClick={handleChartItemClick}
+                                                    xAxis={{showLabels: true, colorMethods }}
                                                 />
                                             )}
                                             {isPie(column) && hasMeaningfulData() && (
@@ -320,7 +320,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     setLegend={setLegend}
                                                     data={chartData}
                                                     column={column}
-                                                    colorMethods={colorMethods}
+                                                    xAxis={{ colorMethods }}
                                                     onSectionClick={handleChartItemClick}
                                                 />
                                             )}
@@ -329,7 +329,6 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                         <Col className='mt-4' md={{ span: 6, pull: 18 }} sm={{ span: 24 }} xs={{ span: 24 }}>
                                             {hasMeaningfulData() && <Legend
                                                 legend={legend}
-                                                setLegend={setLegend}
                                                 selectedValues={selectedFilterValues}
                                                 onItemClick={handleChartItemClick}
                                             />}

@@ -19,7 +19,7 @@ export function some(s1, s2, insensitive = true) {
 export function eq(s1, s2, insensitive = true) {
     let res = s1 === s2
     if (insensitive && s1 !== undefined && s2 !== undefined) {
-        res = s1.toLowerCase() === s2.toLowerCase()
+        res = s1?.toLowerCase() === s2?.toLowerCase()
     }
     return res
 }
@@ -33,11 +33,39 @@ export function toDateString(timestamp) {
     return date.toUTCString()
 }
 
+export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberFormat().format(num) : 0
+
+export const formatBytes = (bytes, decimals = 2) => {
+        if (!+bytes) return '0 Bytes'
+
+        const k = 1024
+        const dm = decimals < 0 ? 0 : decimals
+        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+    }
+
 Object.assign(Array.prototype, {
     comprises(needle, insensitive = true) {
         return this.some((i) => eq(i, needle, insensitive))
+    },
+    keySort(obj) {
+        const keys = this
+        
+        keys.sort();
+
+        // Create a new object with sorted keys
+        const sortedObject = {};
+        for (const key of keys) {
+            sortedObject[key] = obj[key];
+        }
+        return sortedObject
     }
 })
+
+
 
 String.prototype.format = function() {
     let args = arguments;
@@ -47,6 +75,13 @@ String.prototype.format = function() {
             : match
             ;
     });
+};
+
+String.prototype.upCaseFirst = function() {
+    if (this.length === 0) {
+        return "";
+    }
+    return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
 export const getUBKGName = (o) => {

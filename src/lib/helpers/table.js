@@ -7,7 +7,7 @@ import {
     FileTextOutlined,
     ExportOutlined, BugOutlined
 } from "@ant-design/icons";
-import {Button, Dropdown, Space, Tooltip, Tag} from "antd";
+import {Button, Dropdown, Space, Tooltip, Tag, Table} from "antd";
 import React from "react";
 import {
     autoBlobDownloader,
@@ -17,7 +17,7 @@ import {
     getUBKGName,
     some,
     storageKey,
-    toDateString
+    toDateString,
 } from "./general";
 import ENVS from "./envs";
 import URLS from "./urls";
@@ -202,12 +202,16 @@ const TABLE = {
                     item[key] = toDateString(item[key])
                 }
 
-                if (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n')) {
+            
+                if (typeof item[key] === 'string' && (item[key].includes(',') || item[key].includes('"') || item[key].includes('\n'))) {
                     item[key] = item[key].replace(/"/g, '""')
                 }
 
                 if (['processed_datasets', 'descendant_datasets', 'descendants'].comprises(key)) {
                     delete item[key]
+                }
+                if (!Array.isArray(item[key]) && typeof item[key] === 'object') {
+                    item[key] = JSON.stringify(item[key]).replace(/"/g, '""')
                 }
                 if (Array.isArray(item[key])) {
                     // Convert objects to string representations
@@ -246,17 +250,17 @@ const TABLE = {
         }
         return _cols.length ? _cols : cols
     },
-    generateCSVFile: (data, filename) => {
+    generateCSVFile: (data, filename, cols) => {
         if (!data.length) return
         try {
             let _data = ''
-            let cols = TABLE.sortColumns(filename, Object.keys(data[0]))
+            let _cols = cols ? cols : TABLE.sortColumns(filename, Object.keys(data[0]))
 
             const csv = (d) => {
                 let sep, c, col
-                for (let i = 0; i < cols.length; i++) {
-                    sep = i === cols.length - 1 ? '' : ','
-                    c = cols[i]
+                for (let i = 0; i < _cols.length; i++) {
+                    sep = i === _cols.length - 1 ? '' : ','
+                    c = _cols[i]
                     col = d ? d[c] : c
                     _data += `"${col}"${sep}`
                 }
@@ -644,6 +648,29 @@ const TABLE = {
             getCheckboxProps: (record) => ({
                 disabled: disabledRows.comprises(record.status),
             })
+        }
+    },
+    expandableHistogram: (rowKey, formatter, otherComponent) => {
+        return {
+            expandable: {
+                expandedRowRender: row => {
+                    let cols = []
+                    for (let i of Object.keys(row.histogram)) {
+                        cols.push({
+                        title: i,
+                        dataIndex: i,
+                        key: i,
+                        render: (v, r) => {
+                            return <>{formatter(v, {field: i, row: r})}</>
+                        }
+                    },)
+                    }
+                    return <div style={{maxWidth: '100%', overflowX: 'auto'}}>
+                        <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row.histogram, [rowKey]: row[rowKey]}]} />
+                        {otherComponent && <>{otherComponent(row)}</>}
+                    </div>
+                },
+            }
         }
     }
 }
