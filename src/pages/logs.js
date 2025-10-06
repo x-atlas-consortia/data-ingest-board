@@ -31,10 +31,14 @@ const Logs = () => {
 
     const formatDate = (date, month, day) => {
         let m = month ? month : date.getMonth()+1
+        let d = day || date.getDate()
         if (m.toString().length == 1) {
             m = '0'+m
         }
-        return `${date.getFullYear()}-${m}-${day || date.getDate()}`
+        if (date.getDate() < 10) {
+            d = '0'+date.getDate()
+        }
+        return `${date.getFullYear()}-${m}-${d}`
     }
 
     const currentDate = new Date()
