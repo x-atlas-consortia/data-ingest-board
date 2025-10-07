@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Table } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -373,6 +373,9 @@ const Logs = () => {
     }
 
     const dateFormat = 'YYYY-MM-DD';
+    if (!isAuthenticated) {
+        return <Spinner tip='' size='small' />
+    }
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
