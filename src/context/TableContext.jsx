@@ -14,8 +14,7 @@ import {
     SortableContext,
     useSortable
 } from '@dnd-kit/sortable'
-import {eq, storageKey} from "@/lib/helpers/general";
-import TABLE from "@/lib/helpers/table";
+import {storageKey} from "@/lib/helpers/general";
 import RouterContext from "@/context/RouterContext";
 
 const AppTableContext = createContext({})
@@ -32,7 +31,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
     const orderedColumnsStoreKey = storageKey(`${TABLE_COL_ORDER_KEY}${context}`)
     const hiddenColumnsStoreKey = storageKey(`${TABLE_COL_HIDDEN_KEY}${context}`)
     const [dragEnd, setDragEnd] = useState(0)
-    const [_, setHiddenColumns] = useState(initialColumnsToHide)
+    const [hiddenColumns, setHiddenColumns] = useState(initialColumnsToHide)
     const {setFilters, setPage, setPageSize} = useContext(RouterContext)
     const sortingInfo = useRef(null)
     const adjustedFilters = useRef(null)
@@ -56,7 +55,6 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
         }
         localStorage.setItem(hiddenColumnsStoreKey, JSON.stringify(hidden))
         setHiddenColumns(hidden)
-
     }
 
     const dragActiveStyle = (dragState, id) => {
@@ -259,6 +257,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
 
         } else {
             adjustedFilters.current = correctedFilters
+            setFilters(correctedFilters)
             clearSort()
         }
         Object.keys(correctedFilters).forEach(key => {
@@ -299,7 +298,9 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             TableBodyCell,
             TableHeaderCell,
             handleTableChange,
-            baseColumns
+            baseColumns,
+            hiddenColumns,
+            dragIndex
         }}>
             <DndContext
                 sensors={sensors}

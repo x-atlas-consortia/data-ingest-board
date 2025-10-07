@@ -13,7 +13,8 @@ COPY --chmod=755 ./entrypoint.sh /usr/local/bin/entrypoint.sh
 # Update the package list and install git
 RUN apt-get update -y && \
     apt-get dist-upgrade -y && \
-    apt-get install git -y
+    apt-get install git -y && \
+    apt-get install curl -y
 
 # Change to source code directory
 WORKDIR /usr/src/app/src
