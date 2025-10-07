@@ -76,7 +76,7 @@ const LogsApiUsageTable = ({ data }) => {
                 expandIconPosition={'start'}
                 items={list}
             /></div>
-        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h4>Top requested endpoints for {apiName} {details.field ? `in ${details.field}` : ''}</h4></> }}
+        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h4>Top requested endpoints for {apiName} {details.field ? `in ${details.field}` : `from ${getFromDate()} to ${getToDate()}`}</h4></> }}
             modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints.">
             <span data-field="endpoints" className="txt-lnk">{formatNum(r.endpoints || r.requests)}</span>
         </ModalOverComponent>)

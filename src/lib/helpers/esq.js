@@ -16,8 +16,8 @@ const ESQ = {
         }
         return {
             [field]: {
-                "gte": from,
-                "lt": to || "now"
+                gte: from,
+                lt: to || "now"
             }
         }
     },
@@ -32,51 +32,51 @@ const ESQ = {
     },
     groupByField: ({ size = 10, field = 'dataset_uuid' }) => {
         return {
-            "field": `${field}.keyword`,
-            "inner_hits": {
-                "name": "files",
-                "size": size,
-                "sort": [{ [`${field}.keyword`]: "desc" }]
+            field: `${field}.keyword`,
+            inner_hits: {
+                name: "files",
+                size,
+                sort: [{ [`${field}.keyword`]: "desc" }]
             },
-            "max_concurrent_group_searches": 4
+            max_concurrent_group_searches: 4
         }
     },
     groupSort: ({ sort = 'desc', field = 'dataset_uuid' }) => {
         return {
-            "terms": {
-                "field": `${field}.keyword`,
-                "order": {
-                    "_count": sort
+            terms: {
+                field: `${field}.keyword`,
+                order: {
+                    _count: sort
                 }
             }
         }
     },
     sum: (field) => {
-        return { "sum": { "field": field } }
+        return { sum: { field } }
     },
     bucket: (field, count = 10000) => {
         return {
-            "terms": {
-                "field": `${field}.keyword`,
-                "size": count
+            terms: {
+                field: `${field}.keyword`,
+                size: count
             }
         }
     },
     bucketHits: (field, count = 20) => {
         return {
-            "terms": {
-                "field": `${field}.keyword`,
-                "size": count,
-                "order": {
-                  "_count": "desc"
+            terms: {
+                field: `${field}.keyword`,
+                size: count,
+                order: {
+                  _count: "desc"
                 }
             }
         }
     },
     bucketCount: (field) => {
         return {
-            "cardinality": {
-                "field": `${field}.keyword`
+            cardinality: {
+                field: `${field}.keyword`
             }
         }
     },
@@ -223,16 +223,16 @@ const ESQ = {
             },
             minDate: (dateField = 'timestamp') => {
                 return {
-                    "size": 1,
-                    "sort": [
+                    size: 1,
+                    sort: [
                         {
                             [dateField]: {
-                                "order": "asc"
+                                order: "asc"
                             }
                         }
                     ],
-                    "query": {
-                        "match_all": {}
+                    query: {
+                        match_all: {}
                     },
                     _source: [dateField]
                 }
