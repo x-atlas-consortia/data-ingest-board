@@ -120,7 +120,7 @@ function StackedBar({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "middle")
-                .attr("x", width / 1.5)
+                .attr("x", (width / 2) + margin.left)
                 .attr("y", height * 1.3)
                 .text(xAxis.label)
         }
