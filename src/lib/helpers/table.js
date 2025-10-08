@@ -341,14 +341,17 @@ const TABLE = {
             )
         }
 
-        items.push(
+        if (record.globus_url) {
+          items.push(
             {
                 key: '3',
                 label: (
                     <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
                 )
             }
-        )
+            )  
+        }
+        
 
         return items
     },
