@@ -35,6 +35,7 @@ const LogsReposTable = ({ }) => {
     const subgroupLabels = useRef({})
     const repos = useRef([])
     const xAxis = useRef({})
+    const histogramBuckets = useRef({})
 
 
     const fetchData = async (includePrevData = true) => {
@@ -62,7 +63,7 @@ const LogsReposTable = ({ }) => {
             let repo, types
             let repos = {}
             let list = _data?.buckets
-            let _tableData = []
+            let _tableData = includePrevData ? Array.from(tableData) : []
             let _histogramBuckets = {}
             let histogramOps = determineCalendarInterval()
 
@@ -71,7 +72,7 @@ const LogsReposTable = ({ }) => {
             }
 
             if (list.length) {
-                let i = 0
+             
                 for (let d of list) {
                     types = d['type.keyword'].buckets
                     repo = d.key['repository.keyword']
@@ -85,8 +86,8 @@ const LogsReposTable = ({ }) => {
                         histogram: {},
                         ...repos[repo]
                     })
-                    repos[repo] = { ...repos[repo], i }
-                    i++
+                    repos[repo] = { ...repos[repo], i: _tableData.length - 1 }
+                  
                 }
 
                 Addon.log(`${indexKey}.Table`, { data: _tableData })
@@ -108,6 +109,7 @@ const LogsReposTable = ({ }) => {
                                 _histogramBuckets[repo] = { ...(_histogramBuckets[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
                             }
                         }
+                        
                         for (let r in _histogramBuckets) {
                             _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
                         }
@@ -120,7 +122,7 @@ const LogsReposTable = ({ }) => {
                 res = await callService(url, headers, q, 'POST')
 
                 if (res.status == 200) {
-                    _histogramBuckets = {}
+                    _histogramBuckets = includePrevData ? histogramBuckets.current : {}
                     let dKey
                     for (let d of res.data?.aggregations?.calendarHistogram?.buckets) {
                         dKey = d.key_as_string
@@ -129,6 +131,7 @@ const LogsReposTable = ({ }) => {
                             _histogramBuckets[dKey] = { ..._histogramBuckets[dKey], ...valuesObj(t) }
                         }
                     }
+                    histogramBuckets.current = _histogramBuckets
                     setVizData({ ...vizData, stackedBar: Object.values(_histogramBuckets) })
                 }
                 // end get data for stackedBar
@@ -136,7 +139,7 @@ const LogsReposTable = ({ }) => {
 
             setHistogramDetails(histogramOps)
             /// END
-            updateTableData(includePrevData, _tableData)
+            updateTableData(false, _tableData)
         } else {
             setHasMoreData(false)
         }
@@ -199,6 +202,7 @@ const LogsReposTable = ({ }) => {
         setVizData({})
         afterKey.current = null
         fetchData(false)
+        histogramBuckets.current = {}
         xAxis.current = {}
         repos.current = []
         setSelectedRows([])
