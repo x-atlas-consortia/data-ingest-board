@@ -46,6 +46,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     } else {
       exportData.current[indexKey] = tableData
     }
+    exportData.current[indexKey + 'Date'] = {fromDate: getFromDate(), toDate: getToDate()}
     
   }, [tableData, selectedRowObjects])
 

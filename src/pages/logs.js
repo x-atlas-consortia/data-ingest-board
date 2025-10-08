@@ -106,15 +106,14 @@ const Logs = () => {
         }
 
         const exportKey = key + 'Overview'
-        exportData.current[exportKey] = []
         if (isRepos(key)) {
-            exportData.current[exportKey].push({
+            exportData.current[exportKey] = {
                 fromDate,
                 toDate,
                 totalRepositories: repos,
                 totalViews,
                 totalClones
-            })
+            }
             return (<>
                 <div><h3>{repos}</h3></div>
                 <Row>
@@ -127,12 +126,12 @@ const Logs = () => {
         if (isApi(key)) {
             let ms = []
             for (let d of indexData.aggregations.services.buckets) {
-                exportData.current[exportKey].push({
+                exportData.current[exportKey] = {
                     fromDate,
                     toDate,
                     apiName: d.key,
                     requests: d.doc_count
-                })
+                }
                 ms.push(
                     <Row className='mb-2' key={d.key}>
                         <Col span={12}><strong>{d.key}</strong>:</Col>
@@ -150,14 +149,14 @@ const Logs = () => {
         }
 
         if (isFiles(key)) {
-            exportData.current[exportKey].push({
+            exportData.current[exportKey] = {
                     fromDate,
                     toDate,
                     totalBytes,
                     totalDatasets: datasetGroups,
                     totalFiles,
                     totalHits
-            })
+            }
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
                 <Row className='mt-3'>
@@ -338,9 +337,7 @@ const Logs = () => {
         let cols = []
 
         if (_data.length) {
-           
             for (let d of _data) {
-
                 // rename group (used in stackedBar viz) to repository
                 if (d.group) {
                     d.repository = d.group
@@ -365,9 +362,14 @@ const Logs = () => {
                 cols.unshift(c)
             }
             _data = TABLE.flattenDataForCSV(_data)
-            TABLE.generateCSVFile(_data, _indexKey + '.csv', cols)
+            let timespan = exportData.current[_indexKey + 'Date']
+            let fileNameDate = `${timespan.fromDate}-${timespan.toDate}`
+            TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
             if (!indexKey) {
-                TABLE.generateCSVFile(TABLE.flattenDataForCSV(exportData.current[_indexKey + 'Overview']), _indexKey + 'Overview.csv')
+                let overview = exportData.current[_indexKey + 'Overview']
+                overview.fromDate = timespan.fromDate
+                overview.toDate = timespan.toDate
+                TABLE.generateCSVFile(TABLE.flattenDataForCSV([overview]), `${_indexKey}Overview-${fileNameDate}.csv`)
             }
         }
     }
