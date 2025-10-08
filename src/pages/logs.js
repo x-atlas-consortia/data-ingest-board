@@ -295,7 +295,7 @@ const Logs = () => {
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
             if (!_data[s]) {
-                url = ENVS.urlFormat.search(`/${index}/search`)
+                url = ENVS.urlFormat.search(index)
                 q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
                 headers = getHeadersWith(globusToken).headers
                 res = await callService(url,

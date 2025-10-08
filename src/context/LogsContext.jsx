@@ -193,7 +193,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     let i = config[indexKey]
     if (!i) return null
 
-    let url = ENVS.urlFormat.search(`/${i}/search`)
+    let url = ENVS.urlFormat.search(i)
     return url
   }
 

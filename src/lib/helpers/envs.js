@@ -22,7 +22,17 @@ const ENVS = {
             be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
             fe: (path) => `${process.env.NEXT_PUBLIC_INGEST_BASE}${path}`,
         },
-        search: (path) => `${process.env.NEXT_PUBLIC_SEARCH_API_BASE}${path}`,
+        search: (val) => {
+            let path = '/search'
+            let base = process.env.NEXT_PUBLIC_SEARCH_API_BASE
+            if (eq(typeof val, 'string')) {
+                path = `/${val}${path}`
+            } else {
+                path = `/${val.index}${path}`
+                base = val.url || base
+            }
+            return `${base}${path}`
+        },
     },
     tableColumns: () => parseJSON(process.env.NEXT_PUBLIC_TABLE_COLUMNS),
     datasetFilterFields: () => parseJSON(process.env.NEXT_PUBLIC_DATASET_FILTER_FIELDS),
@@ -49,7 +59,7 @@ const ENVS = {
         const config = parseJSON(process.env.NEXT_PUBLIC_SEARCH_INDICES)
         return config[entity]
     },
-    logsIndicies: () => parseJSON(process.env.NEXT_PUBLIC_LOGS_SEARCH_INDICIES),
+    logsIndicies: () => parseJSON(process.env.NEXT_PUBLIC_LOGS_SEARCH_API_INDICIES),
     idleTimeout: () => {
         let num = process.env.NEXT_PUBLIC_IDLE_TIME
         try {
