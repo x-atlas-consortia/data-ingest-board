@@ -10,8 +10,9 @@ export const prepareStackedData = (data) => {
             Object.entries(d).sort(([, a], [, b]) => b - a)
         ))
     }
-    
-    
+
+    Addon.log('prepareStackedData', { data: sorted })
+
     return sorted
 }
 
@@ -23,7 +24,7 @@ function StackedBar({
     subGroupLabels = {},
     chartId = 'modal',
     yAxis = {},
-    xAxis={}
+    xAxis = {}
 }) {
     const {
         getChartSelector,
@@ -67,7 +68,7 @@ function StackedBar({
             .append("g")
             .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
-        const subgroups = Object.keys(data[0]).slice(1)
+        const subgroups = Object.keys(subGroupLabels)
 
         const groups = data.map(d => (d.group))
 
@@ -88,12 +89,26 @@ function StackedBar({
             }
         }
 
-        var stack = d3.stack()
-            .keys(subgroups)
-            .order(d3.stackOrderNone)
-            .offset(d3.stackOffsetNone);
+        
+        let stackedSorted = []
+        for (let d of data) {
+            let subgroupsSorted = []
+            for (let k in d) {
+                if (subGroupLabels[k]) {
+                    subgroupsSorted.push({val: d[k], key: k, group: d.group})
+                }
+            }
+            stackedSorted.push(subgroupsSorted)
+        }
 
-        const stackedData = stack(data);
+        // var stack = d3.stack()
+        //     .keys(subgroups)
+        //     .order(d3.stackOrderNone)
+        //     .offset(d3.stackOffsetNone);
+
+        // const stackedData = stack(data);
+        
+        // Addon.log('d3 stackedData', { data: stackedData })
 
         // Add Y axis
         const y = d3.scaleLinear()
@@ -101,20 +116,20 @@ function StackedBar({
             .range([height, 0]);
         g.append("g")
             .call(d3.axisLeft(y))
-            
+
         if (showYLabels()) {
             svg.append("g")
-            .append("text")
-            .attr("class", "y label")
-            .attr("text-anchor", "end")
-            .attr("y",  yAxis.labelPadding || 0)
-            .attr("x", (height/2) * -1)
-            .attr("dy", ".74em")
-            .attr("transform", "rotate(-90)")
-            .text(yAxis.label || "Frequency")
+                .append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "end")
+                .attr("y", yAxis.labelPadding || 0)
+                .attr("x", (height / 2) * -1)
+                .attr("dy", ".74em")
+                .attr("transform", "rotate(-90)")
+                .text(yAxis.label || "Frequency")
         }
-        
-            
+
+
         if (xAxis.label && showXLabels()) {
             svg.append("g")
                 .append("text")
@@ -147,29 +162,31 @@ function StackedBar({
         g.append("g")
             .selectAll("g")
             // Enter in the stack data = loop key per key = group per group
-            .data(stackedData)
+            .data(stackedSorted)
             .join("g")
+            .selectAll("rect")
+            // enter a second time = loop subgroup per subgroup to add all rectangles
+            .data(D => D.map(d => (d)))
+            .join("rect")
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
                 colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
                 return color
             })
-            .selectAll("rect")
-            // enter a second time = loop subgroup per subgroup to add all rectangles
-            .data(D => D.map(d => (d.key = D.key, d)))
-            .join("rect")
-            .attr('data-value', d => formatVal(d[1] - d[0]))
+            .attr('data-value', d => {
+                return formatVal(d.val)
+            })
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
             })
-            .attr("x", d => x(d.data.group))
+            .attr("x", d => x(d.group))
             .attr("y", height)
             .attr("height", 0)
             .attr("width", x.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.data.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d[1] - d[0])}`
+                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
             })
 
         svg.selectAll("rect")
@@ -181,10 +198,10 @@ function StackedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return y(d[0]) - y(d[1])
+                return y(maxY - d.val)
             })
             .attr("y", d => {
-                return y(d[1] - d[0])
+                return y(d.val)
             })
 
         return svg.node();

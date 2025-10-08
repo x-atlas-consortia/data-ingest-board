@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
-import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
+import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
@@ -212,7 +212,10 @@ const LogsReposTable = ({ }) => {
 
     useEffect(() => {
         for (let c of cols) {
-            subgroupLabels.current[c.dataIndex] = c.title
+            if (!eq(c.key, 'group')) {
+               subgroupLabels.current[c.dataIndex] = c.title 
+            }
+            
         }
     }, [])
 

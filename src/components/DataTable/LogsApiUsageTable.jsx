@@ -151,6 +151,7 @@ const LogsApiUsageTable = ({ data }) => {
                 histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
+                    apis.current[apiName] = apiName
                     endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
                     histogramBuckets[bKey][apiName] = t.doc_count
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
@@ -158,8 +159,6 @@ const LogsApiUsageTable = ({ data }) => {
             }
 
             _vizData = Object.values(histogramBuckets)
-
-            apis.current = endpointsPerApi
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
 
             setVizData({ ...vizData, line: _vizData })
@@ -186,7 +185,7 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} groups={Object.keys(apis.current)} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}
