@@ -177,11 +177,15 @@ const Logs = () => {
 
     const getTabId = (key) => `tab-${key}`
 
-    const highlightSection = (e, key) => {
+    const toggleHighlightClasses = (sel) => {
         const className = 'is-highlighted'
         $('.c-logCard').removeClass(className)
+        $(sel).addClass(className)
+    }
+
+    const highlightSection = (e, key) => {
         setActiveSection(getTabId(key))
-        $(e.currentTarget).addClass(className)
+        toggleHighlightClasses(e.currentTarget)
     }
 
     const getTabContent = (key, data) => {
@@ -265,7 +269,7 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = {from, to}
             title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -283,8 +287,11 @@ const Logs = () => {
         setIsBusy(false)
     }
 
+    const getIndexKeyByActiveTab = (active) => active.replace('tab-', '')
+
     const onTabChange = (active) => {
         setActiveSection(active)
+        toggleHighlightClasses('.c-logCard--'+getIndexKeyByActiveTab(active))
     }
 
     const fetchData = async () => {
@@ -332,7 +339,7 @@ const Logs = () => {
     }
 
     const exportHandler = (indexKey) => {
-        let _indexKey = indexKey || activeSection?.replace('tab-', '') || Object.keys(indicesSections.current)[0]
+        let _indexKey = indexKey || getIndexKeyByActiveTab(activeSection) || Object.keys(indicesSections.current)[0]
         let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
         let cols = []
 
