@@ -161,7 +161,9 @@ const Logs = () => {
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
                 <Row className='mt-3'>
-                    <Col span={12}>{formatNum(datasetGroups)}<br /><strong>Datasets</strong></Col>
+                    <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
+                </Row>
+                <Row className='mt-3'>
                     <Col span={12}>{formatNum(totalFiles)}<br /><strong>Globus files</strong> </Col>
                 </Row>
                 <Row className='mt-2'>

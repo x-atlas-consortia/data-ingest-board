@@ -209,6 +209,7 @@ const ESQ = {
 
         return {
             filter: {
+                size,
                 query: {
                     bool: {
                         filter: [

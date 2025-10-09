@@ -90,8 +90,8 @@ const LogsFilesTable = ({ }) => {
             }
 
             // Find out info about these ids
-            q = ESQ.indexQueries({ list: ids }).filter
-            q._source = ['uuid', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
+            q = ESQ.indexQueries({ list: ids, size: dataSize }).filter
+            q._source = ['uuid', 'intended_dataset_type', 'entity_type', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
             let entitiesSearch = await callService(ENVS.urlFormat.search('entities'),
                 headers,
                 q,
@@ -102,7 +102,8 @@ const LogsFilesTable = ({ }) => {
                     entities.current[d._source.uuid] = {
                         [TABLE.cols.f('id')]: d._source[TABLE.cols.f('id')],
                         entityId: d._source[TABLE.cols.f('id')], 
-                        datasetType: d._source.dataset_type,
+                        datasetType: d._source.dataset_type || d._source.intended_dataset_type || '',
+                        entityType: d._source.entity_type
                     }
                 }
             }
@@ -123,7 +124,7 @@ const LogsFilesTable = ({ }) => {
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
                     entity = entities.current[uuid]
-                    entities.current[uuid] = {...(entity || {uuid}), datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
+                    entities.current[uuid] = {...(entity || {uuid}), entityType: entity?.entityType, datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
                 }
             }
 
@@ -164,6 +165,12 @@ const LogsFilesTable = ({ }) => {
                     return <span className="text-muted">{row.uuid}</span>
                 }
             }
+        },
+        {
+            title: 'Entity Type',
+            dataIndex: 'entityType',
+            key: 'entityType',
+            sorter: (a, b) => a.entityType?.localeCompare(b?.entityType),
         },
         {
             title: 'Dataset Type',
