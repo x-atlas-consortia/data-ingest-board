@@ -101,15 +101,6 @@ function StackedBar({
             stackedSorted.push(subgroupsSorted)
         }
 
-        // var stack = d3.stack()
-        //     .keys(subgroups)
-        //     .order(d3.stackOrderNone)
-        //     .offset(d3.stackOffsetNone);
-
-        // const stackedData = stack(data);
-        
-        // Addon.log('d3 stackedData', { data: stackedData })
-
         // Add Y axis
         const y = d3.scaleLinear()
             .domain([0, maxY])

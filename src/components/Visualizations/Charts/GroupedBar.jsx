@@ -3,19 +3,6 @@ import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
 
-export const prepareStackedData = (data) => {
-    let sorted = []
-    for (let d of data) {
-        sorted.push(Object.fromEntries(
-            Object.entries(d).sort(([, a], [, b]) => b - a)
-        ))
-    }
-
-    Addon.log('prepareStackedData', { data: sorted })
-
-    return sorted
-}
-
 function GroupedBar({
     setLegend,
     filters,
@@ -89,18 +76,6 @@ function GroupedBar({
             }
         }
 
-        
-        let stackedSorted = []
-        for (let d of data) {
-            let subgroupsSorted = []
-            for (let k in d) {
-                if (subGroupLabels[k]) {
-                    subgroupsSorted.push({val: d[k], key: k, group: d.group})
-                }
-            }
-            stackedSorted.push(subgroupsSorted)
-        }
-
         // Add Y axis
         const y = d3.scaleLinear()
             .domain([0, maxY])
@@ -163,7 +138,8 @@ function GroupedBar({
                 .attr("transform", function(d) { return "translate(" + x(d.group) + ",0)"; })
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
-            .data(function(d) { return subgroups.map(function(key) { return {key: key, val: d[key]}; }); })
+            .data(function(d) { 
+                return subgroups.map(function(key) { return {key: key, val: d[key]}; }); })
             .join("rect")
             .attr("fill", d => {
                 const color = colorScale(d.key)

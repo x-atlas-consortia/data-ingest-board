@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
-import GroupedBar, { prepareStackedData } from '@/components/Visualizations/Charts/GroupedBar';
+import { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
+import GroupedBar from '@/components/Visualizations/Charts/GroupedBar';
 import WithChart from './WithChart';
 
 function GroupedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }) {
