@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Table, Input } from 'antd';
 
 function SearchFilterTable({ data, columns, tableProps, formatters = {} }) {
@@ -39,7 +39,7 @@ function SearchFilterTable({ data, columns, tableProps, formatters = {} }) {
                 onChange={(e) => handleSearch(e.target.value)} 
                 style={{ marginBottom: 16 }}
             />
-            <Table dataSource={filteredData} columns={columns} {...tableProps} />
+            <Table  dataSource={filteredData} columns={columns} {...tableProps} />
             
         </div>
     )

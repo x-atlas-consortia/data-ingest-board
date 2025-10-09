@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
@@ -30,7 +30,8 @@ const LogsReposTable = ({ }) => {
         getAxisTick,
         getDatePart,
         histogramDetails, setHistogramDetails,
-        selectedMenuItem, setSelectedMenuItem
+        selectedMenuItem, setSelectedMenuItem,
+        tableScroll
 
     } = useContext(LogsContext)
 
@@ -314,7 +315,7 @@ const LogsReposTable = ({ }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
-                scroll: { y: 'calc(100vh - 200px)' }
+                ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More

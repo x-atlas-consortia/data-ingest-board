@@ -47,6 +47,7 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
     const exportData = useRef({})
+    const dateFormat = 'YYYY-MM-DD';
 
     let _cards = {
             openSourceRepos: {
@@ -269,7 +270,7 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = {from, to}
             title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -381,7 +382,7 @@ const Logs = () => {
         }
     }
 
-    const dateFormat = 'YYYY-MM-DD';
+    
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
     }

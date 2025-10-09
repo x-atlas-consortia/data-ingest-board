@@ -34,20 +34,17 @@ const LogsFilesTable = ({ }) => {
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
         afterKey,
-        selectedMenuItem,
         numOfRows,
         setMenuItems,
         updateTableData,
-        getMenuItemClassName,
         fromDate, toDate,
         getFromDate, getToDate,
         vizData, setVizData,
         determineCalendarInterval,
-        getAxisTick,
         selectedRows, setSelectedRows,
-        selectedRowObjects, setSelectedRowObjects,
+        setSelectedRowObjects,
         getUrl,
-        getDatePart,
+        tableScroll,
         histogramDetails, setHistogramDetails,
         sectionHandleMenuItemClick
 
@@ -306,7 +303,7 @@ const LogsFilesTable = ({ }) => {
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,
                     loading: isBusy,
-                    scroll: { y: 'calc(100vh - 200px)' }
+                    ...tableScroll
                 }} />
 
             {hasMoreData && <Button onClick={fetchData} type="primary" block>

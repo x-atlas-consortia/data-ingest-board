@@ -224,6 +224,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
 
   const getDatePart = (histogramOps) => ['month', 'year'].comprises(histogramOps.interval) ? '-2' : ''
 
+  const tableScroll = {scroll: {x: 900, y: 'calc(100vh - 200px)' }}
+
   return <LogsContext.Provider value={{
     tableData, setTableData,
     isBusy, setIsBusy,
@@ -249,7 +251,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getDatePart,
     histogramDetails, setHistogramDetails,
     sectionHandleMenuItemClick,
-    stackedGroupedBarMenuItems
+    stackedGroupedBarMenuItems,
+    tableScroll
 
   }}>{children}</LogsContext.Provider>
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
@@ -8,7 +8,7 @@ import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
-import { BarChartOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
 
 const LogsApiUsageTable = ({ data }) => {
@@ -30,7 +30,8 @@ const LogsApiUsageTable = ({ data }) => {
         selectedMenuItem,
         setSelectedMenuItem,
         setMenuItems,
-        histogramDetails, setHistogramDetails
+        histogramDetails, setHistogramDetails,
+        tableScroll
 
     } = useContext(LogsContext)
 
@@ -110,7 +111,7 @@ const LogsApiUsageTable = ({ data }) => {
             }
         }
     ]
-    
+
     useEffect(() => {
         setMenuItems(stackedGroupedBarMenuItems)
     }, [selectedMenuItem])
@@ -207,7 +208,7 @@ const LogsApiUsageTable = ({ data }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
-                scroll: { y: 'calc(100vh - 200px)' }
+                ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More

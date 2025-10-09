@@ -39,6 +39,13 @@ function AppSideNavBar({ exportHandler }) {
         }
     }, [isAuthenticated])
 
+    useEffect(()=> {
+        if (window.innerWidth < 768) {
+            setCollapsed(true)
+        }
+
+    }, [])
+
 
     const handleMenuClick = (e) => {
         if (eq(e.key, 'export')) {
