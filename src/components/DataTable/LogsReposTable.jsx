@@ -8,6 +8,7 @@ import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
+import GroupedBarWithLegend from "../Visualizations/GroupedBarWithLegend";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -22,13 +23,14 @@ const LogsReposTable = ({ }) => {
         fromDate, toDate,
         getFromDate, getToDate,
         indexKey,
-        selectedRows, setSelectedRows,
-        selectedRowObjects, setSelectedRowObjects,
+        selectedRows, setSelectedRows, setMenuItems,
+        stackedGroupedBarMenuItems, setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
         getAxisTick,
         getDatePart,
-        histogramDetails, setHistogramDetails
+        histogramDetails, setHistogramDetails,
+        selectedMenuItem, setSelectedMenuItem
 
     } = useContext(LogsContext)
 
@@ -117,7 +119,7 @@ const LogsReposTable = ({ }) => {
                     }
                 }
 
-                // Get data for stackedBar
+                // Get data for bar charts
                 q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}Histogram`](histogramOps)
                 res = await callService(url, headers, q, 'POST')
 
@@ -132,9 +134,9 @@ const LogsReposTable = ({ }) => {
                         }
                     }
                     histogramBuckets.current = _histogramBuckets
-                    setVizData({ ...vizData, stackedBar: Object.values(_histogramBuckets) })
+                    setVizData({ ...vizData, bar: Object.values(_histogramBuckets) })
                 }
-                // end get data for stackedBar
+                // end get data for bar charts
             }
 
             setHistogramDetails(histogramOps)
@@ -196,6 +198,15 @@ const LogsReposTable = ({ }) => {
             }
         }
     ]
+
+    useEffect(() => {
+        setMenuItems(stackedGroupedBarMenuItems)
+    }, [selectedMenuItem])
+
+
+    useEffect(() => {
+        setSelectedMenuItem('groupedBar')
+    }, [])
 
     useEffect(() => {
         setTableData([])
@@ -292,7 +303,8 @@ const LogsReposTable = ({ }) => {
     }
 
     return (<>
-        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

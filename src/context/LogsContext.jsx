@@ -1,9 +1,10 @@
 import React from 'react'
 import { createContext, useEffect, useState, useRef } from 'react'
-import { DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
+import Icon, { BarChartOutlined, DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
 import { Dropdown, Space } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
+import { GroupedBarChartIcon } from '@/lib/helpers/icons';
 
 const LogsContext = createContext({})
 
@@ -189,6 +190,29 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
   }
 
+  const stackedGroupedBarMenuItems = [
+        {
+            key: 'chartType',
+            type: 'group',
+            label: 'Chart Type',
+            children: [
+                {
+                    key: 'groupedBar',
+                    className: getMenuItemClassName(selectedMenuItem, 'groupedBar'),
+                    label: 'Grouped Bar',
+                    icon:   <GroupedBarChartIcon />
+                },
+                {
+                    key: 'stackedBar',
+                    className: getMenuItemClassName(selectedMenuItem, 'stackedBar'),
+                    label: 'Stacked Bar',
+                    icon: <BarChartOutlined  />
+                },
+                
+            ],
+        }
+    ]
+
   const getUrl = () => {
     let config = ENVS.logsIndicies()
     let i = config[indexKey]
@@ -224,7 +248,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     getUrl,
     getDatePart,
     histogramDetails, setHistogramDetails,
-    sectionHandleMenuItemClick
+    sectionHandleMenuItemClick,
+    stackedGroupedBarMenuItems
 
   }}>{children}</LogsContext.Provider>
 }
