@@ -1,5 +1,5 @@
 import { useEffect, useContext, useRef } from "react";
-import { Button, Table } from 'antd';
+import { Button, Popover, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
@@ -69,6 +69,7 @@ const LogsReposTable = ({ }) => {
             let _tableData = includePrevData ? Array.from(tableData) : []
             let _histogramBuckets = {}
             let histogramOps = determineCalendarInterval()
+            let _ownerBuckets = {}
 
             const valuesObj = (t) => {
                 return { [`unique${t.key.upCaseFirst()}s`]: t.unique?.value, [`${t.key}s`]: t.count?.value }
@@ -109,11 +110,13 @@ const LogsReposTable = ({ }) => {
 
                             for (let r of t['repository.keyword'].buckets) {
                                 repo = r.key
+                                _ownerBuckets[repo] = {owner: r.owner?.buckets[0].key}
                                 _histogramBuckets[repo] = { ...(_histogramBuckets[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
                             }
                         }
                         
                         for (let r in _histogramBuckets) {
+                            _tableData[repos[r].i].owner = _ownerBuckets[r].owner
                             _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
                         }
 
@@ -161,6 +164,9 @@ const LogsReposTable = ({ }) => {
             dataIndex: 'group',
             key: 'group',
             sorter: (a, b) => a.group.localeCompare(b.group),
+            render: (v, r) => {
+                return <span data-field="group"><Popover content={<span>{r.owner}</span>}><span>{v}</span></Popover></span>
+            }
         },
         {
             title: 'Total Views',

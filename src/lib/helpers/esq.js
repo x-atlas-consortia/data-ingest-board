@@ -128,6 +128,7 @@ const ESQ = {
                     field: `${field}.keyword`
                 },
                 aggs: {
+                    owner: ESQ.bucket('owner'),
                     count: ESQ.sum('count'),
                     unique: ESQ.sum('uniques')
                 }
