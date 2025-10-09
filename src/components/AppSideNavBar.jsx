@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Button, Layout, Menu } from "antd";
 import {
     DownloadOutlined,
-    LeftOutlined, QuestionOutlined,
+    LeftOutlined, LogoutOutlined, QuestionOutlined,
     RightOutlined,
     UserOutlined,
 } from "@ant-design/icons";
@@ -24,9 +24,13 @@ function AppSideNavBar({ exportHandler }) {
                     key: '1',
                     icon: <UserOutlined />,
                     label: getUserEmail(),
+                    children: [
+                        { key: 'logOut', label: 'Log out', icon: <LogoutOutlined /> },
+                    ]
                 },
                 {
                     key: 'export',
+                    className: 'export',
                     icon: <DownloadOutlined />,
                     label: 'Export',
                 },
@@ -39,12 +43,21 @@ function AppSideNavBar({ exportHandler }) {
         }
     }, [isAuthenticated])
 
+    useEffect(()=> {
+        if (window.innerWidth < 768) {
+            setCollapsed(true)
+        }
+
+    }, [])
+
 
     const handleMenuClick = (e) => {
         if (eq(e.key, 'export')) {
             exportHandler()
         } else if (eq(e.key, 'help')) {
             window.open(`https://docs.${ENVS.appContext().toLowerCase()}consortium.org/`, '_blank')
+        } else if (eq(e.key, 'logOut')) {
+            handleLogout()
         }
     }
 

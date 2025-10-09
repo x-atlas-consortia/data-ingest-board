@@ -47,6 +47,7 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
     const exportData = useRef({})
+    const dateFormat = 'YYYY-MM-DD';
 
     let _cards = {
             openSourceRepos: {
@@ -106,15 +107,14 @@ const Logs = () => {
         }
 
         const exportKey = key + 'Overview'
-        exportData.current[exportKey] = []
         if (isRepos(key)) {
-            exportData.current[exportKey].push({
+            exportData.current[exportKey] = {
                 fromDate,
                 toDate,
                 totalRepositories: repos,
                 totalViews,
                 totalClones
-            })
+            }
             return (<>
                 <div><h3>{repos}</h3></div>
                 <Row>
@@ -127,12 +127,12 @@ const Logs = () => {
         if (isApi(key)) {
             let ms = []
             for (let d of indexData.aggregations.services.buckets) {
-                exportData.current[exportKey].push({
+                exportData.current[exportKey] = {
                     fromDate,
                     toDate,
                     apiName: d.key,
                     requests: d.doc_count
-                })
+                }
                 ms.push(
                     <Row className='mb-2' key={d.key}>
                         <Col span={12}><strong>{d.key}</strong>:</Col>
@@ -150,18 +150,20 @@ const Logs = () => {
         }
 
         if (isFiles(key)) {
-            exportData.current[exportKey].push({
+            exportData.current[exportKey] = {
                     fromDate,
                     toDate,
                     totalBytes,
                     totalDatasets: datasetGroups,
                     totalFiles,
                     totalHits
-            })
+            }
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
                 <Row className='mt-3'>
-                    <Col span={12}>{formatNum(datasetGroups)}<br /><strong>Datasets</strong></Col>
+                    <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
+                </Row>
+                <Row className='mt-3'>
                     <Col span={12}>{formatNum(totalFiles)}<br /><strong>Globus files</strong> </Col>
                 </Row>
                 <Row className='mt-2'>
@@ -178,11 +180,15 @@ const Logs = () => {
 
     const getTabId = (key) => `tab-${key}`
 
-    const highlightSection = (e, key) => {
+    const toggleHighlightClasses = (sel) => {
         const className = 'is-highlighted'
         $('.c-logCard').removeClass(className)
+        $(sel).addClass(className)
+    }
+
+    const highlightSection = (e, key) => {
         setActiveSection(getTabId(key))
-        $(e.currentTarget).addClass(className)
+        toggleHighlightClasses(e.currentTarget)
     }
 
     const getTabContent = (key, data) => {
@@ -266,7 +272,7 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = {from, to}
             title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" style={{ width: 300 }} onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -284,8 +290,11 @@ const Logs = () => {
         setIsBusy(false)
     }
 
+    const getIndexKeyByActiveTab = (active) => active.replace('tab-', '')
+
     const onTabChange = (active) => {
         setActiveSection(active)
+        toggleHighlightClasses('.c-logCard--'+getIndexKeyByActiveTab(active))
     }
 
     const fetchData = async () => {
@@ -333,14 +342,12 @@ const Logs = () => {
     }
 
     const exportHandler = (indexKey) => {
-        let _indexKey = indexKey || activeSection?.replace('tab-', '') || Object.keys(indicesSections.current)[0]
+        let _indexKey = indexKey || getIndexKeyByActiveTab(activeSection) || Object.keys(indicesSections.current)[0]
         let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
         let cols = []
 
         if (_data.length) {
-           
             for (let d of _data) {
-
                 // rename group (used in stackedBar viz) to repository
                 if (d.group) {
                     d.repository = d.group
@@ -365,14 +372,19 @@ const Logs = () => {
                 cols.unshift(c)
             }
             _data = TABLE.flattenDataForCSV(_data)
-            TABLE.generateCSVFile(_data, _indexKey + '.csv', cols)
+            let timespan = exportData.current[_indexKey + 'Date']
+            let fileNameDate = `${timespan.fromDate}-${timespan.toDate}`
+            TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
             if (!indexKey) {
-                TABLE.generateCSVFile(TABLE.flattenDataForCSV(exportData.current[_indexKey + 'Overview']), _indexKey + 'Overview.csv')
+                let overview = exportData.current[_indexKey + 'Overview']
+                overview.fromDate = timespan.fromDate
+                overview.toDate = timespan.toDate
+                TABLE.generateCSVFile(TABLE.flattenDataForCSV([overview]), `${_indexKey}Overview-${fileNameDate}.csv`)
             }
         }
     }
 
-    const dateFormat = 'YYYY-MM-DD';
+    
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
     }

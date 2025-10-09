@@ -1,13 +1,14 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
-import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
+import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
 import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
+import GroupedBarWithLegend from "../Visualizations/GroupedBarWithLegend";
 
 const LogsReposTable = ({ }) => {
     const { globusToken } = useContext(AppContext)
@@ -22,13 +23,15 @@ const LogsReposTable = ({ }) => {
         fromDate, toDate,
         getFromDate, getToDate,
         indexKey,
-        selectedRows, setSelectedRows,
-        selectedRowObjects, setSelectedRowObjects,
+        selectedRows, setSelectedRows, setMenuItems,
+        stackedGroupedBarMenuItems, setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
         getAxisTick,
         getDatePart,
-        histogramDetails, setHistogramDetails
+        histogramDetails, setHistogramDetails,
+        selectedMenuItem, setSelectedMenuItem,
+        tableScroll
 
     } = useContext(LogsContext)
 
@@ -117,7 +120,7 @@ const LogsReposTable = ({ }) => {
                     }
                 }
 
-                // Get data for stackedBar
+                // Get data for bar charts
                 q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}Histogram`](histogramOps)
                 res = await callService(url, headers, q, 'POST')
 
@@ -132,9 +135,9 @@ const LogsReposTable = ({ }) => {
                         }
                     }
                     histogramBuckets.current = _histogramBuckets
-                    setVizData({ ...vizData, stackedBar: Object.values(_histogramBuckets) })
+                    setVizData({ ...vizData, bar: Object.values(_histogramBuckets) })
                 }
-                // end get data for stackedBar
+                // end get data for bar charts
             }
 
             setHistogramDetails(histogramOps)
@@ -198,6 +201,15 @@ const LogsReposTable = ({ }) => {
     ]
 
     useEffect(() => {
+        setMenuItems(stackedGroupedBarMenuItems)
+    }, [selectedMenuItem])
+
+
+    useEffect(() => {
+        setSelectedMenuItem('groupedBar')
+    }, [])
+
+    useEffect(() => {
         setTableData([])
         setVizData({})
         afterKey.current = null
@@ -212,7 +224,10 @@ const LogsReposTable = ({ }) => {
 
     useEffect(() => {
         for (let c of cols) {
-            subgroupLabels.current[c.dataIndex] = c.title
+            if (!eq(c.key, 'group')) {
+               subgroupLabels.current[c.dataIndex] = c.title 
+            }
+            
         }
     }, [])
 
@@ -289,7 +304,8 @@ const LogsReposTable = ({ }) => {
     }
 
     return (<>
-        {vizData.stackedBar?.length > 0 && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.stackedBar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}
@@ -299,7 +315,7 @@ const LogsReposTable = ({ }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
-                scroll: { y: 'calc(100vh - 200px)' }
+                ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More

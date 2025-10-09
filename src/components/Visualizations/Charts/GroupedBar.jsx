@@ -3,20 +3,7 @@ import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
 
-export const prepareStackedData = (data) => {
-    let sorted = []
-    for (let d of data) {
-        sorted.push(Object.fromEntries(
-            Object.entries(d).sort(([, a], [, b]) => b - a)
-        ))
-    }
-
-    Addon.log('prepareStackedData', { data: sorted })
-
-    return sorted
-}
-
-function StackedBar({
+function GroupedBar({
     setLegend,
     filters,
     data = [],
@@ -32,7 +19,7 @@ function StackedBar({
         appendTooltip } = useContext(ChartContext)
 
 
-    const chartType = 'stackedBar'
+    const chartType = 'groupedBar'
     const colors = useRef({})
     const chartData = useRef([])
     const hasLoaded = useRef(false)
@@ -80,7 +67,7 @@ function StackedBar({
 
         g.append("g")
             .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+            .call(d3.axisBottom(x).tickSize(0));
 
         let maxY = 0;
         for (let d of data) {
@@ -89,24 +76,17 @@ function StackedBar({
             }
         }
 
-        
-        let stackedSorted = []
-        for (let d of data) {
-            let subgroupsSorted = []
-            for (let k in d) {
-                if (subGroupLabels[k]) {
-                    subgroupsSorted.push({val: d[k], key: k, group: d.group})
-                }
-            }
-            stackedSorted.push(subgroupsSorted)
-        }
-
         // Add Y axis
         const y = d3.scaleLinear()
             .domain([0, maxY])
             .range([height, 0]);
         g.append("g")
             .call(d3.axisLeft(y))
+
+        var xSubgroup = d3.scaleBand()
+            .domain(subgroups)
+            .range([0, x.bandwidth()])
+            .padding([0.05])
 
         if (showYLabels()) {
             svg.append("g")
@@ -153,11 +133,13 @@ function StackedBar({
         g.append("g")
             .selectAll("g")
             // Enter in the stack data = loop key per key = group per group
-            .data(stackedSorted)
+            .data(data)
             .join("g")
+                .attr("transform", function(d) { return "translate(" + x(d.group) + ",0)"; })
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
-            .data(D => D.map(d => (d)))
+            .data(function(d) { 
+                return subgroups.map(function(key) { return {key: key, val: d[key]}; }); })
             .join("rect")
             .attr("fill", d => {
                 const color = colorScale(d.key)
@@ -171,10 +153,10 @@ function StackedBar({
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
             })
-            .attr("x", d => x(d.group))
+            .attr("x", d => xSubgroup(d.key))
             .attr("y", height)
             .attr("height", 0)
-            .attr("width", x.bandwidth())
+            .attr("width", xSubgroup.bandwidth())
             .append("title")
             .text(d => {
                 return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
@@ -222,8 +204,8 @@ function StackedBar({
     }, [filters])
 
     return (
-        <div className={`c-visualizations__chart c-visualizations__stackedBar c-bar`} id={`c-visualizations__stackedBar--${chartId}`}></div>
+        <div className={`c-visualizations__chart c-visualizations__groupedBar c-bar`} id={`c-visualizations__groupedBar--${chartId}`}></div>
     )
 }
 
-export default StackedBar
+export default GroupedBar

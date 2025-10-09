@@ -49,3 +49,14 @@
 
     .ant-menu
       background-color $col-nav-bg
+      &-submenu
+        .ant-menu
+          background-color $col-subnav-bg !important
+
+      &-item-selected
+        &.export
+          background-color inherit 
+          color inherit
+
+.ant-menu-sub
+  background-color $col-subnav-bg !important

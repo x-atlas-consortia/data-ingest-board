@@ -34,20 +34,17 @@ const LogsFilesTable = ({ }) => {
         isBusy, setIsBusy,
         hasMoreData, setHasMoreData,
         afterKey,
-        selectedMenuItem,
         numOfRows,
         setMenuItems,
         updateTableData,
-        getMenuItemClassName,
         fromDate, toDate,
         getFromDate, getToDate,
         vizData, setVizData,
         determineCalendarInterval,
-        getAxisTick,
         selectedRows, setSelectedRows,
-        selectedRowObjects, setSelectedRowObjects,
+        setSelectedRowObjects,
         getUrl,
-        getDatePart,
+        tableScroll,
         histogramDetails, setHistogramDetails,
         sectionHandleMenuItemClick
 
@@ -93,8 +90,8 @@ const LogsFilesTable = ({ }) => {
             }
 
             // Find out info about these ids
-            q = ESQ.indexQueries({ list: ids }).filter
-            q._source = ['uuid', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
+            q = ESQ.indexQueries({ list: ids, size: dataSize }).filter
+            q._source = ['uuid', 'intended_dataset_type', 'entity_type', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
             let entitiesSearch = await callService(ENVS.urlFormat.search('entities'),
                 headers,
                 q,
@@ -105,7 +102,8 @@ const LogsFilesTable = ({ }) => {
                     entities.current[d._source.uuid] = {
                         [TABLE.cols.f('id')]: d._source[TABLE.cols.f('id')],
                         entityId: d._source[TABLE.cols.f('id')], 
-                        datasetType: d._source.dataset_type,
+                        datasetType: d._source.dataset_type || d._source.intended_dataset_type || '',
+                        entityType: d._source.entity_type
                     }
                 }
             }
@@ -126,7 +124,7 @@ const LogsFilesTable = ({ }) => {
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
                     entity = entities.current[uuid]
-                    entities.current[uuid] = {...(entity || {uuid}), datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
+                    entities.current[uuid] = {...(entity || {uuid}), entityType: entity?.entityType || '', datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
                 }
             }
 
@@ -169,6 +167,12 @@ const LogsFilesTable = ({ }) => {
             }
         },
         {
+            title: 'Entity Type',
+            dataIndex: 'entityType',
+            key: 'entityType',
+            sorter: (a, b) => a.entityType?.localeCompare(b?.entityType),
+        },
+        {
             title: 'Dataset Type',
             dataIndex: 'datasetType',
             key: 'datasetType',
@@ -203,8 +207,6 @@ const LogsFilesTable = ({ }) => {
         buildBarChart()
         
     }, [fromDate, toDate])
-
-
 
 
     const buildBarChart = async () => {
@@ -299,8 +301,6 @@ const LogsFilesTable = ({ }) => {
 
     return (<>
         {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
-    
-
         <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
@@ -310,7 +310,7 @@ const LogsFilesTable = ({ }) => {
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,
                     loading: isBusy,
-                    scroll: { y: 'calc(100vh - 200px)' }
+                    ...tableScroll
                 }} />
 
             {hasMoreData && <Button onClick={fetchData} type="primary" block>

@@ -341,14 +341,17 @@ const TABLE = {
             )
         }
 
-        items.push(
+        if (record.globus_url) {
+          items.push(
             {
                 key: '3',
                 label: (
                     <a href={record.globus_url} target="_blank" rel="noopener noreferrer">Globus Directory</a>
                 )
             }
-        )
+            )  
+        }
+        
 
         return items
     },
@@ -587,7 +590,7 @@ const TABLE = {
             target="_blank"
             rel="noopener noreferrer"
             type="primary"
-            className="text-decoration-none ms-2 js-btn--viewSankey">
+            className="text-decoration-none ms-2 js-btn--viewSankey mt-2 mt-md-0">
             View Sankey Diagram
         </Button>
     },
@@ -666,7 +669,7 @@ const TABLE = {
                     },)
                     }
                     return <div style={{maxWidth: '100%', overflowX: 'auto'}}>
-                        <Table pagination={false} rowKey={rowKey} columns={cols} dataSource={[{...row.histogram, [rowKey]: row[rowKey]}]} />
+                        <Table pagination={false} rowKey={rowKey} columns={cols} scroll={{x: 1500}} dataSource={[{...row.histogram, [rowKey]: row[rowKey]}]} />
                         {otherComponent && <>{otherComponent(row)}</>}
                     </div>
                 },

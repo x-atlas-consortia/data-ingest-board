@@ -1,7 +1,7 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
 import ESQ from "@/lib/helpers/esq";
-import { callService, formatNum, getHeadersWith } from "@/lib/helpers/general";
+import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
@@ -9,6 +9,7 @@ import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLege
 import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
+import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
 
 const LogsApiUsageTable = ({ data }) => {
     const { globusToken } = useContext(AppContext)
@@ -23,18 +24,19 @@ const LogsApiUsageTable = ({ data }) => {
         getFromDate, getToDate,
         indexKey,
         selectedRows, setSelectedRows,
-        selectedRowObjects, setSelectedRowObjects,
+        stackedGroupedBarMenuItems, setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
-        getAxisTick,
-        getDatePart,
-        histogramDetails, setHistogramDetails
+        selectedMenuItem,
+        setSelectedMenuItem,
+        setMenuItems,
+        histogramDetails, setHistogramDetails,
+        tableScroll
 
     } = useContext(LogsContext)
 
     const apis = useRef({})
     const xAxis = useRef({})
-
 
     const fetchData = (includePrevData = true) => {
         setIsBusy(true)
@@ -111,6 +113,15 @@ const LogsApiUsageTable = ({ data }) => {
     ]
 
     useEffect(() => {
+        setMenuItems(stackedGroupedBarMenuItems)
+    }, [selectedMenuItem])
+
+
+    useEffect(() => {
+        setSelectedMenuItem('groupedBar')
+    }, [])
+
+    useEffect(() => {
         setTableData([])
         setVizData({})
         fetchData(false)
@@ -130,6 +141,7 @@ const LogsApiUsageTable = ({ data }) => {
 
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
+        
 
         let res = await callService(url, headers, q, 'POST')
         let _vizData = []
@@ -151,6 +163,7 @@ const LogsApiUsageTable = ({ data }) => {
                 histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
+                    apis.current[apiName] = apiName
                     endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
                     histogramBuckets[bKey][apiName] = t.doc_count
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
@@ -158,11 +171,9 @@ const LogsApiUsageTable = ({ data }) => {
             }
 
             _vizData = Object.values(histogramBuckets)
-
-            apis.current = endpointsPerApi
             Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
 
-            setVizData({ ...vizData, line: _vizData })
+            setVizData({ ...vizData, bar: _vizData })
             updateTableData(includePrevData, _tableData)
             setHistogramDetails(histogramOps)
         }
@@ -178,15 +189,16 @@ const LogsApiUsageTable = ({ data }) => {
     };
 
     const yAxis = { label: "Requests", formatter: formatNum }
+    const _xAxis = { ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
     }
 
-
     return (<>
 
-        {vizData.line?.length > 0 && <StackedBarWithLegend xAxis={{ ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }} groups={Object.keys(apis.current)} yAxis={yAxis} data={vizData.line} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={_xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend xAxis={_xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}
@@ -196,7 +208,7 @@ const LogsApiUsageTable = ({ data }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
-                scroll: { y: 'calc(100vh - 200px)' }
+                ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>
             Load More

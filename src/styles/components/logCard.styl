@@ -2,8 +2,16 @@
   border solid 3px transparent
   margin 10px
   cursor pointer
+  width 25%
+  max-width 320px
+  word-break break-all
+  +md-max()
+    width 100%
     
   &.is-highlighted
     border-color $col-hover-blue
   &:hover
     background-color #fffbfb
+
+  .ant-card-head-title 
+    padding-top 20px
