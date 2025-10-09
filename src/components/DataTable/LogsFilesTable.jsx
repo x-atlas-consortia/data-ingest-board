@@ -124,7 +124,7 @@ const LogsFilesTable = ({ }) => {
                         histogramBuckets[h.key_as_string] = h.totalBytes.value
                     }
                     entity = entities.current[uuid]
-                    entities.current[uuid] = {...(entity || {uuid}), entityType: entity?.entityType, datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
+                    entities.current[uuid] = {...(entity || {uuid}), entityType: entity?.entityType || '', datasetType: entity?.datasetType || '', interval: histogramOps.interval,  histogram: histogramBuckets}
                 }
             }
 

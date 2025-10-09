@@ -118,7 +118,7 @@ const ESQ = {
         }
     },
     ownerFilter: (from, to) => {
-        return ESQ.filter(from, to, 'owner', [`${ENVS.appContext().toLowerCase()}consortium`])
+        return ESQ.filter(from, to, 'owner.keyword', [`${ENVS.appContext().toLowerCase()}consortium`, 'x-atlas-consortia'])
     },
     reposAggs: (field = 'type', size = 20) => {
         return {
