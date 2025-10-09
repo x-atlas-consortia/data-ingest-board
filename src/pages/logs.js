@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -30,7 +30,7 @@ const Logs = () => {
     const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
-        let m = month || (date.getMonth()+1)
+        let m = month || (date.getMonth() + 1)
         let d = day || date.getDate()
         const pad = (num) => String(num).padStart(2, '0')
         return `${date.getFullYear()}-${pad(m)}-${pad(d)}`
@@ -50,21 +50,21 @@ const Logs = () => {
     const dateFormat = 'YYYY-MM-DD';
 
     let _cards = {
-            openSourceRepos: {
-                title: 'Open Source Repositories',
-                icon: <CodeOutlined />
-            },
-            apiUsage: {
-                title: 'API Usage',
-                icon: <ApiOutlined />,
-                dateField: indexFixtures.apiUsage.date
-            },
-            fileDownloads: {
-                title: 'Data Transfers',
-                icon: <DownloadOutlined />,
-                dateField: indexFixtures.fileDownloads.date
-            }
+        openSourceRepos: {
+            title: 'Open Source Repositories',
+            icon: <CodeOutlined />
+        },
+        apiUsage: {
+            title: 'API Usage',
+            icon: <ApiOutlined />,
+            dateField: indexFixtures.apiUsage.date
+        },
+        fileDownloads: {
+            title: 'Data Transfers',
+            icon: <DownloadOutlined />,
+            dateField: indexFixtures.fileDownloads.date
         }
+    }
 
     const handleDateRange = (dates, dateStrings) => {
         setFromDate(dateStrings[0])
@@ -84,6 +84,7 @@ const Logs = () => {
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
         let agg
+        let repoData = []
 
         let indexData = data[key]
         agg = indexData.aggregations
@@ -96,32 +97,48 @@ const Logs = () => {
             datasetGroups = agg.totalDatasets.value
             totalBytes = agg.totalBytes.value
         } else {
-            for (let b of agg.buckets.buckets) {
-                if (eq(b.key['type.keyword'], 'clone')) {
-                    totalClones = b.count.value;
-                } else {
-                    totalViews = b.count.value;
+            for (let o of agg.repos.buckets) {
+                let owner = o.key
+                let total = o.total.buckets.length
+                let stats = []
+                for (let b of o.buckets.buckets) {
+                    stats.push({
+                        type: b.key,
+                        count: b.count.value,
+                        unique: b.unique.value
+                    })
                 }
+                repoData.push({
+                    fromDate,
+                    toDate,
+                    owner,
+                    total,
+                    stats
+                })
             }
-            repos = agg.repos.buckets.length
+
         }
 
         const exportKey = key + 'Overview'
         if (isRepos(key)) {
-            exportData.current[exportKey] = {
-                fromDate,
-                toDate,
-                totalRepositories: repos,
-                totalViews,
-                totalClones
+            exportData.current[exportKey] = repoData
+            let cardInfo = []
+            for (let d of repoData) {
+                let colInfo = []
+                for (let c of d.stats) {
+                    colInfo.push(<Row key={c.type}>
+                        <Col  span={12}>{formatNum(c.count)}<br />{c.type}s</Col>
+                        <Col span={12}>{formatNum(c.unique)}<br />unique {c.type}s</Col>
+                    </Row>)
+                }
+                cardInfo.push(
+                    <div key={d.owner}>
+                        <div><h3> {d.total} <small style={{ fontSize: '.5em' }}>{d.owner}</small></h3></div>
+                        {colInfo}
+                    </div>
+                )
             }
-            return (<>
-                <div><h3>{repos}</h3></div>
-                <Row>
-                    <Col span={12}>{formatNum(totalViews)}<br />views</Col>
-                    <Col span={12}>{formatNum(totalClones)}<br />clones</Col>
-                </Row>
-            </>)
+            return (<Carousel>{cardInfo}</Carousel>)
         }
 
         if (isApi(key)) {
@@ -141,7 +158,7 @@ const Logs = () => {
                 )
             }
             return (<>
-                <div style={{overflowY: 'auto', maxHeight: '100px'}}>{ms}</div>
+                <div style={{ overflowY: 'auto', maxHeight: '100px' }}>{ms}</div>
                 {totalHits > 0 && <span>-----------------------------</span>}
                 <Row className='mt-2'>
                     <Col span={12}><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
@@ -151,12 +168,12 @@ const Logs = () => {
 
         if (isFiles(key)) {
             exportData.current[exportKey] = {
-                    fromDate,
-                    toDate,
-                    totalBytes,
-                    totalDatasets: datasetGroups,
-                    totalFiles,
-                    totalHits
+                fromDate,
+                toDate,
+                totalBytes,
+                totalDatasets: datasetGroups,
+                totalFiles,
+                totalHits
             }
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
@@ -165,8 +182,6 @@ const Logs = () => {
                 </Row>
                 <Row className='mt-3'>
                     <Col span={12}>{formatNum(totalFiles)}<br /><strong>Globus files</strong> </Col>
-                </Row>
-                <Row className='mt-2'>
                     <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col>
                 </Row>
             </>)
@@ -218,7 +233,7 @@ const Logs = () => {
                         name: d.key,
                         requests: d.doc_count,
                         endpoints: d.totalEndpoints.value,
-                        endpointsHits: d.endpoints 
+                        endpointsHits: d.endpoints
                     }
                 )
             }
@@ -258,7 +273,7 @@ const Logs = () => {
     }
 
     const getCards = (data) => {
-        
+
 
         let comps = []
         let _tabs = []
@@ -270,8 +285,8 @@ const Logs = () => {
                 from = formatDate(date)
             }
             let to = toDate || 'now'
-            _cards[s].dates = {from, to}
-            title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{fontSize: '12px', color: 'grey'}}><CalendarOutlined /> {from} - {to}</small>}</span></>
+            _cards[s].dates = { from, to }
+            title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{ fontSize: '12px', color: 'grey' }}><CalendarOutlined /> {from} - {to}</small>}</span></>
             comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
@@ -294,7 +309,7 @@ const Logs = () => {
 
     const onTabChange = (active) => {
         setActiveSection(active)
-        toggleHighlightClasses('.c-logCard--'+getIndexKeyByActiveTab(active))
+        toggleHighlightClasses('.c-logCard--' + getIndexKeyByActiveTab(active))
     }
 
     const fetchData = async () => {
@@ -312,7 +327,7 @@ const Logs = () => {
                     q,
                     'POST')
                 _data[s] = res.data
-                
+
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
                     headers,
@@ -363,7 +378,7 @@ const Logs = () => {
                         d.datasetType = ''
                     }
                     delete d.entityId
-                }   
+                }
             }
             cols = Object.keys(_data[0])
             if (_data[0].repository) {
@@ -377,14 +392,17 @@ const Logs = () => {
             TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
             if (!indexKey) {
                 let overview = exportData.current[_indexKey + 'Overview']
-                overview.fromDate = timespan.fromDate
-                overview.toDate = timespan.toDate
-                TABLE.generateCSVFile(TABLE.flattenDataForCSV([overview]), `${_indexKey}Overview-${fileNameDate}.csv`)
+                overview = Array.isArray(overview) ? overview : [overview]
+                for (let o of overview) {
+                    o.fromDate = timespan.fromDate
+                    o.toDate = timespan.toDate
+                }
+                TABLE.generateCSVFile(TABLE.flattenDataForCSV(overview), `${_indexKey}Overview-${fileNameDate}.csv`)
             }
         }
     }
 
-    
+
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
     }
@@ -402,9 +420,9 @@ const Logs = () => {
 
                         </Col>
                         <Col md={{ span: 8 }} className='d-md'>
-                            <RangePicker 
-                            defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                            onChange={handleDateRange} />
+                            <RangePicker
+                                defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
+                                onChange={handleDateRange} />
                         </Col>
 
                     </Row>
@@ -419,9 +437,9 @@ const Logs = () => {
                     }}
                 >
                     <Col md={{ span: 6 }} className='d-sm mx-2 mb-2'>
-                        <RangePicker 
-                        defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                        onChange={handleDateRange} />
+                        <RangePicker
+                            defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
+                            onChange={handleDateRange} />
                     </Col>
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs

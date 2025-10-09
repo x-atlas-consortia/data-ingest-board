@@ -243,12 +243,21 @@ const ESQ = {
                 query: ESQ.ownerFilter(from, to),
                 size: 0,
                 aggs: {
-                    repos: ESQ.bucket('repository'),
-                    buckets: {
-                        composite: ESQ.composite(['type']),
+                    repos: {
+                        terms: {
+                        field: "owner.keyword"
+                    },
                         aggs: {
-                            count: ESQ.sum('count'),
-                            unique: ESQ.sum('uniques')
+                            total: ESQ.bucket('repository'),
+                            buckets: {
+                                terms: {
+                        field: "type.keyword"
+                    },
+                                aggs: {
+                                    count: ESQ.sum('count'),
+                                    unique: ESQ.sum('uniques')
+                                }
+                            }
                         }
                     }
 
