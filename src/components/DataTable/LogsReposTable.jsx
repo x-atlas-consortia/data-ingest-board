@@ -1,5 +1,5 @@
 import { useEffect, useContext, useRef } from "react";
-import { Button, Popover, Table } from 'antd';
+import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
@@ -165,7 +165,16 @@ const LogsReposTable = ({ }) => {
             key: 'group',
             sorter: (a, b) => a.group.localeCompare(b.group),
             render: (v, r) => {
-                return <span data-field="group"><Popover content={<span>{r.owner}</span>}><span>{v}</span></Popover></span>
+                return <span data-field="group">{v}</span>
+            }
+        },
+         {
+            title: 'Owner',
+            dataIndex: 'owner',
+            key: 'owner',
+            sorter: (a, b) => a.owner.localeCompare(b.owner),
+            render: (v, r) => {
+                return <span data-field="owner">{v}</span>
             }
         },
         {
@@ -230,10 +239,9 @@ const LogsReposTable = ({ }) => {
 
     useEffect(() => {
         for (let c of cols) {
-            if (!eq(c.key, 'group')) {
+            if (!eq(c.key, 'group') && !eq(c.key, 'owner')) {
                subgroupLabels.current[c.dataIndex] = c.title 
             }
-            
         }
     }, [])
 
