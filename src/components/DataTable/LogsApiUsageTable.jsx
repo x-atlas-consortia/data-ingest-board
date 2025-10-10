@@ -38,11 +38,11 @@ const LogsApiUsageTable = ({ data }) => {
     const apis = useRef({})
     const xAxis = useRef({})
 
-    const fetchData = (includePrevData = true) => {
+    const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
 
         if (data.length) {
-            buildStackedBarChart(includePrevData)
+            await buildStackedBarChart(includePrevData)
 
             if (data.length < numOfRows) {
                 setHasMoreData(false)
