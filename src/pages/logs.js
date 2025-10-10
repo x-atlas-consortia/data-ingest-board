@@ -80,7 +80,6 @@ const Logs = () => {
 
     const getCardDetail = (key, data) => {
 
-        let repos, totalClones, totalViews = 0
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
         let agg
@@ -97,10 +96,12 @@ const Logs = () => {
             datasetGroups = agg.totalDatasets.value
             totalBytes = agg.totalBytes.value
         } else {
+            let owner,total
+            let stats = []
             for (let o of agg.repos.buckets) {
-                let owner = o.key
-                let total = o.total.buckets.length
-                let stats = []
+                owner = o.key
+                total = o.total.buckets.length
+                stats = []
                 for (let b of o.buckets.buckets) {
                     stats.push({
                         type: b.key,
@@ -187,11 +188,6 @@ const Logs = () => {
             </>)
         }
     }
-    const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-        },
-    };
 
     const getTabId = (key) => `tab-${key}`
 
