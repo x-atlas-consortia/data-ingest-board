@@ -266,8 +266,8 @@ const LogsFilesTable = ({ }) => {
     const _handleMenuItemClick = (e) => {
         if (eq(e.key, 'byDatasetType')) {
             const byTypeCols = []
-            byTypeCols.push(cols[1])
-            byTypeCols.push(cols[3])
+            byTypeCols.push(cols[2])
+            byTypeCols.push(cols[4])
             const body = <>
             <h4>Downloaded Datasets by Dataset Type</h4>
             <p>Currently loaded table items are aggregated by dataset type and visualized in the bar chart below for time period {fromDate} to {toDate}.</p>
