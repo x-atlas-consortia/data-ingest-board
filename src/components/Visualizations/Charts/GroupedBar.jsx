@@ -72,7 +72,7 @@ function GroupedBar({
         let maxY = 0;
         for (let d of data) {
             for (let subgroup of subgroups) {
-                maxY = Math.max(maxY, d[subgroup])
+                maxY = Math.max(maxY, d[subgroup] || 0)
             }
         }
 
@@ -139,7 +139,7 @@ function GroupedBar({
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
             .data(function(d) { 
-                return subgroups.map(function(key) { return {key: key, val: d[key]}; }); })
+                return subgroups.map(function(key) { return {key: key, val: d[key] || 0}; }); })
             .join("rect")
             .attr("fill", d => {
                 const color = colorScale(d.key)
