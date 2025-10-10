@@ -162,7 +162,7 @@ const Logs = () => {
                 <div style={{ overflowY: 'auto', maxHeight: '100px' }}>{ms}</div>
                 {totalHits > 0 && <span>-----------------------------</span>}
                 <Row className='mt-2'>
-                    <Col span={12}><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
+                    <Col><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
                 </Row>
             </>)
         }
@@ -424,10 +424,8 @@ const Logs = () => {
                     </Row>
                 </Header>
                 <Content
+                    className='ant-content--logs'
                     style={{
-                        margin: '24px 16px',
-                        padding: 24,
-                        minHeight: 280,
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
                     }}
