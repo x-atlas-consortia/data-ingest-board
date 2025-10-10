@@ -106,11 +106,18 @@ const LogsReposTable = ({ }) => {
 
                     for (let d of _data) {
                         _histogramBuckets = {}
-                        for (let t of d['type.keyword'].buckets) {
 
+                        if (!d['type.keyword'].buckets.length) {
+                            // account for empty buckets so the respective d.key_as_string is plotted as 0 on the graph (line)
+                            for (let e of _tableData) {
+                                e.histogram[d.key_as_string] = {uniqueViews: 0, views: 0, uniqueClones: 0, clones: 0}
+                            }
+                        }
+
+                        for (let t of d['type.keyword'].buckets) {
                             for (let r of t['repository.keyword'].buckets) {
                                 repo = r.key
-                                _ownerBuckets[repo] = {owner: r.owner?.buckets[0].key}
+                                _ownerBuckets[repo] = {owner: r.owner?.buckets[0]?.key}
                                 _histogramBuckets[repo] = { ...(_histogramBuckets[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
                             }
                         }
@@ -119,8 +126,9 @@ const LogsReposTable = ({ }) => {
                             _tableData[repos[r].i].owner = _ownerBuckets[r].owner
                             _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
                         }
-
                     }
+
+                    
                 }
 
                 // Get data for bar charts
