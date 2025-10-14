@@ -85,7 +85,7 @@ function StackedBar({
         let maxY = 0;
         for (let d of data) {
             for (let subgroup of subgroups) {
-                maxY = Math.max(maxY, d[subgroup])
+                maxY = Math.max(maxY, d[subgroup] || 0)
             }
         }
 
@@ -95,7 +95,7 @@ function StackedBar({
             let subgroupsSorted = []
             for (let k in d) {
                 if (subGroupLabels[k]) {
-                    subgroupsSorted.push({val: d[k], key: k, group: d.group})
+                    subgroupsSorted.push({val: d[k] || 0, key: k, group: d.group})
                 }
             }
             stackedSorted.push(subgroupsSorted)
