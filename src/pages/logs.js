@@ -127,19 +127,19 @@ const Logs = () => {
             for (let d of repoData) {
                 let colInfo = []
                 for (let c of d.stats) {
-                    colInfo.push(<Row key={c.type}>
-                        <Col  span={12}>{formatNum(c.count)}<br />{c.type}s</Col>
-                        <Col span={12}>{formatNum(c.unique)}<br />unique {c.type}s</Col>
+                    colInfo.push(<Row key={c.type} className='mt-3'>
+                        <Col span={12}>{formatNum(c.count)}<br /><strong>{c.type.upCaseFirst()}s</strong></Col>
+                        <Col span={12}>{formatNum(c.unique)}<br /><strong>Unique {c.type}s</strong></Col>
                     </Row>)
                 }
                 cardInfo.push(
                     <div key={d.owner}>
-                        <div><h3> {d.total} <small style={{ fontSize: '.5em' }}>{d.owner}</small></h3></div>
+                        <div><h3> {d.total} <small>{d.owner}</small></h3></div>
                         {colInfo}
                     </div>
                 )
             }
-            return (<Carousel>{cardInfo}</Carousel>)
+            return (<div className='c-logCard__slickWrap'><Carousel>{cardInfo}</Carousel></div>)
         }
 
         if (isApi(key)) {
@@ -152,18 +152,14 @@ const Logs = () => {
                     requests: d.doc_count
                 }
                 ms.push(
-                    <Row className='mb-2' key={d.key}>
-                        <Col span={12}><strong>{d.key}</strong>:</Col>
-                        <Col span={12}><span>{formatNum(d.doc_count)}</span></Col>
+                    <Row className='mt-3 w-50' key={d.key}>
+                        <Col> <span>{formatNum(d.doc_count)}</span><br /><strong>{d.key}</strong></Col>
                     </Row>
                 )
             }
             return (<>
-                <div style={{ overflowY: 'auto', maxHeight: '100px' }}>{ms}</div>
-                {totalHits > 0 && <span>-----------------------------</span>}
-                <Row className='mt-2'>
-                    <Col><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
-                </Row>
+                <div><h3>{formatNum(totalHits)} <small>total requests</small></h3></div>
+                <div className='c-logCard__flexWrap'>{ms}</div>
             </>)
         }
 
@@ -177,7 +173,7 @@ const Logs = () => {
                 totalHits
             }
             return (<>
-                <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
+                <div><h3> {formatBytes(totalBytes)} <small>downloaded</small></h3></div>
                 <Row className='mt-3'>
                     <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
                 </Row>

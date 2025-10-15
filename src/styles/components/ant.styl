@@ -10,12 +10,14 @@
       overflow-x auto
       max-width 200px
   
-  &-carousel .slick-dots li
-    button 
+  &-carousel .slick-dots
+    bottom -20px
+    li
+      button 
+        &:after
+          background black !important
       &:after
-        background black !important
-    &:after
-      background $col-lnk-blue !important
+        background $col-lnk-blue !important
 
   &-content--logs
     margin 24px 16px
