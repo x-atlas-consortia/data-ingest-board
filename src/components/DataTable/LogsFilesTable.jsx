@@ -293,7 +293,7 @@ const LogsFilesTable = ({ }) => {
         setMenuItems(items)
     }, [])
 
-    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1 }
+    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: true, }
 
     const formatAnalytics = (v, details) => {
         return formatBytes(v, 3)
