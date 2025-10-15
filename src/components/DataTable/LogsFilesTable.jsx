@@ -17,6 +17,7 @@ import {
     BarChartOutlined,
     DownloadOutlined,
 } from "@ant-design/icons";
+import WithChart from "../Visualizations/WithChart";
 
 const LogsFilesTable = ({ }) => {
 
@@ -300,7 +301,7 @@ const LogsFilesTable = ({ }) => {
     }
 
     return (<>
-        {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
+        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div></WithChart>}
         <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
