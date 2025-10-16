@@ -79,7 +79,7 @@ const LogsFilesTable = ({ }) => {
 
         // Get page for grouped Ids
         let res = await callService(url, headers, q, 'POST')
-        let _data = res.data?.aggregations?.buckets
+        let _data = res.data?.aggregations?.buckets || []
 
         let ids = []
         if (res.status === 200 && _data?.buckets.length) {
@@ -130,7 +130,7 @@ const LogsFilesTable = ({ }) => {
             }
 
             let _tableData = []
-            for (let d of _data.buckets) {
+            for (let d of _data?.buckets) {
                 uuid = d.key['dataset_uuid.keyword']
                 _tableData.push(
                     {

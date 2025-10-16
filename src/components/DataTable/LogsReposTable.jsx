@@ -55,9 +55,9 @@ const LogsReposTable = ({ }) => {
         }
 
         let res = await callService(url, headers, q, 'POST')
-        let _data = res.data?.aggregations?.buckets
+        let _data = res.data?.aggregations?.buckets || []
 
-        if (res.status === 200 && _data?.buckets.length) {
+        if (res.status === 200 && _data?.buckets?.length) {
 
             afterKey.current = _data.after_key
 

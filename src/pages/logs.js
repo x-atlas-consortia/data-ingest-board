@@ -27,7 +27,7 @@ const Logs = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated, handleLogout } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
         let m = month || (date.getMonth() + 1)
@@ -319,6 +319,10 @@ const Logs = () => {
                     q,
                     'POST')
                 _data[s] = res.data
+
+                if (res.status == 401) {
+                    window.location = handleLogout()
+                }
 
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
