@@ -403,15 +403,15 @@ const Logs = () => {
         <Layout style={{ minHeight: '100vh' }}>
             <AppSideNavBar exportHandler={exportHandler} />
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }}>
+                <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
                     <Row>
-                        <Col md={{ span: 8 }} lg={{ span: 5 }} xlg={{ span: 4 }}>
+                        <Col className='c-barHead__col c-barHead__col--title' >
                             <div style={{ padding: '10px 24px' }}>
-                                <h2>Dashboard</h2>
+                                <h2 className='text-truncate'>Usage Logs Dashboard</h2>
                             </div>
 
                         </Col>
-                        <Col md={{ span: 8 }} className='d-md'>
+                        <Col className='c-barHead__col c-barHead__col--date d-md'>
                             <RangePicker
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                                 onChange={handleDateRange} />

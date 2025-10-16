@@ -1,6 +1,9 @@
 .c-nav
   background-color $col-nav-bg
   color white
+  &__user 
+    align-right()
+    max-width 180px
   &__imgWrap
     display inline-block
     +sm()
@@ -58,5 +61,14 @@
           background-color inherit 
           color inherit
 
+// Vendor classes
 .ant-menu-sub
   background-color $col-subnav-bg !important
+
+.navbar-expand-lg .navbar-nav
+  +bslg() 
+    justify-content right
+
+  &.me-auto 
+    a  
+      min-width 120px

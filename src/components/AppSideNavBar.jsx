@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { Button, Layout, Menu } from "antd";
 import {
     DownloadOutlined,
+    HomeOutlined,
     LeftOutlined, LogoutOutlined, QuestionOutlined,
     RightOutlined,
     UserOutlined,
@@ -20,6 +21,11 @@ function AppSideNavBar({ exportHandler }) {
     useEffect(() => {
         if (isAuthenticated) {
             setItems([
+                {
+                    key: 'home',
+                    icon: <HomeOutlined />,
+                    label: 'Home',
+                },
                 {
                     key: '1',
                     icon: <UserOutlined />,
@@ -58,6 +64,8 @@ function AppSideNavBar({ exportHandler }) {
             window.open(`https://docs.${ENVS.appContext().toLowerCase()}consortium.org/`, '_blank')
         } else if (eq(e.key, 'logOut')) {
             handleLogout()
+        } else if (eq(e.key, 'home')) {
+            window.location = '/'
         }
     }
 
