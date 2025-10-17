@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -14,10 +14,13 @@ import {
     DownloadOutlined,
     ApiOutlined,
     CodeOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    ExclamationCircleFilled 
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
+import AppModal from '@/components/AppModal';
+import { modalDefault } from '@/lib/constants';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -48,6 +51,8 @@ const Logs = () => {
     const tabExtraActions = useRef({})
     const exportData = useRef({})
     const dateFormat = 'YYYY-MM-DD';
+
+    const [modal, setModal] = useState(modalDefault)
 
     let _cards = {
         openSourceRepos: {
@@ -356,8 +361,29 @@ const Logs = () => {
         let _indexKey = indexKey || getIndexKeyByActiveTab(activeSection) || Object.keys(indicesSections.current)[0]
         let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
         let cols = []
+        let hasLengthy = false
+        const charLimit = 32767
+
+        const _checkCharLength = (i, d, c) => {
+            if (d[c]) {
+                let histogramStr = JSON.stringify(d[c]).replace(/"/g, '""')
+                if ((histogramStr.length > charLimit) || (eq(c, 'histogram') && d.endpointsHits)) { // or just auto remove the inner hits info
+                    hasLengthy = hasLengthy || []
+                    let newCell = ''
+                    if (d.endpointsHits) {
+                        let buckets = {}
+                        for (let h in d.histogram) {
+                            buckets[h] = d.histogram[h].requests
+                        }
+                        newCell = buckets
+                    }
+                    hasLengthy.push({c, i, newCell})
+                }
+            }
+        } 
 
         if (_data.length) {
+            let i = 0
             for (let d of _data) {
                 // rename group (used in stackedBar viz) to repository
                 if (d.group) {
@@ -375,17 +401,52 @@ const Logs = () => {
                     }
                     delete d.entityId
                 }
+
+                _checkCharLength(i, d, 'histogram')
+                _checkCharLength(i, d, 'endpointsHits')
+                i++
             }
+
             cols = Object.keys(_data[0])
             if (_data[0].repository) {
                 // move repository column to front
                 let c = cols.pop()
                 cols.unshift(c)
             }
-            _data = TABLE.flattenDataForCSV(_data)
+
             let timespan = exportData.current[_indexKey + 'Date']
             let fileNameDate = `${timespan.fromDate}-${timespan.toDate}`
-            TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
+
+            const _csvDownload = (removeLengthy = false) => {
+                if (removeLengthy) {
+                    for (let x of hasLengthy) {
+                        _data[x.i][x.c] = x.newCell
+                    }
+                }
+                _data = TABLE.flattenDataForCSV(_data)
+                TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
+            }
+
+            const _csvDownloadAndCloseModal = (removeLengthy = false) => {
+                setModal({...modal, open:false})
+                _csvDownload(removeLengthy)
+            }
+
+            if (hasLengthy) {
+                // Show modal warning of csv lengthy
+                let title = <h4><ExclamationCircleFilled  style={{color:'var(--bs-warning)'}} /> CSV Cell Character Limit</h4>
+                let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
+               
+                const footer = [
+                    <Button icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
+                    <Button color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
+                ]
+                setModal({...modal, title, body, open: true, footer})       
+            } else {
+                _csvDownload()
+            }
+            
+            // Download overview
             if (!indexKey) {
                 let overview = exportData.current[_indexKey + 'Overview']
                 overview = Array.isArray(overview) ? overview : [overview]
@@ -446,6 +507,7 @@ const Logs = () => {
                         items={tabs}
                     /></Row>}
                     {isBusy && <Spinner />}
+                    <AppModal modal={modal} setModal={setModal} id='modal--logs' />
                 </Content>
             </Layout>
         </Layout>
