@@ -55,13 +55,11 @@ const LogsReposTable = ({ }) => {
         }
 
         let res = await callService(url, headers, q, 'POST')
-        let _data = res.data?.aggregations?.buckets || []
+        let _data = res.data?.aggregations?.buckets || {}
 
         if (res.status === 200 && _data?.buckets?.length) {
 
             afterKey.current = _data.after_key
-
-            /// 
 
             let repo, types
             let repos = {}
@@ -87,6 +85,7 @@ const LogsReposTable = ({ }) => {
 
                     _tableData.push({
                         group: repo,
+                        interval: histogramOps.interval,
                         histogram: {},
                         ...repos[repo]
                     })
@@ -127,8 +126,6 @@ const LogsReposTable = ({ }) => {
                             _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
                         }
                     }
-
-                    
                 }
 
                 // Get data for bar charts
@@ -152,7 +149,6 @@ const LogsReposTable = ({ }) => {
             }
 
             setHistogramDetails(histogramOps)
-            /// END
             updateTableData(false, _tableData)
         } else {
             setHasMoreData(false)
@@ -319,7 +315,6 @@ const LogsReposTable = ({ }) => {
 
     const repoLineChart = (row) => {
         const _vizData = buildLineChart(row)
-        //colorGroups={['views', 'clones', 'uniqueClones', 'uniqueViews']}
         return <>
             {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>

@@ -148,6 +148,7 @@ const LogsApiUsageTable = ({ data }) => {
             let apiListIndexes = {}
             for (let i = 0; i < data.length; i++) {
                 data[i].histogram = {}
+                data[i].interval = histogramOps.interval
                 apiListIndexes[data[i].name] = i
             }
             let _tableData = Array.from(data)
