@@ -36,7 +36,6 @@ const LogsApiUsageTable = ({ data }) => {
     } = useContext(LogsContext)
 
     const apis = useRef({})
-    const xAxis = useRef({})
 
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
@@ -125,7 +124,6 @@ const LogsApiUsageTable = ({ data }) => {
         setTableData([])
         setVizData({})
         fetchData(false)
-        xAxis.current = {}
         apis.current = {}
         setSelectedRows([])
         setSelectedRowObjects([])
@@ -138,10 +136,8 @@ const LogsApiUsageTable = ({ data }) => {
 
         let histogramOps = determineCalendarInterval()
 
-
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
-        
 
         let res = await callService(url, headers, q, 'POST')
         let _vizData = []
@@ -179,7 +175,6 @@ const LogsApiUsageTable = ({ data }) => {
         }
     }
 
-
     const rowSelection = {
         selectedRowKeys: selectedRows,
         onChange: (rowKeys, rows) => {
@@ -189,7 +184,7 @@ const LogsApiUsageTable = ({ data }) => {
     };
 
     const yAxis = { label: "Requests", formatter: formatNum }
-    const _xAxis = { ...xAxis.current, formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
+    const xAxis = { formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
@@ -197,8 +192,8 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={_xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend xAxis={_xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}
