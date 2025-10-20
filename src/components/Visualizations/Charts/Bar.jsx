@@ -82,19 +82,20 @@ function Bar({
 
         // Bar must have a minimum height to be able to click. 2% of the max value seems good
         const maxY = d3.max(data, (d) => d.value);
-        const yStartPos = -(maxY * .02)
+        const yStartPos = yAxis.scaleLog ? .1 : (-(maxY * .02))
+        const yDomain = [yStartPos, maxY]
 
         // Declare the y (vertical position) scale.
-        const y = d3.scaleLinear()
-            .domain([yStartPos, maxY])
-            .range([height - margin.bottom, margin.top]);
+        let y = yAxis.scaleLog ? d3.scaleLog()
+            .domain(yDomain).nice() : d3.scaleLinear().domain(yDomain)
+
+           y = y.range([height - margin.bottom, margin.top]);
 
         // Create the SVG container.
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [0, 0, width, height])
-            .attr("style", "max-width: 100%; height: auto;");
 
         svg.selectAll(".y-grid")
             .data(y.ticks())

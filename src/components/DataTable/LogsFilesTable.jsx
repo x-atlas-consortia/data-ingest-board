@@ -17,11 +17,11 @@ import {
     BarChartOutlined,
     DownloadOutlined,
 } from "@ant-design/icons";
+import WithChart from "../Visualizations/WithChart";
 
 const LogsFilesTable = ({ }) => {
 
     const { globusToken } = useContext(AppContext)
-    const xAxis = useRef({})
     const entities = useRef({})
     const datasetGroups = useRef([])
     const byDatasetTypes = useRef([])
@@ -78,7 +78,7 @@ const LogsFilesTable = ({ }) => {
 
         // Get page for grouped Ids
         let res = await callService(url, headers, q, 'POST')
-        let _data = res.data?.aggregations?.buckets
+        let _data = res.data?.aggregations?.buckets || {}
 
         let ids = []
         if (res.status === 200 && _data?.buckets.length) {
@@ -91,7 +91,7 @@ const LogsFilesTable = ({ }) => {
 
             // Find out info about these ids
             q = ESQ.indexQueries({ list: ids, size: dataSize }).filter
-            q._source = ['uuid', 'intended_dataset_type', 'entity_type', 'dataset_type', TABLE.cols.f('id')] // TODO change to TABLE.col.f('id')
+            q._source = ['uuid', 'intended_dataset_type', 'entity_type', 'dataset_type', TABLE.cols.f('id')] 
             let entitiesSearch = await callService(ENVS.urlFormat.search('entities'),
                 headers,
                 q,
@@ -129,7 +129,7 @@ const LogsFilesTable = ({ }) => {
             }
 
             let _tableData = []
-            for (let d of _data.buckets) {
+            for (let d of _data?.buckets) {
                 uuid = d.key['dataset_uuid.keyword']
                 _tableData.push(
                     {
@@ -202,7 +202,6 @@ const LogsFilesTable = ({ }) => {
         byDatasetTypes.current = []
         setSelectedRows([])
         setSelectedRowObjects([])
-        xAxis.current = {}
         fetchData(false)
         buildBarChart()
         
@@ -293,14 +292,15 @@ const LogsFilesTable = ({ }) => {
         setMenuItems(items)
     }, [])
 
-    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1 }
+    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: true, }
+    const xAxis = {monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
 
     const formatAnalytics = (v, details) => {
         return formatBytes(v, 3)
     }
 
     return (<>
-        {vizData.bar?.length > 0 && <div className="mx-5 mb-5"><ChartProvider><Bar xAxis={{monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div>}
+        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar xAxis={xAxis} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div></WithChart>}
         <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}

@@ -56,7 +56,6 @@ export default function Pie({
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [-width / 2, -height / 2, width, height])
-            .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
 
         // Add a sector path for each value.
         svg.append("g")

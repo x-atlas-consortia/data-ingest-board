@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -14,10 +14,13 @@ import {
     DownloadOutlined,
     ApiOutlined,
     CodeOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    ExclamationCircleFilled 
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
+import AppModal from '@/components/AppModal';
+import { modalDefault } from '@/lib/constants';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -27,7 +30,7 @@ const Logs = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { globusToken, isLoading, isAuthenticated } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated, handleLogout } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
         let m = month || (date.getMonth() + 1)
@@ -48,6 +51,8 @@ const Logs = () => {
     const tabExtraActions = useRef({})
     const exportData = useRef({})
     const dateFormat = 'YYYY-MM-DD';
+
+    const [modal, setModal] = useState(modalDefault)
 
     let _cards = {
         openSourceRepos: {
@@ -127,19 +132,19 @@ const Logs = () => {
             for (let d of repoData) {
                 let colInfo = []
                 for (let c of d.stats) {
-                    colInfo.push(<Row key={c.type}>
-                        <Col  span={12}>{formatNum(c.count)}<br />{c.type}s</Col>
-                        <Col span={12}>{formatNum(c.unique)}<br />unique {c.type}s</Col>
+                    colInfo.push(<Row key={c.type} className='mt-3'>
+                        <Col span={12}>{formatNum(c.count)}<br /><strong>{c.type.upCaseFirst()}s</strong></Col>
+                        <Col span={12}>{formatNum(c.unique)}<br /><strong>Unique {c.type}s</strong></Col>
                     </Row>)
                 }
                 cardInfo.push(
                     <div key={d.owner}>
-                        <div><h3> {d.total} <small style={{ fontSize: '.5em' }}>{d.owner}</small></h3></div>
+                        <div><h3> {d.total} <small>{d.owner}</small></h3></div>
                         {colInfo}
                     </div>
                 )
             }
-            return (<Carousel>{cardInfo}</Carousel>)
+            return (<div className='c-logCard__slickWrap'><Carousel>{cardInfo}</Carousel></div>)
         }
 
         if (isApi(key)) {
@@ -152,18 +157,14 @@ const Logs = () => {
                     requests: d.doc_count
                 }
                 ms.push(
-                    <Row className='mb-2' key={d.key}>
-                        <Col span={12}><strong>{d.key}</strong>:</Col>
-                        <Col span={12}><span>{formatNum(d.doc_count)}</span></Col>
+                    <Row className='mt-3 w-50' key={d.key}>
+                        <Col> <span>{formatNum(d.doc_count)}</span><br /><strong>{d.key}</strong></Col>
                     </Row>
                 )
             }
             return (<>
-                <div style={{ overflowY: 'auto', maxHeight: '100px' }}>{ms}</div>
-                {totalHits > 0 && <span>-----------------------------</span>}
-                <Row className='mt-2'>
-                    <Col><strong>{formatNum(totalHits)}</strong><br />Total requests</Col>
-                </Row>
+                <div><h3>{formatNum(totalHits)} <small>total requests</small></h3></div>
+                <div className='c-logCard__flexWrap'>{ms}</div>
             </>)
         }
 
@@ -177,7 +178,7 @@ const Logs = () => {
                 totalHits
             }
             return (<>
-                <div><h3> {formatBytes(totalBytes)} <small style={{ fontSize: '.5em' }}>downloaded</small></h3></div>
+                <div><h3> {formatBytes(totalBytes)} <small>downloaded</small></h3></div>
                 <Row className='mt-3'>
                     <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
                 </Row>
@@ -324,6 +325,10 @@ const Logs = () => {
                     'POST')
                 _data[s] = res.data
 
+                if (res.status == 401) {
+                    window.location = handleLogout()
+                }
+
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
                     headers,
@@ -356,8 +361,29 @@ const Logs = () => {
         let _indexKey = indexKey || getIndexKeyByActiveTab(activeSection) || Object.keys(indicesSections.current)[0]
         let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
         let cols = []
+        let hasLengthy = false
+        const charLimit = 32767
+
+        const _checkCharLength = (i, d, c) => {
+            if (d[c]) {
+                let histogramStr = JSON.stringify(d[c]).replace(/"/g, '""')
+                if ((histogramStr.length > charLimit) || (eq(c, 'histogram') && d.endpointsHits)) { // or just auto remove the inner hits info
+                    hasLengthy = hasLengthy || []
+                    let newCell = ''
+                    if (d.endpointsHits) {
+                        let buckets = {}
+                        for (let h in d.histogram) {
+                            buckets[h] = d.histogram[h].requests
+                        }
+                        newCell = buckets
+                    }
+                    hasLengthy.push({c, i, newCell})
+                }
+            }
+        } 
 
         if (_data.length) {
+            let i = 0
             for (let d of _data) {
                 // rename group (used in stackedBar viz) to repository
                 if (d.group) {
@@ -375,17 +401,52 @@ const Logs = () => {
                     }
                     delete d.entityId
                 }
+
+                _checkCharLength(i, d, 'histogram')
+                _checkCharLength(i, d, 'endpointsHits')
+                i++
             }
+
             cols = Object.keys(_data[0])
             if (_data[0].repository) {
                 // move repository column to front
                 let c = cols.pop()
                 cols.unshift(c)
             }
-            _data = TABLE.flattenDataForCSV(_data)
+
             let timespan = exportData.current[_indexKey + 'Date']
             let fileNameDate = `${timespan.fromDate}-${timespan.toDate}`
-            TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
+
+            const _csvDownload = (removeLengthy = false) => {
+                if (removeLengthy) {
+                    for (let x of hasLengthy) {
+                        _data[x.i][x.c] = x.newCell
+                    }
+                }
+                _data = TABLE.flattenDataForCSV(_data)
+                TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
+            }
+
+            const _csvDownloadAndCloseModal = (removeLengthy = false) => {
+                setModal({...modal, open:false})
+                _csvDownload(removeLengthy)
+            }
+
+            if (hasLengthy) {
+                // Show modal warning of csv lengthy
+                let title = <h4><ExclamationCircleFilled  style={{color:'var(--bs-warning)'}} /> CSV Cell Character Limit</h4>
+                let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
+               
+                const footer = [
+                    <Button icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
+                    <Button color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
+                ]
+                setModal({...modal, title, body, open: true, footer})       
+            } else {
+                _csvDownload()
+            }
+            
+            // Download overview
             if (!indexKey) {
                 let overview = exportData.current[_indexKey + 'Overview']
                 overview = Array.isArray(overview) ? overview : [overview]
@@ -407,15 +468,15 @@ const Logs = () => {
         <Layout style={{ minHeight: '100vh' }}>
             <AppSideNavBar exportHandler={exportHandler} />
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }}>
+                <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
                     <Row>
-                        <Col md={{ span: 8 }} lg={{ span: 5 }} xlg={{ span: 4 }}>
+                        <Col className='c-barHead__col c-barHead__col--title' >
                             <div style={{ padding: '10px 24px' }}>
-                                <h2>Dashboard</h2>
+                                <h2 className='text-truncate'>Usage Logs Dashboard</h2>
                             </div>
 
                         </Col>
-                        <Col md={{ span: 8 }} className='d-md'>
+                        <Col className='c-barHead__col c-barHead__col--date d-md'>
                             <RangePicker
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                                 onChange={handleDateRange} />
@@ -446,6 +507,7 @@ const Logs = () => {
                         items={tabs}
                     /></Row>}
                     {isBusy && <Spinner />}
+                    <AppModal modal={modal} setModal={setModal} id='modal--logs' />
                 </Content>
             </Layout>
         </Layout>

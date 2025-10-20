@@ -5,6 +5,9 @@
   width 25%
   max-width 320px
   word-break break-all
+  h3 
+    small 
+      font-size .5em
   +md-max()
     width 100%
     margin 0
@@ -12,16 +15,18 @@
   &.is-highlighted
     border-color $col-hover-blue
   &:hover
-    background-color #fffbfb
+    background-color $col-dirty-white
 
-  .slick-slider 
-    height 95%
+  &__slickWrap
+    margin-bottom 25px
+  
+  &__flexWrap 
+    overflowY auto
+    max-height 150px
+    display flex 
+    flex-wrap wrap
+
   .ant
-    &-carousel
-      height 90%
     &-card
       &-head-title 
         padding-top 20px
-
-      &-body
-        height 90%
