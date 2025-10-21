@@ -9,4 +9,19 @@
     +bp(max, 576px)
       overflow-x auto
       max-width 200px
+  
+  &-carousel .slick-dots
+    bottom -20px
+    li
+      button 
+        &:after
+          background black !important
+      &:after
+        background $col-lnk-blue !important
+
+  &-content--logs
+    margin 24px 16px
+    padding 24px
+    +sm()
+      padding 24px 5px
 

@@ -5,18 +5,19 @@ import {useState} from "react";
 import AppModal from "@/components/AppModal";
 import {modalDefault} from "@/lib/constants";
 
-function ModalOverComponent({children, modalContent}) {
+function ModalOverComponent({children, modalContent, childrenAsTrigger = false, popoverText = 'Click to view full content.', modalOps = {width: 700}}) {
     const [modal, setModal] = useState(modalDefault)
 
     return (
         <>
-            {children}
-            <Popover content={'Click to view full content.'} placement={'left'}><div onClick={(e) => {
+            {!childrenAsTrigger && <>{children}</>}
+            <Popover content={popoverText} placement={'left'}><div onClick={(e) => {
                 e.preventDefault()
-                setModal({width: 700, cancelCSS: 'none', className: '', body: modalContent, open: true})
+                setModal({...modalOps, cancelCSS: 'none', className: '', body: modalContent, open: true})
             }
             }>
-                <Button className='ant-btn-more' type="primary" shape="round" icon={<EllipsisOutlined style={{fontSize: '24px'}} />} size={'small'}>View all </Button>
+                {!childrenAsTrigger && <Button className='ant-btn-more' type="primary" shape="round" icon={<EllipsisOutlined style={{fontSize: '24px'}} />} size={'small'}>View all</Button>}
+                {childrenAsTrigger && <>{children}</>}
             </div></Popover>
 
             <AppModal modal={modal} setModal={setModal} />
@@ -25,8 +26,7 @@ function ModalOverComponent({children, modalContent}) {
 }
 
 ModalOverComponent.propTypes = {
-    children: PropTypes.node,
-    displayMax: PropTypes.number
+    children: PropTypes.node
 }
 
 export default ModalOverComponent

@@ -1,6 +1,9 @@
 .c-nav
   background-color $col-nav-bg
   color white
+  &__user 
+    align-right()
+    max-width 180px
   &__imgWrap
     display inline-block
     +sm()
@@ -28,3 +31,44 @@
     .c-logout
       width 100%
       display inline-block
+
+  &--sider
+    &.ant-layout-sider-collapsed
+      .c-nav
+        &__imgWrap
+          img
+            max-width 60px
+    .c-nav
+      &__brand
+        text-align center
+        margin 1em 0
+      &__title
+        display block
+        font-size 1.1rem
+        margin auto
+      &__siderTrigger
+        position absolute
+        right 0
+
+    .ant-menu
+      background-color $col-nav-bg
+      &-submenu
+        .ant-menu
+          background-color $col-subnav-bg !important
+
+      &-item-selected
+        &.export
+          background-color inherit 
+          color inherit
+
+// Vendor classes
+.ant-menu-sub
+  background-color $col-subnav-bg !important
+
+.navbar-expand-lg .navbar-nav
+  +bslg() 
+    justify-content right
+
+  &.me-auto 
+    a  
+      min-width 120px
