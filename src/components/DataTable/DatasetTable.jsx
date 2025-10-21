@@ -12,19 +12,18 @@ import AppContext from "@/context/AppContext";
 import UI_BLOCKS from "@/lib/helpers/uiBlocks";
 import {STATUS} from "@/lib/constants";
 import BulkEditForm from "../BulkEditForm";
-import Visualizations from "@/components/Visualizations";
-import {ChartProvider} from "@/context/ChartContext";
 import {AppTableProvider} from "@/context/TableContext";
 import AppTable from "@/components/DataTable/AppTable";
 import RouterContext from "@/context/RouterContext";
 import AppModal from "@/components/AppModal";
+import ChartsWrapper from "@/components/Visualizations/ChartsWrapper";
 
 const DatasetTable = ({
     data,
     loading,
     hasInitViz, setHasInitViz,
 }) => {
-    const {filters, handleTableChange, sortField, sortOrder} = useContext(RouterContext)
+    const {filters, sortField, sortOrder} = useContext(RouterContext)
     const {globusToken, hasDataAdminPrivs, hasPipelineTestingPrivs, selectedEntities, setSelectedEntities, dataProviderGroups, confirmBulkEdit} = useContext(AppContext)
     const [modifiedData, setModifiedData] = useState([])
     const [checkedModifiedData, setCheckedModifiedData] = useState([])
@@ -426,11 +425,8 @@ const DatasetTable = ({
                 <Spinner />
             ) : (
                 <>
-                    <ChartProvider>
-                        <Visualizations hasInitViz={hasInitViz} setHasInitViz={setHasInitViz} data={countFilteredRecords(data, filters)} filters={filters} applyFilters={handleTableChange} />
-                    </ChartProvider>
-
                     <AppTableProvider context={'Dataset'} baseColumns={filteredDatasetColumns}>
+                        <ChartsWrapper countFilteredRecords={countFilteredRecords} filters={filters} hasInitViz={hasInitViz} setHasInitViz={setHasInitViz} data={data} />
                         <AppTable countFilteredRecords={countFilteredRecords}
                                   data={data}
                                   modifiedData={modifiedData}
