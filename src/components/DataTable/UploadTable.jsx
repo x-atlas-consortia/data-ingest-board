@@ -187,6 +187,13 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
             sorter: (a,b) => a.uuid.localeCompare(b.uuid),
             ellipsis: true,
         },
+        {
+            ... TABLE.columnOptions({
+                field: "has_all_published_datasets",
+                title: "Has All Primary Published",
+                width: 300,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
+        },
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).priorityProjectList(uniquePriorityPList, filters),
         TABLE.reusableColumns(urlSortOrder, urlParamFilters).errorMessage(),
     ];
