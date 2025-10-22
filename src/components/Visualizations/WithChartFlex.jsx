@@ -6,9 +6,9 @@ import {
     RightOutlined,
 } from "@ant-design/icons";
 
-function WithChartCollapsible({ children, legend, data }) {
+function WithChartFlex({ children, legend, data }) {
     const [_, setRefresh] = useState(null)
-    const [collapsed, setCollapsed] = useState(true)
+    const [collapsed, setCollapsed] = useState(false)
 
     useEffect(() =>{
         setRefresh(new Date().getTime())
@@ -40,4 +40,4 @@ function WithChartCollapsible({ children, legend, data }) {
     )
 }
 
-export default WithChartCollapsible
+export default WithChartFlex
