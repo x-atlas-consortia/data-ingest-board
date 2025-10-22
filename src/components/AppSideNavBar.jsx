@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Button, Layout, Menu } from "antd";
 import {
     DownloadOutlined,
-    HomeOutlined,
+    TableOutlined,
     LeftOutlined, LogoutOutlined, QuestionOutlined,
     RightOutlined,
     UserOutlined,
@@ -23,8 +23,8 @@ function AppSideNavBar({ exportHandler }) {
             setItems([
                 {
                     key: 'home',
-                    icon: <HomeOutlined />,
-                    label: 'Home',
+                    icon: <TableOutlined />,
+                    label: 'Data Ingest Board',
                 },
                 {
                     key: '1',

@@ -50,7 +50,7 @@ function AppNavBar() {
                 {isAuthenticated && <Navbar.Collapse className={'w-40 c-nav__auth'}>
                     <Nav className={'me-auto'}>
                   
-                        <a className='p-2 txt-muted-on-dark text-decoration-none' href='/usage'>Usage Dashboard<DatabaseOutlined /></a>
+                        <a className='p-2 txt-muted-on-dark text-decoration-none' href='/usage'>Usage Dashboard <DatabaseOutlined /></a>
                         <Dropdown menu={{ items, onClick: handleMenuClick} } className='c-nav__user w-40' >
                             <span className='p-2 txt-muted-on-dark' onClick={e => e.preventDefault()}>
                                 {getUserEmail()}
