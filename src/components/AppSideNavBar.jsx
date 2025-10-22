@@ -83,7 +83,7 @@ function AppSideNavBar({ exportHandler }) {
                             />
                         </span>
                         {!collapsed && <h1 className="c-nav__title text-white">
-                            <span className='d-inline-block'>Logs Dashboard</span>
+                            <span className='d-inline-block'>Usage Dashboard</span>
                         </h1>}
                     </Navbar.Brand>
                 </div>

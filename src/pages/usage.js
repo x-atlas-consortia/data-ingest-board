@@ -472,7 +472,7 @@ const Logs = () => {
                     <Row>
                         <Col className='c-barHead__col c-barHead__col--title' >
                             <div style={{ padding: '10px 24px' }}>
-                                <h2 className='text-truncate'>Usage Logs Dashboard</h2>
+                                <h2 className='text-truncate'>Usage Dashboard</h2>
                             </div>
 
                         </Col>
