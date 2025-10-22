@@ -6,6 +6,9 @@
     max-width 180px
   &__imgWrap
     display inline-block
+    +lg() 
+      top -5px 
+      position relative
     +sm()
       padding-top 5px
     img
@@ -13,8 +16,7 @@
   &__title
     width 75%
     display inline-block
-    margin-left 15%
-    text-align center
+    text-align right
     +md-max()
       margin-left 5%
       font-size 1.2rem
