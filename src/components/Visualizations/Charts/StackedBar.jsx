@@ -171,6 +171,7 @@ function StackedBar({
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
             })
+            .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
             .attr("x", d => x(d.group))
             .attr("y", height)
             .attr("height", 0)
