@@ -21,6 +21,7 @@ import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal';
 import { modalDefault } from '@/lib/constants';
+import Unauthorized from '@/components/Unauthorized';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -50,6 +51,8 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
     const exportData = useRef({})
+    const isSearchApiUnauthorized = useRef(false)
+    const [showUnauthorized, setShowUnauthorized] = useState(false)
     const dateFormat = 'YYYY-MM-DD';
 
     const [modal, setModal] = useState(modalDefault)
@@ -323,11 +326,13 @@ const Logs = () => {
                     headers,
                     q,
                     'POST')
-                _data[s] = res.data
-
+            
                 if (res.status == 401) {
-                    window.location = handleLogout()
+                    isSearchApiUnauthorized.current = true
+                    console.error('User unauthorized', res)
+                    break
                 }
+                _data[s] = res.data
 
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
@@ -344,7 +349,14 @@ const Logs = () => {
     useEffect(() => {
         if (globusToken) {
             fetchData().then((data) => {
-                getCards(data)
+                if (Object.keys(data).length) {
+                    getCards(data)
+                } else {
+                    if (isSearchApiUnauthorized.current && isAuthenticated) {
+                        setShowUnauthorized(true)
+                    }
+                }
+                
             })
         }
     }, [globusToken, fromDate, toDate]);
@@ -466,8 +478,9 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar exportHandler={exportHandler} />
-            <Layout>
+            <AppSideNavBar exportHandler={showUnauthorized ? undefined : exportHandler} />
+            {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
+            {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
                     <Row>
                         <Col className='c-barHead__col c-barHead__col--title' >
@@ -509,7 +522,7 @@ const Logs = () => {
                     {isBusy && <Spinner />}
                     <AppModal modal={modal} setModal={setModal} id='modal--logs' />
                 </Content>
-            </Layout>
+            </Layout>}
         </Layout>
     );
 };

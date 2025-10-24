@@ -39,6 +39,7 @@ function AppSideNavBar({ exportHandler }) {
                     className: 'export',
                     icon: <DownloadOutlined />,
                     label: 'Export',
+                    disabled: exportHandler == undefined
                 },
                 {
                     key: 'help',
