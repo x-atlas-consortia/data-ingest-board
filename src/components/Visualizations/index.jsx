@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useState, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {
     AreaChartOutlined,
@@ -17,7 +17,7 @@ import {getHierarchy} from "@/lib/helpers/hierarchy";
 import {scaleOrdinal} from 'd3'
 import Palette from 'xac-sankey/dist/js/util/Palette'
 import useContent from "@/hooks/useContent";
-import {getUBKGName} from "@/lib/helpers/general";
+import {getUBKGName, eq} from "@/lib/helpers/general";
 
 function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
@@ -32,11 +32,11 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
     const [showModal, setShowModal] = useState(false)
     const [selectedFilterValues, setSelectedFilterValues] = useState([])
     const { colorPalettes} = useContent()
+    const hasHandledChartHotlinking = useRef(false)
 
     const getStatusColor = (label) => {
         return THEME.getStatusColor(label).bg
     }
-
 
     const [colorMethods, setColorMethods] = useState({'status': getStatusColor,})
 
@@ -75,6 +75,30 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
         setColorMethods(_colorMethods)
     }
 
+    const handleChartRequest = () => {
+        const query = new URLSearchParams(window.location.search)
+        const viz = query.get('chart')
+        let chartType = query.get('chartType')?.toLowerCase()
+        if (viz) {
+            for (let c of columns) {
+                if (eq(c.key, viz) || eq(c.label, viz)) {
+                    hasHandledChartHotlinking.current = true
+                    if (chartType && ['bar', 'pie'].comprises(chartType)) {
+                        handleChartMenuClick({key: chartType, column: c.key})
+                    }
+                    openMiniChartInModal(c)
+                    break
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (data && data.length && !hasHandledChartHotlinking.current) {
+            handleChartRequest()
+        }
+    }, [data])
+
     useEffect(() => {
         const filteredData = filterChartData(column)
 
@@ -91,7 +115,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
         setChartTypes((prevTypes) => {
             return {
                 ...prevTypes,
-                [column]: e.key
+                [e.column || column]: e.key
             }
         })
     }

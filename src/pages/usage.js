@@ -21,6 +21,7 @@ import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal';
 import { modalDefault } from '@/lib/constants';
+import Unauthorized from '@/components/Unauthorized';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -50,6 +51,8 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
     const exportData = useRef({})
+    const isSearchApiUnauthorized = useRef(false)
+    const [showUnauthorized, setShowUnauthorized] = useState(false)
     const dateFormat = 'YYYY-MM-DD';
 
     const [modal, setModal] = useState(modalDefault)
@@ -271,6 +274,12 @@ const Logs = () => {
 
     const getCards = (data) => {
 
+        let tabName = Object.keys(indicesSections.current)[0] 
+        const query = new URLSearchParams(window.location.search)
+        const tab = query.get('tab')
+        if (tab && Object.keys(indicesSections.current).comprises(tab)) {
+            tabName = tab
+        }
 
         let comps = []
         let _tabs = []
@@ -283,8 +292,8 @@ const Logs = () => {
             }
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
-            title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{ fontSize: '12px', color: 'grey' }}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
+            title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span></>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -296,7 +305,7 @@ const Logs = () => {
         }
         setCards(comps)
         if (activeSection == null) {
-            setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
+            setActiveSection(getTabId(tabName))
         }
         setTabs(_tabs)
         setIsBusy(false)
@@ -323,11 +332,13 @@ const Logs = () => {
                     headers,
                     q,
                     'POST')
-                _data[s] = res.data
-
+            
                 if (res.status == 401) {
-                    window.location = handleLogout()
+                    isSearchApiUnauthorized.current = true
+                    console.error('User unauthorized', res)
+                    break
                 }
+                _data[s] = res.data
 
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
@@ -344,7 +355,14 @@ const Logs = () => {
     useEffect(() => {
         if (globusToken) {
             fetchData().then((data) => {
-                getCards(data)
+                if (Object.keys(data).length) {
+                    getCards(data)
+                } else {
+                    if (isSearchApiUnauthorized.current && isAuthenticated) {
+                        setShowUnauthorized(true)
+                    }
+                }
+                
             })
         }
     }, [globusToken, fromDate, toDate]);
@@ -466,13 +484,14 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar exportHandler={exportHandler} />
-            <Layout>
+            <AppSideNavBar exportHandler={showUnauthorized ? undefined : exportHandler} />
+            {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
+            {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
                     <Row>
                         <Col className='c-barHead__col c-barHead__col--title' >
                             <div style={{ padding: '10px 24px' }}>
-                                <h2 className='text-truncate'>Usage Logs Dashboard</h2>
+                                <h2 className='text-truncate'>Usage Dashboard</h2>
                             </div>
 
                         </Col>
@@ -509,7 +528,7 @@ const Logs = () => {
                     {isBusy && <Spinner />}
                     <AppModal modal={modal} setModal={setModal} id='modal--logs' />
                 </Content>
-            </Layout>
+            </Layout>}
         </Layout>
     );
 };
