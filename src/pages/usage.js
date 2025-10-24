@@ -274,6 +274,12 @@ const Logs = () => {
 
     const getCards = (data) => {
 
+        let tabName = Object.keys(indicesSections.current)[0] 
+        const query = new URLSearchParams(window.location.search)
+        const tab = query.get('tab')
+        if (tab && Object.keys(indicesSections.current).comprises(tab)) {
+            tabName = tab
+        }
 
         let comps = []
         let _tabs = []
@@ -287,7 +293,7 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
             title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -299,7 +305,7 @@ const Logs = () => {
         }
         setCards(comps)
         if (activeSection == null) {
-            setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
+            setActiveSection(getTabId(tabName))
         }
         setTabs(_tabs)
         setIsBusy(false)
