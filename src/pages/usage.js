@@ -272,13 +272,23 @@ const Logs = () => {
         }
     }
 
+    const tabTitles = Object.values(_cards).map((c) => c.title.toLowerCase())
+
+    const getTabByTitle = (t) => {
+        for (const [key, value] of Object.entries(_cards)) {
+            if (eq(value.title, t)) return key
+        }
+       return t 
+    }
+
     const getCards = (data) => {
 
         let tabName = Object.keys(indicesSections.current)[0] 
         const query = new URLSearchParams(window.location.search)
         const tab = query.get('tab')
-        if (tab && Object.keys(indicesSections.current).comprises(tab)) {
-            tabName = tab
+        
+        if (tab && (Object.keys(indicesSections.current).comprises(tab) || tabTitles.comprises(tab.toLowerCase())) ) {
+            tabName = getTabByTitle(tab)
         }
 
         let comps = []
