@@ -101,12 +101,16 @@ function StackedBar({
             stackedSorted.push(subgroupsSorted)
         }
 
+        const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
+        const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
+        const minY = yAxis.scaleLog ? 1 : 0
+
         // Add Y axis
-        const y = d3.scaleLinear()
-            .domain([0, maxY])
+        const y = scaleMethod()
+            .domain([minY, maxY])
             .range([height, 0]);
         g.append("g")
-            .call(d3.axisLeft(y))
+            .call(d3.axisLeft(y).ticks(ticks))
 
         if (showYLabels()) {
             svg.append("g")
@@ -139,7 +143,7 @@ function StackedBar({
         const getSubgroupLabel = (v) => subGroupLabels[v] || v
 
         g.selectAll(".y-grid")
-            .data(y.ticks())
+            .data(y.ticks(ticks))
             .enter().append("line")
             .attr("class", "y-grid")
             .attr("x1", 0)
@@ -190,7 +194,7 @@ function StackedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return y(maxY - d.val)
+                return height - y(d.val)
             })
             .attr("y", d => {
                 return y(d.val)
