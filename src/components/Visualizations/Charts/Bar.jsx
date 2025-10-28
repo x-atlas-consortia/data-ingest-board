@@ -82,7 +82,7 @@ function Bar({
 
         // Bar must have a minimum height to be able to click. 2% of the max value seems good
         const maxY = d3.max(data, (d) => d.value);
-        const yStartPos = yAxis.scaleLog ? .1 : (-(maxY * .02))
+        const yStartPos = yAxis.scaleLog ? 1 : (-(maxY * .02))
         const yDomain = [yStartPos, maxY]
 
         // Declare the y (vertical position) scale.
