@@ -201,7 +201,10 @@ const Logs = () => {
         $(sel).addClass(className)
     }
 
+    const configureTabURL = (key) => window.history.pushState(null, null, `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`)
+
     const highlightSection = (e, key) => {
+        configureTabURL(key)
         setActiveSection(getTabId(key))
         toggleHighlightClasses(e.currentTarget)
     }
@@ -325,6 +328,7 @@ const Logs = () => {
 
     const onTabChange = (active) => {
         setActiveSection(active)
+        configureTabURL(getIndexKeyByActiveTab(active))
         toggleHighlightClasses('.c-logCard--' + getIndexKeyByActiveTab(active))
     }
 
