@@ -4,8 +4,9 @@ import {
     AreaChartOutlined,
     PieChartOutlined,
     BarChartOutlined,
+    ShareAltOutlined,
 } from '@ant-design/icons';
-import {Col, Collapse, Row, Dropdown, Button, Modal} from "antd";
+import {Col, Collapse, Row, Dropdown, Button, Modal, Tooltip} from "antd";
 import Bar from "@/components/Visualizations/Charts/Bar";
 import Legend from "@/components/Visualizations/Legend";
 import TABLE from "@/lib/helpers/table";
@@ -18,6 +19,7 @@ import {scaleOrdinal} from 'd3'
 import Palette from 'xac-sankey/dist/js/util/Palette'
 import useContent from "@/hooks/useContent";
 import {getUBKGName, eq} from "@/lib/helpers/general";
+import AppTooltip from '../AppTooltip';
 
 function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz, defaultColumn = 'group_name' }) {
     const defaultChartTypes = ENVS.datasetCharts().reduce((acc, c) => {
@@ -254,6 +256,10 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
 
     const hasMeaningfulData = () => chartData.length > 1
 
+    const getShareAbleURL = () => {
+        navigator.clipboard.writeText(`${location.host}/?chart=${column}&chartType=${chartTypes[column] || 'bar'}`)
+    }   
+
     return (
         <div className='c-visualizations my-3'>
             <Collapse
@@ -283,10 +289,19 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 <Modal
                                     className='c-chart c-chart--modal'
                                     classNames={{ body: 'c-chart__body' }}
-                                    title={TABLE.cols.n(
-                                        column,
-                                        getColumnName()
-                                    )}
+                                    title={<div>
+                                        <span>{TABLE.cols.n(
+                                            column,
+                                            getColumnName()
+                                        )}</span>
+                                        <span style={{float: 'right'}} >
+                                            <AppTooltip title={'Shareable URL copied to clipboard!'}>
+                                            <span onClick={getShareAbleURL} >
+                                                <Tooltip title='Copy shareable URL' placement='left'><ShareAltOutlined style={{color: 'var(--bs-blue)', cursor: 'pointer'}} /></Tooltip>
+                                            </span>
+                                        </AppTooltip>
+                                        </span>
+                                    </div>}
                                     centered
                                     closable={false}
                                     open={showModal}

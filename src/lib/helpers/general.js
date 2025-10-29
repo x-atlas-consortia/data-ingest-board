@@ -37,7 +37,7 @@ export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberForm
 
 export const formatBytes = (bytes, decimals = 2) => {
         if (!+bytes) return '0 Bytes'
-        if (bytes < 1) return `${bytes} Bytes`
+        if (bytes <= 1) return `${bytes} Byte`
 
         const k = 1024
         const dm = decimals < 0 ? 0 : decimals
