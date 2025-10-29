@@ -56,6 +56,9 @@ const Logs = () => {
     const dateFormat = 'YYYY-MM-DD';
 
     const [modal, setModal] = useState(modalDefault)
+    const [_refresh, setRefresh] = useState(null)
+
+    const refresh = () => setRefresh(new Date().getTime())
 
     let _cards = {
         openSourceRepos: {
@@ -509,10 +512,11 @@ const Logs = () => {
                             </div>
 
                         </Col>
-                        <Col className='c-barHead__col c-barHead__col--date d-md'>
+                        <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
                             <RangePicker
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                                 onChange={handleDateRange} />
+                            <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                         </Col>
 
                     </Row>
@@ -524,10 +528,11 @@ const Logs = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2'>
+                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2 c-pickerRange'>
                         <RangePicker
                             defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                             onChange={handleDateRange} />
+                        <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     <Row>{cards}</Row>
                     {tabs && <Row className='mt-5'><Tabs
