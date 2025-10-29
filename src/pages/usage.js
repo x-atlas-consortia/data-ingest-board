@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button  } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -15,7 +15,9 @@ import {
     ApiOutlined,
     CodeOutlined,
     CalendarOutlined,
-    ExclamationCircleFilled 
+    ExclamationCircleFilled, 
+    MinusOutlined,
+    PlusOutlined
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
@@ -57,6 +59,7 @@ const Logs = () => {
 
     const [modal, setModal] = useState(modalDefault)
     const [_refresh, setRefresh] = useState(null)
+    const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
 
     const refresh = () => setRefresh(new Date().getTime())
 
@@ -494,6 +497,10 @@ const Logs = () => {
         }
     }
 
+    const toggleOverview = () => {
+        setIsOverviewCollapsed(!isOverviewCollapsed)
+    }
+
 
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
@@ -528,13 +535,17 @@ const Logs = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
+                    <span style={{float: 'right'}}>
+                        {!isOverviewCollapsed && <Tooltip title='Hide overview section' placement='left'><MinusOutlined className='txt-lnk' onClick={toggleOverview} /></Tooltip>}
+                        {isOverviewCollapsed && <Tooltip title='Show overview section' placement='left'><PlusOutlined className='txt-lnk' onClick={toggleOverview}  /></Tooltip>}
+                    </span>
                     <Col md={{ span: 6 }} className='d-sm mx-2 mb-2 c-pickerRange'>
                         <RangePicker
                             defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                             onChange={handleDateRange} />
                         <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
-                    <Row>{cards}</Row>
+                    {!isOverviewCollapsed && <Row>{cards}</Row>}
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
