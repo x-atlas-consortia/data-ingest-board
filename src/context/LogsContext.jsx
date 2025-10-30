@@ -33,7 +33,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       },
       {
         key: 'export',
-        label: 'Export',
+        label: <span data-gtm-info={indexKey} className='js-gtm--btn-cta-export'>Export</span>,
         icon: <DownloadOutlined />
       }
     ],

@@ -85,7 +85,14 @@ class GoogleTagManager extends Addon {
 
     getContext() {
         if (!this.hasUser()) return null
-        return window.location.href.includes('entity_type=uploads') ? 'uploads' : 'datasets'
+        if (window.location.href.includes('entity_type=uploads')) {
+            return 'uploads'
+        } else if (window.location.pathname == '/usage') {
+            return 'usage'
+        } else {
+            return 'datasets'
+        }
+      
     }
 
     getPerson(bto = false) {

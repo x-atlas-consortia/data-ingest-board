@@ -13,7 +13,7 @@ import { Navbar } from "react-bootstrap";
 import { eq } from '@/lib/helpers/general';
 import ENVS from '@/lib/helpers/envs';
 const { Sider } = Layout;
-function AppSideNavBar({ exportHandler }) {
+function AppSideNavBar({ exportHandler, activeTab }) {
     const { handleLogout, isAuthenticated, t, getUserEmail } = useContext(AppContext)
     const [collapsed, setCollapsed] = useState(false)
     const [items, setItems] = useState(null)
@@ -38,7 +38,7 @@ function AppSideNavBar({ exportHandler }) {
                     key: 'export',
                     className: 'export',
                     icon: <DownloadOutlined />,
-                    label: 'Export',
+                    label: <span data-gtm-info={activeTab} className='js-gtm--btn-cta-export'>Export</span>,
                     disabled: exportHandler == undefined
                 },
                 {
@@ -48,7 +48,7 @@ function AppSideNavBar({ exportHandler }) {
                 },
             ])
         }
-    }, [isAuthenticated])
+    }, [isAuthenticated, activeTab])
 
     useEffect(()=> {
         if (window.innerWidth < 768) {

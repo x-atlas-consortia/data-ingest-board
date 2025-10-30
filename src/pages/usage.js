@@ -290,7 +290,7 @@ const Logs = () => {
        return t 
     }
 
-    const getCards = (data) => {
+    const getCurrentTab = () => {
         let tabName = Object.keys(indicesSections.current)[0] 
         const query = new URLSearchParams(window.location.search)
         const tab = query.get('tab')
@@ -298,6 +298,11 @@ const Logs = () => {
         if (tab && (Object.keys(indicesSections.current).comprises(tab) || tabTitles.comprises(tab.toLowerCase())) ) {
             tabName = getTabByTitle(tab)
         }
+        return tabName
+    }
+
+    const getCards = (data) => {
+        const tabName = getCurrentTab()
 
         let comps = []
         let _tabs = []
@@ -512,7 +517,7 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar exportHandler={showUnauthorized ? undefined : exportHandler} />
+            <AppSideNavBar activeTab={activeSection} exportHandler={showUnauthorized ? undefined : exportHandler} />
             {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
             {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>

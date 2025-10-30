@@ -1,12 +1,30 @@
 class Addon {
 
-    constructor(ops, app) {
-        this.ops = ops
-        Addon.log(`Addons args of ${app}:`, {color: 'aqua', data: ops})
+    constructor(el, args) {
+        this.el = $(el)
+        this.ops = args
+        Addon.log(`Addons args of ${args.app}:`, {color: 'aqua', data: {el, args}})
     }
 
     currentTarget(e) {
         return $(e.currentTarget)
+    }
+
+    static observeMutations(apps, args) {
+        const initAddon = ()=> {
+            for (let app in apps) {
+                document
+                    .querySelectorAll(`[class*='js-${app}--'], [data-js-${app}], .js-app--${app}`)
+                    .forEach((el) => {
+                        if (!$(el).data(app)) {
+                            $(el).data(app, new apps[app](el, {app, ...args }))
+                        }
+                    })
+            }
+        }
+
+        const observer = new MutationObserver(initAddon)
+        observer.observe(document.body,  { childList: true, subtree: true })
     }
 
     static isLocal() {
