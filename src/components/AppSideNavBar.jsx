@@ -38,7 +38,7 @@ function AppSideNavBar({ exportHandler, activeTab }) {
                     key: 'export',
                     className: 'export',
                     icon: <DownloadOutlined />,
-                    label: <span data-gtm-info={activeTab} className='js-gtm--btn-cta-export'>Export</span>,
+                    label: <span data-gtm-info={activeTab} className='js-gtm--btn-cta-export' id='sideMenu--export'>Export</span>,
                     disabled: exportHandler == undefined
                 },
                 {

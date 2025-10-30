@@ -485,8 +485,8 @@ const Logs = () => {
                 let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
                
                 const footer = [
-                    <Button icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
-                    <Button color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
+                    <Button key='dwn-trunc' icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
+                    <Button key='dwn-all' color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
                 ]
                 setModal({...modal, title, body, open: true, footer})       
             } else {

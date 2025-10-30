@@ -13,6 +13,7 @@ class GoogleTagManager extends Addon {
     }
 
     handleCta(e) {
+        e.stopPropagation()
         this.event = 'cta'
         const classNames = this.currentTarget(e).attr('class')
         const pos = classNames.indexOf(this.prefixes.action)
@@ -56,18 +57,22 @@ class GoogleTagManager extends Addon {
     events() {
         const _t = this
         $('body').on('click', `[class*="${this.prefixes.action}"]`, (e)=>{
+            e.stopImmediatePropagation()
             _t.handleCta(e)
         })
 
         $('body').on('change', '.ant-table-filter-dropdown .ant-checkbox-input', (e)=>{
+            e.stopImmediatePropagation()
             _t.handleFilter(e)
         })
 
         $('body').on('click', '.ant-dropdown-menu-item .ant-dropdown-menu-title-content', (e)=> {
+            e.stopImmediatePropagation()
             _t.handleMenuItem(e)
         })
 
         $('body').on('click', '.ant-modal-footer .ant-btn-primary', (e)=> {
+            e.stopImmediatePropagation()
             _t.handleModalCta(e)
         })
 
