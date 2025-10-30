@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip  } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip, Spin  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -291,7 +291,6 @@ const Logs = () => {
     }
 
     const getCards = (data) => {
-
         let tabName = Object.keys(indicesSections.current)[0] 
         const query = new URLSearchParams(window.location.search)
         const tab = query.get('tab')
@@ -311,8 +310,12 @@ const Logs = () => {
             }
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
-            title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
+            title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span> </>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} 
+                extra={<><span className='pull-right c-logCard__spinner'><Spin size='small' /></span></>}
+            title={title} key={s} 
+            variant="borderless" 
+            onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -339,6 +342,7 @@ const Logs = () => {
     }
 
     const fetchData = async () => {
+        setIsBusy(true)
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
         let q, url, headers, res
@@ -545,7 +549,7 @@ const Logs = () => {
                             onChange={handleDateRange} />
                         <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
-                    {!isOverviewCollapsed && <Row>{cards}</Row>}
+                    {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
