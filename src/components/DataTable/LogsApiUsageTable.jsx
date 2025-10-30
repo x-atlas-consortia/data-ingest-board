@@ -184,7 +184,7 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "Requests", formatter: formatNum }
+    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: true }
     const xAxis = { formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
 
     const formatAnalytics = (v, details) => {

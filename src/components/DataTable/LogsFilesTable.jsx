@@ -7,7 +7,7 @@ import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/h
 import AppContext from "@/context/AppContext";
 import LogsContext from "@/context/LogsContext";
 import IdLinkDropdown from "../IdLinkDropdown";
-import BarWithLegend from "@/components/Visualizations/BarWithLegend";
+import BarWithLegendFlex from "@/components/Visualizations/BarWithLegendFlex";
 import SearchFilterTable from "./SearchFilterTable";
 import Bar from "@/components/Visualizations/Charts/Bar";
 import { ChartProvider } from '@/context/ChartContext';
@@ -270,7 +270,7 @@ const LogsFilesTable = ({ }) => {
             const body = <>
             <h4>Downloaded Datasets by Dataset Type</h4>
             <p>Currently loaded table items are aggregated by dataset type and visualized in the bar chart below for time period {fromDate} to {toDate}.</p>
-            <BarWithLegend yAxis={yAxis} data={byDatasetTypes.current} chartId={'filesByTypes'} />
+            <BarWithLegendFlex yAxis={yAxis} data={byDatasetTypes.current} chartId={'filesByTypes'} />
             <SearchFilterTable data={byDatasetTypes.current} columns={byTypeCols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
@@ -280,8 +280,8 @@ const LogsFilesTable = ({ }) => {
                 }} />
             </>
             const footer = [
-                <Button icon={<DownloadOutlined />} onClick={()=>exportByTypeSelection(byTypeCols.map((c) => c.dataIndex))}> Download CSV Data</Button>,
-                <Button color="primary" variant="solid" onClick={()=>setModal({...modal, open:false})}> Close</Button>
+                <Button key='exportSelection' icon={<DownloadOutlined />} onClick={()=>exportByTypeSelection(byTypeCols.map((c) => c.dataIndex))}> Download CSV Data</Button>,
+                <Button key='close' color="primary" variant="solid" onClick={()=>setModal({...modal, open:false})}> Close</Button>
             ]
             setModal({...modal, footer, body, open: true, width: '90%'})
         }

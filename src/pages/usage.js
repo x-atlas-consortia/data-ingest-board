@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button  } from 'antd';
+import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip, Spin  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -15,12 +15,15 @@ import {
     ApiOutlined,
     CodeOutlined,
     CalendarOutlined,
-    ExclamationCircleFilled 
+    ExclamationCircleFilled, 
+    MinusOutlined,
+    PlusOutlined
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal';
 import { modalDefault } from '@/lib/constants';
+import Unauthorized from '@/components/Unauthorized';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -50,9 +53,15 @@ const Logs = () => {
     const [extraActions, setExtraActions] = useState({})
     const tabExtraActions = useRef({})
     const exportData = useRef({})
+    const isSearchApiUnauthorized = useRef(false)
+    const [showUnauthorized, setShowUnauthorized] = useState(false)
     const dateFormat = 'YYYY-MM-DD';
 
     const [modal, setModal] = useState(modalDefault)
+    const [_refresh, setRefresh] = useState(null)
+    const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
+
+    const refresh = () => setRefresh(new Date().getTime())
 
     let _cards = {
         openSourceRepos: {
@@ -198,7 +207,10 @@ const Logs = () => {
         $(sel).addClass(className)
     }
 
+    const configureTabURL = (key) => window.history.pushState(null, null, `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`)
+
     const highlightSection = (e, key) => {
+        configureTabURL(key)
         setActiveSection(getTabId(key))
         toggleHighlightClasses(e.currentTarget)
     }
@@ -269,8 +281,23 @@ const Logs = () => {
         }
     }
 
-    const getCards = (data) => {
+    const tabTitles = Object.values(_cards).map((c) => c.title.toLowerCase())
 
+    const getTabByTitle = (t) => {
+        for (const [key, value] of Object.entries(_cards)) {
+            if (eq(value.title, t)) return key
+        }
+       return t 
+    }
+
+    const getCards = (data) => {
+        let tabName = Object.keys(indicesSections.current)[0] 
+        const query = new URLSearchParams(window.location.search)
+        const tab = query.get('tab')
+        
+        if (tab && (Object.keys(indicesSections.current).comprises(tab) || tabTitles.comprises(tab.toLowerCase())) ) {
+            tabName = getTabByTitle(tab)
+        }
 
         let comps = []
         let _tabs = []
@@ -283,8 +310,12 @@ const Logs = () => {
             }
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
-            title = <>{_cards[s].icon}<span className='mx-3'>{_cards[s].title}<br />{from && <small style={{ fontSize: '12px', color: 'grey' }}><CalendarOutlined /> {from} - {to}</small>}</span></>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${isFiles(s) ? 'is-highlighted' : ''}`} title={title} key={s} variant="borderless" onClick={(e) => highlightSection(e, s)}>
+            title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span> </>
+            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} 
+                extra={<><span className='pull-right c-logCard__spinner'><Spin size='small' /></span></>}
+            title={title} key={s} 
+            variant="borderless" 
+            onClick={(e) => highlightSection(e, s)}>
                 {getCardDetail(s, data)}
             </Card>)
             _tabs.push({
@@ -296,7 +327,7 @@ const Logs = () => {
         }
         setCards(comps)
         if (activeSection == null) {
-            setActiveSection(getTabId(Object.keys(indicesSections.current)[0]))
+            setActiveSection(getTabId(tabName))
         }
         setTabs(_tabs)
         setIsBusy(false)
@@ -306,10 +337,12 @@ const Logs = () => {
 
     const onTabChange = (active) => {
         setActiveSection(active)
+        configureTabURL(getIndexKeyByActiveTab(active))
         toggleHighlightClasses('.c-logCard--' + getIndexKeyByActiveTab(active))
     }
 
     const fetchData = async () => {
+        setIsBusy(true)
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
         let q, url, headers, res
@@ -323,11 +356,13 @@ const Logs = () => {
                     headers,
                     q,
                     'POST')
-                _data[s] = res.data
-
+            
                 if (res.status == 401) {
-                    window.location = handleLogout()
+                    isSearchApiUnauthorized.current = true
+                    console.error('User unauthorized', res)
+                    break
                 }
+                _data[s] = res.data
 
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 res = await callService(url,
@@ -344,7 +379,14 @@ const Logs = () => {
     useEffect(() => {
         if (globusToken) {
             fetchData().then((data) => {
-                getCards(data)
+                if (Object.keys(data).length) {
+                    getCards(data)
+                } else {
+                    if (isSearchApiUnauthorized.current && isAuthenticated) {
+                        setShowUnauthorized(true)
+                    }
+                }
+                
             })
         }
     }, [globusToken, fromDate, toDate]);
@@ -459,6 +501,10 @@ const Logs = () => {
         }
     }
 
+    const toggleOverview = () => {
+        setIsOverviewCollapsed(!isOverviewCollapsed)
+    }
+
 
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
@@ -466,20 +512,22 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar exportHandler={exportHandler} />
-            <Layout>
+            <AppSideNavBar exportHandler={showUnauthorized ? undefined : exportHandler} />
+            {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
+            {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
                     <Row>
                         <Col className='c-barHead__col c-barHead__col--title' >
                             <div style={{ padding: '10px 24px' }}>
-                                <h2 className='text-truncate'>Usage Logs Dashboard</h2>
+                                <h2 className='text-truncate'>Usage Dashboard</h2>
                             </div>
 
                         </Col>
-                        <Col className='c-barHead__col c-barHead__col--date d-md'>
+                        <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
                             <RangePicker
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                                 onChange={handleDateRange} />
+                            <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                         </Col>
 
                     </Row>
@@ -491,12 +539,17 @@ const Logs = () => {
                         borderRadius: borderRadiusLG,
                     }}
                 >
-                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2'>
+                    <span style={{float: 'right'}}>
+                        {!isOverviewCollapsed && <Tooltip title='Hide overview section' placement='left'><MinusOutlined className='txt-lnk' onClick={toggleOverview} /></Tooltip>}
+                        {isOverviewCollapsed && <Tooltip title='Show overview section' placement='left'><PlusOutlined className='txt-lnk' onClick={toggleOverview}  /></Tooltip>}
+                    </span>
+                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2 c-pickerRange'>
                         <RangePicker
                             defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                             onChange={handleDateRange} />
+                        <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
-                    <Row>{cards}</Row>
+                    {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
                     {tabs && <Row className='mt-5'><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
@@ -509,7 +562,7 @@ const Logs = () => {
                     {isBusy && <Spinner />}
                     <AppModal modal={modal} setModal={setModal} id='modal--logs' />
                 </Content>
-            </Layout>
+            </Layout>}
         </Layout>
     );
 };

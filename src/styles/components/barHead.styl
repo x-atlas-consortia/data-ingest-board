@@ -1,9 +1,22 @@
 .c-barHead 
+  > .ant-row 
+    min-width 100%
+    +xlg() 
+      min-width 70%
+    +xxlg() 
+      min-width 60%
+    +xxxlg() 
+      min-width 55%
   display flex
   &__col 
     &--title 
       +lg()
-        width 60%
+        width 50%
       
     &--date
-      width 40%
+      width 50%
+  .ant-picker-range 
+    +bp(max, 847px)
+      max-width 60%
+    
+ 

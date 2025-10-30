@@ -2,7 +2,7 @@ import {eq, parseJSON} from "./general";
 
 const ENVS = {
     ubkg: {
-        base: () => process.env.NEXT_PUBLIC_UBKG_BASE,
+        base: () => process.env.NEXT_PUBLIC_UBKG_API_BASE,
         sab: () => process.env.NEXT_PUBLIC_APP_CONTEXT
     },
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
@@ -16,7 +16,7 @@ const ENVS = {
         return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
     urlFormat: {
-        entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_BASE}${path}`,
+        entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_API_BASE}${path}`,
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,
         ingest: {
             be: (path) => `${process.env.NEXT_PUBLIC_API_BASE}${path}`,
@@ -56,7 +56,7 @@ const ENVS = {
     uploadsEnabled: () => process.env.NEXT_PUBLIC_UPLOADS_ENABLED === '1',
     searchEnabled: () => process.env.NEXT_PUBLIC_SEARCH_ENABLED === '1',
     searchIndices: (entity) => {
-        const config = parseJSON(process.env.NEXT_PUBLIC_SEARCH_INDICES)
+        const config = parseJSON(process.env.NEXT_PUBLIC_ENABLED_SEARCH_FIELDS)
         return config[entity]
     },
     logsIndicies: () => parseJSON(process.env.NEXT_PUBLIC_LOGS_SEARCH_API_INDICIES),

@@ -26,7 +26,21 @@
     display flex 
     flex-wrap wrap
 
+  &__date
+    font-size 12px
+    color grey
+
   .ant
     &-card
       &-head-title 
         padding-top 20px
+
+  &s
+    &.isBusy  
+      .c-logCard
+        opacity 0.5
+        &__spinner 
+          display block
+    .c-logCard
+      &__spinner 
+        display none

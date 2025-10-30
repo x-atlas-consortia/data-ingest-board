@@ -37,7 +37,7 @@ export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberForm
 
 export const formatBytes = (bytes, decimals = 2) => {
         if (!+bytes) return '0 Bytes'
-        if (bytes < 1) return `${bytes} Bytes`
+        if (bytes <= 1) return `${bytes} Byte`
 
         const k = 1024
         const dm = decimals < 0 ? 0 : decimals
@@ -66,24 +66,37 @@ Object.assign(Array.prototype, {
     }
 })
 
-
-
-String.prototype.format = function() {
-    let args = arguments;
-    return this.replace(/{(\d+)}/g, function(match, number) {
-        return typeof args[number] != 'undefined'
-            ? args[number]
-            : match
-            ;
-    });
-};
-
-String.prototype.upCaseFirst = function() {
-    if (this.length === 0) {
-        return "";
+Object.assign(String.prototype, {
+    toCamelCase() {
+        return this.replace(/\s(.)/g, function (a) {
+            return a.toUpperCase();
+        })
+        .replace(/\s/g, '')
+        .replace(/^(.)/, function (b) {
+            return b.toLowerCase();
+        });
+    },
+    toDashedCase() {
+        return this
+            .replace(/[^a-zA-Z0-9]+/g, '-')
+            .toLowerCase();
+    },
+    upCaseFirst() {
+        if (this.length === 0) {
+            return "";
+        }
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    },
+    format() {
+        let args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
     }
-    return this.charAt(0).toUpperCase() + this.slice(1);
-};
+})
 
 export const getUBKGName = (o) => {
     if (!window.UBKG) return o
