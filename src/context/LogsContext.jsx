@@ -5,6 +5,8 @@ import { Dropdown, Space } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import { GroupedBarChartIcon } from '@/lib/helpers/icons';
+import { useContext } from 'react';
+import AppContext from './AppContext';
 
 const LogsContext = createContext({})
 
@@ -22,6 +24,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [selectedRowObjects, setSelectedRowObjects] = useState([])
   const [histogramDetails, setHistogramDetails] = useState({})
   const sectionHandleMenuItemClick = useRef(null)
+  const {globusInfo} = useContext(AppContext)
 
   const menuProps = () => {
     return {
@@ -33,7 +36,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       },
       {
         key: 'export',
-        label: <span data-gtm-info={indexKey} className='js-gtm--btn-cta-export'>Export</span>,
+        label: 'Export',
         icon: <DownloadOutlined />
       }
     ],
@@ -177,7 +180,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   const handleMenuClick = (e) => {
+    const gtm = {info: globusInfo, gtm: {event: 'cta', info: indexKey, action: e.key}}
     if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
+      gtm.action = `${e.keyPath[1]}:${e.key}}`
       setNumOfRows(Number(e.key))
     } else {
       setSelectedMenuItem(e.key)
@@ -188,6 +193,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     if (sectionHandleMenuItemClick.current) {
       sectionHandleMenuItemClick.current(e)
     }
+    GoogleTagManager.gtm(gtm)
   }
 
   const stackedGroupedBarMenuItems = [
