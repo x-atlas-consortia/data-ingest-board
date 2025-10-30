@@ -33,7 +33,7 @@ const Logs = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { globusToken, isLoading, isAuthenticated, handleLogout } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated, dispatchGTM } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
         let m = month || (date.getMonth() + 1)
@@ -63,6 +63,10 @@ const Logs = () => {
 
     const refresh = () => setRefresh(new Date().getTime())
 
+    const _dispatchGTM = (action, event = 'cta') => {
+        dispatchGTM({action, event, info: getCurrentTab()})
+    }
+
     let _cards = {
         openSourceRepos: {
             title: 'Open Source Repositories',
@@ -83,6 +87,7 @@ const Logs = () => {
     const handleDateRange = (dates, dateStrings) => {
         setFromDate(dateStrings[0])
         setToDate(dateStrings[1])
+        _dispatchGTM('dateFilter')
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
@@ -205,6 +210,7 @@ const Logs = () => {
         const className = 'is-highlighted'
         $('.c-logCard').removeClass(className)
         $(sel).addClass(className)
+        _dispatchGTM('tabChange')
     }
 
     const configureTabURL = (key) => window.history.pushState(null, null, `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`)
