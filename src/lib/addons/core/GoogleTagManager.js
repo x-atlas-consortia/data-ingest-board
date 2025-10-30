@@ -1,11 +1,12 @@
 class GoogleTagManager extends Addon {
 
-    constructor(ops, app) {
-        super(ops, app)
+    constructor(el, app) {
+        super(el, app)
         this.prefixes = {
             action: 'js-gtm--btn-cta-'
         }
         this.events()
+        return this
     }
 
     currentTarget(e) {
@@ -43,6 +44,12 @@ class GoogleTagManager extends Addon {
         const txt = this.currentTarget(e).text()
         if (txt === 'Submit For Processing') {
             this.gtm({filter: 'initiate-submit-for-processing'})
+        }
+        if (txt === 'Bulk Edit') {
+            this.gtm({filter: 'initiate-bulk-edit'})
+        }
+        if (txt === 'Validate Data') {
+            this.gtm({filter: 'initiate-validate-data'})
         }
     }
 
@@ -119,7 +126,14 @@ class GoogleTagManager extends Addon {
             user_id: this.getPerson(true),
             ...args
         }
-        console.log(data)
+        Addon.log('Pushing GTM info ...', {color: 'orange', data})
         dataLayer.push(data)
     }
+
+    static gtm(args) {
+        const model = new GoogleTagManager(args.el, args.info)
+        model.gtm(args.gtm)
+    }
+
+    
 }
