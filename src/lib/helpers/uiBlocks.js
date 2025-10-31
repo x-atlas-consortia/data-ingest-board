@@ -39,7 +39,7 @@ const UI_BLOCKS = {
     modalConfirm: {
         showConfirmModalOfSelectedEntities: ({callback, afterTableComponent, columns, selectedEntities, setModal, entityName = 'Datasets', title = ''}) => {
             const modalBody = (<div>
-                <h5 className='text-center mb-5' data-gtm-info={title.toDashedCase()}>Confirm selection {title}</h5>
+                <h5 className='text-center mb-5'>Confirm selection {title}</h5>
                 <p>{selectedEntities.length} {entityName} selected</p>
                 <Table className='c-table--pDatasets' rowKey={TABLE.cols.f('id')} dataSource={selectedEntities} columns={columns} />
                 {afterTableComponent}
