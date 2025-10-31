@@ -30,6 +30,7 @@ class GoogleTagManager extends Addon {
             }
         }
     }
+
     handleFilter(e) {
         this.event = 'filter'
         if (this.currentTarget(e).is(':checked')) {
@@ -42,22 +43,14 @@ class GoogleTagManager extends Addon {
         e.stopPropagation()
         this.event = 'cta'
         const txt = this.currentTarget(e).text()
-        if (txt === 'Submit For Processing') {
-            this.gtm({filter: 'initiate-submit-for-processing'})
-        }
-        if (txt === 'Bulk Edit') {
-            this.gtm({filter: 'initiate-bulk-edit'})
-        }
-        if (txt === 'Validate Data') {
-            this.gtm({filter: 'initiate-validate-data'})
-        }
+        this.gtm({info: `initiate-${txt.toDashedCase()}`})
     }
 
     handleModalCta(e) {
         this.event = 'cta'
         const txt = this.currentTarget(e).text()
         if (txt === 'Submit') {
-            this.gtm({filter: 'submit-for-processing'})
+            this.gtm({info: `submit-${$('.ant-modal-body h5').text().toDashedCase()}`})
         }
     }
 
@@ -82,8 +75,6 @@ class GoogleTagManager extends Addon {
             e.stopImmediatePropagation()
             _t.handleModalCta(e)
         })
-
-
     }
 
     getPath() {
@@ -104,7 +95,6 @@ class GoogleTagManager extends Addon {
         } else {
             return 'datasets'
         }
-      
     }
 
     getPerson(bto = false) {
