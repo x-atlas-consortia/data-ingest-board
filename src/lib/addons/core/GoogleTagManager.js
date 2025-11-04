@@ -123,7 +123,7 @@ class GoogleTagManager extends Addon {
     }
 
     static gtm(args) {
-        const model = new GoogleTagManager(args.el, args.info)
+        const model = new GoogleTagManager(args.el, {...args.info, app: 'self'})
         model.gtm(args.gtm)
     }
 

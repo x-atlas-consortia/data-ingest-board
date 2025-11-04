@@ -483,6 +483,8 @@ const Logs = () => {
             const _csvDownloadAndCloseModal = (removeLengthy = false) => {
                 setModal({...modal, open:false})
                 _csvDownload(removeLengthy)
+                const _action = removeLengthy ? 'truncateExport' : 'allExport'
+                _dispatchGTM(_action)
             }
 
             if (hasLengthy) {
@@ -491,7 +493,7 @@ const Logs = () => {
                 let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
                
                 const footer = [
-                    <Button key='dwn-trunc' icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
+                    <Button key='dwn-trunc' icon={<DownloadOutlined />}  onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
                     <Button key='dwn-all' color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
                 ]
                 setModal({...modal, title, body, open: true, footer})       

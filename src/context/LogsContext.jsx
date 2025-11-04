@@ -181,6 +181,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
 
   const handleMenuClick = (e) => {
     const gtm = {info: globusInfo, gtm: {event: 'cta', info: indexKey, action: e.key}}
+    let pushGTM = true
     if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
       gtm.action = `${e.keyPath[1]}:${e.key}}`
       setNumOfRows(Number(e.key))
@@ -189,10 +190,14 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
     if (eq(e.key, 'export')) {
       exportHandler(indexKey)
+      pushGTM = false
     }
     if (sectionHandleMenuItemClick.current) {
+      pushGTM = false
       sectionHandleMenuItemClick.current(e)
-    } else {
+    }
+
+    if (pushGTM) {
       GoogleTagManager.gtm(gtm)
     }
     
