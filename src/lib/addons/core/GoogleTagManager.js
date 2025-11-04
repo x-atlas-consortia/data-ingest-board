@@ -43,7 +43,9 @@ class GoogleTagManager extends Addon {
         e.stopPropagation()
         this.event = 'cta'
         const txt = this.currentTarget(e).text()
-        this.gtm({info: `initiate-${txt.toDashedCase()}`})
+        let info = this.currentTarget(e).find('span')?.data('gtm-info')
+        let action = this.currentTarget(e).find('span')?.data('gtm-action')
+        this.gtm({info: info || `initiate-${txt.toDashedCase()}`, action})
     }
 
     handleModalCta(e) {

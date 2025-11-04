@@ -344,7 +344,7 @@ const Logs = () => {
         setIsBusy(false)
     }
 
-    const getIndexKeyByActiveTab = (active) => active.replace('tab-', '')
+    const getIndexKeyByActiveTab = (active) => active?.replace('tab-', '')
 
     const onTabChange = (active) => {
         setActiveSection(active)
@@ -523,7 +523,7 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar activeTab={activeSection} exportHandler={showUnauthorized ? undefined : exportHandler} />
+            <AppSideNavBar activeTab={getCurrentTab()} exportHandler={showUnauthorized ? undefined : exportHandler} />
             {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
             {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>

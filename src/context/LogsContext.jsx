@@ -36,7 +36,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       },
       {
         key: 'export',
-        label: 'Export',
+        label: <span data-gtm-info={indexKey} data-gtm-action='export'>Export</span>,
         icon: <DownloadOutlined />
       }
     ],
@@ -192,8 +192,10 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     }
     if (sectionHandleMenuItemClick.current) {
       sectionHandleMenuItemClick.current(e)
+    } else {
+      GoogleTagManager.gtm(gtm)
     }
-    GoogleTagManager.gtm(gtm)
+    
   }
 
   const stackedGroupedBarMenuItems = [
