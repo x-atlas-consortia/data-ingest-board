@@ -563,7 +563,7 @@ const Logs = () => {
                         <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
-                    {tabs && <Row className='mt-5'><Tabs
+                    {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
                         activeKey={activeSection}
