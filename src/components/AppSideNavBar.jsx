@@ -7,24 +7,40 @@ import {
     LeftOutlined, LogoutOutlined, QuestionOutlined,
     RightOutlined,
     UserOutlined,
+    LineChartOutlined
 } from "@ant-design/icons";
 import AppContext from "@/context/AppContext";
 import { Navbar } from "react-bootstrap";
 import { eq } from '@/lib/helpers/general';
 import ENVS from '@/lib/helpers/envs';
 const { Sider } = Layout;
-function AppSideNavBar({ exportHandler, activeTab }) {
+function AppSideNavBar({ exportHandler, activeTab, isGoogleAnalytics }) {
     const { handleLogout, isAuthenticated, t, getUserEmail } = useContext(AppContext)
     const [collapsed, setCollapsed] = useState(false)
     const [items, setItems] = useState(null)
 
+    const getGoogleLookerStudio = () => {
+        const lookerStudio = ENVS.lookerStudio()
+        let _items = []
+        for (let l of lookerStudio) {
+            _items.push({ key: l.name.toDashedCase(), label: l.name })
+        }
+        return _items
+    }
+
     useEffect(() => {
         if (isAuthenticated) {
-            setItems([
+            let _items = [
                 {
                     key: 'home',
                     icon: <TableOutlined />,
                     label: 'Data Ingest Board',
+                },
+                {
+                    key: 'ga',
+                    icon: <LineChartOutlined />,
+                    label: 'Google Analytics',
+                    children: getGoogleLookerStudio()
                 },
                 {
                     key: '1',
@@ -35,18 +51,21 @@ function AppSideNavBar({ exportHandler, activeTab }) {
                     ]
                 },
                 {
+                    key: 'help',
+                    icon: <QuestionOutlined />,
+                    label: 'Help',
+                },
+            ]
+            if (!isGoogleAnalytics) {
+                _items.splice(3, 0, {
                     key: 'export',
                     className: 'export',
                     icon: <DownloadOutlined />,
                     label: <span data-gtm-info={activeTab} className='js-gtm--btn-cta-export' id='sideMenu--export'>Export</span>,
                     disabled: exportHandler == undefined
-                },
-                {
-                    key: 'help',
-                    icon: <QuestionOutlined />,
-                    label: 'Help',
-                },
-            ])
+                })
+            }
+            setItems(_items)
         }
     }, [isAuthenticated, activeTab])
 
@@ -54,7 +73,6 @@ function AppSideNavBar({ exportHandler, activeTab }) {
         if (window.innerWidth < 768) {
             setCollapsed(true)
         }
-
     }, [])
 
 
@@ -67,6 +85,8 @@ function AppSideNavBar({ exportHandler, activeTab }) {
             handleLogout()
         } else if (eq(e.key, 'home')) {
             window.location = '/'
+        } else {
+            window.location = '/usage/ga?v='+e.key
         }
     }
 
@@ -79,12 +99,12 @@ function AppSideNavBar({ exportHandler, activeTab }) {
                         <span className={'c-nav__imgWrap'}>
                             <img
                                 className="c-logo"
-                                src={`images/${collapsed ? t('hubmap-logo.png') : t('hubmap-type-white250.png')}`}
+                                src={`/images/${collapsed ? t('hubmap-logo.png') : t('hubmap-type-white250.png')}`}
                                 alt={t('HuBMAP Logo')}
                             />
                         </span>
                         {!collapsed && <h1 className="c-nav__title text-white">
-                            <span className='d-inline-block'>Usage Dashboard</span>
+                            <a href='/' className='d-inline-block text-white text-decoration-none'>Usage Dashboard</a>
                         </h1>}
                     </Navbar.Brand>
                 </div>
