@@ -41,7 +41,7 @@ const UsageGoogleAnalytics = ({}) => {
     }
 
     return (
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout style={{ minHeight: '100vh', maxHeight: '2000px' }}>
             <AppSideNavBar isGoogleAnalytics={true}  />
             {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
             {!showUnauthorized && dataSource && <Layout>
