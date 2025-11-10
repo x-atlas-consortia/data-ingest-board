@@ -41,6 +41,7 @@ function SankeyPage() {
             }
             el.setOptions({
                 ...options,
+                startUpOnOptions: true,
                 loading: {
                     callback: handleLoading
                 },
@@ -81,6 +82,7 @@ function SankeyPage() {
     useEffect(() => {
         if (globusToken && filters) {
             setOptions({
+                startUpOnOptions: false,
                 useShadow: true,
                 disableUbkgColorPalettes: isHM(),
                 styleSheetPath: '/css/xac-sankey.css',
@@ -116,12 +118,13 @@ function SankeyPage() {
                 if (xacSankey.current && xacSankey.current.setOptions) {
                     // it's ready
                     setSankeyOptions(xac)
-                    observer.disconnect()
+                    observer?.disconnect()
                 }
             }
 
             const observer = new MutationObserver(callback)
             observer.observe(targetNode, config)
+            callback(null, observer)
         })
     }, [])
 
