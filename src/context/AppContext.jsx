@@ -209,6 +209,11 @@ export const AppProvider = ({ children, messages, banners }) => {
         }
     }, [globusInfo])
 
+    const dispatchGTM = ({action, info, event = 'cta'}) => {
+        const gtm = {info: globusInfo, gtm: {event, info, action}}
+        GoogleTagManager.gtm(gtm)
+    }
+
     return <AppContext.Provider value={{
         globusInfo, setGlobusInfo,
         globusToken, setGlobusToken,
@@ -224,7 +229,8 @@ export const AppProvider = ({ children, messages, banners }) => {
         confirmBulkEdit,
         dataProviderGroups,
         revisionsData,
-        selectedEntities, setSelectedEntities
+        selectedEntities, setSelectedEntities,
+        dispatchGTM
     }}>{children}</AppContext.Provider>
 }
 

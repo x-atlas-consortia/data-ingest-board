@@ -1,6 +1,6 @@
 function AddonsIndex(source, globusInfo) {
     if (!Addon) return;
-    Addon.log('Addons started ...', {color: 'white'})
+    Addon.log(`Addons started ... ${source}`, {color: 'white'})
 
     window.addons = window.addons || {}
     if (window.addons[source] !== undefined) {
@@ -8,14 +8,21 @@ function AddonsIndex(source, globusInfo) {
     }
     window.addons[source] = globusInfo
 
-    const addons = [GoogleTagManager]
-    $(document).ready(() => {
-        for (let addon of addons) {
-            Addon.log(`Addons app: ${addon.name}`, {color: 'green'})
-            new addon(globusInfo, addon.name)
-        }
+    let apps = {
+        gtm: GoogleTagManager,
+    }
 
-    })
+    globusInfo = globusInfo || window.addons.init
+    Addon.observeMutations(apps, globusInfo)
+
+    setTimeout(() => {
+        try {
+            // Default: Capture all link clicks.
+            new GoogleTagManager(null, {app: 'links', ...globusInfo})
+        } catch (e) {
+            console.error(e)
+        }
+    }, 1200)
 }
 
 export default AddonsIndex

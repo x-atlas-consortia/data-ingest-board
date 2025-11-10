@@ -33,7 +33,7 @@ const Logs = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const { globusToken, isLoading, isAuthenticated, handleLogout } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated, dispatchGTM } = useContext(AppContext)
 
     const formatDate = (date, month, day) => {
         let m = month || (date.getMonth() + 1)
@@ -63,6 +63,10 @@ const Logs = () => {
 
     const refresh = () => setRefresh(new Date().getTime())
 
+    const _dispatchGTM = (action, event = 'cta') => {
+        dispatchGTM({action, event, info: getCurrentTab()})
+    }
+
     let _cards = {
         openSourceRepos: {
             title: 'Open Source Repositories',
@@ -83,6 +87,7 @@ const Logs = () => {
     const handleDateRange = (dates, dateStrings) => {
         setFromDate(dateStrings[0])
         setToDate(dateStrings[1])
+        _dispatchGTM('dateFilter')
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
@@ -205,6 +210,7 @@ const Logs = () => {
         const className = 'is-highlighted'
         $('.c-logCard').removeClass(className)
         $(sel).addClass(className)
+        _dispatchGTM('tabChange')
     }
 
     const configureTabURL = (key) => window.history.pushState(null, null, `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`)
@@ -290,7 +296,7 @@ const Logs = () => {
        return t 
     }
 
-    const getCards = (data) => {
+    const getCurrentTab = () => {
         let tabName = Object.keys(indicesSections.current)[0] 
         const query = new URLSearchParams(window.location.search)
         const tab = query.get('tab')
@@ -298,6 +304,11 @@ const Logs = () => {
         if (tab && (Object.keys(indicesSections.current).comprises(tab) || tabTitles.comprises(tab.toLowerCase())) ) {
             tabName = getTabByTitle(tab)
         }
+        return tabName
+    }
+
+    const getCards = (data) => {
+        const tabName = getCurrentTab()
 
         let comps = []
         let _tabs = []
@@ -333,7 +344,7 @@ const Logs = () => {
         setIsBusy(false)
     }
 
-    const getIndexKeyByActiveTab = (active) => active.replace('tab-', '')
+    const getIndexKeyByActiveTab = (active) => active?.replace('tab-', '')
 
     const onTabChange = (active) => {
         setActiveSection(active)
@@ -472,6 +483,8 @@ const Logs = () => {
             const _csvDownloadAndCloseModal = (removeLengthy = false) => {
                 setModal({...modal, open:false})
                 _csvDownload(removeLengthy)
+                const _action = removeLengthy ? 'truncateExport' : 'allExport'
+                _dispatchGTM(_action)
             }
 
             if (hasLengthy) {
@@ -480,8 +493,8 @@ const Logs = () => {
                 let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
                
                 const footer = [
-                    <Button icon={<DownloadOutlined />} onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
-                    <Button color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
+                    <Button key='dwn-trunc' icon={<DownloadOutlined />}  onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
+                    <Button key='dwn-all' color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
                 ]
                 setModal({...modal, title, body, open: true, footer})       
             } else {
@@ -512,7 +525,7 @@ const Logs = () => {
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar exportHandler={showUnauthorized ? undefined : exportHandler} />
+            <AppSideNavBar activeTab={getCurrentTab()} exportHandler={showUnauthorized ? undefined : exportHandler} />
             {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
             {!showUnauthorized && <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
@@ -550,7 +563,7 @@ const Logs = () => {
                         <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
-                    {tabs && <Row className='mt-5'><Tabs
+                    {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}><Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
                         activeKey={activeSection}

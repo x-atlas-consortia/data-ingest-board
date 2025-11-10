@@ -1,6 +1,6 @@
 import React from "react";
-import {Button, Form, Input, Select, Table} from 'antd';
-import {CheckCircleOutlined, CloseOutlined, IssuesCloseOutlined} from "@ant-design/icons";
+import {Table} from 'antd';
+import {CheckCircleOutlined, IssuesCloseOutlined} from "@ant-design/icons";
 import {eq} from "./general";
 import TABLE from "./table";
 
@@ -38,7 +38,6 @@ const UI_BLOCKS = {
     },
     modalConfirm: {
         showConfirmModalOfSelectedEntities: ({callback, afterTableComponent, columns, selectedEntities, setModal, entityName = 'Datasets', title = ''}) => {
-
             const modalBody = (<div>
                 <h5 className='text-center mb-5'>Confirm selection {title}</h5>
                 <p>{selectedEntities.length} {entityName} selected</p>
@@ -46,7 +45,7 @@ const UI_BLOCKS = {
                 {afterTableComponent}
             </div>)
 
-            setModal({key: 'bulkProcess', okText: 'Submit', okCallback: callback,
+            setModal({key: 'bulkInitiateModal', okText: 'Submit', okCallback: callback,
                 width: 1000, className: '', cancelCSS: 'initial', open: true, body:  modalBody, okButtonProps: {disabled: selectedEntities.length <= 0}})
         }
     }

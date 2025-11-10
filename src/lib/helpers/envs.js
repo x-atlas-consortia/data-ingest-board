@@ -6,6 +6,7 @@ const ENVS = {
         sab: () => process.env.NEXT_PUBLIC_APP_CONTEXT
     },
     theme: () => parseJSON(process.env.NEXT_PUBLIC_THEME),
+    lookerStudio: () => parseJSON(process.env.NEXT_PUBLIC_LOOKER_STUDIO),
     locale: () => {
         return process.env.NEXT_PUBLIC_LOCALE || 'en/hubmap'
     },
