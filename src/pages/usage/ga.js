@@ -3,21 +3,36 @@ import { Layout  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
 import AppContext from "@/context/AppContext";
 import Spinner from '@/components/Spinner';
-import Unauthorized from '@/components/Unauthorized';
 import { eq } from '@/lib/helpers/general';
 import ENVS from '@/lib/helpers/envs';
 
 const UsageGoogleAnalytics = ({}) => {
-    const { isAuthenticated} = useContext(AppContext)
-    const [showUnauthorized, setShowUnauthorized] = useState(false)
+    const {isLoading, isAuthenticated} = useContext(AppContext)
     const [dataSource, setDataSource] = useState(null)
     const lookerStudioFrame = useRef(null)
+
+    const [isIframeLoaded, setIsIframeLoaded] = useState(false)
+
+    const handleIframeLoad = () => {
+        setIsIframeLoaded(true)
+    }
+
+    useEffect(() => {
+        const currentIframe = lookerStudioFrame.current
+        if (currentIframe) {
+        currentIframe.addEventListener('load', handleIframeLoad)
+        return () => {
+            currentIframe.removeEventListener('load', handleIframeLoad)
+        };
+        }
+    }, [lookerStudioFrame.current])
 
     const getGoogleLookerStudio = () => {
      
       const query = new URLSearchParams(window.location.search)
       const requestedDataSource = query.get('v')
       const lookerStudio = ENVS.lookerStudio()
+      if (!Array.isArray(lookerStudio)) return []
       let _dataSource = lookerStudio[0]
  
       for (let l of lookerStudio) {
@@ -36,6 +51,11 @@ const UsageGoogleAnalytics = ({}) => {
         }
     }, [isAuthenticated])
 
+
+    if (!isAuthenticated && !isLoading) {
+         window.location = '/'
+    }
+
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
     }
@@ -43,8 +63,8 @@ const UsageGoogleAnalytics = ({}) => {
     return (
         <Layout style={{ minHeight: '100vh', maxHeight: '2000px' }}>
             <AppSideNavBar isGoogleAnalytics={true}  />
-            {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
-            {!showUnauthorized && dataSource && <Layout>
+            {!isIframeLoaded && <div className='mx-auto w-100 text-center'><Spinner tip='Loading report from Google Looker Studio...' /></div>}
+            {isAuthenticated && dataSource && <Layout>
                 <iframe ref={lookerStudioFrame} width="100%" height="100%" src={`https://lookerstudio.google.com/embed/reporting${dataSource.path}`} ></iframe>
             </Layout>}
         </Layout>

@@ -21,6 +21,7 @@ function AppSideNavBar({ exportHandler, activeTab, isGoogleAnalytics }) {
 
     const getGoogleLookerStudio = () => {
         const lookerStudio = ENVS.lookerStudio()
+        if (!Array.isArray(lookerStudio)) return []
         let _items = []
         for (let l of lookerStudio) {
             _items.push({ key: l.name.toDashedCase(), label: l.name })
@@ -104,7 +105,7 @@ function AppSideNavBar({ exportHandler, activeTab, isGoogleAnalytics }) {
                             />
                         </span>
                         {!collapsed && <h1 className="c-nav__title text-white">
-                            <a href='/' className='d-inline-block text-white text-decoration-none'>Usage Dashboard</a>
+                            <a href='/usage' className='d-inline-block text-white text-decoration-none'>Usage Dashboard</a>
                         </h1>}
                     </Navbar.Brand>
                 </div>
