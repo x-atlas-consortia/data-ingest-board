@@ -18,6 +18,7 @@ const UsageGoogleAnalytics = ({}) => {
       const query = new URLSearchParams(window.location.search)
       const requestedDataSource = query.get('v')
       const lookerStudio = ENVS.lookerStudio()
+      if (!Array.isArray(lookerStudio)) return []
       let _dataSource = lookerStudio[0]
  
       for (let l of lookerStudio) {
