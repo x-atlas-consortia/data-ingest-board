@@ -191,12 +191,24 @@ export const AppProvider = ({ children, messages, banners }) => {
 
     const idleTimer = useIdleTimer({timeout: ENVS.idleTimeout(), onIdle})
 
+    const getPageTitle = () => {
+        let title = 'Usage Dashboard'
+        if (eq(location.pathname, '/usage/ga')) {
+            return `${title} | Google Analytics`
+        }
+        else if (eq(location.pathname, '/usage')) {
+            return title
+        } else {
+            return 'Data Ingest Board'
+        }
+    }
+
 
     useEffect(() => {
         setIsLoading(true)
         resolveLocals()
         // Set up Page Title based on Resolved Locals
-        document.title = ENVS.appContext() + " Data Ingest Board"
+        document.title = ENVS.appContext() + " " + getPageTitle()
         if (pageLoaded.current === false) {
             THEME.cssProps()
             pageLoaded.current = true
