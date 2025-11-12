@@ -268,8 +268,15 @@ const DatasetTable = ({
         },
         {
             ... TABLE.columnOptions({
-                field: "has_qa_published_derived_dataset",
-                title: "Has QA/Published Derived Datasets",
+                field: "has_published_processed",
+                title: "Has Published Processed Data",
+                width: 300,  urlSortOrder, urlParamFilters, uniqueDataFilters
+            })
+        },
+        {
+            ... TABLE.columnOptions({
+                field: "has_qa_processed",
+                title: "Has QA Processed Data",
                 width: 300,  urlSortOrder, urlParamFilters, uniqueDataFilters
             })
         },
