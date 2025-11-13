@@ -74,6 +74,7 @@ const THEME = {
     },
     cssProps: () => {
         const themeConfig = ENVS.theme()
+        themeConfig.cssProps['col-sub-nav-bg'] = THEME.lightenDarkenColor(themeConfig.cssProps['col-nav-bg'], -5)
         for (let t in themeConfig.cssProps) {
             document.body.style.setProperty(
                 `--${t}`,

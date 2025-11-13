@@ -43,7 +43,7 @@ const DatasetTable = ({
     const [modal, setModal] = useState({cancelCSS: 'none', okText: 'OK'})
 
     useEffect(() => {
-        if (modal.open && eq(modal.key, 'bulkProcess')) {
+        if (modal.open && eq(modal.key, 'bulkInitiateModal')) {
             showConfirmModalOfSelectedDatasets(confirmModalArgs)
         }
     }, [selectedEntities])
@@ -317,7 +317,7 @@ const DatasetTable = ({
     }
 
     const showConfirmModalOfSelectedDatasets  = ({callback, afterTableComponent, title = ''}) => {
-        setConfirmModalArgs({callback, afterTableComponent})
+        setConfirmModalArgs({callback, afterTableComponent, title})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
             TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),

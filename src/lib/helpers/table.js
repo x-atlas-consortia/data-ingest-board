@@ -590,7 +590,7 @@ const TABLE = {
             target="_blank"
             rel="noopener noreferrer"
             type="primary"
-            className="text-decoration-none ms-2 js-btn--viewSankey mt-2 mt-md-0">
+            className="text-decoration-none ms-2 js-gtm--btn-cta-viewSankey mt-2 mt-md-0">
             View Sankey Diagram
         </Button>
     },

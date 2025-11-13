@@ -34,7 +34,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     }, [data])
 
     useEffect(() => {
-        if (modal.open && eq(modal.key, 'bulkProcess')) {
+        if (modal.open && eq(modal.key, 'bulkInitiateModal')) {
             showConfirmModalOfSelectedUploads(confirmModalArgs)
         }
     }, [selectedEntities])
@@ -223,7 +223,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
     }
 
     const showConfirmModalOfSelectedUploads  = ({callback, afterTableComponent, title = ''}) => {
-        setConfirmModalArgs({callback, afterTableComponent})
+        setConfirmModalArgs({callback, afterTableComponent, title})
         let columns = [
             TABLE.reusableColumns(urlSortOrder, {}).id(),
             TABLE.reusableColumns(urlSortOrder, {}).groupName(uniqueDataFilters['group_name']),

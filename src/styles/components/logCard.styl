@@ -2,13 +2,16 @@
   border solid 3px transparent
   margin 10px
   cursor pointer
-  width 25%
-  max-width 320px
+  width 320px
   word-break break-all
   h3 
     small 
       font-size .5em
+  +xxlg()
+    width 25%
   +md-max()
+    width 45%
+  +sm()
     width 100%
     margin 0
     

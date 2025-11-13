@@ -11,7 +11,7 @@ function useContent() {
 
     const loadMessages = async () => {
         let res = await axios.get(
-            `locale/${ENVS.locale()}.json`,
+            `/locale/${ENVS.locale()}.json`,
             getRequestOptions()
         )
         return res.data
@@ -20,7 +20,7 @@ function useContent() {
     const loadBanners = async () => {
         try {
             let res = await axios.get(
-                `content/banners/index.json`,
+                `/content/banners/index.json`,
                 getRequestOptions()
             )
             return res.data

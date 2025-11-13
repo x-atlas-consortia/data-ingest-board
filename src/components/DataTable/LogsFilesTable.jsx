@@ -280,7 +280,7 @@ const LogsFilesTable = ({ }) => {
                 }} />
             </>
             const footer = [
-                <Button key='exportSelection' icon={<DownloadOutlined />} onClick={()=>exportByTypeSelection(byTypeCols.map((c) => c.dataIndex))}> Download CSV Data</Button>,
+                <Button key='exportSelection' className="js-gtm--btn-cta-downloadCSVData" data-gtm-info={indexKey} icon={<DownloadOutlined />} onClick={()=>exportByTypeSelection(byTypeCols.map((c) => c.dataIndex))}> Download CSV Data</Button>,
                 <Button key='close' color="primary" variant="solid" onClick={()=>setModal({...modal, open:false})}> Close</Button>
             ]
             setModal({...modal, footer, body, open: true, width: '90%'})

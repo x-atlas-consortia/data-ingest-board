@@ -256,8 +256,10 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
 
     const hasMeaningfulData = () => chartData.length > 1
 
+    const getChartType = () => chartTypes[column] || 'bar'
+
     const getShareAbleURL = () => {
-        navigator.clipboard.writeText(`${location.host}/?chart=${column}&chartType=${chartTypes[column] || 'bar'}`)
+        navigator.clipboard.writeText(`${location.host}/?chart=${column}&chartType=${getChartType()}`)
     }   
 
     return (
@@ -296,7 +298,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                         )}</span>
                                         <span style={{float: 'right'}} >
                                             <AppTooltip title={'Shareable URL copied to clipboard!'}>
-                                            <span onClick={getShareAbleURL} >
+                                            <span onClick={getShareAbleURL} data-gtm-info={`${column}:${getChartType()}`} className='js-gtm--btn-cta-copyShareableUrl'>
                                                 <Tooltip title='Copy shareable URL' placement='left'><ShareAltOutlined style={{color: 'var(--bs-blue)', cursor: 'pointer'}} /></Tooltip>
                                             </span>
                                         </AppTooltip>
