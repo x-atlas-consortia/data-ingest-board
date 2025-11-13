@@ -65,7 +65,7 @@ const UsageGoogleAnalytics = ({}) => {
             <AppSideNavBar isGoogleAnalytics={true}  />
             {!isIframeLoaded && <div className='mx-auto w-100 text-center'><Spinner tip='Loading report from Google Looker Studio...' /></div>}
             {isAuthenticated && dataSource && <Layout>
-                <iframe ref={lookerStudioFrame} width="100%" height="100%" src={`https://lookerstudio.google.com/embed/reporting${dataSource.path}`} ></iframe>
+                <div className='c-iframeReport'><iframe ref={lookerStudioFrame} width="100%" height="100%" src={`https://lookerstudio.google.com/embed/reporting${dataSource.path}`} ></iframe></div>
             </Layout>}
         </Layout>
     );
