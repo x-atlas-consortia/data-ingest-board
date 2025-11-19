@@ -1,11 +1,12 @@
 class GoogleTagManager extends Addon {
 
-    constructor(ops, app) {
-        super(ops, app)
+    constructor(el, app) {
+        super(el, app)
         this.prefixes = {
             action: 'js-gtm--btn-cta-'
         }
         this.events()
+        return this
     }
 
     currentTarget(e) {
@@ -13,6 +14,7 @@ class GoogleTagManager extends Addon {
     }
 
     handleCta(e) {
+        e.stopPropagation()
         this.event = 'cta'
         const classNames = this.currentTarget(e).attr('class')
         const pos = classNames.indexOf(this.prefixes.action)
@@ -28,6 +30,7 @@ class GoogleTagManager extends Addon {
             }
         }
     }
+
     handleFilter(e) {
         this.event = 'filter'
         if (this.currentTarget(e).is(':checked')) {
@@ -40,38 +43,40 @@ class GoogleTagManager extends Addon {
         e.stopPropagation()
         this.event = 'cta'
         const txt = this.currentTarget(e).text()
-        if (txt === 'Submit For Processing') {
-            this.gtm({filter: 'initiate-submit-for-processing'})
-        }
+        let info = this.currentTarget(e).find('span')?.data('gtm-info')
+        let action = this.currentTarget(e).find('span')?.data('gtm-action')
+        this.gtm({info: info || `initiate-${txt.toDashedCase()}`, action})
     }
 
     handleModalCta(e) {
         this.event = 'cta'
         const txt = this.currentTarget(e).text()
         if (txt === 'Submit') {
-            this.gtm({filter: 'submit-for-processing'})
+            this.gtm({info: `submit-${$('.ant-modal-body h5').text().toDashedCase()}`})
         }
     }
 
     events() {
         const _t = this
         $('body').on('click', `[class*="${this.prefixes.action}"]`, (e)=>{
+            e.stopImmediatePropagation()
             _t.handleCta(e)
         })
 
         $('body').on('change', '.ant-table-filter-dropdown .ant-checkbox-input', (e)=>{
+            e.stopImmediatePropagation()
             _t.handleFilter(e)
         })
 
         $('body').on('click', '.ant-dropdown-menu-item .ant-dropdown-menu-title-content', (e)=> {
+            e.stopImmediatePropagation()
             _t.handleMenuItem(e)
         })
 
         $('body').on('click', '.ant-modal-footer .ant-btn-primary', (e)=> {
+            e.stopImmediatePropagation()
             _t.handleModalCta(e)
         })
-
-
     }
 
     getPath() {
@@ -85,7 +90,13 @@ class GoogleTagManager extends Addon {
 
     getContext() {
         if (!this.hasUser()) return null
-        return window.location.href.includes('entity_type=uploads') ? 'uploads' : 'datasets'
+        if (window.location.href.includes('entity_type=uploads')) {
+            return 'uploads'
+        } else if (window.location.pathname == '/usage') {
+            return 'usage'
+        } else {
+            return 'datasets'
+        }
     }
 
     getPerson(bto = false) {
@@ -107,7 +118,14 @@ class GoogleTagManager extends Addon {
             user_id: this.getPerson(true),
             ...args
         }
-        console.log(data)
+        Addon.log('Pushing GTM info ...', {color: 'orange', data})
         dataLayer.push(data)
     }
+
+    static gtm(args) {
+        const model = new GoogleTagManager(args.el, {...args.info, app: 'self'})
+        model.gtm(args.gtm)
+    }
+
+    
 }
