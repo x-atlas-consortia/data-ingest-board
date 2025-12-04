@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import TABLE from "@/lib/helpers/table";
 import {Table} from "antd";
+import { eq } from "@/lib/helpers/general";
 import AppTableContext from "@/context/TableContext";
 import ColumnToggle from "@/components/DataTable/ColumnToggle";
 import RouterContext from "@/context/RouterContext";
@@ -38,7 +39,7 @@ function AppTable({data, modifiedData, countFilteredRecords,  rowSelection, load
         <>
             <div className="count c-table--header">
                 {TABLE.rowSelectionDropdown({menuProps, selectedEntities, countFilteredRecords, modifiedData, filters, entity: context})}
-                {TABLE.viewSankeyButton({filters})}
+                {eq(context, 'dataset') && TABLE.viewSankeyButton({filters})}
                 <ColumnToggle hiddenColumns={getHiddenColumns()} columns={columns} handleSelectionChange={handleHiddenColumns} />
             </div>
             <Table className={`c-table--main ${countFilteredRecords(data, filters).length > 0 ? '' : 'no-data'}`}
