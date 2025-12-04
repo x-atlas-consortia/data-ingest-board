@@ -1,7 +1,7 @@
 import React from 'react'
 import { createContext, useEffect, useState, useRef } from 'react'
 import Icon, { BarChartOutlined, DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
-import { Dropdown, Space } from 'antd';
+import { Dropdown, Space, Switch } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import { GroupedBarChartIcon } from '@/lib/helpers/icons';
@@ -10,7 +10,7 @@ import AppContext from './AppContext';
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates, defaultIsLogScale }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -25,10 +25,23 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [histogramDetails, setHistogramDetails] = useState({})
   const sectionHandleMenuItemClick = useRef(null)
   const {globusInfo} = useContext(AppContext)
+  const [isLogScale, setIsLogScale] = useState(defaultIsLogScale)
 
+  const scaleTypeChange = (checked, e) => {
+    setIsLogScale(checked)
+  }
+  
   const menuProps = () => {
+    let _items = []
+    if (defaultIsLogScale) {
+      _items.push({
+            key: 'scaleType',
+            disabled: true,
+            label: <>Y-Axis Scale <Switch checkedChildren="Log" onChange={scaleTypeChange} unCheckedChildren="Linear" size="small" defaultChecked /></>,
+        })
+    }
     return {
-      items: [...menuItems, {
+      items: [...menuItems, ..._items, {
         key: 'numOfRows',
         label: 'Rows Per Load More',
         icon: <TableOutlined />,
@@ -265,7 +278,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     histogramDetails, setHistogramDetails,
     sectionHandleMenuItemClick,
     stackedGroupedBarMenuItems,
-    tableScroll
+    tableScroll,
+    isLogScale, setIsLogScale
 
   }}>{children}</LogsContext.Provider>
 }

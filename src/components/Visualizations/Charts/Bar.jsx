@@ -210,7 +210,7 @@ function Bar({
 
     useEffect(() => {
         updateChart()
-    }, [filters])
+    }, [filters, yAxis])
 
     return (
         <div className={`c-visualizations__chart c-visualizations__bar c-bar`} id={`c-visualizations__bar--${chartId}`}></div>

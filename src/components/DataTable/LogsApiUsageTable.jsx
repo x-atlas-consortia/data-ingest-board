@@ -31,7 +31,7 @@ const LogsApiUsageTable = ({ data }) => {
         setSelectedMenuItem,
         setMenuItems,
         histogramDetails, setHistogramDetails,
-        tableScroll
+        tableScroll, isLogScale
 
     } = useContext(LogsContext)
 
@@ -184,7 +184,7 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: true }
+    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
     const xAxis = { formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
 
     const formatAnalytics = (v, details) => {

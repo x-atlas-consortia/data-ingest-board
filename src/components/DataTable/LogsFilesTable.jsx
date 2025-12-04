@@ -46,7 +46,8 @@ const LogsFilesTable = ({ }) => {
         getUrl,
         tableScroll,
         histogramDetails, setHistogramDetails,
-        sectionHandleMenuItemClick
+        sectionHandleMenuItemClick,
+        isLogScale,
 
     } = useContext(LogsContext)
 
@@ -292,7 +293,7 @@ const LogsFilesTable = ({ }) => {
         setMenuItems(items)
     }, [])
 
-    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: true, }
+    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: isLogScale, }
     const xAxis = {monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
 
     const formatAnalytics = (v, details) => {

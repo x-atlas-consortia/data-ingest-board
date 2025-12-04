@@ -262,7 +262,8 @@ const Logs = () => {
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
-                    extraActions={extraActions} >
+                    extraActions={extraActions}
+                    defaultIsLogScale={true} >
                     <LogsApiUsageTable data={tableData} />
                 </LogsProvider>
             </>
@@ -279,7 +280,8 @@ const Logs = () => {
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
-                    extraActions={extraActions} >
+                    extraActions={extraActions}
+                    defaultIsLogScale={true} >
                     <LogsFilesTable />
                 </LogsProvider>
 
