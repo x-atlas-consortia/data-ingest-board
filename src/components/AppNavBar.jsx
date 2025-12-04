@@ -53,7 +53,7 @@ function AppNavBar() {
                         <a className='p-2 txt-muted-on-dark text-decoration-none' href='/usage'>Usage Dashboard <DatabaseOutlined /></a>
                         <Dropdown menu={{ items, onClick: handleMenuClick} } className='c-nav__user w-40' >
                             <span className='p-2 txt-muted-on-dark' onClick={e => e.preventDefault()}>
-                                {getUserEmail()}
+                                <span className='c-nav__userEmail'>{getUserEmail()}</span>
                                 <DownOutlined />
                             </span>
                         </Dropdown>
