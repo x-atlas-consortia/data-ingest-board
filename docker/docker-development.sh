@@ -76,7 +76,7 @@ else
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board config
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board config
     elif [ "$1" = "build" ]; then
         # Delete the copied source code dir if exists
         if [ -d "data-ingest-board/src" ]; then
@@ -91,12 +91,12 @@ else
         # Also explicitly copy the .env file
         cp ../src/.env data-ingest-board/src
 
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board build
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board build
     elif [ "$1" = "start" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board up -d
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board up -d
     elif [ "$1" = "stop" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board stop
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board stop
     elif [ "$1" = "down" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board down
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p data-ingest-board down
     fi
 fi
