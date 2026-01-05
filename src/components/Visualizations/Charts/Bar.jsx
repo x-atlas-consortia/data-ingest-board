@@ -84,6 +84,7 @@ function Bar({
         const maxY = d3.max(data, (d) => d.value);
         const yStartPos = yAxis.scaleLog ? 1 : (-(maxY * .02))
         const yDomain = [yStartPos, maxY]
+        const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
 
         // Declare the y (vertical position) scale.
         let y = yAxis.scaleLog ? d3.scaleLog()
@@ -98,7 +99,7 @@ function Bar({
             .attr("viewBox", [0, 0, width, height])
 
         svg.selectAll(".y-grid")
-            .data(y.ticks())
+            .data(y.ticks(ticks))
             .enter().append("line")
             .attr("class", "y-grid")
             .attr("x1", margin.left)
@@ -161,7 +162,7 @@ function Bar({
         // Add the y-axis and label, and remove the domain line.
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
+            .call(d3.axisLeft(y).ticks(ticks).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
 
         if (showYLabels()) {
             svg.append("g")
