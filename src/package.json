@@ -1,6 +1,6 @@
 {
   "name": "data-ingest-board",
-  "version": "1.4.16",
+  "version": "1.4.18",
   "private": true,
   "watch": {
     "addons": "./lib/addons/core/*.js"
