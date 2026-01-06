@@ -48,6 +48,7 @@ const LogsFilesTable = ({ }) => {
         histogramDetails, setHistogramDetails,
         sectionHandleMenuItemClick,
         isLogScale,
+        getScaleSwitchMenuItem
 
     } = useContext(LogsContext)
 
@@ -249,7 +250,8 @@ const LogsFilesTable = ({ }) => {
             key: 'byDatasetType',
             icon: <BarChartOutlined />,
             label: <Popover content={'Currently loaded table items are aggregated by dataset type and shown in bar chart.'} placement={'left'}><span>View By Dataset Type</span></Popover>,
-        }
+        },
+        getScaleSwitchMenuItem()
     ];
 
     const rowSelectionForByType = {
@@ -291,7 +293,7 @@ const LogsFilesTable = ({ }) => {
     useEffect(() => {
         sectionHandleMenuItemClick.current = _handleMenuItemClick
         setMenuItems(items)
-    }, [])
+    }, [isLogScale])
 
     const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: isLogScale, }
     const xAxis = {monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}

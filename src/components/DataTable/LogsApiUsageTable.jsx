@@ -31,7 +31,8 @@ const LogsApiUsageTable = ({ data }) => {
         setSelectedMenuItem,
         setMenuItems,
         histogramDetails, setHistogramDetails,
-        tableScroll, isLogScale
+        tableScroll, isLogScale,
+        getScaleSwitchMenuItem,
 
     } = useContext(LogsContext)
 
@@ -112,8 +113,8 @@ const LogsApiUsageTable = ({ data }) => {
     ]
 
     useEffect(() => {
-        setMenuItems(stackedGroupedBarMenuItems)
-    }, [selectedMenuItem])
+        setMenuItems([...stackedGroupedBarMenuItems, getScaleSwitchMenuItem()])
+    }, [selectedMenuItem, isLogScale])
 
 
     useEffect(() => {

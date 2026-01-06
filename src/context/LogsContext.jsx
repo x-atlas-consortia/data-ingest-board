@@ -25,23 +25,28 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [histogramDetails, setHistogramDetails] = useState({})
   const sectionHandleMenuItemClick = useRef(null)
   const {globusInfo} = useContext(AppContext)
-  const [isLogScale, setIsLogScale] = useState(defaultIsLogScale)
+  const [isLogScale, setIsLogScale] = useState(defaultIsLogScale ? defaultIsLogScale.current[indexKey] : false)
 
   const scaleTypeChange = (checked, e) => {
+    defaultIsLogScale.current[indexKey] = checked
     setIsLogScale(checked)
+  }
+
+  const getScaleSwitchMenuItem = () => {
+    if (defaultIsLogScale !== undefined) {
+      return {
+            key: 'scaleType'+indexKey,
+            className: 'ant-menu-item--scaleType',
+            disabled: true, //disable clicks on label
+            label: <>Y-Axis Scale <Switch checkedChildren="Log" onChange={scaleTypeChange} unCheckedChildren="Linear" size="small" defaultChecked={isLogScale} /></>,
+      }
+    }
+    return {}  
   }
   
   const menuProps = () => {
-    let _items = []
-    if (defaultIsLogScale) {
-      _items.push({
-            key: 'scaleType',
-            disabled: true,
-            label: <>Y-Axis Scale <Switch checkedChildren="Log" onChange={scaleTypeChange} unCheckedChildren="Linear" size="small" defaultChecked /></>,
-        })
-    }
     return {
-      items: [...menuItems, ..._items, {
+      items: [...menuItems, {
         key: 'numOfRows',
         label: 'Rows Per Load More',
         icon: <TableOutlined />,
@@ -94,7 +99,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       </div>)
     }
     setExtraActions(tabExtraActions.current)
-  }, [numOfRows, selectedMenuItem, menuItems])
+  }, [numOfRows, selectedMenuItem, menuItems, isLogScale])
 
   const updateTableData = (includePrevData, _tableData) => {
     if (includePrevData) {
@@ -279,7 +284,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     sectionHandleMenuItemClick,
     stackedGroupedBarMenuItems,
     tableScroll,
-    isLogScale, setIsLogScale
+    isLogScale, setIsLogScale,
+    defaultIsLogScale, getScaleSwitchMenuItem
 
   }}>{children}</LogsContext.Provider>
 }
