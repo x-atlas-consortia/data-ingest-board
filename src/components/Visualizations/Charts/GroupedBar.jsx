@@ -207,7 +207,7 @@ function GroupedBar({
 
     useEffect(() => {
         updateChart()
-    }, [filters])
+    }, [filters, yAxis])
 
     return (
         <div className={`c-visualizations__chart c-visualizations__groupedBar c-bar`} id={`c-visualizations__groupedBar--${chartId}`}></div>
