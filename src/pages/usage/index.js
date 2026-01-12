@@ -60,6 +60,7 @@ const Logs = () => {
     const [modal, setModal] = useState(modalDefault)
     const [_refresh, setRefresh] = useState(null)
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
+    const defaultIsLogScale = useRef({apiUsage: true, fileDownloads: true})
 
     const refresh = () => setRefresh(new Date().getTime())
 
@@ -262,7 +263,8 @@ const Logs = () => {
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
-                    extraActions={extraActions} >
+                    extraActions={extraActions}
+                    defaultIsLogScale={defaultIsLogScale} >
                     <LogsApiUsageTable data={tableData} />
                 </LogsProvider>
             </>
@@ -279,7 +281,8 @@ const Logs = () => {
                     fromDate={fromDate} toDate={toDate}
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
-                    extraActions={extraActions} >
+                    extraActions={extraActions}
+                    defaultIsLogScale={defaultIsLogScale} >
                     <LogsFilesTable />
                 </LogsProvider>
 

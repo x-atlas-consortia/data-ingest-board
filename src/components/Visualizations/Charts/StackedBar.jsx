@@ -224,7 +224,7 @@ function StackedBar({
 
     useEffect(() => {
         updateChart()
-    }, [filters])
+    }, [filters, yAxis])
 
     return (
         <div className={`c-visualizations__chart c-visualizations__stackedBar c-bar`} id={`c-visualizations__stackedBar--${chartId}`}></div>

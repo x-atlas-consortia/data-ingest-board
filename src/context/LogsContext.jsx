@@ -1,7 +1,7 @@
 import React from 'react'
 import { createContext, useEffect, useState, useRef } from 'react'
 import Icon, { BarChartOutlined, DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
-import { Dropdown, Space } from 'antd';
+import { Dropdown, Space, Switch } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import { GroupedBarChartIcon } from '@/lib/helpers/icons';
@@ -10,7 +10,7 @@ import AppContext from './AppContext';
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates, defaultIsLogScale }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -25,7 +25,25 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const [histogramDetails, setHistogramDetails] = useState({})
   const sectionHandleMenuItemClick = useRef(null)
   const {globusInfo} = useContext(AppContext)
+  const [isLogScale, setIsLogScale] = useState(defaultIsLogScale ? defaultIsLogScale.current[indexKey] : false)
 
+  const scaleTypeChange = (checked, e) => {
+    defaultIsLogScale.current[indexKey] = checked
+    setIsLogScale(checked)
+  }
+
+  const getScaleSwitchMenuItem = () => {
+    if (defaultIsLogScale !== undefined) {
+      return {
+            key: 'scaleType'+indexKey,
+            className: 'ant-menu-item--scaleType',
+            disabled: true, //disable clicks on label
+            label: <>Y-Axis Scale <Switch checkedChildren="Log" onChange={scaleTypeChange} unCheckedChildren="Linear" size="small" defaultChecked={isLogScale} /></>,
+      }
+    }
+    return {}  
+  }
+  
   const menuProps = () => {
     return {
       items: [...menuItems, {
@@ -81,7 +99,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       </div>)
     }
     setExtraActions(tabExtraActions.current)
-  }, [numOfRows, selectedMenuItem, menuItems])
+  }, [numOfRows, selectedMenuItem, menuItems, isLogScale])
 
   const updateTableData = (includePrevData, _tableData) => {
     if (includePrevData) {
@@ -265,7 +283,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     histogramDetails, setHistogramDetails,
     sectionHandleMenuItemClick,
     stackedGroupedBarMenuItems,
-    tableScroll
+    tableScroll,
+    isLogScale, setIsLogScale,
+    defaultIsLogScale, getScaleSwitchMenuItem
 
   }}>{children}</LogsContext.Provider>
 }
