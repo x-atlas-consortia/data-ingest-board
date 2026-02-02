@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip, Spin  } from 'antd';
 import AppSideNavBar from "@/components/AppSideNavBar";
-import { callService, eq, getHeadersWith, formatNum, formatBytes } from "@/lib/helpers/general";
+import { callService, eq, getHeadersWith, formatNum, formatBytes, roundToTheNearest } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
 import ESQ, { indexFixtures } from "@/lib/helpers/esq";
@@ -17,7 +17,8 @@ import {
     CalendarOutlined,
     ExclamationCircleFilled, 
     MinusOutlined,
-    PlusOutlined
+    PlusOutlined,
+    InfoCircleOutlined
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
@@ -101,7 +102,7 @@ const Logs = () => {
     const getCardDetail = (key, data) => {
 
         let totalHits = 0
-        let totalBytes, datasetGroups, totalFiles = 0
+        let totalBytes, datasetGroups, totalFiles, totalFilesRounded = 0
         let agg
         let repoData = []
 
@@ -113,6 +114,7 @@ const Logs = () => {
         } else if (isFiles(key)) {
             totalHits = indexData.hits.total?.value
             totalFiles = agg.totalFiles.value
+            totalFilesRounded = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
             datasetGroups = agg.totalDatasets.value
             totalBytes = agg.totalBytes.value
         } else {
@@ -198,8 +200,15 @@ const Logs = () => {
                     <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
                 </Row>
                 <Row className='mt-3'>
-                    <Col span={12}>{formatNum(totalFiles)}<br /><strong>Globus files</strong> </Col>
-                    <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col>
+                    <Col span={12}><span>
+                        {formatNum(totalFilesRounded)} &nbsp;
+                        <Tooltip placement="right" title={`Total number of files downloaded, estimated at ${formatNum(totalFiles)} and rounded to the next nearest power of 10.`}>
+                            <InfoCircleOutlined />
+                        </Tooltip>
+                        </span><br />
+                        <strong>Files downloaded</strong> 
+                    </Col>
+                    {/* <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col> */}
                 </Row>
             </>)
         }
