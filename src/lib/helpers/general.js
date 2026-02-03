@@ -24,7 +24,15 @@ export function eq(s1, s2, insensitive = true) {
     return res
 }
 
+export const roundToTheNearest = (num, exponentModifier = -1) => {
+    const exponent = Math.floor(Math.log10(num)); 
+    const magnitude = Math.pow(10, (exponent + exponentModifier)); 
+
+    return Math.round(num / magnitude) * magnitude; 
+}
+
 export function toDateString(timestamp) {
+    if (!timestamp || !timestamp.length) return ''
     const date = new Date(timestamp);
     let options = { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric',
         minute: 'numeric',
