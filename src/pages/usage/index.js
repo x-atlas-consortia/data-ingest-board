@@ -102,7 +102,7 @@ const Logs = () => {
     const getCardDetail = (key, data) => {
 
         let totalHits = 0
-        let totalBytes, datasetGroups, totalFiles, totalFilesRounded = 0
+        let totalBytes, datasetGroups, totalFiles = 0
         let agg
         let repoData = []
 
@@ -114,7 +114,7 @@ const Logs = () => {
         } else if (isFiles(key)) {
             totalHits = indexData.hits.total?.value
             totalFiles = agg.totalFiles.value
-            totalFilesRounded = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
+            totalFiles = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
             datasetGroups = agg.totalDatasets.value
             totalBytes = agg.totalBytes.value
         } else {
@@ -201,8 +201,8 @@ const Logs = () => {
                 </Row>
                 <Row className='mt-3'>
                     <Col span={12}><span>
-                        {formatNum(totalFilesRounded)} &nbsp;
-                        <Tooltip placement="right" title={`Total number of files downloaded, estimated at ${formatNum(totalFiles)} and rounded to the next nearest power of 10.`}>
+                        {formatNum(totalFiles)} &nbsp;
+                        <Tooltip placement="right" title={`Estimated total number of files downloaded.`}>
                             <InfoCircleOutlined />
                         </Tooltip>
                         </span><br />
