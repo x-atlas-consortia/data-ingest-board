@@ -76,7 +76,12 @@ const ESQ = {
     bucketCount: (field) => {
         return {
             cardinality: {
-                field: `${field}.keyword`
+                field: `${field}.keyword`,
+                /**
+                 * Cardinality aggregations are an estimate, 
+                 * but should be a good number if precision_threshold is high enough.
+                 */
+                precision_threshold: 40000
             }
         }
     },
