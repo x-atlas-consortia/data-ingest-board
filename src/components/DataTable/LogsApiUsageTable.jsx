@@ -5,7 +5,7 @@ import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/genera
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
-import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
+import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
@@ -207,7 +207,7 @@ const LogsApiUsageTable = ({ data }) => {
     return (<>
 
         {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <OverlappedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

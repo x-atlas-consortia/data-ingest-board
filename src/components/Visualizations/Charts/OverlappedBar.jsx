@@ -16,7 +16,7 @@ export const prepareStackedData = (data) => {
     return sorted
 }
 
-function StackedBar({
+function OverlappedBar({
     setLegend,
     filters,
     data = [],
@@ -32,7 +32,7 @@ function StackedBar({
         appendTooltip } = useContext(ChartContext)
 
 
-    const chartType = 'stackedBar'
+    const chartType = 'overlappedBar'
     const colors = useRef({})
     const chartData = useRef([])
     const hasLoaded = useRef(false)
@@ -227,8 +227,8 @@ function StackedBar({
     }, [filters, yAxis])
 
     return (
-        <div className={`c-visualizations__chart c-visualizations__stackedBar c-bar`} id={`c-visualizations__stackedBar--${chartId}`}></div>
+        <div className={`c-visualizations__chart c-visualizations__overlappedBar c-bar`} id={`c-visualizations__overlappedBar--${chartId}`}></div>
     )
 }
 
-export default StackedBar
+export default OverlappedBar

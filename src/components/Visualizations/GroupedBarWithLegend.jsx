@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
-import { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
+import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedBar';
 import GroupedBar from '@/components/Visualizations/Charts/GroupedBar';
 import WithChart from './WithChart';
 

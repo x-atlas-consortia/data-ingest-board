@@ -5,7 +5,7 @@ import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/genera
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
-import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
+import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import GroupedBarWithLegend from "../Visualizations/GroupedBarWithLegend";
@@ -334,7 +334,7 @@ const LogsReposTable = ({ }) => {
 
     return (<>
         {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <OverlappedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}
