@@ -155,15 +155,17 @@ const Logs = () => {
                
                 const $dots = $('#js-sliderNav li')
                 $dots.removeClass('slideNav-active arrow arrow-next arrow-prev')
+                let label 
                 $dots.each((i, el) => {
+                    label = $(el).attr('aria-label')
                     if (i < slideIndex) {
-                        $(el).addClass('arrow arrow-prev')
+                        $(el).addClass('arrow arrow-prev').attr('title', `Go to previous slide: ${label}`)
                     } else {
                         if (i > slideIndex) {
-                           $(el).addClass('arrow arrow-next') 
+                           $(el).addClass('arrow arrow-next').attr('title', `Go to next slide: ${label}`) 
                         }
                         if (i === slideIndex) {
-                            $(el).addClass('slideNav-active') 
+                            $(el).addClass('slideNav-active').attr('title', `Current slide: ${label}`) 
                         }
                     }
                 })
