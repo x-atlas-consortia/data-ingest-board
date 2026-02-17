@@ -62,6 +62,7 @@ const Logs = () => {
     const [_refresh, setRefresh] = useState(null)
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
     const defaultIsLogScale = useRef({apiUsage: true, fileDownloads: true})
+    const repoCarouselRef = useRef(null);
 
     const refresh = () => setRefresh(new Date().getTime())
 
@@ -144,8 +145,37 @@ const Logs = () => {
 
         const exportKey = key + 'Overview'
         if (isRepos(key)) {
+            repoData.sort((a,b) => (a.owner > b.owner) ? 1 : ((b.owner > a.owner) ? -1 : 0))
             exportData.current[exportKey] = repoData
             let cardInfo = []
+            let sliderNav = []
+            let i = 0
+
+            const afterRepoSliderChange = (slideIndex) => {
+               
+                const $dots = $('#js-sliderNav li')
+                $dots.removeClass('slideNav-active arrow arrow-next arrow-prev')
+                $dots.each((i, el) => {
+                    if (i < slideIndex) {
+                        $(el).addClass('arrow arrow-prev')
+                    } else {
+                        if (i > slideIndex) {
+                           $(el).addClass('arrow arrow-next') 
+                        }
+                        if (i === slideIndex) {
+                            $(el).addClass('slideNav-active') 
+                        }
+                    }
+                })
+            }
+
+            const navigateSlider = (e) => {
+                const $el = $(e.currentTarget)
+                const index = Number($el.attr('data-index'))
+                repoCarouselRef.current.goTo(index)
+                afterRepoSliderChange(index)
+            }
+
             for (let d of repoData) {
                 let colInfo = []
                 for (let c of d.stats) {
@@ -160,8 +190,26 @@ const Logs = () => {
                         {colInfo}
                     </div>
                 )
+
+                sliderNav.push(<li key={'li'+d.owner} data-index={i} aria-label={d.owner} onClick={navigateSlider}>&nbsp;<span>{i + 1}</span></li>)
+                i++
             }
-            return (<div className='c-logCard__slickWrap'><Carousel>{cardInfo}</Carousel></div>)
+
+            let _timeout
+            
+            const styleDots = (slideIndex) => {
+                clearTimeout(_timeout)
+                setTimeout(() => {
+                    afterRepoSliderChange(slideIndex)
+                }, 100)
+            }
+            styleDots(0)
+            
+            return (<div className='c-logCard__slickWrap'>
+                <Carousel dots={false} ref={repoCarouselRef}>{cardInfo}
+                </Carousel>
+                <div className='position-relative'><ul id='js-sliderNav' className='slider-nav'>{sliderNav}</ul></div>
+                </div>)
         }
 
         if (isApi(key)) {
