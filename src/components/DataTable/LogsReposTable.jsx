@@ -334,7 +334,7 @@ const LogsReposTable = ({ }) => {
 
     return (<>
         {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <OverlappedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

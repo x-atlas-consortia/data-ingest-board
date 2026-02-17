@@ -271,9 +271,9 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
                     icon:   <GroupedBarChartIcon />
                 },
                 {
-                    key: 'stackedBar',
-                    className: getMenuItemClassName(selectedMenuItem, 'stackedBar'),
-                    label: 'Stacked Bar',
+                    key: 'overlappedBar',
+                    className: getMenuItemClassName(selectedMenuItem, 'overlappedBar'),
+                    label: 'Overlapped Bar',
                     icon: <BarChartOutlined  />
                 },
                 

@@ -207,7 +207,7 @@ const LogsApiUsageTable = ({ data }) => {
     return (<>
 
         {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <OverlappedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

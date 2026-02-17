@@ -153,6 +153,7 @@ function OverlappedBar({
             .style("stroke", "#eee") // Light gray
             .style("stroke-width", "1px")
 
+        const widthModifier = 10
         // Show the bars
         g.append("g")
             .selectAll("g")
@@ -176,10 +177,10 @@ function OverlappedBar({
                 return getSubgroupLabel(d.key)
             })
             .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
-            .attr("x", d => x(d.group))
+            .attr("x", (d, i) => x(d.group) + (i * (widthModifier/2))) 
             .attr("y", height)
             .attr("height", 0)
-            .attr("width", x.bandwidth())
+            .attr("width", (d, i) => x.bandwidth() - (i * widthModifier))
             .append("title")
             .text(d => {
                 return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
