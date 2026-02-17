@@ -78,11 +78,17 @@ function GroupedBar({
 
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
         const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-        const minY = yAxis.scaleLog ? 1 : 0
+        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
+
+        const yaxis = scaleMethod()
+            .domain([minY, maxY])
+
+        if (yAxis.scaleLog) {
+            yaxis.nice()
+        }
 
         // Add Y axis
-        const y = scaleMethod()
-            .domain([minY, maxY]).nice()
+        const y = yaxis
             .range([height, 0])
 
         g.append("g")
