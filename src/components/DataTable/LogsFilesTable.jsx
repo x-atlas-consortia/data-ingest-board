@@ -195,7 +195,7 @@ const LogsFilesTable = ({ }) => {
         }
     ]
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         afterKey.current = null
@@ -206,8 +206,17 @@ const LogsFilesTable = ({ }) => {
         setSelectedRowObjects([])
         fetchData(false)
         buildBarChart()
-        
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
+
+     useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
 
     const buildBarChart = async () => {
@@ -216,8 +225,10 @@ const LogsFilesTable = ({ }) => {
         if (!url) return
 
         let histogramOps = determineCalendarInterval()
-        setHistogramDetails(histogramOps)
-
+        if (!histogramDetails) {
+            setHistogramDetails(histogramOps)
+        }
+        
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate() })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 

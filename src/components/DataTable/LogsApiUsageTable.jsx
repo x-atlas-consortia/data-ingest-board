@@ -42,7 +42,12 @@ const LogsApiUsageTable = ({ data }) => {
         setIsBusy(true)
 
         if (data.length) {
-            await buildStackedBarChart(includePrevData)
+            let histogramOps = determineCalendarInterval()
+            if (!histogramDetails) {
+                setHistogramDetails(histogramOps)
+            }
+
+            await buildStackedBarChart(includePrevData, histogramOps)
 
             if (data.length < numOfRows) {
                 setHasMoreData(false)
@@ -121,21 +126,28 @@ const LogsApiUsageTable = ({ data }) => {
         setSelectedMenuItem('groupedBar')
     }, [])
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         fetchData(false)
         apis.current = {}
         setSelectedRows([])
         setSelectedRowObjects([])
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
 
+    useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
-    const buildStackedBarChart = async (includePrevData) => {
+    const buildStackedBarChart = async (includePrevData, histogramOps) => {
         let url = getUrl()
         if (!url) return
-
-        let histogramOps = determineCalendarInterval()
 
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
@@ -173,7 +185,7 @@ const LogsApiUsageTable = ({ data }) => {
 
             setVizData({ ...vizData, bar: _vizData })
             updateTableData(includePrevData, _tableData)
-            setHistogramDetails(histogramOps)
+            
         }
     }
 

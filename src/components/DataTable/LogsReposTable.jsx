@@ -148,7 +148,9 @@ const LogsReposTable = ({ }) => {
                 // end get data for bar charts
             }
 
-            setHistogramDetails(histogramOps)
+            if (!histogramDetails) {
+                setHistogramDetails(histogramOps)
+            }
             updateTableData(false, _tableData)
         } else {
             setHasMoreData(false)
@@ -228,7 +230,7 @@ const LogsReposTable = ({ }) => {
         setSelectedMenuItem('groupedBar')
     }, [])
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         afterKey.current = null
@@ -238,7 +240,17 @@ const LogsReposTable = ({ }) => {
         repos.current = []
         setSelectedRows([])
         setSelectedRowObjects([])
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
+
+     useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
 
     useEffect(() => {
@@ -295,7 +307,7 @@ const LogsReposTable = ({ }) => {
 
     const yAxis = { label: "Views/Clones" }
     const _xAxis = () => {
-        return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
+        return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails?.interval}`}
     }
 
     const formatAnalytics = (v, details) => {

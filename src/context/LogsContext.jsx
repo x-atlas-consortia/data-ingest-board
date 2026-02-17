@@ -1,6 +1,6 @@
 import React from 'react'
 import { createContext, useEffect, useState, useRef } from 'react'
-import Icon, { BarChartOutlined, DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
+import Icon, { BarChartOutlined, CalendarOutlined, DownloadOutlined, SettingOutlined, TableOutlined } from "@ant-design/icons";
 import { Dropdown, Space, Switch } from 'antd';
 import { eq } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
@@ -45,8 +45,17 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
   
   const menuProps = () => {
+    const intervalMenu = []
+    if (histogramDetails?.children) {
+      intervalMenu.push({
+        key: 'histogramInterval',
+        label: 'Histogram Interval',
+        icon: <CalendarOutlined />,
+        children: getHistogramIntervalMenu(),
+      })
+    }
     return {
-      items: [...menuItems, {
+      items: [...menuItems, ...intervalMenu, {
         key: 'numOfRows',
         label: 'Rows Per Load More',
         icon: <TableOutlined />,
@@ -91,7 +100,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
         <Dropdown menu={menuProps()}>
           <a onClick={e => e.preventDefault()}>
             <Space>
-              Table Options
+              Table/Chart Options
               <SettingOutlined />
             </Space>
           </a>
@@ -99,7 +108,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
       </div>)
     }
     setExtraActions(tabExtraActions.current)
-  }, [numOfRows, selectedMenuItem, menuItems, isLogScale])
+  }, [numOfRows, selectedMenuItem, menuItems, isLogScale, histogramDetails])
 
   const updateTableData = (includePrevData, _tableData) => {
     if (includePrevData) {
@@ -156,14 +165,27 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     };
   }
 
+  const calendarIntervals = {
+    year: { interval: 'year', format: 'yyyy' },
+    month: { interval: 'month', format: 'yyyy-MM' },
+    week:  { interval: 'week', format: 'yyyy-MM-dd' },
+    day: { interval: 'day', format: 'yyyy-MM-dd' }
+  }
+
+  const calendarIntervalsSubmenu = {
+    year: ['year', 'month'],
+    month: ['month', 'week']
+  }
+
   const determineCalendarInterval = () => {
+    if (histogramDetails?.isMenuAction) return histogramDetails
     let to = getToDate()
     to = to === 'now' ? new Date() : new Date(to)
     let diff = getDateDifference(new Date(getFromDate()), to);
-    if (diff.years > 0) return { interval: 'year', format: 'yyyy' }
-    if (diff.months >= 1) return { interval: 'month', format: 'yyyy-MM' }
-    if (diff.weeks > 1) return { interval: 'week', format: 'yyyy-MM-dd' }
-    if (diff.weeks <= 1) return { interval: 'day', format: 'yyyy-MM-dd' }
+    if (diff.years > 0) return {...calendarIntervals.month, children: calendarIntervalsSubmenu.year}
+    if (diff.months >= 1) return {...calendarIntervals.month, children: calendarIntervalsSubmenu.month}
+    if (diff.weeks > 1) return calendarIntervals.week
+    if (diff.weeks <= 1) return calendarIntervals.day
   }
 
   const pad = (num) => String(num).padStart(2, '0')
@@ -197,12 +219,27 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     return r
   }
 
+  const getHistogramIntervalMenu = () => {
+    const ops = histogramDetails?.children || []
+    let r = []
+    for (let o of ops) {
+      r.push({
+        key: o,
+        label: calendarIntervals[o].format,
+        className: getMenuItemClassName(histogramDetails?.interval, o.toString())
+      })
+    }
+    return r
+  }
+
   const handleMenuClick = (e) => {
     const gtm = {info: globusInfo, gtm: {event: 'cta', info: indexKey, action: e.key}}
     let pushGTM = true
     if (e.keyPath.length > 1 && eq(e.keyPath[1], 'numOfRows')) {
       gtm.action = `${e.keyPath[1]}:${e.key}}`
       setNumOfRows(Number(e.key))
+    } if (e.keyPath.length > 1 && eq(e.keyPath[1], 'histogramInterval')) {
+      setHistogramDetails({...calendarIntervals[e.key], children: histogramDetails.children, isMenuAction: true})
     } else {
       setSelectedMenuItem(e.key)
     }
@@ -256,6 +293,10 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   const getDatePart = (histogramOps) => ['month', 'year'].comprises(histogramOps.interval) ? '-2' : ''
 
   const tableScroll = {scroll: {x: 900, y: 'calc(100vh - 200px)' }}
+
+  useEffect(() =>{
+   setHistogramDetails(null)
+  }, [fromDate, toDate])
 
   return <LogsContext.Provider value={{
     tableData, setTableData,
