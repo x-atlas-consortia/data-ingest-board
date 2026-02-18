@@ -260,7 +260,9 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
 
     const getShareAbleURL = () => {
         navigator.clipboard.writeText(`${location.host}/?chart=${column}&chartType=${getChartType()}`)
-    }   
+    }
+    
+    const yAxis = useRef({})
 
     return (
         <div className='c-visualizations my-3'>
@@ -354,6 +356,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     column={column}
                                                     onSectionClick={handleChartItemClick}
                                                     xAxis={{showLabels: true, colorMethods }}
+                                                    yAxis={yAxis.current}
                                                 />
                                             )}
                                             {isPie(column) && hasMeaningfulData() && (
