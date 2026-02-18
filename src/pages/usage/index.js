@@ -159,10 +159,10 @@ const Logs = () => {
                 $dots.each((i, el) => {
                     label = $(el).attr('aria-label')
                     if (i < slideIndex) {
-                        $(el).addClass('arrow arrow-prev').attr('title', `Go to previous slide: ${label}`)
+                        $(el).addClass('arrow arrow-prev').attr('title', `Go to the previous slide: ${label}`)
                     } else {
                         if (i > slideIndex) {
-                           $(el).addClass('arrow arrow-next').attr('title', `Go to next slide: ${label}`) 
+                           $(el).addClass('arrow arrow-next').attr('title', `Go to the next slide: ${label}`) 
                         }
                         if (i === slideIndex) {
                             $(el).addClass('slideNav-active').attr('title', `Current slide: ${label}`) 

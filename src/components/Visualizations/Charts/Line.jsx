@@ -48,7 +48,7 @@ function Line({
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left + 20},${margin.top + 50})`)
+            .attr("transform", `translate(${margin.left + 20},${margin.top + 20})`)
 
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -130,7 +130,7 @@ function Line({
             .attr("class", "y label")
             .attr("text-anchor", "end")
             .attr("y",  yAxis.labelPadding || 0)
-            .attr("x", (height/1.7) * -1)
+            .attr("x", (height/2.2) * -1)
             .attr("dy", ".74em")
             .attr("transform", "rotate(-90)")
             .text(yAxis.label || "Frequency")
@@ -142,8 +142,8 @@ function Line({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "end")
-                .attr("x", width / 1.3)
-                .attr("y", height * 1.3)
+                .attr("x", (width + margin.left ) / 1.3)
+                .attr("y", height * 1.2)
                 .text(xAxis.label)
         }
 
