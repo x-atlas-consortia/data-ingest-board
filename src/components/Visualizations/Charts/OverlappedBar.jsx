@@ -180,7 +180,7 @@ function OverlappedBar({
             .attr("x", (d, i) => x(d.group) + (i * (widthModifier/2))) 
             .attr("y", height)
             .attr("height", 0)
-            .attr("width", (d, i) => x.bandwidth() - (i * widthModifier))
+            .attr("width", (d, i) => Math.abs(x.bandwidth() - (i * widthModifier)))
             .append("title")
             .text(d => {
                 return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`

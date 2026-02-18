@@ -173,8 +173,10 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
   }
 
   const calendarIntervalsSubmenu = {
-    year: ['year', 'month'],
-    month: ['month', 'week']
+    year:  ['year', 'month'],
+    month:  ['year', 'month', 'week'],
+    week:  ['year', 'month', 'week'],
+    day: ['year', 'month', 'week', 'day']
   }
 
   const determineCalendarInterval = () => {
@@ -225,7 +227,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     for (let o of ops) {
       r.push({
         key: o,
-        label: calendarIntervals[o].format,
+        label: `By ${o} (${calendarIntervals[o].format})`,
         className: getMenuItemClassName(histogramDetails?.interval, o.toString())
       })
     }
