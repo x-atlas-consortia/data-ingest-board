@@ -198,7 +198,8 @@ const LogsApiUsageTable = ({ data }) => {
     };
 
     const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
-    const xAxis = { formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
+    const xAxis = { label: `Requests per ${histogramDetails?.interval}` }
+    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
@@ -206,8 +207,8 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

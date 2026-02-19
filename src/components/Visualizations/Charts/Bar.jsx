@@ -5,7 +5,6 @@ import ChartContext from '@/context/ChartContext';
 
 function Bar({
     setLegend,
-    column,
     filters,
     data = [],
     chartId = 'modal',
@@ -83,6 +82,7 @@ function Bar({
             .attr("viewBox", [0, 0, width, height + margin.top])
 
         svgDo({}).grid({g: svg, y, hideGrid: style.hideGrid, ticks, sizing})
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
 
         // Add a rect for each bar.
         svg.append("g")
@@ -91,10 +91,10 @@ function Bar({
             .join("rect")
             .attr("class", d => `bar--${d.id?.toDashedCase()}`)
             .attr("x", (d) => x(d.label))
-            .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.value) : d.value)
+            .attr('data-value', (d) => formatVal({d, v:  d.value}))
             .attr("fill", function (d) {
-                const color = xAxis?.colorMethods && xAxis?.colorMethods[column] ? xAxis?.colorMethods[column](d.label) : (xAxis.monoColor ? xAxis.monoColor : colorScale(d.label));
-                colors[d.label] = { color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label };
+                const color = style?.colorMethods && style?.colorMethods[style.colorMethodKey] ? style?.colorMethods[style.colorMethodKey](d.label) : (style?.monoColor ? style?.monoColor : colorScale(d.label));
+                colors[d.label] = { color, value: formatVal({d, v:  d.value}), label: d.label };
                 return color;
             })
             .attr("y", (d) => y(minY))

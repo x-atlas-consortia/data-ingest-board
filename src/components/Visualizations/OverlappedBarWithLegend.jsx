@@ -3,7 +3,7 @@ import { ChartProvider } from '@/context/ChartContext';
 import OverlappedBar, { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedBar';
 import WithChart from './WithChart';
 
-function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }) {
+function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style }) {
     const [legend, setLegend] = useState({})
 
     return (
@@ -14,6 +14,7 @@ function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}
+                        style={style}
                         yAxis={yAxis}
                         xAxis={xAxis}
                         chartId={chartId} />

@@ -98,7 +98,7 @@ function GroupedBar({
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
-        const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
 
         const getSubgroupLabel = (v) => subGroupLabels[v] || v
 
@@ -119,11 +119,11 @@ function GroupedBar({
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
+                colors.current[label] = { color, label, value: formatVal({d, v: getSubGroupSum(d.key)}) }
                 return color
             })
             .attr('data-value', d => {
-                return formatVal(d.val)
+                return formatVal({d, v: d.val})
             })
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
@@ -135,7 +135,7 @@ function GroupedBar({
             .attr("width", xSubgroup.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
+                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.val})}`
             })
 
         svg.selectAll("rect")

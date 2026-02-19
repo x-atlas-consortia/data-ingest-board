@@ -307,7 +307,7 @@ const LogsReposTable = ({ }) => {
 
     const yAxis = { label: "Views/Clones" }
     const _xAxis = () => {
-        return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails?.interval}`}
+        return  {...xAxis.current, label: `Views/Clones per ${histogramDetails?.interval}`}
     }
 
     const formatAnalytics = (v, details) => {
@@ -325,16 +325,18 @@ const LogsReposTable = ({ }) => {
         return <Table pagination={false} columns={cols} dataSource={[v]} />
     }
 
+    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+
     const repoLineChart = (row) => {
         const _vizData = buildLineChart(row)
         return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+            {_vizData.length > 0 && fromDate && <LineWithLegend style={svgStyle} xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>
     }
 
     return (<>
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

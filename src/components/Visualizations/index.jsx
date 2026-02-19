@@ -219,20 +219,18 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                             <Bar
                                 data={_data}
                                 filters={filters}
-                                column={c.key}
                                 chartId={i.toString()}
                                 reload={false}
                                 yAxis={{showLabels: false}}
-                                xAxis={{showLabels: false, colorMethods }}
-                                style={{minWidth: 928}}
+                                xAxis={{showLabels: false }}
+                                style={{minWidth: 928, colorMethods, colorMethodKey: c.key}}
                             />
                         )}
                         {hasInitViz && isPie(c.key) && (
                             <Pie
                                 data={_data}
-                                column={c.key}
                                 chartId={i.toString()}
-                                xAxis={{ colorMethods }}
+                                style={{ colorMethods, colorMethodKey: c.key }}
                             />
                         )}
                         <div className='text-center'>
@@ -354,19 +352,17 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                 <Bar
                                                     setLegend={setLegend}
                                                     data={chartData}
-                                                    column={column}
                                                     onSectionClick={handleChartItemClick}
-                                                    xAxis={{showLabels: true, colorMethods }}
+                                                    xAxis={{showLabels: true }}
                                                     yAxis={yAxis.current}
-                                                    style={{minWidth: 928}}
+                                                    style={{minWidth: 1024, colorMethods, colorMethodKey: column}}
                                                 />
                                             )}
                                             {isPie(column) && hasMeaningfulData() && (
                                                 <Pie
                                                     setLegend={setLegend}
                                                     data={chartData}
-                                                    column={column}
-                                                    xAxis={{ colorMethods }}
+                                                    style={{ colorMethods, colorMethodKey: column }}
                                                     onSectionClick={handleChartItemClick}
                                                 />
                                             )}

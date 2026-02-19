@@ -97,7 +97,7 @@ function Line({
 
         }
 
-        const formatVal = (v) => yAxis.formatter ? yAxis.formatter(v) : v
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
 
         // Add X axis --> it is a date format
@@ -137,11 +137,10 @@ function Line({
             })
             .attr('pointer-events', 'none')
             .attr("stroke", d => {
-
                 const {color, gColor} = groupColor(d)
                 const label = d.name
                 const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
-                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal(sum) }
+                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal({d, v: sum}) }
                 return color
             })
             .style("stroke-width", 4)
@@ -167,7 +166,7 @@ function Line({
             .attr("r", 5)
             .attr('pointer-events', 'all')
             .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
-            .attr('data-value', (d) => formatVal(d.yValue))
+            .attr('data-value', (d) => formatVal({d, v: d.yValue}))
             .attr('data-label', (d) => `${d.group} \n ${d.xValue}`)
 
         // Add a legend at the end of each line

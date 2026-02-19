@@ -170,7 +170,7 @@ export const ChartProvider = ({ children }) => {
                     .attr("class", "y label")
                     .attr("text-anchor", "start")
                     .attr("y",  yAxis.labelPadding || 40)
-                    .attr("x", ((sizing.height + sizing.margin.bottom) / 2) * -1)
+                    .attr("x", ((sizing.height ) / 2) * -1)
                     .attr("dy", ".74em")
                     .attr("transform", "rotate(-90)")
                     .text(yAxis.label || "Frequency")
@@ -203,7 +203,7 @@ export const ChartProvider = ({ children }) => {
                         .style("stroke-width", "1px")
                 }
             },
-            valueFormat: ({style, d, v}) => {
+            valueFormatter: ({style, d, v}) => { 
                 return style.valueFormatter ? style.valueFormatter({d, v}) : v
             }
 
