@@ -38,22 +38,18 @@ function GroupedBar({
 
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 40, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 420 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = margin.left + margin.right * 3
+        const width = 728;
+        let height = 500;
+        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.2}
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
-            .attr("viewBox", [0, 0, width + marginX, height + marginY])
+                    .attr("width", width)
+                    .attr("height", height)
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
+            //.attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(subGroupLabels)
 
@@ -62,12 +58,12 @@ function GroupedBar({
         // Add X axis
         const x = d3.scaleBand()
             .domain(groups)
-            .range([0, width])
+            .range([margin.left, width - margin.right])
             .padding([0.2])
 
-        g.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).tickSize(0));
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x));
 
         let maxY = 0;
         for (let d of data) {
@@ -89,13 +85,15 @@ function GroupedBar({
 
         // Add Y axis
         const y = yaxis
-            .range([height, 0])
+            .range([height - margin.bottom, margin.top])
 
         g.append("g")
+         .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
         var xSubgroup = d3.scaleBand()
             .domain(subgroups)
+            //.range([height - margin.bottom, margin.top])
             .range([0, x.bandwidth()])
             .padding([0.05])
 
@@ -104,8 +102,8 @@ function GroupedBar({
                 .append("text")
                 .attr("class", "y label")
                 .attr("text-anchor", "end")
-                .attr("y", yAxis.labelPadding || 0)
-                .attr("x", (height / 2) * -1)
+                .attr("y",  yAxis.labelPadding || 40)
+                .attr("x", (height/3) * -1)
                 .attr("dy", ".74em")
                 .attr("transform", "rotate(-90)")
                 .text(yAxis.label || "Frequency")
@@ -117,8 +115,8 @@ function GroupedBar({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "middle")
-                .attr("x", (width / 2) + margin.left)
-                .attr("y", height * 1.3)
+                .attr("x", width / 2 + margin.left/2)
+                .attr("y", height - (margin.bottom/2))
                 .text(xAxis.label)
         }
 
@@ -133,9 +131,9 @@ function GroupedBar({
             .data(y.ticks(ticks))
             .enter().append("line")
             .attr("class", "y-grid")
-            .attr("x1", 0)
+            .attr("x1", margin.left)
             .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
+            .attr("x2", width - margin.right)
             .attr("y2", d => Math.ceil(y(d)))
             .style("stroke", "#eee") // Light gray
             .style("stroke-width", "1px")
@@ -166,7 +164,7 @@ function GroupedBar({
             })
             .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
             .attr("x", d => xSubgroup(d.key))
-            .attr("y", height)
+            .attr("y", y(minY))
             .attr("height", 0)
             .attr("width", xSubgroup.bandwidth())
             .append("title")
@@ -183,7 +181,7 @@ function GroupedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return height - y(d.val)
+                return y(minY) - y(d.val)
             })
             .attr("y", d => {
                 return y(d.val)
