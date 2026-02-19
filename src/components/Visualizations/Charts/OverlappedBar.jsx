@@ -23,12 +23,14 @@ function OverlappedBar({
     reload = true,
     subGroupLabels = {},
     chartId = 'modal',
+    style = {},
     yAxis = {},
     xAxis = {}
 }) {
     const {
         getChartSelector,
         toolTipHandlers,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
 
@@ -45,21 +47,16 @@ function OverlappedBar({
         return sum
     }
 
-    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
-    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
-
     const buildChart = () => {
 
-        const width = 728;
-        let height = 500;
-        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.3}
+        const sizing = svgDo({data}).sizing(style, chartId, chartType)
+        let {width, height, margin} = sizing
 
         // append the svg object to the body of the page
          const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
-            .attr("viewBox", [0, 0, width, height])
+            .attr("viewBox", [0, 0, width, height + margin.top])
 
         const g = svg
             .append("g")
@@ -110,28 +107,7 @@ function OverlappedBar({
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
-        if (showYLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "y label")
-                .attr("text-anchor", "end")
-                .attr("y",  yAxis.labelPadding || 40)
-                .attr("x", (height/3) * -1)
-                .attr("dy", ".74em")
-                .attr("transform", "rotate(-90)")
-                .text(yAxis.label || "Frequency")
-        }
-
-
-        if (xAxis.label && showXLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "middle")
-                .attr("x", width / 2 + margin.left/2)
-                .attr("y", height - (margin.bottom/2))
-                .text(xAxis.label)
-        }
+        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
@@ -140,16 +116,7 @@ function OverlappedBar({
 
         const getSubgroupLabel = (v) => subGroupLabels[v] || v
 
-        g.selectAll(".y-grid")
-            .data(y.ticks(ticks))
-            .enter().append("line")
-            .attr("class", "y-grid")
-            .attr("x1", margin.left)
-            .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width - margin.right)
-            .attr("y2", d => Math.ceil(y(d)))
-            .style("stroke", "#eee") // Light gray
-            .style("stroke-width", "1px")
+        svgDo({}).grid({g, y, hideGrid: style.hideGrid, ticks, sizing})
 
         const widthModifier = 10
         // Show the bars

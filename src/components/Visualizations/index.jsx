@@ -224,6 +224,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                 reload={false}
                                 yAxis={{showLabels: false}}
                                 xAxis={{showLabels: false, colorMethods }}
+                                style={{minWidth: 928}}
                             />
                         )}
                         {hasInitViz && isPie(c.key) && (
@@ -357,6 +358,7 @@ function Visualizations({ data, filters, applyFilters, hasInitViz, setHasInitViz
                                                     onSectionClick={handleChartItemClick}
                                                     xAxis={{showLabels: true, colorMethods }}
                                                     yAxis={yAxis.current}
+                                                    style={{minWidth: 928}}
                                                 />
                                             )}
                                             {isPie(column) && hasMeaningfulData() && (

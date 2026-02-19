@@ -10,7 +10,7 @@ function WithChart({ children, legend, data }) {
 
     return (
         <div className='row p-4 p-lg-0'>
-            <div className={'col-12 text-center'} style={{overflowX: 'auto'}}>
+            <div className={'col-12 text-center mb-4'} style={{overflowX: 'auto'}}>
                 {children}
             </div>
             {legend && <div className='c-legendWrap c-legendWrap--flex'><Legend legend={legend} sortLegend={false} /></div>}
