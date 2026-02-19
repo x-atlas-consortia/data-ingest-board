@@ -45,7 +45,7 @@ function Bar({
         // Declare the chart dimensions and margins.
         const width = 928;
         let height = 500;
-        const margin = {top: 30, right: 0, bottom: 30 * 1.5, left: 90 * 1.2}
+        const margin = {top: 30, right: 0, bottom: 30 * 1.5, left: 90 * 1.3}
 
         if (showXLabels()) {
             // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
@@ -71,7 +71,7 @@ function Bar({
         const x = d3.scaleBand()
             .domain(names) // descending value
             .range([margin.left, width - margin.right])
-            .padding(0.1);
+            .padding(0.2);
 
         const scaleRange = data.length <= 1 ? 2 : data.length
 
@@ -82,8 +82,8 @@ function Bar({
 
         // Bar must have a minimum height to be able to click. 2% of the max value seems good
         const maxY = d3.max(data, (d) => d.value);
-        const yStartPos = yAxis.scaleLog ? 1 : (-(maxY * .02))
-        const yDomain = [yStartPos, maxY]
+        const minY = yAxis.scaleLog ? 1 : (-(maxY * .02))
+        const yDomain = [minY, maxY]
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
 
         // Declare the y (vertical position) scale.
@@ -122,8 +122,8 @@ function Bar({
                 colors[d.label] = { color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label };
                 return color;
             })
-            .attr("y", (d) => y(yStartPos))
-            .attr("height", (d) => y(yStartPos) - y(yStartPos))
+            .attr("y", (d) => y(minY))
+            .attr("height", (d) => y(minY) - y(minY))
             .attr("width", x.bandwidth())
             .on("click", function (event, d) {
                 if (onSectionClick) {
@@ -136,7 +136,7 @@ function Bar({
             .transition()
             .duration(800)
             .attr("y", (d) => y(d.value))
-            .attr("height", function (d) { return y(yStartPos) - y(d.value); })
+            .attr("height", function (d) { return y(minY) - y(d.value); })
             .delay(function (d, i) { return (i * 100) })
 
         svg.selectAll("rect")
@@ -147,7 +147,7 @@ function Bar({
         // Add the x-axis and label.
         svg.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .call(d3.axisBottom(x))
             .selectAll("text")
             .style("display", showXLabels() ? "block" : "none")
             .style("text-anchor", "end")

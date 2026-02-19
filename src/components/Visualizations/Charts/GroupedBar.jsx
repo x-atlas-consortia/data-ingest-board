@@ -40,16 +40,16 @@ function GroupedBar({
 
         const width = 728;
         let height = 500;
-        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.2}
+        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.3}
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
                     .attr("width", width)
                     .attr("height", height)
+                    .attr("viewBox", [0, 0, width, height])
 
         const g = svg
             .append("g")
-            //.attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(subGroupLabels)
 
@@ -88,12 +88,11 @@ function GroupedBar({
             .range([height - margin.bottom, margin.top])
 
         g.append("g")
-         .attr("transform", `translate(${margin.left},0)`)
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
         var xSubgroup = d3.scaleBand()
             .domain(subgroups)
-            //.range([height - margin.bottom, margin.top])
             .range([0, x.bandwidth()])
             .padding([0.05])
 

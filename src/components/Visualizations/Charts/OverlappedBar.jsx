@@ -51,22 +51,18 @@ function OverlappedBar({
 
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 40, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 420 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = margin.left + margin.right * 3
+        const width = 728;
+        let height = 500;
+        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.3}
 
         // append the svg object to the body of the page
-        const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
-            .attr("viewBox", [0, 0, width + marginX, height + marginY])
+         const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(subGroupLabels)
 
@@ -75,12 +71,12 @@ function OverlappedBar({
         // Add X axis
         const x = d3.scaleBand()
             .domain(groups)
-            .range([0, width])
+            .range([margin.left, width - margin.right])
             .padding([0.2])
 
         g.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x));
 
         let maxY = 0;
         for (let d of data) {
@@ -108,8 +104,10 @@ function OverlappedBar({
         // Add Y axis
         const y = scaleMethod()
             .domain([minY, maxY])
-            .range([height, 0]);
+            .range([height - margin.bottom, margin.top])
+
         g.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
         if (showYLabels()) {
@@ -117,8 +115,8 @@ function OverlappedBar({
                 .append("text")
                 .attr("class", "y label")
                 .attr("text-anchor", "end")
-                .attr("y", yAxis.labelPadding || 0)
-                .attr("x", (height / 2) * -1)
+                .attr("y",  yAxis.labelPadding || 40)
+                .attr("x", (height/3) * -1)
                 .attr("dy", ".74em")
                 .attr("transform", "rotate(-90)")
                 .text(yAxis.label || "Frequency")
@@ -130,8 +128,8 @@ function OverlappedBar({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "middle")
-                .attr("x", (width / 2) + margin.left)
-                .attr("y", height * 1.3)
+                .attr("x", width / 2 + margin.left/2)
+                .attr("y", height - (margin.bottom/2))
                 .text(xAxis.label)
         }
 
@@ -146,9 +144,9 @@ function OverlappedBar({
             .data(y.ticks(ticks))
             .enter().append("line")
             .attr("class", "y-grid")
-            .attr("x1", 0)
+            .attr("x1", margin.left)
             .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
+            .attr("x2", width - margin.right)
             .attr("y2", d => Math.ceil(y(d)))
             .style("stroke", "#eee") // Light gray
             .style("stroke-width", "1px")
@@ -178,7 +176,7 @@ function OverlappedBar({
             })
             .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
             .attr("x", (d, i) => x(d.group) + (i * (widthModifier/2))) 
-            .attr("y", height)
+            .attr("y", y(minY))
             .attr("height", 0)
             .attr("width", (d, i) => Math.abs(x.bandwidth() - (i * widthModifier)))
             .append("title")
@@ -195,7 +193,7 @@ function OverlappedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return height - y(d.val)
+                return y(minY) - y(d.val)
             })
             .attr("y", d => {
                 return y(d.val)

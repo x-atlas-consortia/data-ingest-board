@@ -35,18 +35,16 @@ function Line({
 
         const width = 728;
         let height = 500;
-        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.2}
+        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.3}
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
-        //.attr("viewBox", [0, 0, width + marginX, height + marginY])
+            .attr("viewBox", [0, 0, width, height])
 
         const g = svg
             .append("g")
-            //.attr("transform", `translate(${margin.left + 20},${margin.top + 20})`)
-
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
         const dataReady = groups.map(function (group) {
@@ -59,13 +57,11 @@ function Line({
         });
 
         let maxY = 0;
-        let minY = Infinity;
         for (let d of data) {
             let list = Object.values(d)
             for (let x of list) {
                 if (typeof x === 'number') {
                     maxY = Math.max(maxY, x)
-                    minY = Math.min(minY, x)
                 }
             }
 
@@ -78,7 +74,8 @@ function Line({
         if (xAxis.suffix) {
             xGroups.push(xAxis.suffix)
         }
-        const yStartPos = -(maxY * .02)
+
+        const minY = -(maxY * .02)
 
         // A color scale: one color for each group
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -110,16 +107,17 @@ function Line({
         const x = d3.scalePoint()
             .domain(xGroups)
             .range([margin.left, width - margin.right])
-            .padding(0.1)
+            .padding(0.2)
 
-        svg.append("g")
+        g.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x));
 
         // Add Y axis
         const y = d3.scaleLinear()
-            .domain([yStartPos, maxY * 1.02])
+            .domain([minY, maxY * 1.02])
             .range([height - margin.bottom, margin.top]);
+            
         g.append("g")
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : y))
@@ -142,8 +140,8 @@ function Line({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "end")
-                .attr("x", width / 1.5)
-                .attr("y", height - margin.bottom/2.5)
+                .attr("x", (width / 1.5))
+                .attr("y", height - (margin.bottom/2.5))
                 .text(xAxis.label)
         }
 
