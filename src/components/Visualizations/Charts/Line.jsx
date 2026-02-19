@@ -33,22 +33,19 @@ function Line({
 
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 30, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 430 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = (margin.left + margin.right) * 3
+        const width = 728;
+        let height = 500;
+        const margin = {top: 30, right: 0, bottom: 50 * 1.5, left: 90 * 1.2}
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
+            .attr("width", width)
+            .attr("height", height)
         //.attr("viewBox", [0, 0, width + marginX, height + marginY])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left + 20},${margin.top + 20})`)
+            //.attr("transform", `translate(${margin.left + 20},${margin.top + 20})`)
 
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -112,16 +109,19 @@ function Line({
         // Add X axis --> it is a date format
         const x = d3.scalePoint()
             .domain(xGroups)
-            .range([0, width]);
-        g.append("g")
-            .attr("transform", `translate(0, ${height})`)
+            .range([margin.left, width - margin.right])
+            .padding(0.1)
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x));
 
         // Add Y axis
         const y = d3.scaleLinear()
             .domain([yStartPos, maxY * 1.02])
-            .range([height, 0]);
+            .range([height - margin.bottom, margin.top]);
         g.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : y))
         
         if (showYLabels()) {
@@ -129,8 +129,8 @@ function Line({
             .append("text")
             .attr("class", "y label")
             .attr("text-anchor", "end")
-            .attr("y",  yAxis.labelPadding || 0)
-            .attr("x", (height/2.2) * -1)
+            .attr("y",  yAxis.labelPadding || 40)
+            .attr("x", (height/3) * -1)
             .attr("dy", ".74em")
             .attr("transform", "rotate(-90)")
             .text(yAxis.label || "Frequency")
@@ -142,8 +142,8 @@ function Line({
                 .append("text")
                 .attr("class", "x label")
                 .attr("text-anchor", "end")
-                .attr("x", (width + margin.left ) / 1.3)
-                .attr("y", height * 1.2)
+                .attr("x", width / 1.5)
+                .attr("y", height - margin.bottom/2.5)
                 .text(xAxis.label)
         }
 
@@ -156,9 +156,9 @@ function Line({
             .data(y.ticks())
             .enter().append("line")
             .attr("class", "y-grid")
-            .attr("x1", 0)
+            .attr("x1", margin.left)
             .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
+            .attr("x2", width - margin.right)
             .attr("y2", d => Math.ceil(y(d)))
             .style("stroke", "#eee") // Light gray
             .style("stroke-width", "1px")
