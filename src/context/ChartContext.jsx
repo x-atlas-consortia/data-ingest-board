@@ -132,7 +132,7 @@ export const ChartProvider = ({ children }) => {
 
                 const width = style.width || minWidth
                 const height = style.height || minHeight
-                const margin = { top: 30, right: 0, bottom: 30 * 1.5, left: 90 * 1.3, ...(style.margin || {}) };
+                const margin = { top: 30, right: 0, bottom: 30 * 1.5, left: 70, ...(style.margin || {}) };
             
                 return {width, height, margin,
                     isMobile: width < 500,
@@ -169,8 +169,8 @@ export const ChartProvider = ({ children }) => {
                     .style("font-size", sizing.font.title)
                     .attr("class", "y label")
                     .attr("text-anchor", "start")
-                    .attr("y",  yAxis.labelPadding || 40)
-                    .attr("x", ((sizing.height ) / 2) * -1)
+                    .attr("y",  yAxis.labelPadding || -20)
+                    .attr("x", (sizing.height / 2) * -1)
                     .attr("dy", ".74em")
                     .attr("transform", "rotate(-90)")
                     .text(yAxis.label || "Frequency")
