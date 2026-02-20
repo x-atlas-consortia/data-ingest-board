@@ -5,7 +5,7 @@ import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/genera
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
-import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
+import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
 import LineWithLegend from "@/components/Visualizations/LineWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import GroupedBarWithLegend from "../Visualizations/GroupedBarWithLegend";
@@ -148,7 +148,9 @@ const LogsReposTable = ({ }) => {
                 // end get data for bar charts
             }
 
-            setHistogramDetails(histogramOps)
+            if (!histogramDetails) {
+                setHistogramDetails(histogramOps)
+            }
             updateTableData(false, _tableData)
         } else {
             setHasMoreData(false)
@@ -228,7 +230,7 @@ const LogsReposTable = ({ }) => {
         setSelectedMenuItem('groupedBar')
     }, [])
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         afterKey.current = null
@@ -238,7 +240,17 @@ const LogsReposTable = ({ }) => {
         repos.current = []
         setSelectedRows([])
         setSelectedRowObjects([])
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
+
+     useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
 
     useEffect(() => {
@@ -295,7 +307,7 @@ const LogsReposTable = ({ }) => {
 
     const yAxis = { label: "Views/Clones" }
     const _xAxis = () => {
-        return  {...xAxis.current, formatter: formatNum, label: `Views/Clones per ${histogramDetails.interval}`}
+        return  {...xAxis.current, label: `Views/Clones per ${histogramDetails?.interval}`}
     }
 
     const formatAnalytics = (v, details) => {
@@ -313,16 +325,18 @@ const LogsReposTable = ({ }) => {
         return <Table pagination={false} columns={cols} dataSource={[v]} />
     }
 
+    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+
     const repoLineChart = (row) => {
         const _vizData = buildLineChart(row)
         return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+            {_vizData.length > 0 && fromDate && <LineWithLegend style={svgStyle} xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>
     }
 
     return (<>
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

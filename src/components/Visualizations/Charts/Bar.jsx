@@ -5,12 +5,12 @@ import ChartContext from '@/context/ChartContext';
 
 function Bar({
     setLegend,
-    column,
     filters,
     data = [],
     chartId = 'modal',
     reload = true,
     onSectionClick,
+    style = {},
     yAxis = {},
     xAxis = {},
 }) {
@@ -19,6 +19,7 @@ function Bar({
     const {
         getChartSelector,
         toolTipHandlers,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
     const colors = {}
@@ -29,8 +30,6 @@ function Bar({
     }
 
     const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
-    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
 
     const buildChart = () => {
         let names 
@@ -43,35 +42,19 @@ function Bar({
         }
     
         // Declare the chart dimensions and margins.
-        const width = 928;
-        let height = 500;
-        const margin = {top: 30, right: 0, bottom: 30 * 1.5, left: 90 * 1.2}
-
+        const sizing = svgDo({data}).sizing(style, chartId)
+    
         if (showXLabels()) {
-            // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
-            const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden");
-            let maxLabelWidth = 0;
-            names.forEach(name => {
-                const truncName = truncateLabel(name);
-                const textElement = tempSvg.append("text").text(truncName).style("font-size", "11px");
-                const bbox = textElement.node().getBBox();
-                if (bbox.width > maxLabelWidth) {
-                    maxLabelWidth = bbox.width;
-                }
-                textElement.remove();
-            });
-            tempSvg.remove();
-
-            // Adjust the bottom margin and height to not cut off the labels.
-            margin.bottom = margin.bottom + maxLabelWidth * Math.sin(Math.PI / 4);
-            height = height + maxLabelWidth * Math.sin(Math.PI / 4);
+            svgDo({}).adjustSizingByTicks(sizing, names)
         }
+
+        let {width, height, margin} = sizing
 
         // Declare the x (horizontal position) scale.
         const x = d3.scaleBand()
             .domain(names) // descending value
             .range([margin.left, width - margin.right])
-            .padding(0.1);
+            .padding(0.2);
 
         const scaleRange = data.length <= 1 ? 2 : data.length
 
@@ -82,8 +65,8 @@ function Bar({
 
         // Bar must have a minimum height to be able to click. 2% of the max value seems good
         const maxY = d3.max(data, (d) => d.value);
-        const yStartPos = yAxis.scaleLog ? 1 : (-(maxY * .02))
-        const yDomain = [yStartPos, maxY]
+        const minY = yAxis.scaleLog ? 1 : (-(maxY * .02))
+        const yDomain = [minY, maxY]
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
 
         // Declare the y (vertical position) scale.
@@ -96,18 +79,10 @@ function Bar({
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
-            .attr("viewBox", [0, 0, width, height])
+            .attr("viewBox", [0, 0, width, height + margin.top])
 
-        svg.selectAll(".y-grid")
-            .data(y.ticks(ticks))
-            .enter().append("line")
-            .attr("class", "y-grid")
-            .attr("x1", margin.left)
-            .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width - margin.right)
-            .attr("y2", d => Math.ceil(y(d)))
-            .style("stroke", "#eee") // Light gray
-            .style("stroke-width", "1px")
+        svgDo({}).grid({g: svg, y, hideGrid: style.hideGrid, ticks, sizing})
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
 
         // Add a rect for each bar.
         svg.append("g")
@@ -116,14 +91,14 @@ function Bar({
             .join("rect")
             .attr("class", d => `bar--${d.id?.toDashedCase()}`)
             .attr("x", (d) => x(d.label))
-            .attr('data-value', (d) => yAxis.formatter ? yAxis.formatter(d.value) : d.value)
+            .attr('data-value', (d) => formatVal({d, v:  d.value}))
             .attr("fill", function (d) {
-                const color = xAxis?.colorMethods && xAxis?.colorMethods[column] ? xAxis?.colorMethods[column](d.label) : (xAxis.monoColor ? xAxis.monoColor : colorScale(d.label));
-                colors[d.label] = { color, value: yAxis.formatter ? yAxis.formatter(d.value) : d.value, label: d.label };
+                const color = style?.colorMethods && style?.colorMethods[style.colorMethodKey] ? style?.colorMethods[style.colorMethodKey](d.label) : (style?.monoColor ? style?.monoColor : colorScale(d.label));
+                colors[d.label] = { color, value: formatVal({d, v:  d.value}), label: d.label };
                 return color;
             })
-            .attr("y", (d) => y(yStartPos))
-            .attr("height", (d) => y(yStartPos) - y(yStartPos))
+            .attr("y", (d) => y(minY))
+            .attr("height", (d) => y(minY) - y(minY))
             .attr("width", x.bandwidth())
             .on("click", function (event, d) {
                 if (onSectionClick) {
@@ -136,7 +111,7 @@ function Bar({
             .transition()
             .duration(800)
             .attr("y", (d) => y(d.value))
-            .attr("height", function (d) { return y(yStartPos) - y(d.value); })
+            .attr("height", function (d) { return y(minY) - y(d.value); })
             .delay(function (d, i) { return (i * 100) })
 
         svg.selectAll("rect")
@@ -147,7 +122,7 @@ function Bar({
         // Add the x-axis and label.
         svg.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .call(d3.axisBottom(x))
             .selectAll("text")
             .style("display", showXLabels() ? "block" : "none")
             .style("text-anchor", "end")
@@ -164,28 +139,7 @@ function Bar({
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : (y).toFixed()))
 
-        if (showYLabels()) {
-            svg.append("g")
-            .append("text")
-            .attr("class", "y label")
-            .attr("text-anchor", "end")
-            .attr("y",  yAxis.labelPadding || 40)
-            .attr("x", (height/3) * -1)
-            .attr("dy", ".74em")
-            .attr("transform", "rotate(-90)")
-            .text(yAxis.label || "Frequency")
-        }
-        
-            
-        if (xAxis.label && showXLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "end")
-                .attr("x", width / 1.5)
-                .attr("y", height - 2)
-                .text(xAxis.label)
-        }
+        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
 
         // Return the SVG element.
         return svg.node();

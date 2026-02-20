@@ -231,9 +231,6 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             }
         }
 
-
-
-
         const clearSort = () => {
             //setSortOrder(undefined)
             //setSortField(undefined)
@@ -244,9 +241,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
 
         if (sorter.field) {
             const sortingFlag = `${sorter.field}_${sorter.order}`
-            if (sortingInfo.current === sortingFlag) {
-                setFilters(correctedFilters)
-            }
+            setFilters(correctedFilters)
             query.set('sort_field', sorter.field);
             if (sorter.order) {
                 sortingInfo.current = sortingFlag

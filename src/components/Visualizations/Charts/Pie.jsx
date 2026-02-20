@@ -4,11 +4,10 @@ import ChartContext from "@/context/ChartContext";
 
 export default function Pie({
     setLegend,
-    column,
     data = [],
     chartId = 'modal',
     onSectionClick,
-    xAxis = {}
+    style = {},
 }) {
     const colors = {}
 
@@ -65,7 +64,7 @@ export default function Pie({
             .join("path")
             .attr("class", d => `slice--${d.data.id}`)
             .attr("fill", d => {
-                const color = xAxis?.colorMethods && xAxis?.colorMethods[column] ? xAxis?.colorMethods[column](d.data.label) : colorS(d.data.label)
+                const color = style?.colorMethods && style?.colorMethods[style.colorMethodKey] ? style?.colorMethods[style.colorMethodKey](d.data.label) : colorS(d.data.label)
                 colors[d.data.label] = {color, value: d.data.value, label: d.data.label};
                 return color
             })
