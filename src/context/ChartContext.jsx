@@ -124,7 +124,7 @@ export const ChartProvider = ({ children }) => {
 
                 let _minWidth = 728
 
-                divWidth = Math.min(divWidth, data?.length * 150)
+                divWidth = Math.min(divWidth, data?.length * 110)
                 divWidth = Math.max(_minWidth, divWidth)
 
                 const minWidth = style.minWidth || divWidth || 728
