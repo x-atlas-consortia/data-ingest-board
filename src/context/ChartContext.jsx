@@ -183,7 +183,7 @@ export const ChartProvider = ({ children }) => {
                         .style("font-size", sizing.font.title)
                         .attr("class", "x label")
                         .attr("text-anchor", "middle")
-                        .attr("x", (sizing.width / 2) + sizing.margin.right)
+                        .attr("x", (sizing.width / 2) + (sizing.margin.left / 2))
                         .attr("y", sizing.height + (sizing.margin.top / 2))
                         .text(xAxis.label)
                 }

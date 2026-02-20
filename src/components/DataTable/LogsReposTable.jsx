@@ -322,7 +322,7 @@ const LogsReposTable = ({ }) => {
             }
         },)
         }
-        return <Table pagination={false} columns={cols} dataSource={[v]} />
+        return <Table pagination={false} columns={cols} dataSource={[{...v, id: crypto.randomUUID()}]} rowKey={'id'} />
     }
 
     const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
