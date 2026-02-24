@@ -3,10 +3,11 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    webpack: (config, options) => {
-        // Set the @ alias for the src directory
-        config.resolve.alias['@'] = path.resolve(__dirname)
-        return config
+    turbopack: {
+        root: path.join(__dirname, '..'),
+        resolveAlias: {
+            "@": path.resolve(__dirname)
+        }
     },
     transpilePackages: [
         'antd',
