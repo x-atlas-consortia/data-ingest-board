@@ -11,7 +11,7 @@ function Line({
     reload = true,
     groups = [],
     chartId = 'modal',
-    colorGroups = [],
+    style = {},
     yAxis = {},
     xAxis = {}
 }) {
@@ -25,31 +25,22 @@ function Line({
         getChartSelector,
         toolTipHandlers,
         appendTooltip,
+        svgDo,
     } = useContext(ChartContext)
-
-    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
-    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
 
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 30, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 430 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = (margin.left + margin.right) * 3
+        const sizing = svgDo({data}).sizing(style, chartId, chartType)
+        let {width, height, margin} = sizing
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
-        //.attr("viewBox", [0, 0, width + marginX, height + marginY])
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height + margin.top])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left + 20},${margin.top + 50})`)
-
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
         const dataReady = groups.map(function (group) {
@@ -62,13 +53,11 @@ function Line({
         });
 
         let maxY = 0;
-        let minY = Infinity;
         for (let d of data) {
             let list = Object.values(d)
             for (let x of list) {
                 if (typeof x === 'number') {
                     maxY = Math.max(maxY, x)
-                    minY = Math.min(minY, x)
                 }
             }
 
@@ -81,7 +70,8 @@ function Line({
         if (xAxis.suffix) {
             xGroups.push(xAxis.suffix)
         }
-        const yStartPos = -(maxY * .02)
+
+        const minY = -(maxY * .02)
 
         // A color scale: one color for each group
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -89,10 +79,10 @@ function Line({
         const groupColor = (d) => {
             let pos = -1
             let name = d.name
-            for (let i = 0; i < colorGroups.length; i++) {
-                if (d.name.includes(colorGroups[i])) {
+            for (let i = 0; i < style?.colorGroups?.length; i++) {
+                if (d.name.includes(style?.colorGroups[i])) {
                     pos = (i + 1) * 20;
-                    name = name.replace(colorGroups[i], '')
+                    name = name.replace(style?.colorGroups[i], '')
                     break;
                 }
             }
@@ -107,61 +97,36 @@ function Line({
 
         }
 
-        const formatVal = (v) => yAxis.formatter ? yAxis.formatter(v) : v
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
+        const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
 
         // Add X axis --> it is a date format
         const x = d3.scalePoint()
             .domain(xGroups)
-            .range([0, width]);
+            .range([margin.left, width - margin.right])
+            .padding(0.2)
+
         g.append("g")
-            .attr("transform", `translate(0, ${height})`)
+            .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x));
 
         // Add Y axis
         const y = d3.scaleLinear()
-            .domain([yStartPos, maxY * 1.02])
-            .range([height, 0]);
+            .domain([minY, maxY * 1.02])
+            .range([height - margin.bottom, margin.top]);
+            
         g.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : y))
         
-        if (showYLabels()) {
-            svg.append("g")
-            .append("text")
-            .attr("class", "y label")
-            .attr("text-anchor", "end")
-            .attr("y",  yAxis.labelPadding || 0)
-            .attr("x", (height/1.7) * -1)
-            .attr("dy", ".74em")
-            .attr("transform", "rotate(-90)")
-            .text(yAxis.label || "Frequency")
-        }
-        
-            
-        if (xAxis.label && showXLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "end")
-                .attr("x", width / 1.3)
-                .attr("y", height * 1.3)
-                .text(xAxis.label)
-        }
+        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
 
         // Add the lines
         const line = d3.line()
             .x(d => x(d.xValue))
             .y(d => y(d.yValue))
         
-        g.selectAll(".y-grid")
-            .data(y.ticks())
-            .enter().append("line")
-            .attr("class", "y-grid")
-            .attr("x1", 0)
-            .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
-            .attr("y2", d => Math.ceil(y(d)))
-            .style("stroke", "#eee") // Light gray
-            .style("stroke-width", "1px")
+        svgDo({}).grid({g, y, hideGrid: style.hideGrid, ticks, sizing})
 
 
         const paths = g.selectAll("line--lines")
@@ -172,11 +137,10 @@ function Line({
             })
             .attr('pointer-events', 'none')
             .attr("stroke", d => {
-
                 const {color, gColor} = groupColor(d)
                 const label = d.name
                 const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
-                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal(sum) }
+                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal({d, v: sum}) }
                 return color
             })
             .style("stroke-width", 4)
@@ -202,7 +166,7 @@ function Line({
             .attr("r", 5)
             .attr('pointer-events', 'all')
             .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
-            .attr('data-value', (d) => formatVal(d.yValue))
+            .attr('data-value', (d) => formatVal({d, v: d.yValue}))
             .attr('data-label', (d) => `${d.group} \n ${d.xValue}`)
 
         // Add a legend at the end of each line

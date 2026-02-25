@@ -16,23 +16,25 @@ export const prepareStackedData = (data) => {
     return sorted
 }
 
-function StackedBar({
+function OverlappedBar({
     setLegend,
     filters,
     data = [],
     reload = true,
     subGroupLabels = {},
     chartId = 'modal',
+    style = {},
     yAxis = {},
     xAxis = {}
 }) {
     const {
         getChartSelector,
         toolTipHandlers,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
 
-    const chartType = 'stackedBar'
+    const chartType = 'overlappedBar'
     const colors = useRef({})
     const chartData = useRef([])
     const hasLoaded = useRef(false)
@@ -45,28 +47,19 @@ function StackedBar({
         return sum
     }
 
-    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
-    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
-
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 40, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 420 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = margin.left + margin.right * 3
+        const sizing = svgDo({data}).sizing(style, chartId, chartType)
+        let {width, height, margin} = sizing
 
         // append the svg object to the body of the page
-        const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
-            .attr("viewBox", [0, 0, width + marginX, height + marginY])
+         const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height + margin.top])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(subGroupLabels)
 
@@ -75,12 +68,12 @@ function StackedBar({
         // Add X axis
         const x = d3.scaleBand()
             .domain(groups)
-            .range([0, width])
+            .range([margin.left, width - margin.right])
             .padding([0.2])
 
         g.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x));
 
         let maxY = 0;
         for (let d of data) {
@@ -103,56 +96,29 @@ function StackedBar({
 
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
         const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-        const minY = yAxis.scaleLog ? 1 : 0
+        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
 
         // Add Y axis
         const y = scaleMethod()
             .domain([minY, maxY])
-            .range([height, 0]);
+            .range([height - margin.bottom, margin.top])
+
         g.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
-        if (showYLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "y label")
-                .attr("text-anchor", "end")
-                .attr("y", yAxis.labelPadding || 0)
-                .attr("x", (height / 2) * -1)
-                .attr("dy", ".74em")
-                .attr("transform", "rotate(-90)")
-                .text(yAxis.label || "Frequency")
-        }
-
-
-        if (xAxis.label && showXLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "middle")
-                .attr("x", (width / 2) + margin.left)
-                .attr("y", height * 1.3)
-                .text(xAxis.label)
-        }
+        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
-        const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
 
         const getSubgroupLabel = (v) => subGroupLabels[v] || v
 
-        g.selectAll(".y-grid")
-            .data(y.ticks(ticks))
-            .enter().append("line")
-            .attr("class", "y-grid")
-            .attr("x1", 0)
-            .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
-            .attr("y2", d => Math.ceil(y(d)))
-            .style("stroke", "#eee") // Light gray
-            .style("stroke-width", "1px")
+        svgDo({}).grid({g, y, hideGrid: style.hideGrid, ticks, sizing})
 
+        const widthModifier = 10
         // Show the bars
         g.append("g")
             .selectAll("g")
@@ -166,23 +132,23 @@ function StackedBar({
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
+                colors.current[label] = { color, label, value: formatVal({d, v: getSubGroupSum(d.key)}) }
                 return color
             })
             .attr('data-value', d => {
-                return formatVal(d.val)
+                return formatVal({d, v: d.val})
             })
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
             })
             .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
-            .attr("x", d => x(d.group))
-            .attr("y", height)
+            .attr("x", (d, i) => x(d.group) + (i * (widthModifier/2))) 
+            .attr("y", y(minY))
             .attr("height", 0)
-            .attr("width", x.bandwidth())
+            .attr("width", (d, i) => Math.abs(x.bandwidth() - (i * widthModifier)))
             .append("title")
             .text(d => {
-                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
+                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.val})}`
             })
 
         svg.selectAll("rect")
@@ -194,7 +160,7 @@ function StackedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return height - y(d.val)
+                return y(minY) - y(d.val)
             })
             .attr("y", d => {
                 return y(d.val)
@@ -227,8 +193,8 @@ function StackedBar({
     }, [filters, yAxis])
 
     return (
-        <div className={`c-visualizations__chart c-visualizations__stackedBar c-bar`} id={`c-visualizations__stackedBar--${chartId}`}></div>
+        <div className={`c-visualizations__chart c-visualizations__overlappedBar c-bar`} id={`c-visualizations__overlappedBar--${chartId}`}></div>
     )
 }
 
-export default StackedBar
+export default OverlappedBar

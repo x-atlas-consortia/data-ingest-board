@@ -5,7 +5,7 @@ import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/genera
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
 import LogsContext from "@/context/LogsContext";
-import StackedBarWithLegend from "@/components/Visualizations/StackedBarWithLegend";
+import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
 import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
@@ -42,7 +42,12 @@ const LogsApiUsageTable = ({ data }) => {
         setIsBusy(true)
 
         if (data.length) {
-            await buildStackedBarChart(includePrevData)
+            let histogramOps = determineCalendarInterval()
+            if (!histogramDetails) {
+                setHistogramDetails(histogramOps)
+            }
+
+            await buildStackedBarChart(includePrevData, histogramOps)
 
             if (data.length < numOfRows) {
                 setHasMoreData(false)
@@ -121,21 +126,28 @@ const LogsApiUsageTable = ({ data }) => {
         setSelectedMenuItem('groupedBar')
     }, [])
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         fetchData(false)
         apis.current = {}
         setSelectedRows([])
         setSelectedRowObjects([])
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
 
+    useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
-    const buildStackedBarChart = async (includePrevData) => {
+    const buildStackedBarChart = async (includePrevData, histogramOps) => {
         let url = getUrl()
         if (!url) return
-
-        let histogramOps = determineCalendarInterval()
 
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
@@ -173,7 +185,7 @@ const LogsApiUsageTable = ({ data }) => {
 
             setVizData({ ...vizData, bar: _vizData })
             updateTableData(includePrevData, _tableData)
-            setHistogramDetails(histogramOps)
+            
         }
     }
 
@@ -186,7 +198,8 @@ const LogsApiUsageTable = ({ data }) => {
     };
 
     const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
-    const xAxis = { formatter: formatNum, label: `Requests per ${histogramDetails?.interval}` }
+    const xAxis = { label: `Requests per ${histogramDetails?.interval}` }
+    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
@@ -194,8 +207,8 @@ const LogsApiUsageTable = ({ data }) => {
 
     return (<>
 
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'stackedBar') && <StackedBarWithLegend xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{ bytes: formatNum }}

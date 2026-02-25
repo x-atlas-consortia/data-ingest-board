@@ -195,7 +195,7 @@ const LogsFilesTable = ({ }) => {
         }
     ]
 
-    useEffect(() => {
+    const resetView = () => {
         setTableData([])
         setVizData({})
         afterKey.current = null
@@ -206,8 +206,17 @@ const LogsFilesTable = ({ }) => {
         setSelectedRowObjects([])
         fetchData(false)
         buildBarChart()
-        
+    }
+
+    useEffect(() => {
+        resetView()
     }, [fromDate, toDate])
+
+     useEffect(() => {
+        if (!histogramDetails || histogramDetails.isMenuAction) {
+            resetView()
+        }
+    }, [histogramDetails])
 
 
     const buildBarChart = async () => {
@@ -216,8 +225,10 @@ const LogsFilesTable = ({ }) => {
         if (!url) return
 
         let histogramOps = determineCalendarInterval()
-        setHistogramDetails(histogramOps)
-
+        if (!histogramDetails) {
+            setHistogramDetails(histogramOps)
+        }
+        
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate() })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
@@ -296,14 +307,15 @@ const LogsFilesTable = ({ }) => {
     }, [isLogScale])
 
     const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: isLogScale, }
-    const xAxis = {monoColor: '#4288b5', noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
+    const xAxis = {noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
+    const svgStyle = {valueFormatter: ({v}) => formatBytes(v), monoColor: '#4288b5', margin: {left: 95}}
 
     const formatAnalytics = (v, details) => {
         return formatBytes(v, 3)
     }
 
     return (<>
-        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar xAxis={xAxis} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div></WithChart>}
+        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar style={svgStyle} xAxis={xAxis} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div></WithChart>}
         <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}

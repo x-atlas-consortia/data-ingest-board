@@ -10,12 +10,14 @@ function GroupedBar({
     reload = true,
     subGroupLabels = {},
     chartId = 'modal',
+    style = {},
     yAxis = {},
     xAxis = {}
 }) {
     const {
         getChartSelector,
         toolTipHandlers,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
 
@@ -32,28 +34,19 @@ function GroupedBar({
         return sum
     }
 
-    const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
-    const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
-
     const buildChart = () => {
 
-        const dyWidth = Math.max(460, data.length * 150)
-        const margin = { top: 10, right: 30, bottom: 40, left: 50 },
-            width = (Math.min((dyWidth), 1000)) - margin.left - margin.right,
-            height = 420 - margin.top - margin.bottom;
-        const marginY = (margin.top + margin.bottom) * 3
-        const marginX = margin.left + margin.right * 3
+        const sizing = svgDo({data}).sizing(style, chartId, chartType)
+        let {width, height, margin} = sizing
 
         // append the svg object to the body of the page
         const svg = d3.create("svg")
-            .attr("width", width + marginX)
-            .attr("height", height + marginY)
-            .attr("viewBox", [0, 0, width + marginX, height + marginY])
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("viewBox", [0, 0, width, height + margin.top])
 
         const g = svg
             .append("g")
-            .attr("transform", `translate(${margin.left * 1.5},${margin.top + 50})`)
 
         const subgroups = Object.keys(subGroupLabels)
 
@@ -62,12 +55,12 @@ function GroupedBar({
         // Add X axis
         const x = d3.scaleBand()
             .domain(groups)
-            .range([0, width])
+            .range([margin.left, width - margin.right])
             .padding([0.2])
 
-        g.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).tickSize(0));
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x));
 
         let maxY = 0;
         for (let d of data) {
@@ -78,14 +71,21 @@ function GroupedBar({
 
         const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
         const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-        const minY = yAxis.scaleLog ? 1 : 0
+        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
+
+        const yaxis = scaleMethod()
+            .domain([minY, maxY])
+
+        if (yAxis.scaleLog) {
+            yaxis.nice()
+        }
 
         // Add Y axis
-        const y = scaleMethod()
-            .domain([minY, maxY]).nice()
-            .range([height, 0])
+        const y = yaxis
+            .range([height - margin.bottom, margin.top])
 
         g.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
         var xSubgroup = d3.scaleBand()
@@ -93,46 +93,16 @@ function GroupedBar({
             .range([0, x.bandwidth()])
             .padding([0.05])
 
-        if (showYLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "y label")
-                .attr("text-anchor", "end")
-                .attr("y", yAxis.labelPadding || 0)
-                .attr("x", (height / 2) * -1)
-                .attr("dy", ".74em")
-                .attr("transform", "rotate(-90)")
-                .text(yAxis.label || "Frequency")
-        }
-
-
-        if (xAxis.label && showXLabels()) {
-            svg.append("g")
-                .append("text")
-                .attr("class", "x label")
-                .attr("text-anchor", "middle")
-                .attr("x", (width / 2) + margin.left)
-                .attr("y", height * 1.3)
-                .text(xAxis.label)
-        }
+        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
 
         // color palette = one color per subgroup
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
-        const formatVal = (v) => xAxis.formatter ? xAxis.formatter(v) : v
+        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
 
         const getSubgroupLabel = (v) => subGroupLabels[v] || v
 
-        g.selectAll(".y-grid")
-            .data(y.ticks(ticks))
-            .enter().append("line")
-            .attr("class", "y-grid")
-            .attr("x1", 0)
-            .attr("y1", d => Math.ceil(y(d)))
-            .attr("x2", width)
-            .attr("y2", d => Math.ceil(y(d)))
-            .style("stroke", "#eee") // Light gray
-            .style("stroke-width", "1px")
+        svgDo({}).grid({g, y, hideGrid: style.hideGrid, ticks, sizing})
 
         // Show the bars
         g.append("g")
@@ -144,28 +114,28 @@ function GroupedBar({
             .selectAll("rect")
             // enter a second time = loop subgroup per subgroup to add all rectangles
             .data(function(d) { 
-                return subgroups.map(function(key) { return {key: key, val: d[key] || 0}; }); })
+                return subgroups.map(function(key) { return {key: key, group: d.group, val: d[key] || 0}; }); })
             .join("rect")
             .attr("fill", d => {
                 const color = colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[label] = { color, label, value: formatVal(getSubGroupSum(d.key)) }
+                colors.current[label] = { color, label, value: formatVal({d, v: getSubGroupSum(d.key)}) }
                 return color
             })
             .attr('data-value', d => {
-                return formatVal(d.val)
+                return formatVal({d, v: d.val})
             })
             .attr('data-label', d => {
                 return getSubgroupLabel(d.key)
             })
             .attr("class", d => `bar--${getSubgroupLabel(d.key).toDashedCase()}`)
             .attr("x", d => xSubgroup(d.key))
-            .attr("y", height)
+            .attr("y", y(minY))
             .attr("height", 0)
             .attr("width", xSubgroup.bandwidth())
             .append("title")
             .text(d => {
-                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal(d.val)}`
+                return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.val})}`
             })
 
         svg.selectAll("rect")
@@ -177,7 +147,7 @@ function GroupedBar({
             .transition()
             .duration(800)
             .attr("height", d => {
-                return height - y(d.val)
+                return y(minY) - y(d.val)
             })
             .attr("y", d => {
                 return y(d.val)

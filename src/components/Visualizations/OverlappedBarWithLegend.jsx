@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
-import StackedBar, { prepareStackedData } from '@/components/Visualizations/Charts/StackedBar';
+import OverlappedBar, { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedBar';
 import WithChart from './WithChart';
 
-function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }) {
+function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style }) {
     const [legend, setLegend] = useState({})
 
     return (
         <WithChart legend={legend} data={data}>
                 <ChartProvider>
-                    <StackedBar
+                    <OverlappedBar
                         reload={false}
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}
+                        style={style}
                         yAxis={yAxis}
                         xAxis={xAxis}
                         chartId={chartId} />
@@ -22,4 +23,4 @@ function StackedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis }) {
     )
 }
 
-export default StackedBarWithLegend
+export default OverlappedBarWithLegend

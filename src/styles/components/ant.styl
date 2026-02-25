@@ -9,15 +9,6 @@
     +bp(max, 576px)
       overflow-x auto
       max-width 200px
-  
-  &-carousel .slick-dots
-    bottom -20px
-    li
-      button 
-        &:after
-          background black !important
-      &:after
-        background $col-lnk-blue !important
 
   &-content--logs
     margin 24px 16px
@@ -30,3 +21,39 @@
     &--scaleType 
       cursor default !important
 
+.slider-nav
+  margin 0
+  text-align center
+  padding  0
+  position absolute 
+  top 15px
+  right 15px
+  li
+    width 15px 
+    height 15px 
+    display inline-block
+    list-style none
+    padding 3px
+    margin-left 5px
+    span
+      color $col-trout
+      font-size 11px
+      top -8px 
+      left -2px
+      position relative
+    &.slideNav-active 
+      background #eee
+    &.arrow
+      border-width 0 3px 3px 0
+      border-style solid
+      display inline-block
+      border-color $col-lnk-blue
+      span 
+        opacity 0
+      &:hover 
+        border-color $col-hover-blue
+    &.arrow-prev 
+      transform rotate(135deg)
+    &.arrow-next 
+      transform rotate(-45deg)
+      

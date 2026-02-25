@@ -3,14 +3,14 @@ import { ChartProvider } from '@/context/ChartContext';
 import Line from '@/components/Visualizations/Charts/Line';
 import WithChart from './WithChart';
 
-function LineWithLegend({ chartId, data, groups, yAxis, xAxis, colorGroups }) {
+function LineWithLegend({ chartId, data, groups, yAxis, xAxis, style }) {
     const [legend, setLegend] = useState({})
 
     return (
         <WithChart legend={legend} data={data}>
              <ChartProvider>
                     <Line
-                        colorGroups={colorGroups}
+                        style={style}
                         xAxis={xAxis}
                         yAxis={yAxis}
                         groups={groups}
