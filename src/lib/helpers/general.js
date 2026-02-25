@@ -32,7 +32,7 @@ export const roundToTheNearest = (num, exponentModifier = -1) => {
 }
 
 export function toDateString(timestamp) {
-    if (!timestamp || !timestamp.length) return ''
+    if (!timestamp || (typeof timestamp === 'string' && !timestamp.length)) return ''
     const date = new Date(timestamp);
     let options = { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric',
         minute: 'numeric',
