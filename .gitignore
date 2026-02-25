@@ -36,6 +36,7 @@ src/.env
 # nextjs
 src/.next
 src/out
+src/src
 
 # misc
 .DS_Store
