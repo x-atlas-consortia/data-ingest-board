@@ -488,7 +488,7 @@ const TABLE = {
                     if (!uuids || !uuids.length) return null
                     let res = []
                     for (let id of uuids) {
-                        res.push(<li key={id.uuid} className={'list-group-item'}><IdLink data={id} /></li>)
+                        res.push(<li key={id.uuid} className={'list-group-item'}>{ENVS.isHM() ? <IdLinkDropdown data={id} /> : <IdLink data={id} />}</li>)
                     }
                     const titles = {
                         blocks: 'Sample Blocks',
