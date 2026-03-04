@@ -494,7 +494,7 @@ const TABLE = {
                         blocks: 'Sample Blocks',
                         parent_ancestors: name
                     }
-                    const display = <IdLink data={uuids[0]} />
+                    const display = ENVS.isHM() ? <IdLinkDropdown data={uuids[0]} /> : <IdLink data={uuids[0]} />
                     if (uuids.length > 1) {
                         return (<ModalOverComponent modalContent={
                             <div className='c-table__colTags'>
