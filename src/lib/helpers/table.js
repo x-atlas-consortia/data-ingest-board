@@ -488,13 +488,13 @@ const TABLE = {
                     if (!uuids || !uuids.length) return null
                     let res = []
                     for (let id of uuids) {
-                        res.push(<li key={id.uuid} className={'list-group-item'}><IdLink data={id} /></li>)
+                        res.push(<li key={id.uuid} className={'list-group-item'}>{ENVS.isHM() ? <IdLinkDropdown data={id} /> : <IdLink data={id} />}</li>)
                     }
                     const titles = {
                         blocks: 'Sample Blocks',
                         parent_ancestors: name
                     }
-                    const display = <IdLink data={uuids[0]} />
+                    const display = ENVS.isHM() ? <IdLinkDropdown data={uuids[0]} /> : <IdLink data={uuids[0]} />
                     if (uuids.length > 1) {
                         return (<ModalOverComponent modalContent={
                             <div className='c-table__colTags'>
