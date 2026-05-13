@@ -136,6 +136,10 @@ const TABLE = {
                 case 'QA':
                     msg = <span>The data has been successfully processed via the ingest pipeline and is awaiting data provider curation.</span>
                     break;
+                 case 'APPROVAL':
+                    msg =
+                        <span>The data is out for approval at the Data Provider</span>
+                    break;
                 case 'ERROR':
                     msg = <span>An error occurred during processing via the ingest pipeline.</span>
                     break;
