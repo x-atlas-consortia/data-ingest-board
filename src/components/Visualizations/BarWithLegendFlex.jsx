@@ -3,13 +3,14 @@ import { ChartProvider } from '@/context/ChartContext';
 import Bar from '@/components/Visualizations/Charts/Bar';
 import WithChartFlex from './WithChartFlex';
 
-function BarWithLegendFlex({ chartId, data, yAxis, xAxis}) {
+function BarWithLegendFlex({ chartId, data, yAxis, xAxis, style = {}}) {
     const [legend, setLegend] = useState({})
 
     return (
         <WithChartFlex legend={legend} data={data}>
                 <ChartProvider>
                     <Bar
+                        style={style}
                         xAxis={xAxis}
                         yAxis={yAxis}
                         reload={false}

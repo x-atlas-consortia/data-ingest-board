@@ -3,7 +3,7 @@ import { ChartProvider } from '@/context/ChartContext';
 import Line from '@/components/Visualizations/Charts/Line';
 import WithChart from './WithChart';
 
-function LineWithLegend({ chartId, data, groups, yAxis, xAxis, style }) {
+function LineWithLegend({ chartId, data, groups, yAxis, xAxis, style = {}}) {
     const [legend, setLegend] = useState({})
 
     return (

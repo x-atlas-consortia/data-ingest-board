@@ -4,7 +4,7 @@ import { prepareStackedData } from '@/components/Visualizations/Charts/Overlappe
 import GroupedBar from '@/components/Visualizations/Charts/GroupedBar';
 import WithChart from './WithChart';
 
-function GroupedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style }) {
+function GroupedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) {
     const [legend, setLegend] = useState({})
 
     return (
