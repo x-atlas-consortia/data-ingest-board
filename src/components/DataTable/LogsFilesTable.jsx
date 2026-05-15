@@ -284,7 +284,7 @@ const LogsFilesTable = ({ }) => {
             const body = <>
             <h4>Downloaded Datasets by Dataset Type</h4>
             <p>Currently loaded table items are aggregated by dataset type and visualized in the bar chart below for time period {fromDate} to {toDate}.</p>
-            <BarWithLegendFlex yAxis={yAxis} data={byDatasetTypes.current} chartId={'filesByTypes'} />
+            <BarWithLegendFlex style={{valueFormatter: ({v}) => formatBytes(v)}} yAxis={{...yAxis, labelPadding: -20}} data={byDatasetTypes.current} chartId={'filesByTypes'} />
             <SearchFilterTable data={byDatasetTypes.current} columns={byTypeCols}
                 formatters={{bytes: formatBytes}}
                 tableProps={{
