@@ -1,13 +1,14 @@
 export const STATUS = {
     datasets: [
-        {text: 'Unpublished', value: 'unpublished'},
-        {text: 'Published', value: 'published'},
-        {text: 'QA', value: 'qa'}
+        { text: 'Unpublished', value: 'unpublished' },
+        { text: 'Published', value: 'published' },
+        { text: 'QA', value: 'qa' },
+        { text: 'Approval', value: 'approval' }
     ],
 
     uploads: [
-        {text: 'Valid', value: 'valid'},
-        {text: 'Reorganized', value: 'reorganized'},
+        { text: 'Valid', value: 'valid' },
+        { text: 'Reorganized', value: 'reorganized' }
     ]
 }
 
