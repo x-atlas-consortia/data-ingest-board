@@ -296,7 +296,7 @@ const DatasetTable = ({
     const dataIndexList = filteredDatasetColumns.map(column => column.dataIndex);
 
     function countFilteredRecords(data, filters) {
-        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: 'published'}, hierarchyGroupings)
+        return TABLE.countFilteredRecords(data, filters, dataIndexList, {case1: 'unpublished', case2: ['published', 'retracted']}, hierarchyGroupings)
     }
 
     const rowSelection =  TABLE.rowSelection({setDisabledMenuItems, disabledMenuItems, selectedEntities, setSelectedEntities, setCheckedModifiedData})

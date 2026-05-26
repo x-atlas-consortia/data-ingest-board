@@ -3,7 +3,8 @@ export const STATUS = {
         { text: 'Unpublished', value: 'unpublished' },
         { text: 'Published', value: 'published' },
         { text: 'QA', value: 'qa' },
-        { text: 'Approval', value: 'approval' }
+        { text: 'Approval', value: 'approval' },
+        ...ENVS.datasetStatus()
     ],
 
     uploads: [
