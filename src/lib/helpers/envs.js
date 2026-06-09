@@ -16,6 +16,15 @@ const ENVS = {
     appContext: () => {
         return process.env.NEXT_PUBLIC_APP_CONTEXT || 'Hubmap'
     },
+    datasetStatus: () => {
+        const list = parseJSON(process.env.NEXT_PUBLIC_DATASET_STATUS, [])
+        return list.map((l) => {
+            const parts = l.split(';')
+            const text = parts[0]
+            const value = parts[1] || parts[0].toLowerCase()
+            return {text, value }
+        })
+    },
     urlFormat: {
         entity: (path) => `${process.env.NEXT_PUBLIC_ENTITY_API_BASE}${path}`,
         portal: (path) => `${process.env.NEXT_PUBLIC_PORTAL_BASE}${path}`,

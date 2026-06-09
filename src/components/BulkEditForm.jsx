@@ -14,7 +14,7 @@ function BulkEditForm({statuses, dataProviderGroups, setBulkEditValues, entityNa
     const buildStatusOptions = () => {
         let options = []
         const selectedEntitiesStatuses = selectedEntities.map((e) => e.status)
-        let notToIncludeStatues = selectedEntitiesStatuses.concat(['unpublished', 'published'])
+        let notToIncludeStatues = selectedEntitiesStatuses.concat(['unpublished', 'published', 'retracted'])
         for (let s of statuses) {
             if (!notToIncludeStatues.comprises(s.value)) {
                 options.push(<Select.Option key={`status__${s.value}`} value={s.value}>{s.text}</Select.Option>)

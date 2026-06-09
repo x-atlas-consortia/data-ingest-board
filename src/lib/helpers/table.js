@@ -186,9 +186,18 @@ const TABLE = {
                     filterValues = filterValues.concat(filterGroupings[v] || [v]);
                 }
                 if (filterValues.includes(special.case1)) {
-                    if (eq(item[key], special.case2)) {
-                        return false;
+                    if (Array.isArray(special.case2)) {
+                        for (const c of special.case2) {
+                            if (eq(item[key], c)) {
+                                return false
+                            }
+                        }
+                    } else {
+                        if (eq(item[key], special.case2)) {
+                            return false
+                        }
                     }
+                    
                 } else if (item[key] && !filterValues.some(value => some(item[key], value))) {
                     return false;
                 } else if (!item[key]) {

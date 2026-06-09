@@ -1,9 +1,11 @@
+import ENVS from './helpers/envs'
 export const STATUS = {
     datasets: [
         { text: 'Unpublished', value: 'unpublished' },
         { text: 'Published', value: 'published' },
         { text: 'QA', value: 'qa' },
-        { text: 'Approval', value: 'approval' }
+        { text: 'Approval', value: 'approval' },
+        ...ENVS.datasetStatus()
     ],
 
     uploads: [
@@ -12,4 +14,4 @@ export const STATUS = {
     ]
 }
 
-export const modalDefault = {cancelCSS: 'none', okText: 'OK'}
+export const modalDefault = { cancelCSS: 'none', okText: 'OK' }
