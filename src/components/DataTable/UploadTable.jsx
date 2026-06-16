@@ -67,7 +67,7 @@ const UploadTable = ({ data, loading, filterUploads, uploadData, datasetData, cl
             {
                 key: '1',
                 label: (
-                    <a href={URLS.ingest.view(record.uuid, 'upload')} target="_blank" rel="noopener noreferrer">Data Portal</a>
+                    <a href={URLS.ingest.view(record.uuid, 'upload')} target="_blank" rel="noopener noreferrer">Ingest UI</a>
                 )
             }
         ]
