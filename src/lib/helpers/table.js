@@ -186,9 +186,18 @@ const TABLE = {
                     filterValues = filterValues.concat(filterGroupings[v] || [v]);
                 }
                 if (filterValues.includes(special.case1)) {
-                    if (eq(item[key], special.case2)) {
-                        return false;
+                    if (Array.isArray(special.case2)) {
+                        for (const c of special.case2) {
+                            if (eq(item[key], c)) {
+                                return false
+                            }
+                        }
+                    } else {
+                        if (eq(item[key], special.case2)) {
+                            return false
+                        }
                     }
+                    
                 } else if (item[key] && !filterValues.some(value => some(item[key], value))) {
                     return false;
                 } else if (!item[key]) {
@@ -644,12 +653,12 @@ const TABLE = {
                 }
             },
             onChange: (newSelectedRowKeys, selectedRows, e, a) => {
-                const hasPublished = selectedRows.some(r => eq(r.status, "Published"));
-                const hasCertainStatus = selectedRows.some(r => ["Published", "Processing", "Reorganized"].comprises(r.status))
-                if (!selectedRows.length) { // If noithing is selected
+                const hasCertainStatus1 = selectedRows.some(r => ["Published", "Retracted"].comprises(r.status));
+                const hasCertainStatus2 = selectedRows.some(r => ["Published", "Processing", "Reorganized", "Retracted"].comprises(r.status))
+                if (!selectedRows.length) { // If nothing is selected
                     setDisabledMenuItems({...disabledMenuItems, bulkEdit: true, bulkSubmit:true, bulkValidate: true, submitForPipelineTesting: true})
                 } else { // at least one thing is selected
-                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: hasPublished, bulkSubmit: hasPublished, bulkValidate: hasCertainStatus, submitForPipelineTesting: false })
+                    setDisabledMenuItems({...disabledMenuItems, bulkEdit: hasCertainStatus1, bulkSubmit: hasCertainStatus1, bulkValidate: hasCertainStatus2, submitForPipelineTesting: false })
                 }
             },
             getCheckboxProps: (record) => ({

@@ -145,13 +145,13 @@ export const callService = async (url, headers, payload = {}, method = 'put') =>
     }
 }
 
-export const parseJSON = (obj) => {
+export const parseJSON = (obj, returnDefault = {}) => {
     try {
         return JSON.parse(obj)
     } catch (e) {
         console.error(e)
     }
-    return {}
+    return returnDefault
 }
 
 export const storageKey = (key = '') => `ingest-board.${key}`
