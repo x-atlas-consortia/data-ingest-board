@@ -17,7 +17,7 @@ const ESQ = {
         return {
             [field]: {
                 gte: from,
-                lt: to || "now"
+                lte: to || "now"
             }
         }
     },
