@@ -147,6 +147,7 @@ export const callService = async (url, headers, payload = {}, method = 'put') =>
 
 export const parseJSON = (obj, returnDefault = {}) => {
     try {
+        if (!obj) return returnDefault;
         return JSON.parse(obj)
     } catch (e) {
         console.error(e)

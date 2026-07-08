@@ -318,7 +318,7 @@ const Logs = () => {
         }
         if (isApi(key)) {
 
-            for (let d of data[key].aggregations.services.buckets) {
+            for (let d of (data[key]?.aggregations?.services?.buckets || [])) {
                 tableData.push(
                     {
                         name: d.key,
