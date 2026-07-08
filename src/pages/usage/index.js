@@ -18,7 +18,8 @@ import {
     ExclamationCircleFilled, 
     MinusOutlined,
     PlusOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    InboxOutlined
 } from "@ant-design/icons";
 import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
 import dayjs from 'dayjs';
@@ -101,23 +102,35 @@ const Logs = () => {
     const isFiles = (key) => eq(key, 'fileDownloads')
 
     const getCardDetail = (key, data) => {
+        let agg
+        let indexData = data[key]
+        agg = indexData?.aggregations
 
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
-        let agg
         let repoData = []
 
-        let indexData = data[key]
-        agg = indexData.aggregations
+        const noData = <div className='c-logCard__noData'><p className="text-center" style={{ width: '95%', margin: '0 auto' }}><InboxOutlined style={{ fontSize: '30px' }} /> <br />Could not retrieve data for the selected date range.</p></div>
+        if (!agg) {
+            return noData
+        }
 
         if (isApi(key)) {
             totalHits = indexData.hits?.total?.value
+
+            if (!totalHits) {
+                return noData
+            }
         } else if (isFiles(key)) {
             totalHits = indexData.hits.total?.value
             totalFiles = agg.totalFiles.value
             totalFiles = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
             datasetGroups = agg.totalDatasets.value
             totalBytes = agg.totalBytes.value
+
+            if (!totalBytes) {
+                return noData
+            }
         } else {
             let owner,total
             let stats = []
@@ -139,6 +152,9 @@ const Logs = () => {
                     total,
                     stats
                 })
+            }
+            if (!repoData.length) {
+                return noData
             }
 
         }
@@ -216,7 +232,7 @@ const Logs = () => {
 
         if (isApi(key)) {
             let ms = []
-            for (let d of indexData.aggregations.services.buckets) {
+            for (let d of agg.services.buckets) {
                 exportData.current[exportKey] = {
                     fromDate,
                     toDate,
@@ -435,14 +451,19 @@ const Logs = () => {
                     console.error('User unauthorized', res)
                     break
                 }
-                _data[s] = res.data
+
+                if (res.status == 200) {
+                    _data[s] = res.data
+                }
 
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
-                res = await callService(url,
-                    headers,
-                    q,
-                    'POST')
-                _data[`${s}MinDate`] = res.data
+                    res = await callService(url,
+                        headers,
+                        q,
+                        'POST')
+                if (res.status == 200) {
+                    _data[`${s}MinDate`] = res.data
+                }
 
             }
         }
