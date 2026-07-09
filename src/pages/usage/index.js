@@ -89,8 +89,9 @@ const Logs = () => {
     }
 
     const handleDateRange = (dates, dateStrings) => {
-        setFromDate(dateStrings[0])
-        setToDate(dateStrings[1])
+        const [from, to] = dateStrings || [null, null]
+        setFromDate(from)
+        setToDate(to)
         _dispatchGTM('dateFilter')
         // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
@@ -439,16 +440,16 @@ const Logs = () => {
         let promisesMinDate = []
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
-            if (!_data[s]) {
-                url = ENVS.urlFormat.search(index)
-                q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
-                headers = getHeadersWith(globusToken).headers
+            url = ENVS.urlFormat.search(index)
+            q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
+            headers = getHeadersWith(globusToken).headers
+        
+            promises.push(callService(url,
+                headers,
+                q,
+                'POST'))
             
-                promises.push(callService(url,
-                    headers,
-                    q,
-                    'POST'))
-
+            if (!fromDate) {
                 // get the min date for each index to use as default fromDate if user doesn't select a date range
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
                 promisesMinDate.push(callService(url,
@@ -456,7 +457,6 @@ const Logs = () => {
                         q,
                         'POST'));
             }
-            
         }
         const results = await Promise.all(promises)
         const resultsMinDate = await Promise.all(promisesMinDate)
