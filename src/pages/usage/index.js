@@ -434,37 +434,44 @@ const Logs = () => {
         setIsBusy(true)
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
-        let q, url, headers, res
+        let q, url, headers
+        let promises = []
+        let promisesMinDate = []
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
             if (!_data[s]) {
                 url = ENVS.urlFormat.search(index)
                 q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
                 headers = getHeadersWith(globusToken).headers
-                res = await callService(url,
+            
+                promises.push(callService(url,
                     headers,
                     q,
-                    'POST')
-            
-                if (res.status == 401) {
-                    isSearchApiUnauthorized.current = true
-                    console.error('User unauthorized', res)
-                    break
-                }
+                    'POST'))
 
-                if (res.status == 200) {
-                    _data[s] = res.data
-                }
-
+                // get the min date for each index to use as default fromDate if user doesn't select a date range
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
-                    res = await callService(url,
+                promisesMinDate.push(callService(url,
                         headers,
                         q,
-                        'POST')
-                if (res.status == 200) {
-                    _data[`${s}MinDate`] = res.data
+                        'POST'));
+            }
+            const results = await Promise.all(promises)
+            const resultsMinDate = await Promise.all(promisesMinDate)
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].status == 401) {
+                    isSearchApiUnauthorized.current = true
+                    console.error('User unauthorized', results[i])
+                    break
                 }
-
+                if (results[i].status == 200) {
+                    _data[Object.keys(indicesSections.current)[i]] = results[i].data
+                }
+            }
+            for (let i = 0; i < resultsMinDate.length; i++) {
+                if (resultsMinDate[i].status == 200) {
+                    _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
+                }
             }
         }
         return _data
