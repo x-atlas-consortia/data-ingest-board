@@ -49,6 +49,6 @@
     "eslint": "^9.38.0",
     "eslint-config-next": "^16.0.0",
     "npm-watch": "^0.13.0",
-    "xac-esbuild": "github:x-atlas-consortia/xac-esbuild#1.0.0"
+    "xac-esbuild": "github:x-atlas-consortia/xac-esbuild#1.0.1"
   }
 }
