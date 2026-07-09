@@ -456,22 +456,23 @@ const Logs = () => {
                         q,
                         'POST'));
             }
-            const results = await Promise.all(promises)
-            const resultsMinDate = await Promise.all(promisesMinDate)
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].status == 401) {
-                    isSearchApiUnauthorized.current = true
-                    console.error('User unauthorized', results[i])
-                    break
-                }
-                if (results[i].status == 200) {
-                    _data[Object.keys(indicesSections.current)[i]] = results[i].data
-                }
+            
+        }
+        const results = await Promise.all(promises)
+        const resultsMinDate = await Promise.all(promisesMinDate)
+        for (let i = 0; i < results.length; i++) {
+            if (results[i].status == 401) {
+                isSearchApiUnauthorized.current = true
+                console.error('User unauthorized', results[i])
+                break
             }
-            for (let i = 0; i < resultsMinDate.length; i++) {
-                if (resultsMinDate[i].status == 200) {
-                    _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
-                }
+            if (results[i].status == 200) {
+                _data[Object.keys(indicesSections.current)[i]] = results[i].data
+            }
+        }
+        for (let i = 0; i < resultsMinDate.length; i++) {
+            if (resultsMinDate[i].status == 200) {
+                _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
             }
         }
         return _data
