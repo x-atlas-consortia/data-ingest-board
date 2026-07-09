@@ -22,7 +22,7 @@ WORKDIR /usr/src/app/src
 # Update npm, install dependencies, build the project, remove dev dependencies
 ENV NODE_ENV=production
 RUN npm install -g npm@latest && \
-    npm install && \
+    npm install --allow-git=root && \
     npm run build && \
     npm prune --production
 
