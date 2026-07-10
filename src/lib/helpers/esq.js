@@ -344,7 +344,7 @@ const ESQ = {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 size: 0,
-                track_total_hits: true,
+                track_total_hits: false,
                 collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
                 aggs: {
                     totalBytes: ESQ.sum('bytes_transferred'),
