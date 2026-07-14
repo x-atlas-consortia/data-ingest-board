@@ -8,16 +8,17 @@ export const indexFixtures = {
 const ESQ = {
     dateRange: (from, to, field = 'timestamp') => {
         const isoSuffix = 'T00:00:00'
+        const isoSuffixEnd = 'T23:59:59'
         if (typeof from === 'string') {
             from = from + isoSuffix
         }
         if (to && typeof to === 'string' && to !== 'now') {
-            to = to + isoSuffix
+            to = to + isoSuffixEnd
         }
         return {
             [field]: {
                 gte: from,
-                lt: to || "now"
+                lte: to || "now"
             }
         }
     },
@@ -343,7 +344,7 @@ const ESQ = {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
                 },
                 size: 0,
-                track_total_hits: true,
+                track_total_hits: false,
                 collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
                 aggs: {
                     totalBytes: ESQ.sum('bytes_transferred'),
