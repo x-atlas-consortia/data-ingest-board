@@ -97,9 +97,14 @@ function SankeyPage() {
                 displayableFilterMap: isHM() ? undefined : {
                     status: null
                 },
+                propertyPluralizedDisplayNames: isHM() ? undefined :  {
+                    dataset_type_hierarchy: 'modalities',
+                    dataset_type_analyte_class: 'analyte classes'
+                },
                 validFilterMap: isHM() ? undefined : {
                     dataset_type: 'dataset_type_hierarchy',
-                    source_type: 'dataset_source_type'
+                    source_type: 'dataset_source_type',
+                    analyte_class: 'dataset_type_analyte_class'
                 }
             })
         }
