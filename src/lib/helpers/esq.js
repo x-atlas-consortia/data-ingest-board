@@ -309,7 +309,7 @@ const ESQ = {
                     }
                 }
             },
-            apiUsage: {
+            apiUsageTable: {
                 query: {
                     [queryField]: from ? ESQ.apiUsageDateRange(from, to) : {} 
                 },
@@ -339,20 +339,20 @@ const ESQ = {
                     calendarHistogram: ESQ.apiUsageCalendarHistogram(ops)
                 }
             }),
-            fileDownloads: {
-                query: {
-                    [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
-                },
-                size: 0,
-                track_total_hits: false,
-                collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
-                aggs: {
-                    totalBytes: ESQ.sum('bytes_transferred'),
-                    totalFiles: ESQ.bucketCount('relative_file_path'),
-                    totalDatasets: ESQ.bucketCount('dataset_uuid'),
+            // fileDownloads: {
+            //     query: {
+            //         [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
+            //     },
+            //     size: 0,
+            //     track_total_hits: false,
+            //     collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
+            //     aggs: {
+            //         //totalBytes: ESQ.sum('bytes_transferred'),
+            //         //totalFiles: ESQ.bucketCount('relative_file_path'),
+            //         // totalDatasets: ESQ.bucketCount('dataset_uuid'),
 
-                }
-            },
+            //     }
+            // },
             fileDownloadsTable: {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}

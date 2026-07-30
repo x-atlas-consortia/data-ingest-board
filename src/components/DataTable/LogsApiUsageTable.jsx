@@ -1,4 +1,4 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useContext, useRef, useState } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
@@ -11,8 +11,9 @@ import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
 
-const LogsApiUsageTable = ({ data }) => {
+const LogsApiUsageTable = ({  }) => {
     const { globusToken } = useContext(AppContext)
+    const [data, setData] = useState([]);
     const {
         tableData, setTableData,
         isBusy, setIsBusy,
@@ -39,8 +40,10 @@ const LogsApiUsageTable = ({ data }) => {
     const apis = useRef({})
 
     const fetchData = async (includePrevData = true) => {
-        setIsBusy(true)
-
+        if (!isBusy) {
+            setIsBusy(true)
+        }
+        
         if (data.length) {
             let histogramOps = determineCalendarInterval()
             if (!histogramDetails) {
@@ -136,8 +139,47 @@ const LogsApiUsageTable = ({ data }) => {
     }
 
     useEffect(() => {
+        let isMounted = true;
+        setIsBusy(true)
+
+        async function fetchData() {
+        try {
+            const q = ESQ.indexQueries({ from: fromDate, to: toDate })['apiUsageTable']
+            
+            const url = getUrl()
+            const headers = getHeadersWith(globusToken).headers
+            const res = await callService(url,
+                        headers,
+                        q,
+                        'POST')
+            
+            if (isMounted && res.data) {
+                const tableData = []
+                for (let d of (res.data?.aggregations?.services?.buckets || [])) {
+                    tableData.push(
+                        {
+                            name: d.key,
+                            requests: d.doc_count,
+                            endpoints: d.totalEndpoints.value,
+                            endpointsHits: d.endpoints
+                        }
+                    )
+                }
+                console.log('API Usage', q, tableData)
+                setData(tableData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        }
+        }
+
+        fetchData();
+        return () => { isMounted = false; };
+  }, []);
+
+    useEffect(() => {
         resetView()
-    }, [fromDate, toDate])
+    }, [fromDate, toDate, data])
 
     useEffect(() => {
         if (!histogramDetails || histogramDetails.isMenuAction) {
