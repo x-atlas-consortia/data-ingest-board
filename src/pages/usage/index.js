@@ -436,7 +436,7 @@ const Logs = () => {
         if (isRepos(index)) return null;
         const startDate = new Date(fromDate).getTime();
         const endDate = new Date(toDate).getTime();
-        const aggregatedIndexName = isApi(index) ? 'usage_dashboard_api_usage_by_day' : 'usage_dashboard_file_downloads_by_day'
+        const aggregatedIndexName = isApi(index) ? indexFixtures.apiUsage.aggName+'day' : indexFixtures.fileDownloads.aggName+'day'
         const logs = aggregatedData.current[aggregatedIndexName].aggregations.calendarHistogram.buckets
 
 
