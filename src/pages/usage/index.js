@@ -119,17 +119,16 @@ const Logs = () => {
         }
 
         if (isApi(key)) {
-            totalHits = aggregatedSums.totalRequests //indexData.hits?.total?.value
+            totalHits = aggregatedSums.totalRequests
 
             if (!totalHits) {
                 return noData
             }
         } else if (isFiles(key)) {
-            //totalHits = indexData.hits.total?.value
-            totalFiles = aggregatedSums.totalFileDownloads  //agg.totalFiles.value
+            totalFiles = aggregatedSums.totalFileDownloads 
             totalFiles = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
-            datasetGroups = aggregatedSums.distinctDatasetsWithFileDownload //agg.totalDatasets.value
-            totalBytes = aggregatedSums.totalBytes //agg.totalBytes.value
+            datasetGroups = aggregatedSums.distinctDatasetsWithFileDownload
+            totalBytes = aggregatedSums.totalBytes
 
             if (!totalBytes) {
                 return noData
@@ -278,7 +277,7 @@ const Logs = () => {
                         </span><br />
                         <strong>Files downloaded</strong> 
                     </Col>
-                    {/* <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col> */}
+                   
                 </Row>
             </>)
         }
@@ -347,7 +346,10 @@ const Logs = () => {
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
+                    defaultIsLogScale={defaultIsLogScale}
+                    aggregatedData={aggregatedData}
+                    >
+                    
                     <LogsFilesTable />
                 </LogsProvider>
 

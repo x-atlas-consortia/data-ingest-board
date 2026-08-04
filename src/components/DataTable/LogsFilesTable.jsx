@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import TABLE from '@/lib/helpers/table';
 import { Table, Button, Popover } from 'antd';
-import ESQ from "@/lib/helpers/esq";
+import ESQ, {indexFixtures} from "@/lib/helpers/esq";
 import ENVS from "@/lib/helpers/envs";
 import { callService, formatNum, formatBytes, eq, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
@@ -48,7 +48,8 @@ const LogsFilesTable = ({ }) => {
         histogramDetails, setHistogramDetails,
         sectionHandleMenuItemClick,
         isLogScale,
-        getScaleSwitchMenuItem
+        getScaleSwitchMenuItem,
+        aggregatedData
 
     } = useContext(LogsContext)
 
@@ -228,15 +229,13 @@ const LogsFilesTable = ({ }) => {
         if (!histogramDetails) {
             setHistogramDetails(histogramOps)
         }
-        
-        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate() })[`${indexKey}Histogram`](histogramOps)
-        let headers = getHeadersWith(globusToken).headers
 
-        // Get page for grouped Ids
-        let res = await callService(url, headers, q, 'POST')
-        let _vizData = []
-        if (res.status == 200) {
-            let _data = res.data?.aggregations?.calendarHistogram?.buckets
+        let baseIndexName = indexFixtures.fileDownloads.aggName
+        const logs = aggregatedData.current[`${baseIndexName}${histogramOps.interval}`]
+        let _data = ESQ.filterByDate((logs?.aggregations?.calendarHistogram?.buckets || []), getFromDate(), getToDate())
+        
+        const _setVizData = () => {
+            let _vizData = []
             for (let d of _data) {
                 _vizData.push({
                     id: d.key_as_string,
@@ -246,6 +245,21 @@ const LogsFilesTable = ({ }) => {
             }
             setVizData({ ...vizData, bar: _vizData })
         }
+        
+        if (!_data.length) {
+            let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate() })[`${indexKey}Histogram`](histogramOps)
+            let headers = getHeadersWith(globusToken).headers
+
+            let res = await callService(url, headers, q, 'POST')
+            
+            if (res.status == 200) {
+                _data = res.data?.aggregations?.calendarHistogram?.buckets
+                _setVizData()
+            }
+        } else {
+            _setVizData()
+        }
+        
     }
 
     const rowSelection = {
@@ -315,7 +329,7 @@ const LogsFilesTable = ({ }) => {
     }
 
     return (<>
-        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar style={svgStyle} xAxis={xAxis} yAxis={yAxis} data={vizData.bar} chartId={'files'} /></ChartProvider></div></WithChart>}
+        {vizData.bar?.length > 0 && <WithChart data={vizData.bar} ><div className="mx-5 mb-5"><ChartProvider><Bar style={svgStyle} xAxis={xAxis} yAxis={yAxis} data={vizData.bar} chartId={'files'} reload={false} /></ChartProvider></div></WithChart>}
         <>
             <SearchFilterTable data={tableData} columns={cols}
                 formatters={{bytes: formatBytes}}
