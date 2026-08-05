@@ -467,7 +467,7 @@ const Logs = () => {
         return sum
     }
 
-    const fetchData = async () => {
+    const fetchRawDataForCards = async () => {
         setIsBusy(true)
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
@@ -490,7 +490,6 @@ const Logs = () => {
                     'POST'))
             }
            
-            
             if (!fromDate) {
                 // get the min date for each index to use as default fromDate if user doesn't select a date range
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
@@ -525,7 +524,7 @@ const Logs = () => {
     useEffect(() => {
         if (globusToken) {
             fetchAggregatedData().then(() => {
-                fetchData().then((data) => {
+                fetchRawDataForCards().then((data) => {
                     if (Object.keys(data).length) {
                         getCards(data)
                     } else {
