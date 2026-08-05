@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, useMemo } from "react";
 import TABLE from '@/lib/helpers/table';
 import { Table, Button, Popover } from 'antd';
 import ESQ from "@/lib/helpers/esq";
@@ -306,9 +306,17 @@ const LogsFilesTable = ({ }) => {
         setMenuItems(items)
     }, [isLogScale])
 
-    const yAxis = { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: isLogScale, }
-    const xAxis = {noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
-    const svgStyle = {valueFormatter: ({v}) => formatBytes(v), monoColor: '#4288b5', margin: {left: 95}}
+    const yAxis = useMemo(() => {
+        return { formatter: formatBytes, label: 'Bytes downloaded', labelPadding: 1, scaleLog: isLogScale, }
+    }, [isLogScale])
+
+    const xAxis = useMemo(() => {
+        return {noSortLabels: true, label: `Bytes downloaded per ${histogramDetails?.interval}`}
+    }, [histogramDetails])
+
+    const svgStyle = useMemo(() => {
+        return {valueFormatter: ({v}) => formatBytes(v), monoColor: '#4288b5', margin: {left: 95}}
+    }, [])
 
     const formatAnalytics = (v, details) => {
         return formatBytes(v, 3)

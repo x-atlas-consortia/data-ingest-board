@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from 'react'
+import React, {  useEffect, useState, memo } from 'react'
 import Legend from "@/components/Visualizations/Legend";
 import { Button } from "antd";
 import {
@@ -6,7 +6,7 @@ import {
     RightOutlined,
 } from "@ant-design/icons";
 
-function WithChartFlex({ children, legend, data }) {
+const WithChartFlex = memo(({ children, legend, data }) => {
     const [_, setRefresh] = useState(null)
     const [collapsed, setCollapsed] = useState(false)
 
@@ -38,6 +38,6 @@ function WithChartFlex({ children, legend, data }) {
             </div>
         </div>
     )
-}
+})
 
 export default WithChartFlex
