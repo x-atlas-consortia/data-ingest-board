@@ -425,25 +425,18 @@ const Logs = () => {
     const fetchAggregatedData = async () => {
         const url = ENVS.urlFormat.search('logs-aggregated')
         const headers = getHeadersWith(globusToken).headers
-        const res = await callService(url, headers, {}, 'POST')
-        for (const h of res.data.hits.hits) {
+        const res = await callService(url, headers, {}, 'POST') 
+        for (const h of (res.data?.hits?.hits || [])) {
             aggregatedData.current[h._id] = JSON.parse(h._source.query_result)
         }
-        console.log(aggregatedData.current)
     }
 
     const getSumByIndex = (index) => {
         if (isRepos(index)) return null;
-        const startDate = new Date(fromDate).getTime();
-        const endDate = new Date(toDate).getTime();
-        const aggregatedIndexName = isApi(index) ? indexFixtures.apiUsage.aggName+'day' : indexFixtures.fileDownloads.aggName+'day'
-        const logs = aggregatedData.current[aggregatedIndexName].aggregations.calendarHistogram.buckets
+        const aggregatedIndexName = isApi(index) ? `${indexFixtures.apiUsage.aggName}day` : `${indexFixtures.fileDownloads.aggName}day`
+        const logs = aggregatedData.current[aggregatedIndexName]?.aggregations?.calendarHistogram?.buckets || []
 
-
-        const filteredLogs = logs.filter((log) => {
-            const logTime = new Date(log.key_as_string).getTime()
-            return logTime >= startDate && logTime <= endDate
-        })
+        const filteredLogs = ESQ.filterByDate(logs, fromDate, toDate)
 
         const sum = {};
         if (isApi(index)) {
