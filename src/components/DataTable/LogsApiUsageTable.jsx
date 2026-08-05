@@ -10,6 +10,7 @@ import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
+import locale from "antd/es/date-picker/locale/en_US";
 
 const LogsApiUsageTable = ({  }) => {
     const { globusToken } = useContext(AppContext)
@@ -39,6 +40,7 @@ const LogsApiUsageTable = ({  }) => {
     } = useContext(LogsContext)
 
     const apis = useRef({})
+    const [statusError, setStatusError] = useState(false)
 
     const fetchData = async (includePrevData = true) => {
         if (!isBusy) {
@@ -141,6 +143,7 @@ const LogsApiUsageTable = ({  }) => {
         setTableData([])
         setVizData({})
         apis.current = {}
+        setStatusError(false)
         fetchData(false)
         setSelectedRows([])
         setSelectedRowObjects([])
@@ -242,19 +245,20 @@ const LogsApiUsageTable = ({  }) => {
             }
             let _tableData = Array.from(data)
 
-            //let endpointsPerApi = {}
             let apiName, bKey
             for (let d of _data) {
                 bKey = d.key_as_string
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
-                    //endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
                 }
             }
             Addon.log(`${indexKey}.buildTableData`, { data: _tableData })
             updateTableData(includePrevData, _tableData)
             
+        }
+        if (res?.raw?.code == 'ERR_NETWORK' || res.status == 504) {
+            setStatusError(true) // Request timed out, set error state
         }
     }
 
@@ -295,6 +299,7 @@ const LogsApiUsageTable = ({  }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
+                locale: { emptyText: statusError ? "Request timed out. Either narrow down the date range or try again later." : "No data available." },
                 ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>

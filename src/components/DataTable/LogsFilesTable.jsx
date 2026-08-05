@@ -65,6 +65,15 @@ const LogsFilesTable = ({ }) => {
         }
         byDatasetTypes.current = Object.values(types)
     }
+    const [statusError, setStatusError] = useState(false)
+
+    const checkForTimeout = (res) => {
+        if (res?.raw?.code == 'ERR_NETWORK' || res.status == 504) {
+            setStatusError(true) // Request timed out, set error state
+        } else {
+            setStatusError(false) // Reset error state if request is successful
+        }
+    }
 
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
@@ -82,7 +91,7 @@ const LogsFilesTable = ({ }) => {
         // Get page for grouped Ids
         let res = await callService(url, headers, q, 'POST')
         let _data = res.data?.aggregations?.buckets || {}
-
+        checkForTimeout(res)
         let ids = []
         if (res.status === 200 && _data?.buckets.length) {
 
@@ -110,6 +119,7 @@ const LogsFilesTable = ({ }) => {
                     }
                 }
             }
+            checkForTimeout(entitiesSearch)
 
             let histogramOps = determineCalendarInterval()
             let uuid
@@ -117,7 +127,7 @@ const LogsFilesTable = ({ }) => {
            
             q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: ids })[`${indexKey}DatasetsHistogram`](histogramOps)
             res = await callService(url, headers, q, 'POST')
-            
+            checkForTimeout(res)
             let entity
             if (res.status == 200) {
                 for (let d of res.data.aggregations.buckets.buckets) {
@@ -205,6 +215,7 @@ const LogsFilesTable = ({ }) => {
         byDatasetTypes.current = []
         setSelectedRows([])
         setSelectedRowObjects([])
+        setStatusError(false)
         fetchData(false)
         buildBarChart()
     }
@@ -339,6 +350,7 @@ const LogsFilesTable = ({ }) => {
                     rowSelection: { type: 'checkbox', ...rowSelection },
                     pagination: false,
                     loading: isBusy,
+                    locale: { emptyText: statusError ? "Request timed out. Either narrow down the date range or try again later." : "No data available." },
                     ...tableScroll
                 }} />
 
