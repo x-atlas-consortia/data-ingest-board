@@ -10,7 +10,6 @@ import SearchFilterTable from "./SearchFilterTable";
 import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
-import locale from "antd/es/date-picker/locale/en_US";
 
 const LogsApiUsageTable = ({  }) => {
     const { globusToken } = useContext(AppContext)
