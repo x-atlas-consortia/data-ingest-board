@@ -139,7 +139,7 @@ function Line({
             .attr("stroke", d => {
                 const {color, gColor} = groupColor(d)
                 const label = d.name
-                const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
+                const sum = d.values.reduce((accumulator, c) => accumulator + (c.yValue || 0), 0);
                 colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal({d, v: sum}) }
                 return color
             })
