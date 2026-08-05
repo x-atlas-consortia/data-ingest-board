@@ -1,8 +1,9 @@
+import { memo } from 'react'
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import PropTypes from 'prop-types';
 
-function Legend({legend, sortLegend = true, selectedValues = [], onItemClick}) {
+const Legend = memo(({legend, sortLegend = true, selectedValues = [], onItemClick}) => {
     const handleItemClick = (label) => {
         if (onItemClick) {
             onItemClick(label)
@@ -45,7 +46,7 @@ function Legend({legend, sortLegend = true, selectedValues = [], onItemClick}) {
             </ul>
         </div>
     )
-}
+})
 
 Legend.propTypes = {
     children: PropTypes.node
