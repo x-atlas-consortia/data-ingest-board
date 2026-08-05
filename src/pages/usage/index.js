@@ -673,6 +673,7 @@ const Logs = () => {
                         </Col>
                         <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
                             <RangePicker
+                                needConfirm={false}
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
                                 onChange={handleDateRange} />
                             <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
