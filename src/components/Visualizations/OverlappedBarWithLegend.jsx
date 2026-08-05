@@ -10,7 +10,6 @@ function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, 
         <WithChart legend={legend} data={data}>
                 <ChartProvider>
                     <OverlappedBar
-                        reload={false}
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}

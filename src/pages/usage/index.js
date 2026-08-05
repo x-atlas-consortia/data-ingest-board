@@ -328,7 +328,8 @@ const Logs = () => {
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
+                    defaultIsLogScale={defaultIsLogScale} 
+                    aggregatedData={aggregatedData} >
                     <LogsApiUsageTable />
                 </LogsProvider>
             </>
@@ -429,6 +430,7 @@ const Logs = () => {
         for (const h of (res.data?.hits?.hits || [])) {
             aggregatedData.current[h._id] = JSON.parse(h._source.query_result)
         }
+        console.log(aggregatedData.current)
     }
 
     const getSumByIndex = (index) => {
@@ -460,7 +462,6 @@ const Logs = () => {
                 sum.totalFileDownloads += log.totalFileDownloads.value
                 sum.distinctDatasetsWithFileDownload += log.distinctDatasetsWithFileDownload.value
             }
-            console.log('formatted', formatBytes(sum.totalBytes))
         }
 
         return sum

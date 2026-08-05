@@ -1,6 +1,6 @@
-import { useEffect, useContext, useRef, useState } from "react";
+import { useEffect, useContext, useRef, useState, useMemo } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
-import ESQ from "@/lib/helpers/esq";
+import ESQ, {indexFixtures} from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
@@ -34,6 +34,7 @@ const LogsApiUsageTable = ({  }) => {
         histogramDetails, setHistogramDetails,
         tableScroll, isLogScale,
         getScaleSwitchMenuItem,
+        aggregatedData
 
     } = useContext(LogsContext)
 
@@ -50,15 +51,22 @@ const LogsApiUsageTable = ({  }) => {
                 setHistogramDetails(histogramOps)
             }
 
-            await buildStackedBarChart(includePrevData, histogramOps)
-
-            if (data.length < numOfRows) {
-                setHasMoreData(false)
-            }
+            Promise.all([
+                buildStackedBarChart(includePrevData, histogramOps),
+                buildTableData(includePrevData, histogramOps)
+            ]).then(() => {
+                if (data.length < numOfRows) {
+                    setHasMoreData(false)
+                }
+                setIsBusy(false)
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+                setIsBusy(false);
+            });
         } else {
             setHasMoreData(false)
+            setIsBusy(false)
         }
-        setIsBusy(false)
     }
 
     const endpointsDetails = (r, details = {}) => {
@@ -132,8 +140,8 @@ const LogsApiUsageTable = ({  }) => {
     const resetView = () => {
         setTableData([])
         setVizData({})
-        fetchData(false)
         apis.current = {}
+        fetchData(false)
         setSelectedRows([])
         setSelectedRowObjects([])
     }
@@ -191,14 +199,40 @@ const LogsApiUsageTable = ({  }) => {
         let url = getUrl()
         if (!url) return
 
+        let baseIndexName = indexFixtures.apiUsage.aggName
+        const logs = aggregatedData.current[`${baseIndexName}${histogramOps.interval}`]
+        let _chartData = ESQ.filterByDate((logs?.aggregations?.calendarHistogram?.buckets || []), getFromDate(), getToDate())
+
+        let histogramBuckets = {}
+
+        for (let d of _chartData) {
+            let bKey = d.key_as_string
+            histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
+            for (let t of d['host.keyword'].buckets) {
+                let apiName = `${t.key}`
+                apis.current[apiName] = apiName
+                histogramBuckets[bKey][apiName] = t.doc_count
+            }
+        }
+
+        let _vizData = Object.values(histogramBuckets)
+        Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
+
+       
+        setVizData({ ...vizData, bar: _vizData })
+    }
+
+    const buildTableData = async (includePrevData, histogramOps) => {
+        let url = getUrl()
+        if (!url) return
+
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         let res = await callService(url, headers, q, 'POST')
-        let _vizData = []
+
         if (res.status == 200) {
             let _data = res.data?.aggregations?.calendarHistogram?.buckets
-            let histogramBuckets = {}
 
             let apiListIndexes = {}
             for (let i = 0; i < data.length; i++) {
@@ -208,24 +242,17 @@ const LogsApiUsageTable = ({  }) => {
             }
             let _tableData = Array.from(data)
 
-            let endpointsPerApi = {}
+            //let endpointsPerApi = {}
             let apiName, bKey
             for (let d of _data) {
                 bKey = d.key_as_string
-                histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
-                    apis.current[apiName] = apiName
-                    endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
-                    histogramBuckets[bKey][apiName] = t.doc_count
+                    //endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
                 }
             }
-
-            _vizData = Object.values(histogramBuckets)
-            Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
-
-            setVizData({ ...vizData, bar: _vizData })
+            Addon.log(`${indexKey}.buildTableData`, { data: _tableData })
             updateTableData(includePrevData, _tableData)
             
         }
@@ -239,9 +266,17 @@ const LogsApiUsageTable = ({  }) => {
         },
     };
 
-    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
-    const xAxis = { label: `Requests per ${histogramDetails?.interval}` }
-    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+    const yAxis = useMemo(() => {
+        return { label: "Requests", formatter: formatNum, scaleLog: isLogScale };
+    }, [isLogScale]); 
+
+    const xAxis = useMemo(() => {
+        return { label: `Requests per ${histogramDetails?.interval}` };
+    }, [histogramDetails?.interval]);
+
+    const svgStyle = useMemo(() => {
+        return {valueFormatter: ({v}) => formatNum(v)};
+    }, [])
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
