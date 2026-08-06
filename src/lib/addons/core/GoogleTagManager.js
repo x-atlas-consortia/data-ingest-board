@@ -84,8 +84,19 @@ class GoogleTagManager extends Addon {
         return href.length > 70 ? window.location.pathname : href;
     }
 
+    getUser() {
+       const info = this.getCookie('info')
+       if (info) {
+        try {
+            return JSON.parse(atob(info))
+        } catch(e) {
+            Addon.log('Error getting user info', {color: 'red', data: e})
+        }
+       }
+    }
+
     hasUser() {
-        return (this.ops?.email !== null)
+        return (this.getUser()?.email !== null)
     }
 
     getContext() {
@@ -101,7 +112,7 @@ class GoogleTagManager extends Addon {
 
     getPerson(bto = false) {
         if (!this.hasUser()) return 'anonymous'
-        const id = this.ops.email
+        const id = this.getUser().email
         let result
         if (id) {
             result = bto ? btoa(id.replace('@', '*')) : `${id.split('@')[0]}***`

@@ -1,7 +1,7 @@
-import React, {  useEffect, useState } from 'react'
+import React, {  useEffect, useState, memo } from 'react'
 import Legend from "@/components/Visualizations/Legend";
 
-function WithChart({ children, legend, data }) {
+const WithChart = memo(({ children, legend, data }) => {
     const [_, setRefresh] = useState(null)
 
     useEffect(() =>{
@@ -16,6 +16,6 @@ function WithChart({ children, legend, data }) {
             {legend && <div className='c-legendWrap c-legendWrap--flex'><Legend legend={legend} sortLegend={false} /></div>}
         </div>
     )
-}
+})
 
 export default WithChart

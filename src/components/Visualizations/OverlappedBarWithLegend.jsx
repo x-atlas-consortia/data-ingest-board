@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import OverlappedBar, { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedBar';
 import WithChart from './WithChart';
 
-function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) {
+const OverlappedBarWithLegend = memo(({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) => {
     const [legend, setLegend] = useState({})
 
     return (
@@ -21,6 +21,6 @@ function OverlappedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, 
                 </ChartProvider>
         </WithChart>
     )
-}
+})
 
 export default OverlappedBarWithLegend

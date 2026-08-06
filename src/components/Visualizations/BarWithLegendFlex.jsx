@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import Bar from '@/components/Visualizations/Charts/Bar';
 import WithChartFlex from './WithChartFlex';
 
-function BarWithLegendFlex({ chartId, data, yAxis, xAxis, style = {}}) {
+const BarWithLegendFlex = memo(({ chartId, data, yAxis, xAxis, style = {}}) => {
     const [legend, setLegend] = useState({})
 
     return (
@@ -20,6 +20,6 @@ function BarWithLegendFlex({ chartId, data, yAxis, xAxis, style = {}}) {
                 </ChartProvider>
         </WithChartFlex>
     )
-}
+})
 
 export default BarWithLegendFlex
