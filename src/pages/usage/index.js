@@ -47,6 +47,7 @@ const Logs = () => {
     const currentDate = new Date()
     const [fromDate, setFromDate] = useState(formatDate(currentDate, 1, 1))
     const [toDate, setToDate] = useState(formatDate(currentDate))
+    const currentdateStrings = useRef([formatDate(currentDate, 1, 1), formatDate(currentDate)])
     const [cards, setCards] = useState(null)
     const [tabs, setTabs] = useState(null)
     const [activeSection, setActiveSection] = useState(null)
@@ -60,12 +61,9 @@ const Logs = () => {
     const dateFormat = 'YYYY-MM-DD';
 
     const [modal, setModal] = useState(modalDefault)
-    const [_refresh, setRefresh] = useState(null)
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
     const defaultIsLogScale = useRef({apiUsage: true, fileDownloads: true})
     const repoCarouselRef = useRef(null);
-
-    const refresh = () => setRefresh(new Date().getTime())
 
     const _dispatchGTM = (action, event = 'cta') => {
         dispatchGTM({action, event, info: getCurrentTab()})
@@ -88,12 +86,20 @@ const Logs = () => {
         }
     }
 
+    const onCalendarChange = (_, dateStrings) => {
+        currentdateStrings.current = dateStrings || [null, null]
+    }
+
     const handleDateRange = (dates, dateStrings) => {
         const [from, to] = dateStrings || [null, null]
         setFromDate(from)
         setToDate(to)
         _dispatchGTM('dateFilter')
         // dates: [dayjs, dayjs], dateStrings: [string, string]
+    }
+
+    const filterResults = () => {
+        handleDateRange(null, currentdateStrings.current)
     }
 
     const isApi = (key) => eq(key, 'apiUsage')
@@ -630,8 +636,9 @@ const Logs = () => {
                         <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
                             <RangePicker
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                                onCalendarChange={handleDateRange} />
-                            <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
+                                onCalendarChange={onCalendarChange}
+                                onChange={handleDateRange} />
+                            <button onClick={filterResults} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                         </Col>
 
                     </Row>
@@ -650,8 +657,9 @@ const Logs = () => {
                     <Col md={{ span: 6 }} className='d-sm mx-2 mb-2 c-pickerRange'>
                         <RangePicker
                             defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                            onCalendarChange={handleDateRange} />
-                        <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
+                            onCalendarChange={onCalendarChange}
+                            onChange={handleDateRange} />
+                        <button onClick={filterResults} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
                     {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}><Tabs
