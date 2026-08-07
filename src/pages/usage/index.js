@@ -631,7 +631,7 @@ const Logs = () => {
                             <RangePicker
                                 needConfirm={false}
                                 defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                                onChange={handleDateRange} />
+                                onCalendarChange={handleDateRange} />
                             <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                         </Col>
 
@@ -652,7 +652,7 @@ const Logs = () => {
                         <RangePicker
                             needConfirm={false}
                             defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                            onChange={handleDateRange} />
+                            onCalendarChange={handleDateRange} />
                         <button onClick={refresh} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
