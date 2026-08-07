@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedBar';
 import GroupedBar from '@/components/Visualizations/Charts/GroupedBar';
 import WithChart from './WithChart';
 
-function GroupedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) {
+const GroupedBarWithLegend = memo(({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) => {
     const [legend, setLegend] = useState({})
 
     return (
@@ -22,6 +22,6 @@ function GroupedBarWithLegend({ chartId, data, subGroupLabels, yAxis, xAxis, sty
                 </ChartProvider>
         </WithChart>
     )
-}
+})
 
 export default GroupedBarWithLegend

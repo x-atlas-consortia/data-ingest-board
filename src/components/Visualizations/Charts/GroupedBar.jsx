@@ -29,7 +29,7 @@ function GroupedBar({
     const getSubGroupSum = (key) => {
         let sum = 0
         for (let d of data) {
-            sum += d[key]
+            sum += d[key] || 0
         }
         return sum
     }
