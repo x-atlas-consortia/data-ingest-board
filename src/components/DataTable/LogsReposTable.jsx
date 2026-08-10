@@ -1,4 +1,4 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useContext, useRef, useMemo } from "react";
 import { Button, Table } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
@@ -305,10 +305,13 @@ const LogsReposTable = ({ }) => {
         },
     };
 
-    const yAxis = { label: "Views/Clones" }
-    const _xAxis = () => {
+    const yAxis = useMemo(() => {
+        return { label: "Views/Clones" }
+    }, [])
+
+    const _xAxis = useMemo(() => {
         return  {...xAxis.current, label: `Views/Clones per ${histogramDetails?.interval}`}
-    }
+    }, [histogramDetails])
 
     const formatAnalytics = (v, details) => {
         let cols = []
@@ -325,18 +328,20 @@ const LogsReposTable = ({ }) => {
         return <Table pagination={false} columns={cols} dataSource={[{...v, id: crypto.randomUUID()}]} rowKey={'id'} />
     }
 
-    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+    const svgStyle = useMemo(() => {
+        return {valueFormatter: ({v}) => formatNum(v)}
+    }, [])
 
     const repoLineChart = (row) => {
         const _vizData = buildLineChart(row)
         return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend style={svgStyle} xAxis={_xAxis()} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
+            {_vizData.length > 0 && fromDate && <LineWithLegend style={svgStyle} xAxis={_xAxis} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
         </>
     }
 
     return (<>
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis()} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
 
         <SearchFilterTable data={tableData} columns={cols}
             formatters={{}}

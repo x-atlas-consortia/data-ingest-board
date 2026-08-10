@@ -10,7 +10,7 @@ import AppContext from './AppContext';
 
 const LogsContext = createContext({})
 
-export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates, defaultIsLogScale }) => {
+export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, toDate, setExtraActions, extraActions, tabExtraActions, exportData, exportHandler, defaultDates, defaultIsLogScale, aggregatedData }) => {
 
   const [tableData, setTableData] = useState([])
   const [isBusy, setIsBusy] = useState(true)
@@ -328,8 +328,8 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     stackedGroupedBarMenuItems,
     tableScroll,
     isLogScale, setIsLogScale,
-    defaultIsLogScale, getScaleSwitchMenuItem
-
+    defaultIsLogScale, getScaleSwitchMenuItem,
+    aggregatedData
   }}>{children}</LogsContext.Provider>
 }
 

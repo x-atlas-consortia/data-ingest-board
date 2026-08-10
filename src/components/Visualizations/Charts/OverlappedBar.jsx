@@ -42,7 +42,7 @@ function OverlappedBar({
     const getSubGroupSum = (key) => {
         let sum = 0
         for (let d of data) {
-            sum += d[key]
+            sum += d[key] || 0
         }
         return sum
     }
@@ -180,7 +180,7 @@ function OverlappedBar({
     }
 
     useEffect(() => {
-        if (reload || chartData.current.length !== data.length || !hasLoaded.current) {
+        if (reload || JSON.stringify(chartData.current) !== JSON.stringify(data) || !hasLoaded.current) {
             hasLoaded.current = true
             chartData.current = Array.from(data)
             updateChart()

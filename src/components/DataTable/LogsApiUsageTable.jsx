@@ -1,6 +1,6 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useContext, useRef, useState, useMemo } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
-import ESQ from "@/lib/helpers/esq";
+import ESQ, {indexFixtures} from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
 import AppContext from "@/context/AppContext";
 import TABLE from '@/lib/helpers/table';
@@ -11,8 +11,9 @@ import ModalOverComponent from "../ModalOverComponent";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
 
-const LogsApiUsageTable = ({ data }) => {
+const LogsApiUsageTable = ({  }) => {
     const { globusToken } = useContext(AppContext)
+    const [data, setData] = useState([]);
     const {
         tableData, setTableData,
         isBusy, setIsBusy,
@@ -33,29 +34,40 @@ const LogsApiUsageTable = ({ data }) => {
         histogramDetails, setHistogramDetails,
         tableScroll, isLogScale,
         getScaleSwitchMenuItem,
+        aggregatedData
 
     } = useContext(LogsContext)
 
     const apis = useRef({})
+    const [statusError, setStatusError] = useState(false)
 
     const fetchData = async (includePrevData = true) => {
-        setIsBusy(true)
-
+        if (!isBusy) {
+            setIsBusy(true)
+        }
+        
         if (data.length) {
             let histogramOps = determineCalendarInterval()
             if (!histogramDetails) {
                 setHistogramDetails(histogramOps)
             }
 
-            await buildStackedBarChart(includePrevData, histogramOps)
-
-            if (data.length < numOfRows) {
-                setHasMoreData(false)
-            }
+            Promise.all([
+                buildStackedBarChart(includePrevData, histogramOps),
+                buildTableData(includePrevData, histogramOps)
+            ]).then(() => {
+                if (data.length < numOfRows) {
+                    setHasMoreData(false)
+                }
+                setIsBusy(false)
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+                setIsBusy(false);
+            });
         } else {
             setHasMoreData(false)
+            setIsBusy(false)
         }
-        setIsBusy(false)
     }
 
     const endpointsDetails = (r, details = {}) => {
@@ -129,15 +141,55 @@ const LogsApiUsageTable = ({ data }) => {
     const resetView = () => {
         setTableData([])
         setVizData({})
-        fetchData(false)
         apis.current = {}
+        setStatusError(false)
+        fetchData(false)
         setSelectedRows([])
         setSelectedRowObjects([])
     }
 
     useEffect(() => {
+        let isMounted = true;
+        setIsBusy(true)
+
+        async function fetchData() {
+        try {
+            const q = ESQ.indexQueries({ from: fromDate, to: toDate })['apiUsageTable']
+            
+            const url = getUrl()
+            const headers = getHeadersWith(globusToken).headers
+            const res = await callService(url,
+                        headers,
+                        q,
+                        'POST')
+            
+            if (isMounted && res.data) {
+                const tableData = []
+                for (let d of (res.data?.aggregations?.services?.buckets || [])) {
+                    tableData.push(
+                        {
+                            name: d.key,
+                            requests: d.doc_count,
+                            endpoints: d.totalEndpoints.value,
+                            endpointsHits: d.endpoints
+                        }
+                    )
+                }
+                console.log('API Usage', q, tableData)
+                setData(tableData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        }
+        }
+
+        fetchData();
+        return () => { isMounted = false; };
+  }, []);
+
+    useEffect(() => {
         resetView()
-    }, [fromDate, toDate])
+    }, [fromDate, toDate, data])
 
     useEffect(() => {
         if (!histogramDetails || histogramDetails.isMenuAction) {
@@ -149,14 +201,40 @@ const LogsApiUsageTable = ({ data }) => {
         let url = getUrl()
         if (!url) return
 
+        let baseIndexName = indexFixtures.apiUsage.aggName
+        const logs = aggregatedData.current[`${baseIndexName}${histogramOps.interval}`]
+        let _chartData = ESQ.filterByDate((logs?.aggregations?.calendarHistogram?.buckets || []), getFromDate(), getToDate())
+
+        let histogramBuckets = {}
+
+        for (let d of _chartData) {
+            let bKey = d.key_as_string
+            histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
+            for (let t of d['host.keyword'].buckets) {
+                let apiName = `${t.key}`
+                apis.current[apiName] = apiName
+                histogramBuckets[bKey][apiName] = t.doc_count
+            }
+        }
+
+        let _vizData = Object.values(histogramBuckets)
+        Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
+
+       
+        setVizData({ ...vizData, bar: _vizData })
+    }
+
+    const buildTableData = async (includePrevData, histogramOps) => {
+        let url = getUrl()
+        if (!url) return
+
         let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         let res = await callService(url, headers, q, 'POST')
-        let _vizData = []
+
         if (res.status == 200) {
             let _data = res.data?.aggregations?.calendarHistogram?.buckets
-            let histogramBuckets = {}
 
             let apiListIndexes = {}
             for (let i = 0; i < data.length; i++) {
@@ -166,26 +244,20 @@ const LogsApiUsageTable = ({ data }) => {
             }
             let _tableData = Array.from(data)
 
-            let endpointsPerApi = {}
             let apiName, bKey
             for (let d of _data) {
                 bKey = d.key_as_string
-                histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
-                    apis.current[apiName] = apiName
-                    endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
-                    histogramBuckets[bKey][apiName] = t.doc_count
                     _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
                 }
             }
-
-            _vizData = Object.values(histogramBuckets)
-            Addon.log(`${indexKey}.buildStackedBarChart`, { data: _vizData })
-
-            setVizData({ ...vizData, bar: _vizData })
+            Addon.log(`${indexKey}.buildTableData`, { data: _tableData })
             updateTableData(includePrevData, _tableData)
             
+        }
+        if (res?.raw?.code == 'ERR_NETWORK' || res.status == 504) {
+            setStatusError(true) // Request timed out, set error state
         }
     }
 
@@ -197,9 +269,17 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
-    const xAxis = { label: `Requests per ${histogramDetails?.interval}` }
-    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+    const yAxis = useMemo(() => {
+        return { label: "Requests", formatter: formatNum, scaleLog: isLogScale };
+    }, [isLogScale]); 
+
+    const xAxis = useMemo(() => {
+        return { label: `Requests per ${histogramDetails?.interval}` };
+    }, [histogramDetails?.interval]);
+
+    const svgStyle = useMemo(() => {
+        return {valueFormatter: ({v}) => formatNum(v)};
+    }, [])
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
@@ -218,6 +298,7 @@ const LogsApiUsageTable = ({ data }) => {
                 rowSelection: { type: 'checkbox', ...rowSelection },
                 pagination: false,
                 loading: isBusy,
+                locale: { emptyText: statusError ? "Request timed out. Either narrow down the date range or try again later." : "No data available." },
                 ...tableScroll
             }} />
         {hasMoreData && <Button onClick={fetchData} type="primary" block>

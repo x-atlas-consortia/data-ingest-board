@@ -139,7 +139,7 @@ function Line({
             .attr("stroke", d => {
                 const {color, gColor} = groupColor(d)
                 const label = d.name
-                const sum = d.values.reduce((accumulator, c) => accumulator + c.yValue, 0);
+                const sum = d.values.reduce((accumulator, c) => accumulator + (c.yValue || 0), 0);
                 colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal({d, v: sum}) }
                 return color
             })
@@ -226,7 +226,7 @@ function Line({
     }
 
     useEffect(() => {
-        if (reload || chartData.current.length !== groups.length || !hasLoaded.current) {
+        if (reload || JSON.stringify(chartData.current) !== JSON.stringify(groups) || !hasLoaded.current) {
             hasLoaded.current = true
             chartData.current = Array.from(groups)
             colors.current = {}
