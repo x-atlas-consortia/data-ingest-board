@@ -43,6 +43,9 @@ const URLS = {
         auth: {
             login: () => ENVS.urlFormat.ingest.be('/data-ingest-board-login'),
             logout: () => ENVS.urlFormat.ingest.be('/data-ingest-board-logout')
+        },
+        logs: {
+            base: () => process.env.NEXT_PUBLIC_CLIENT_LOGS_URL
         }
     }
 }
