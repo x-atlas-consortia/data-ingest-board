@@ -1,4 +1,4 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useContext, useRef, useMemo } from "react";
 import { Button, Table, Collapse, Badge, List } from 'antd';
 import ESQ from "@/lib/helpers/esq";
 import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
@@ -197,9 +197,17 @@ const LogsApiUsageTable = ({ data }) => {
         },
     };
 
-    const yAxis = { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
-    const xAxis = { label: `Requests per ${histogramDetails?.interval}` }
-    const svgStyle = {valueFormatter: ({v}) => formatNum(v)}
+    const yAxis = useMemo(() => {
+        return { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
+    }, [isLogScale])
+
+    const xAxis =  useMemo(() => {
+        return { label: `Requests per ${histogramDetails?.interval}` }
+    }, [histogramDetails])
+
+    const svgStyle = useMemo(() => {
+        return {valueFormatter: ({v}) => formatNum(v)}
+    }, [])
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)

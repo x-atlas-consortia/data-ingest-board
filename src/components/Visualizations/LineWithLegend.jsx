@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ChartProvider } from '@/context/ChartContext';
 import Line from '@/components/Visualizations/Charts/Line';
 import WithChart from './WithChart';
 
-function LineWithLegend({ chartId, data, groups, yAxis, xAxis, style = {}}) {
+const LineWithLegend = memo(({ chartId, data, groups, yAxis, xAxis, style = {}}) => {
     const [legend, setLegend] = useState({})
 
     return (
@@ -21,6 +21,6 @@ function LineWithLegend({ chartId, data, groups, yAxis, xAxis, style = {}}) {
                 </ChartProvider>
         </WithChart>
     )
-}
+})
 
 export default LineWithLegend
