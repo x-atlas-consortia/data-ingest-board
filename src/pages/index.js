@@ -7,6 +7,8 @@ import { useState, useContext } from "react";
 import AppContext from "../context/AppContext";
 import AppNavBar from "../components/AppNavBar";
 import {RouterProvider} from "@/context/RouterContext";
+import log from 'xac-loglevel';
+import ENVS from "@/lib/helpers/envs";
 
 function App(props) {
     const {handleLogin, handleLogout, isLoading, isAuthenticated, unauthorized, isLogout} = useContext(AppContext)
@@ -29,6 +31,7 @@ function App(props) {
 }
 
 App.getInitialProps = ({ query }) => {
+  log.setLevel(ENVS.logLevel())
   const { entity_type, upload_id, page, page_size, sort_field, sort_order, ...filters } = query;
   return { entity_type, upload_id, page, page_size, sort_field, sort_order, filters};
 };

@@ -14,6 +14,7 @@ import {Alert} from "react-bootstrap";
 import {MailOutlined} from "@ant-design/icons";
 import {Spin} from "antd";
 import RouterContext from "@/context/RouterContext";
+import { logger } from "@/lib/helpers/logger";
 
 const DataTable = () => {
     const {setSelectUploadId, selectUploadId, setUseDatasetApi, useDatasetApi, setFilters, setSortField, setSortOrder, setPage, setPageSize} = useContext(RouterContext)
@@ -94,9 +95,10 @@ const DataTable = () => {
             applyDatasets(datasetResponse.data)
             setOriginalResponse({datasets: datasetResponse.data, uploads: uploadResponse.data})
             filterUploads(uploadData, datasetResponse.data.data, selectUploadId);
-        } catch (error) {
+        } catch (e) {
+            logger.all.error({message: 'DataTable.loadData', error_details: `${e}`});
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 

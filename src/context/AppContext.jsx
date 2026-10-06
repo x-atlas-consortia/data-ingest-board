@@ -8,6 +8,7 @@ import ENVS from "../lib/helpers/envs";
 import THEME from "../lib/helpers/theme";
 import AddonsIndex from "../lib/addons/AddonsIndex";
 import UI_BLOCKS from "../lib/helpers/uiBlocks";
+import { logger } from '@/lib/helpers/logger';
 
 const AppContext = createContext()
 
@@ -58,6 +59,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         setIsAuthenticated(false)
         setUnauthorized(false)
         setGlobusToken(null)
+        sessionStorage.removeItem('globusToken')
         setGlobusInfo(null)
 
         deleteCookies()
@@ -85,7 +87,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 setHasDataAdminPrivs(response.data.has_data_admin_privs)
             }).catch((error) => {
             setHasDataAdminPrivs(false)
-            console.error(error)
+            logger.all.error({message: 'AppContext.checkInAdminGroup', error_details: `${error}`});
         })
     }
 
@@ -95,7 +97,7 @@ export const AppProvider = ({ children, messages, banners }) => {
                 setHasPipelineTestingPrivs(response.data.has_pipeline_test_privs)
             }).catch((error) => {
                 setHasPipelineTestingPrivs(false)
-                console.error(error)
+                logger.all.error({message: 'AppContext.checkPipelineTestingPrivs', error_details: `${error}`});
         })
     }
 
@@ -105,7 +107,7 @@ export const AppProvider = ({ children, messages, banners }) => {
             .then( (response) => {
                 setDataProviderGroups(response.data.groups)
             }).catch((error) => {
-            console.error(error)
+                logger.all.error({message: 'AppContext.fetchDataProviderGroups', error_details: `${error}`});
         })
     }
 
@@ -116,6 +118,7 @@ export const AppProvider = ({ children, messages, banners }) => {
         axios.get(URLS.ingest.privs.groups(), getHeadersWith(token))
             .then( (response) => {
                 setGlobusToken(token)
+                sessionStorage.setItem('globusToken', token)
                 setIsAuthenticated(authorized)
                 verifyInReadGroup(response.data)
                 checkInAdminGroup(token)

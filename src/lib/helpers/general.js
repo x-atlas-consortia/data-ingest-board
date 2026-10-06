@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "./logger";
 
 export function some(s1, s2, insensitive = true) {
     let res = s1 === s2
@@ -140,7 +141,7 @@ export const callService = async (url, headers, payload = {}, method = 'put') =>
             data: payload
         })
     } catch(e) {
-        console.error(`${e}`)
+        logger.all.error({message: 'general.callService', error_details: `${e}`});
         return {...e.response, raw: e}
     }
 }
@@ -150,7 +151,7 @@ export const parseJSON = (obj, returnDefault = {}) => {
         if (!obj) return returnDefault;
         return JSON.parse(obj)
     } catch (e) {
-        console.error(e)
+        logger.all.error({message: 'general.parseJSON', error_details: `${e}`});
     }
     return returnDefault
 }
