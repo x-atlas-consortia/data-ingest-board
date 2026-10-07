@@ -64,6 +64,7 @@ const Logs = () => {
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
     const defaultIsLogScale = useRef({apiUsage: true, fileDownloads: true})
     const repoCarouselRef = useRef(null);
+    const aggregatedData = useRef({})
 
     const _dispatchGTM = (action, event = 'cta') => {
         dispatchGTM({action, event, info: getCurrentTab()})
@@ -116,24 +117,24 @@ const Logs = () => {
         let totalHits = 0
         let totalBytes, datasetGroups, totalFiles = 0
         let repoData = []
+        const aggregatedSums = getSumByIndex(key)
 
         const noData = <div className='c-logCard__noData'><p className="text-center" style={{ width: '95%', margin: '0 auto' }}><InboxOutlined style={{ fontSize: '30px' }} /> <br />Could not retrieve data for the selected date range.</p></div>
-        if (!agg) {
+        if (!agg && !aggregatedSums) {
             return noData
         }
 
         if (isApi(key)) {
-            totalHits = indexData.hits?.total?.value
+            totalHits = aggregatedSums.totalRequests
 
             if (!totalHits) {
                 return noData
             }
         } else if (isFiles(key)) {
-            totalHits = indexData.hits.total?.value
-            totalFiles = agg.totalFiles.value
+            totalFiles = aggregatedSums.totalFileDownloads 
             totalFiles = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
-            datasetGroups = agg.totalDatasets.value
-            totalBytes = agg.totalBytes.value
+            datasetGroups = aggregatedSums.distinctDatasetsWithFileDownload
+            totalBytes = aggregatedSums.totalBytes
 
             if (!totalBytes) {
                 return noData
@@ -238,17 +239,19 @@ const Logs = () => {
         }
 
         if (isApi(key)) {
+
             let ms = []
-            for (let d of agg.services.buckets) {
+            delete aggregatedSums.totalRequests
+            for (let d in aggregatedSums) {
                 exportData.current[exportKey] = {
                     fromDate,
                     toDate,
-                    apiName: d.key,
-                    requests: d.doc_count
+                    apiName: d,
+                    requests: aggregatedSums[d]
                 }
                 ms.push(
-                    <Row className='mt-3 w-50' key={d.key}>
-                        <Col> <span>{formatNum(d.doc_count)}</span><br /><strong>{d.key}</strong></Col>
+                    <Row className='mt-3 w-50' key={d}>
+                        <Col> <span>{formatNum(aggregatedSums[d])}</span><br /><strong>{d}</strong></Col>
                     </Row>
                 )
             }
@@ -265,7 +268,6 @@ const Logs = () => {
                 totalBytes,
                 totalDatasets: datasetGroups,
                 totalFiles,
-                totalHits
             }
             return (<>
                 <div><h3> {formatBytes(totalBytes)} <small>downloaded</small></h3></div>
@@ -281,7 +283,7 @@ const Logs = () => {
                         </span><br />
                         <strong>Files downloaded</strong> 
                     </Col>
-                    {/* <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col> */}
+                   
                 </Row>
             </>)
         }
@@ -306,8 +308,6 @@ const Logs = () => {
 
     const getTabContent = (key, data) => {
 
-        let tableData = []
-
         if (isRepos(key)) {
             return <>
                 <LogsProvider defaultMenuItem={'numOfRows'}
@@ -324,18 +324,6 @@ const Logs = () => {
             </>
         }
         if (isApi(key)) {
-
-            for (let d of (data[key]?.aggregations?.services?.buckets || [])) {
-                tableData.push(
-                    {
-                        name: d.key,
-                        requests: d.doc_count,
-                        endpoints: d.totalEndpoints.value,
-                        endpointsHits: d.endpoints
-                    }
-                )
-            }
-
             return <>
                 <LogsProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
@@ -346,8 +334,9 @@ const Logs = () => {
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
-                    <LogsApiUsageTable data={tableData} />
+                    defaultIsLogScale={defaultIsLogScale} 
+                    aggregatedData={aggregatedData} >
+                    <LogsApiUsageTable />
                 </LogsProvider>
             </>
         }
@@ -364,7 +353,10 @@ const Logs = () => {
                     tabExtraActions={tabExtraActions}
                     setExtraActions={setExtraActions}
                     extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
+                    defaultIsLogScale={defaultIsLogScale}
+                    aggregatedData={aggregatedData}
+                    >
+                    
                     <LogsFilesTable />
                 </LogsProvider>
 
@@ -437,24 +429,73 @@ const Logs = () => {
         toggleHighlightClasses('.c-logCard--' + getIndexKeyByActiveTab(active))
     }
 
-    const fetchData = async () => {
+    const fetchAggregatedData = async () => {
+        const url = ENVS.urlFormat.search('logs-aggregated')
+        const headers = getHeadersWith(globusToken).headers
+        const res = await callService(url, headers, {}, 'POST') 
+        for (const h of (res.data?.hits?.hits || [])) {
+            aggregatedData.current[h._id] = JSON.parse(h._source.query_result)
+        }
+        console.log(aggregatedData.current)
+    }
+
+    const getSumByIndex = (index) => {
+        if (isRepos(index)) return null;
+        const aggregatedIndexName = isApi(index) ? `${indexFixtures.apiUsage.aggName}day` : `${indexFixtures.fileDownloads.aggName}day`
+        const logs = aggregatedData.current[aggregatedIndexName]?.aggregations?.calendarHistogram?.buckets || []
+
+        const filteredLogs = ESQ.filterByDate(logs, fromDate, toDate)
+
+        const sum = {};
+        if (isApi(index)) {
+            for (const log of filteredLogs) {
+               for (const b of log['host.keyword'].buckets ) {
+                    if (!sum[b.key]) {
+                       sum[b.key] = 0
+                    }
+                    sum[b.key] += b.doc_count
+               }
+            }
+            sum.totalRequests =  Object.values(sum).reduce((sum, x) => sum + x, 0)
+        }
+
+        if (isFiles(index)) {
+            sum.totalBytes = 0
+            sum.totalFileDownloads = 0
+            sum.distinctDatasetsWithFileDownload = 0
+            for (const log of filteredLogs) {
+                sum.totalBytes += log.totalBytes.value
+                sum.totalFileDownloads += log.totalFileDownloads.value
+                sum.distinctDatasetsWithFileDownload += log.distinctDatasetsWithFileDownload.value
+            }
+        }
+
+        return sum
+    }
+
+    const fetchRawDataForCards = async () => {
         setIsBusy(true)
         indicesSections.current = ENVS.logsIndicies() || {}
         let _data = {}
         let q, url, headers
         let promises = []
         let promisesMinDate = []
+        const keys = []
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
-            url = ENVS.urlFormat.search(index)
             q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
-            headers = getHeadersWith(globusToken).headers
-        
-            promises.push(callService(url,
-                headers,
-                q,
-                'POST'))
+            if (q) {
+                keys.push(s)
+                url = ENVS.urlFormat.search(index)
+                
+                headers = getHeadersWith(globusToken).headers
             
+                promises.push(callService(url,
+                    headers,
+                    q,
+                    'POST'))
+            }
+           
             if (!fromDate) {
                 // get the min date for each index to use as default fromDate if user doesn't select a date range
                 q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
@@ -466,19 +507,21 @@ const Logs = () => {
         }
         const results = await Promise.all(promises)
         const resultsMinDate = await Promise.all(promisesMinDate)
+   
         for (let i = 0; i < results.length; i++) {
             if (results[i].status == 401) {
                 isSearchApiUnauthorized.current = true
                 console.error('User unauthorized', results[i])
                 break
             }
+          
             if (results[i].status == 200) {
-                _data[Object.keys(indicesSections.current)[i]] = results[i].data
+                _data[keys[i]] = results[i].data
             }
         }
         for (let i = 0; i < resultsMinDate.length; i++) {
             if (resultsMinDate[i].status == 200) {
-                _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
+                _data[`${keys[i]}MinDate`] = resultsMinDate[i].data
             }
         }
         return _data
@@ -486,15 +529,16 @@ const Logs = () => {
 
     useEffect(() => {
         if (globusToken) {
-            fetchData().then((data) => {
-                if (Object.keys(data).length) {
-                    getCards(data)
-                } else {
-                    if (isSearchApiUnauthorized.current && isAuthenticated) {
-                        setShowUnauthorized(true)
+            fetchAggregatedData().then(() => {
+                fetchRawDataForCards().then((data) => {
+                    if (Object.keys(data).length) {
+                        getCards(data)
+                    } else {
+                        if (isSearchApiUnauthorized.current && isAuthenticated) {
+                            setShowUnauthorized(true)
+                        }
                     }
-                }
-                
+                })
             })
         }
     }, [globusToken, fromDate, toDate]);

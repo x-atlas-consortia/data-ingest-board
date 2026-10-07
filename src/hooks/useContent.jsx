@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import axios from "axios";
 import {getRequestOptions} from "../lib/helpers/general";
 import ENVS from "../lib/helpers/envs";
+import { logger } from '@/lib/helpers/logger';
 
 function useContent() {
     const [messages, setMessages] = useState({})
@@ -58,7 +59,7 @@ function useContent() {
             loadUbkg().then((r) => setUbkg(r))
             loadColorPalettes().then((r) => setColorPalettes(r))
         } catch (e) {
-            console.error(e)
+            logger.all.error({message: 'useContent', error_details: `${e}`});
         }
     }, [])
 

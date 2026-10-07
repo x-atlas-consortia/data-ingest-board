@@ -11,7 +11,6 @@ const GroupedBarWithLegend = memo(({ chartId, data, subGroupLabels, yAxis, xAxis
         <WithChart legend={legend} data={data}>
                 <ChartProvider>
                     <GroupedBar
-                        reload={false}
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}

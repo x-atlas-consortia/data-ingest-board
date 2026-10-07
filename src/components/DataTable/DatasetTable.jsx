@@ -17,6 +17,7 @@ import AppTable from "@/components/DataTable/AppTable";
 import RouterContext from "@/context/RouterContext";
 import AppModal from "@/components/AppModal";
 import ChartsWrapper from "@/components/Visualizations/ChartsWrapper";
+import { logger } from "@/lib/helpers/logger";
 
 const DatasetTable = ({
     data,
@@ -406,6 +407,7 @@ const DatasetTable = ({
             const response = await axios.post(URLS.ingest.data.pipelineTesting(), selectedEntityUUIDs, options);
             handlePipelineResponse(response);
         } catch (error) {
+            logger.all.error({message: 'DatasetTable.submitForPipelineTesting', error_details: `${error.response}`});
             handlePipelineResponse(error.response);
         }
     };

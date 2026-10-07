@@ -83,7 +83,8 @@ const ENVS = {
     bulkEditEnabled: () => process.env.NEXT_PUBLIC_BULK_EDIT_ENABLED === '1',
     bulkValidateEnabled: () => process.env.NEXT_PUBLIC_BULK_VALIDATE_ENABLED === '1',
     favicon: () => process.env.NEXT_PUBLIC_FAVICON || 'hubmap-favicon.ico',
-    submissionTestingEnabled: () => process.env.NEXT_PUBLIC_SUBMISSION_TESTING_ENABLED === '1'
+    submissionTestingEnabled: () => process.env.NEXT_PUBLIC_SUBMISSION_TESTING_ENABLED === '1',
+    logLevel: () => process.env.NEXT_PUBLIC_LOG_LEVEL || 'info'
 }
 
 export default ENVS
