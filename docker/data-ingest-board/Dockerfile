@@ -1,5 +1,5 @@
 # Parent image
-FROM node:22-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS base
 
 LABEL description="Data Ingest Board"
 
