@@ -24,6 +24,7 @@ function Bar({
 
     const colors = {}
     const chartData = useRef([])
+    const chartOptions = useRef({filters, yAxis})
 
     const truncateLabel = (label) => {
         return label.length > 30 ? label.substring(0, 27) + "..." : label;
@@ -164,7 +165,10 @@ function Bar({
     }, [data])
 
     useEffect(() => {
-        updateChart()
+        if (JSON.stringify(chartOptions.current.filters) !== JSON.stringify(filters) || JSON.stringify(chartOptions.current.yAxis) !== JSON.stringify(yAxis)) {
+            chartOptions.current = {filters, yAxis}
+            updateChart()
+        }
     }, [filters, yAxis])
 
     return (

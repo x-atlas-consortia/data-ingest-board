@@ -1,11 +1,19 @@
 import ENVS from "./envs"
 export const indexFixtures = {
     openSourceRepos: {date: 'timestamp',},
-    apiUsage:  {date: 'datetime',},
-    fileDownloads:  {date: 'download_date_time'} 
+    apiUsage:  {date: 'datetime', aggName: 'usage_dashboard_api_usage_by_'},
+    fileDownloads:  {date: 'download_date_time', aggName: 'usage_dashboard_file_downloads_by_'} 
 }
-
 const ESQ = {
+    filterByDate: (logs, from, to) => {
+        const startDate = new Date(from).getTime();
+        const endDate = new Date(to).getTime();
+        const filteredLogs = logs.filter((log) => {
+            const logTime = new Date(log.key_as_string).getTime()
+            return logTime >= startDate && logTime <= endDate
+        })
+        return filteredLogs
+    },
     dateRange: (from, to, field = 'timestamp') => {
         const isoSuffix = 'T00:00:00'
         const isoSuffixEnd = 'T23:59:59'
@@ -309,7 +317,7 @@ const ESQ = {
                     }
                 }
             },
-            apiUsage: {
+            apiUsageTable: {
                 query: {
                     [queryField]: from ? ESQ.apiUsageDateRange(from, to) : {} 
                 },
@@ -339,20 +347,6 @@ const ESQ = {
                     calendarHistogram: ESQ.apiUsageCalendarHistogram(ops)
                 }
             }),
-            fileDownloads: {
-                query: {
-                    [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}
-                },
-                size: 0,
-                track_total_hits: false,
-                collapse: collapse ? ESQ.groupByField({ size: size }) : undefined,
-                aggs: {
-                    totalBytes: ESQ.sum('bytes_transferred'),
-                    totalFiles: ESQ.bucketCount('relative_file_path'),
-                    totalDatasets: ESQ.bucketCount('dataset_uuid'),
-
-                }
-            },
             fileDownloadsTable: {
                 query: {
                     [queryField]: from ? ESQ.fileDownloadDateRange(from, to) : {}

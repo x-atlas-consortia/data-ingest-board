@@ -10,7 +10,6 @@ const OverlappedBarWithLegend = memo(({ chartId, data, subGroupLabels, yAxis, xA
         <WithChart legend={legend} data={data}>
                 <ChartProvider>
                     <OverlappedBar
-                        reload={false}
                         setLegend={setLegend}
                         subGroupLabels={subGroupLabels}
                         data={prepareStackedData(Array.from(data))}

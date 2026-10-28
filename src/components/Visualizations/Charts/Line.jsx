@@ -226,7 +226,7 @@ function Line({
     }
 
     useEffect(() => {
-        if (reload || chartData.current.length !== groups.length || !hasLoaded.current) {
+        if (reload || JSON.stringify(chartData.current) !== JSON.stringify(groups) || !hasLoaded.current) {
             hasLoaded.current = true
             chartData.current = Array.from(groups)
             colors.current = {}
