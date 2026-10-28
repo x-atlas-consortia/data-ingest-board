@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable'
 import {storageKey} from "@/lib/helpers/general";
 import RouterContext from "@/context/RouterContext";
+import { logger } from '@/lib/helpers/logger';
 
 const AppTableContext = createContext({})
 
@@ -158,7 +159,7 @@ export const AppTableProvider = ({ children,  context, baseColumns, initialColum
             ))
             return _cols
         } catch (e) {
-            console.error(e)
+            logger.all.error({message: 'TableContext.getColumns', error_details: `${e}`});
         }
         return []
     }

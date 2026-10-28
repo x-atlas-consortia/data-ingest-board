@@ -30,6 +30,7 @@ import ModalOver from "@/components/ModalOver";
 import ModalOverComponent from "@/components/ModalOverComponent";
 import IdLinkDropdown from "@/components/IdLinkDropdown";
 import IdLink from "@/components/IdLink";
+import { logger } from "./logger";
 
 const TABLE = {
     cols: {
@@ -289,7 +290,7 @@ const TABLE = {
             const type = 'comma/tab-separated-values'
             autoBlobDownloader([_data], type, filename)
         } catch (e) {
-
+            logger.all.error({message: 'Table.generateCSVFile', error_details: `${e}`});
         }
 
     },
