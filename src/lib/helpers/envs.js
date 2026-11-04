@@ -69,7 +69,8 @@ const ENVS = {
         const config = parseJSON(process.env.NEXT_PUBLIC_ENABLED_SEARCH_FIELDS)
         return config[entity]
     },
-    logsIndicies: () => parseJSON(process.env.NEXT_PUBLIC_LOGS_SEARCH_API_INDICIES),
+    logsIndicies: () => parseJSON(process.env.NEXT_PUBLIC_LOGS_SEARCH_API_INDICIES), // Deprecated
+    usageAnalytics: () => parseJSON(process.env.NEXT_PUBLIC_USAGE_ANALYTICS),
     idleTimeout: () => {
         let num = process.env.NEXT_PUBLIC_IDLE_TIME
         try {

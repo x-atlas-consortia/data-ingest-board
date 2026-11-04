@@ -4,11 +4,11 @@ import AppSideNavBar from "@/components/AppSideNavBar";
 import { callService, eq, getHeadersWith, formatNum, formatBytes, roundToTheNearest } from "@/lib/helpers/general";
 import ENVS from "@/lib/helpers/envs";
 import AppContext from "@/context/AppContext";
-import ESQ, { indexFixtures } from "@/lib/helpers/esq";
+import SQL, { indexFixtures } from "@/lib/helpers/sql";
 import Spinner from '@/components/Spinner';
 import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
 import LogsReposTable from '@/components/DataTable/LogsReposTable';
-import { LogsProvider } from '@/context/LogsContext';
+import { UsageProvider } from '@/context/UsageContext';
 import TABLE from '@/lib/helpers/table';
 import {
     DownloadOutlined,
@@ -26,10 +26,11 @@ import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal';
 import { modalDefault } from '@/lib/constants';
 import Unauthorized from '@/components/Unauthorized';
+import UsageAnalyticsSummaryCard from '@/components/UsageAnalyticsSummaryCard';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
-const Logs = () => {
+const Usage = () => {
 
     const {
         token: { colorBgContainer, borderRadiusLG },
@@ -108,185 +109,6 @@ const Logs = () => {
 
     const isFiles = (key) => eq(key, 'fileDownloads')
 
-    const getCardDetail = (key, data) => {
-        let agg
-        let indexData = data[key]
-        agg = indexData?.aggregations
-
-        let totalHits = 0
-        let totalBytes, datasetGroups, totalFiles = 0
-        let repoData = []
-
-        const noData = <div className='c-logCard__noData'><p className="text-center" style={{ width: '95%', margin: '0 auto' }}><InboxOutlined style={{ fontSize: '30px' }} /> <br />Could not retrieve data for the selected date range.</p></div>
-        if (!agg) {
-            return noData
-        }
-
-        if (isApi(key)) {
-            totalHits = indexData.hits?.total?.value
-
-            if (!totalHits) {
-                return noData
-            }
-        } else if (isFiles(key)) {
-            totalHits = indexData.hits.total?.value
-            totalFiles = agg.totalFiles.value
-            totalFiles = totalFiles > 100000 ? roundToTheNearest(totalFiles) : totalFiles
-            datasetGroups = agg.totalDatasets.value
-            totalBytes = agg.totalBytes.value
-
-            if (!totalBytes) {
-                return noData
-            }
-        } else {
-            let owner,total
-            let stats = []
-            for (let o of agg.repos.buckets) {
-                owner = o.key
-                total = o.total.buckets.length
-                stats = []
-                for (let b of o.buckets.buckets) {
-                    stats.push({
-                        type: b.key,
-                        count: b.count.value,
-                        unique: b.unique.value
-                    })
-                }
-                repoData.push({
-                    fromDate,
-                    toDate,
-                    owner,
-                    total,
-                    stats
-                })
-            }
-            if (!repoData.length) {
-                return noData
-            }
-
-        }
-
-        const exportKey = key + 'Overview'
-        if (isRepos(key)) {
-            repoData.sort((a,b) => (a.owner > b.owner) ? 1 : ((b.owner > a.owner) ? -1 : 0))
-            exportData.current[exportKey] = repoData
-            let cardInfo = []
-            let sliderNav = []
-            let i = 0
-
-            const afterRepoSliderChange = (slideIndex) => {
-               
-                const $dots = $('#js-sliderNav li')
-                $dots.removeClass('slideNav-active arrow arrow-next arrow-prev')
-                let label 
-                $dots.each((i, el) => {
-                    label = $(el).attr('aria-label')
-                    if (i < slideIndex) {
-                        $(el).addClass('arrow arrow-prev').attr('title', `Go to the previous slide: ${label}`)
-                    } else {
-                        if (i > slideIndex) {
-                           $(el).addClass('arrow arrow-next').attr('title', `Go to the next slide: ${label}`) 
-                        }
-                        if (i === slideIndex) {
-                            $(el).addClass('slideNav-active').attr('title', `Current slide: ${label}`) 
-                        }
-                    }
-                })
-            }
-
-            const navigateSlider = (e) => {
-                const $el = $(e.currentTarget)
-                const index = Number($el.attr('data-index'))
-                repoCarouselRef.current.goTo(index)
-                afterRepoSliderChange(index)
-            }
-
-            for (let d of repoData) {
-                let colInfo = []
-                for (let c of d.stats) {
-                    colInfo.push(<Row key={c.type} className='mt-3'>
-                        <Col span={12}>{formatNum(c.count)}<br /><strong>{c.type.upCaseFirst()}s</strong></Col>
-                        <Col span={12}>{formatNum(c.unique)}<br /><strong>Unique {c.type}s</strong></Col>
-                    </Row>)
-                }
-                cardInfo.push(
-                    <div key={d.owner}>
-                        <div><h3> {d.total} <small>{d.owner}</small></h3></div>
-                        {colInfo}
-                    </div>
-                )
-
-                sliderNav.push(<li key={'li'+d.owner} data-index={i} aria-label={d.owner} onClick={navigateSlider}>&nbsp;<span>{i + 1}</span></li>)
-                i++
-            }
-
-            let _timeout
-            
-            const styleDots = (slideIndex) => {
-                clearTimeout(_timeout)
-                setTimeout(() => {
-                    afterRepoSliderChange(slideIndex)
-                }, 100)
-            }
-            styleDots(0)
-            
-            return (<div className='c-logCard__slickWrap'>
-                <Carousel dots={false} ref={repoCarouselRef}>{cardInfo}
-                </Carousel>
-                <div className='position-relative'><ul id='js-sliderNav' className='slider-nav'>{sliderNav}</ul></div>
-                </div>)
-        }
-
-        if (isApi(key)) {
-            let ms = []
-            for (let d of agg.services.buckets) {
-                exportData.current[exportKey] = {
-                    fromDate,
-                    toDate,
-                    apiName: d.key,
-                    requests: d.doc_count
-                }
-                ms.push(
-                    <Row className='mt-3 w-50' key={d.key}>
-                        <Col> <span>{formatNum(d.doc_count)}</span><br /><strong>{d.key}</strong></Col>
-                    </Row>
-                )
-            }
-            return (<>
-                <div><h3>{formatNum(totalHits)} <small>total requests</small></h3></div>
-                <div className='c-logCard__flexWrap'>{ms}</div>
-            </>)
-        }
-
-        if (isFiles(key)) {
-            exportData.current[exportKey] = {
-                fromDate,
-                toDate,
-                totalBytes,
-                totalDatasets: datasetGroups,
-                totalFiles,
-                totalHits
-            }
-            return (<>
-                <div><h3> {formatBytes(totalBytes)} <small>downloaded</small></h3></div>
-                <Row className='mt-3'>
-                    <Col>{formatNum(datasetGroups)}<br /><strong>Datasets/Data Uploads</strong></Col>
-                </Row>
-                <Row className='mt-3'>
-                    <Col span={12}><span>
-                        {formatNum(totalFiles)} &nbsp;
-                        <Tooltip placement="right" title={`Estimated total number of files downloaded.`}>
-                            <InfoCircleOutlined />
-                        </Tooltip>
-                        </span><br />
-                        <strong>Files downloaded</strong> 
-                    </Col>
-                    {/* <Col span={12}>{formatNum(totalHits)}<br /><strong>Hits</strong></Col> */}
-                </Row>
-            </>)
-        }
-    }
-
     const getTabId = (key) => `tab-${key}`
 
     const toggleHighlightClasses = (sel) => {
@@ -308,21 +130,7 @@ const Logs = () => {
 
         let tableData = []
 
-        if (isRepos(key)) {
-            return <>
-                <LogsProvider defaultMenuItem={'numOfRows'}
-                    indexKey={key}
-                    exportData={exportData}
-                    exportHandler={exportHandler}
-                    defaultDates={_cards[key].dates}
-                    fromDate={fromDate} toDate={toDate}
-                    tabExtraActions={tabExtraActions}
-                    setExtraActions={setExtraActions}
-                    extraActions={extraActions} >
-                    <LogsReposTable />
-                </LogsProvider>
-            </>
-        }
+  
         if (isApi(key)) {
 
             for (let d of (data[key]?.aggregations?.services?.buckets || [])) {
@@ -337,7 +145,7 @@ const Logs = () => {
             }
 
             return <>
-                <LogsProvider defaultMenuItem={'numOfRows'}
+                <UsageProvider defaultMenuItem={'numOfRows'}
                     indexKey={key}
                     exportData={exportData}
                     exportHandler={exportHandler}
@@ -348,14 +156,14 @@ const Logs = () => {
                     extraActions={extraActions}
                     defaultIsLogScale={defaultIsLogScale} >
                     <LogsApiUsageTable data={tableData} />
-                </LogsProvider>
+                </UsageProvider>
             </>
         }
 
         if (isFiles(key)) {
 
             return <>
-                <LogsProvider defaultMenuItem={'byDatasetID'}
+                <UsageProvider defaultMenuItem={'byDatasetID'}
                     indexKey={key}
                     exportData={exportData}
                     exportHandler={exportHandler}
@@ -366,7 +174,7 @@ const Logs = () => {
                     extraActions={extraActions}
                     defaultIsLogScale={defaultIsLogScale} >
                     <LogsFilesTable />
-                </LogsProvider>
+                </UsageProvider>
 
             </>
         }
@@ -395,7 +203,7 @@ const Logs = () => {
     const getCards = (data) => {
         const tabName = getCurrentTab()
 
-        let comps = []
+        let summaryCards = []
         let _tabs = []
         let title, date
         for (let s in indicesSections.current) {
@@ -407,21 +215,25 @@ const Logs = () => {
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
             title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span> </>
-            comps.push(<Card className={`c-logCard c-logCard--${s} ${s == tabName ? 'is-highlighted' : ''}`} 
-                extra={<><span className='pull-right c-logCard__spinner'><Spin size='small' /></span></>}
-            title={title} key={s} 
-            variant="borderless" 
-            onClick={(e) => highlightSection(e, s)}>
-                {getCardDetail(s, data)}
-            </Card>)
+     
+            summaryCards.push(
+                <UsageAnalyticsSummaryCard
+                    fromDate={from} toDate={to}
+                    cardType={{ isFiles, isApi }}
+                    title={title}
+                    tabName={tabName}
+                    cardKey={s}
+                    highlightSection={highlightSection}
+                />
+            )
             _tabs.push({
                 label: `${_cards[s].title}`,
                 key: getTabId(s),
-                children: getTabContent(s, data),
+                children: <span>Tab data</span>,
                 icon: _cards[s].icon
             })
         }
-        setCards(comps)
+        setCards(summaryCards)
         if (activeSection == null) {
             setActiveSection(getTabId(tabName))
         }
@@ -439,43 +251,27 @@ const Logs = () => {
 
     const fetchData = async () => {
         setIsBusy(true)
-        indicesSections.current = ENVS.logsIndicies() || {}
+        indicesSections.current = ENVS.usageAnalytics() || {}
         let _data = {}
         let q, url, headers
-        let promises = []
         let promisesMinDate = []
         for (let s in indicesSections.current) {
             let index = indicesSections.current[s]
             url = ENVS.urlFormat.search(index)
-            q = ESQ.indexQueries({ from: fromDate, to: toDate })[s]
             headers = getHeadersWith(globusToken).headers
-        
-            promises.push(callService(url,
-                headers,
-                q,
-                'POST'))
-            
+      
             if (!fromDate) {
                 // get the min date for each index to use as default fromDate if user doesn't select a date range
-                q = ESQ.indexQueries({}).minDate(_cards[s].dateField || 'timestamp')
+                q = SQL.minDate({ field: _cards[s].dateField || 'timestamp', table: index })
                 promisesMinDate.push(callService(url,
                         headers,
                         q,
                         'POST'));
             }
         }
-        const results = await Promise.all(promises)
+
         const resultsMinDate = await Promise.all(promisesMinDate)
-        for (let i = 0; i < results.length; i++) {
-            if (results[i].status == 401) {
-                isSearchApiUnauthorized.current = true
-                console.error('User unauthorized', results[i])
-                break
-            }
-            if (results[i].status == 200) {
-                _data[Object.keys(indicesSections.current)[i]] = results[i].data
-            }
-        }
+       
         for (let i = 0; i < resultsMinDate.length; i++) {
             if (resultsMinDate[i].status == 200) {
                 _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
@@ -487,13 +283,7 @@ const Logs = () => {
     useEffect(() => {
         if (globusToken) {
             fetchData().then((data) => {
-                if (Object.keys(data).length) {
-                    getCards(data)
-                } else {
-                    if (isSearchApiUnauthorized.current && isAuthenticated) {
-                        setShowUnauthorized(true)
-                    }
-                }
+                getCards(data)
                 
             })
         }
@@ -508,107 +298,7 @@ const Logs = () => {
     }
 
     const exportHandler = (indexKey) => {
-        let _indexKey = indexKey || getIndexKeyByActiveTab(activeSection) || Object.keys(indicesSections.current)[0]
-        let _data = JSON.parse(JSON.stringify(exportData.current[_indexKey])) || []
-        let cols = []
-        let hasLengthy = false
-        const charLimit = 32767
-
-        const _checkCharLength = (i, d, c) => {
-            if (d[c]) {
-                let histogramStr = JSON.stringify(d[c]).replace(/"/g, '""')
-                if ((histogramStr.length > charLimit) || (eq(c, 'histogram') && d.endpointsHits)) { // or just auto remove the inner hits info
-                    hasLengthy = hasLengthy || []
-                    let newCell = ''
-                    if (d.endpointsHits) {
-                        let buckets = {}
-                        for (let h in d.histogram) {
-                            buckets[h] = d.histogram[h].requests
-                        }
-                        newCell = buckets
-                    }
-                    hasLengthy.push({c, i, newCell})
-                }
-            }
-        } 
-
-        if (_data.length) {
-            let i = 0
-            for (let d of _data) {
-                // rename group (used in stackedBar viz) to repository
-                if (d.group) {
-                    d.repository = d.group
-                    delete d.group
-                }
-
-                // We don't want undefined values in csv, just blank
-                if (d.uuid) {
-                    if (!d[TABLE.cols.f('id')]) {
-                        d[TABLE.cols.f('id')] = ''
-                    }
-                    if (!d.datasetType) {
-                        d.datasetType = ''
-                    }
-                    delete d.entityId
-                }
-
-                _checkCharLength(i, d, 'histogram')
-                _checkCharLength(i, d, 'endpointsHits')
-                i++
-            }
-
-            cols = Object.keys(_data[0])
-            if (_data[0].repository) {
-                // move repository column to front
-                let c = cols.pop()
-                cols.unshift(c)
-            }
-
-            let timespan = exportData.current[_indexKey + 'Date']
-            let fileNameDate = `${timespan.fromDate}-${timespan.toDate}`
-
-            const _csvDownload = (removeLengthy = false) => {
-                if (removeLengthy) {
-                    for (let x of hasLengthy) {
-                        _data[x.i][x.c] = x.newCell
-                    }
-                }
-                _data = TABLE.flattenDataForCSV(_data)
-                TABLE.generateCSVFile(_data, `${_indexKey}-${fileNameDate}.csv`, cols)
-            }
-
-            const _csvDownloadAndCloseModal = (removeLengthy = false) => {
-                setModal({...modal, open:false})
-                _csvDownload(removeLengthy)
-                const _action = removeLengthy ? 'truncateExport' : 'allExport'
-                _dispatchGTM(_action)
-            }
-
-            if (hasLengthy) {
-                // Show modal warning of csv lengthy
-                let title = <h4><ExclamationCircleFilled  style={{color:'var(--bs-warning)'}} /> CSV Cell Character Limit</h4>
-                let body = <span>Please note the CSV requested for export contains one or more cells which surpass character size limits for programs like Excel.</span>
-               
-                const footer = [
-                    <Button key='dwn-trunc' icon={<DownloadOutlined />}  onClick={()=>{_csvDownloadAndCloseModal(true)}}> Download with truncation of lengthy cell(s)</Button>,
-                    <Button key='dwn-all' color="primary" variant="solid" onClick={()=>{_csvDownloadAndCloseModal()}}> Ok</Button>
-                ]
-                setModal({...modal, title, body, open: true, footer})       
-            } else {
-                _csvDownload()
-            }
-            
-            // Download overview
-            if (!indexKey) {
-                let overview = exportData.current[_indexKey + 'Overview']
-                overview = Array.isArray(overview) ? overview : [overview]
-                for (let o of overview) {
-                    o.fromDate = timespan.fromDate
-                    o.toDate = timespan.toDate
-                }
-                TABLE.generateCSVFile(TABLE.flattenDataForCSV(overview), `${_indexKey}Overview-${fileNameDate}.csv`)
-            }
-        }
+        
     }
 
     const toggleOverview = () => {
@@ -662,7 +352,8 @@ const Logs = () => {
                         <button onClick={filterResults} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
                     </Col>
                     {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
-                    {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}><Tabs
+                    {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}>
+                      <Tabs
                         onChange={onTabChange}
                         tabBarExtraContent={extraActions[activeSection]}
                         activeKey={activeSection}
@@ -678,4 +369,4 @@ const Logs = () => {
         </Layout>
     );
 };
-export default Logs;
+export default Usage;

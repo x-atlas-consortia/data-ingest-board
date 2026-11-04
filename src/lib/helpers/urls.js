@@ -46,6 +46,10 @@ const URLS = {
         },
         logs: {
             base: () => process.env.NEXT_PUBLIC_CLIENT_LOGS_URL
+        },
+        analytics: {
+            base: () => process.env.NEXT_PUBLIC_USAGE_ANALYTICS_URL,
+            query: () => process.env.NEXT_PUBLIC_USAGE_ANALYTICS_URL + '/query'
         }
     }
 }
