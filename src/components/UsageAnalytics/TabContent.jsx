@@ -12,14 +12,15 @@ import {
     ArrowDownOutlined
 } from '@ant-design/icons'
 import SQL, { indexFixtures } from '@/lib/helpers/sql'
-import UsageAnalyticsTinyCard from '@/components/UsageAnalyticsTinyCard'
+import TinyCard from '@/components/UsageAnalytics/TinyCard'
 import {
     formatNum,
     formatBytes,
     roundToTheNearest
 } from '@/lib/helpers/general'
+import { Tabs } from 'antd'
 
-const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
+const TabContent = ({ tabKey, cardType }) => {
     const performancePercentage = (dataNow, dataPrev) => {
         const perc =
             ((dataNow.rows[0][0] - dataPrev.rows[0][0]) / dataPrev.rows[0][0]) *
@@ -41,7 +42,6 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
                 >
                     {perc.toFixed(2)} %
                 </span>
-               
             </span>
         )
     }
@@ -56,29 +56,28 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
             lastXMonths: {
                 totalBytesTransferred: {
                     title: `Data transferred, last ${months} months`,
-                    formatter: (data) => formatBytes(data.rows[0][0]),
+                    formatter: (data) => formatBytes(data.rows[0][0])
                 },
                 filesDownloaded: {
-                  title: `Files downloaded, last ${months} months`,
-                  formatter: (data) => formatNum(data.rows[0][0]),
+                    title: `Files downloaded, last ${months} months`,
+                    formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueUsers: {
                     title: `Distinct users, last ${months} months`,
-                    formatter: (data) => formatNum(data.rows[0][0]),
+                    formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueOrganizations: {
                     title: `Organizations, last ${months} months`,
-                    formatter: (data) => formatNum(data.rows[0][0]),
+                    formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueCountries: {
                     title: `Countries, last ${months} months`,
-                    formatter: (data) => formatNum(data.rows[0][0]),
+                    formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueEntities: {
                     title: `Datasets touched, last ${months} months`,
-                    formatter: (data) => formatNum(data.rows[0][0]),
+                    formatter: (data) => formatNum(data.rows[0][0])
                 }
-
             }
         }
     }
@@ -86,26 +85,31 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
     const getTabContent = () => {
         const tinyCards = []
         if (cardType.isApi(tabKey)) {
-            return <UsageAnalyticsTinyCard cardKey={tabKey} />
+            return <TinyCard cardKey={tabKey} />
         }
         if (cardType.isFiles(tabKey)) {
             for (const q in SQL.fileDownloads.lastXMonths) {
                 tinyCards.push(
                     <div key={q} className='col-md-2'>
-                      <UsageAnalyticsTinyCard
-                        
-                        cardKey={tabKey}
-                        query={SQL.fileDownloads.lastXMonths[q]({ months })}
-                        query2={SQL.fileDownloads.priorToLastXMonths[q]({
-                            months
-                        })}
-                        title={_tabs.fileDownloads.lastXMonths[q].title}
-                        formatter={_tabs.fileDownloads.lastXMonths[q].formatter}
-                        footer={_tabs.fileDownloads.lastXMonths[q].footer || `vs prior ${months} months`}
-                        formatter2={
-                            _tabs.fileDownloads.lastXMonths[q].formatter2 || performancePercentage
-                        }
-                    />
+                        <TinyCard
+                            cardKey={tabKey}
+                            query={SQL.fileDownloads.lastXMonths[q]({ months })}
+                            query2={SQL.fileDownloads.priorToLastXMonths[q]({
+                                months
+                            })}
+                            title={_tabs.fileDownloads.lastXMonths[q].title}
+                            formatter={
+                                _tabs.fileDownloads.lastXMonths[q].formatter
+                            }
+                            footer={
+                                _tabs.fileDownloads.lastXMonths[q].footer ||
+                                `vs prior ${months} months`
+                            }
+                            formatter2={
+                                _tabs.fileDownloads.lastXMonths[q].formatter2 ||
+                                performancePercentage
+                            }
+                        />
                     </div>
                 )
             }
@@ -120,4 +124,4 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
     )
 }
 
-export default UsageAnalyticsTabContent
+export default TabContent

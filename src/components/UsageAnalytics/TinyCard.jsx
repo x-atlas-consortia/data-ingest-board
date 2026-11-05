@@ -5,7 +5,7 @@ import SQL from '@/lib/helpers/sql'
 
 import DetailSuspence from '@/components/DetailSuspence'
 
-const UsageAnalyticsTinyCard = memo(
+const TinyCard = memo(
     ({ cardKey, query, formatter, title, query2, formatter2, footer }) => {
         return (
             <Card key={cardKey} className='c-logCard--tiny'>
@@ -14,8 +14,13 @@ const UsageAnalyticsTinyCard = memo(
                     buildCallback={(data) => {
                         return (
                             <span>
-                                <small className='p5 text-muted'>{title}</small> <br />
-                                <span className='h4 mt-2 d-block'>{formatter ? formatter(data) : data.rows[0][0]}</span>
+                                <small className='p5 text-muted'>{title}</small>{' '}
+                                <br />
+                                <span className='h4 mt-2 d-block'>
+                                    {formatter
+                                        ? formatter(data)
+                                        : data.rows[0][0]}
+                                </span>
                                 <span>
                                     <DetailSuspence
                                         query={query2}
@@ -36,4 +41,4 @@ const UsageAnalyticsTinyCard = memo(
     }
 )
 
-export default UsageAnalyticsTinyCard
+export default TinyCard

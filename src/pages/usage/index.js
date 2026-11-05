@@ -1,46 +1,62 @@
-import React, { useRef, useEffect, useState, useContext } from 'react';
-import { Card, Col, DatePicker, Layout, Row, theme, Tabs, Carousel, Button, Tooltip, Spin  } from 'antd';
-import AppSideNavBar from "@/components/AppSideNavBar";
-import { callService, eq, getHeadersWith, formatNum, formatBytes, roundToTheNearest } from "@/lib/helpers/general";
-import ENVS from "@/lib/helpers/envs";
-import AppContext from "@/context/AppContext";
-import SQL, { indexFixtures } from "@/lib/helpers/sql";
-import Spinner from '@/components/Spinner';
-import LogsFilesTable from '@/components/DataTable/LogsFilesTable';
-import LogsReposTable from '@/components/DataTable/LogsReposTable';
-import { UsageProvider } from '@/context/UsageContext';
-import TABLE from '@/lib/helpers/table';
+import React, { useRef, useEffect, useState, useContext } from 'react'
+import {
+    Card,
+    Col,
+    DatePicker,
+    Layout,
+    Row,
+    theme,
+    Tabs,
+    Carousel,
+    Button,
+    Tooltip,
+    Spin
+} from 'antd'
+import AppSideNavBar from '@/components/AppSideNavBar'
+import {
+    callService,
+    eq,
+    getHeadersWith,
+    formatNum,
+    formatBytes,
+    roundToTheNearest
+} from '@/lib/helpers/general'
+import ENVS from '@/lib/helpers/envs'
+import AppContext from '@/context/AppContext'
+import SQL, { indexFixtures } from '@/lib/helpers/sql'
+import Spinner from '@/components/Spinner'
+import { UsageProvider } from '@/context/UsageContext'
+import TABLE from '@/lib/helpers/table'
 import {
     DownloadOutlined,
     ApiOutlined,
     CodeOutlined,
     CalendarOutlined,
-    ExclamationCircleFilled, 
+    ExclamationCircleFilled,
     MinusOutlined,
     PlusOutlined,
     InfoCircleOutlined,
     InboxOutlined
-} from "@ant-design/icons";
-import LogsApiUsageTable from '@/components/DataTable/LogsApiUsageTable';
-import dayjs from 'dayjs';
-import AppModal from '@/components/AppModal';
-import { modalDefault } from '@/lib/constants';
-import Unauthorized from '@/components/Unauthorized';
-import UsageAnalyticsSummaryCard from '@/components/UsageAnalyticsSummaryCard';
-import UsageAnalyticsTabContent from '@/components/UsageAnalyticsTabContent';
+} from '@ant-design/icons'
+import dayjs from 'dayjs'
+import AppModal from '@/components/AppModal'
+import { modalDefault } from '@/lib/constants'
+import Unauthorized from '@/components/Unauthorized'
+import SummaryCard from '@/components/UsageAnalytics/SummaryCard'
+import TabContent from '@/components/UsageAnalytics/TabContent'
 
-const { Header, Content } = Layout;
-const { RangePicker } = DatePicker;
+const { Header, Content } = Layout
+const { RangePicker } = DatePicker
 const Usage = () => {
-
     const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+        token: { colorBgContainer, borderRadiusLG }
+    } = theme.useToken()
 
-    const { globusToken, isLoading, isAuthenticated, dispatchGTM } = useContext(AppContext)
+    const { globusToken, isLoading, isAuthenticated, dispatchGTM } =
+        useContext(AppContext)
 
     const formatDate = (date, month, day) => {
-        let m = month || (date.getMonth() + 1)
+        let m = month || date.getMonth() + 1
         let d = day || date.getDate()
         const pad = (num) => String(num).padStart(2, '0')
         return `${date.getFullYear()}-${pad(m)}-${pad(d)}`
@@ -49,7 +65,10 @@ const Usage = () => {
     const currentDate = new Date()
     const [fromDate, setFromDate] = useState(formatDate(currentDate, 1, 1))
     const [toDate, setToDate] = useState(formatDate(currentDate))
-    const currentdateStrings = useRef([formatDate(currentDate, 1, 1), formatDate(currentDate)])
+    const currentdateStrings = useRef([
+        formatDate(currentDate, 1, 1),
+        formatDate(currentDate)
+    ])
     const [cards, setCards] = useState(null)
     const [tabs, setTabs] = useState(null)
     const [activeSection, setActiveSection] = useState(null)
@@ -60,15 +79,15 @@ const Usage = () => {
     const exportData = useRef({})
     const isSearchApiUnauthorized = useRef(false)
     const [showUnauthorized, setShowUnauthorized] = useState(false)
-    const dateFormat = 'YYYY-MM-DD';
+    const dateFormat = 'YYYY-MM-DD'
 
     const [modal, setModal] = useState(modalDefault)
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
-    const defaultIsLogScale = useRef({apiUsage: true, fileDownloads: true})
-    const repoCarouselRef = useRef(null);
+    const defaultIsLogScale = useRef({ apiUsage: true, fileDownloads: true })
+    const repoCarouselRef = useRef(null)
 
     const _dispatchGTM = (action, event = 'cta') => {
-        dispatchGTM({action, event, info: getCurrentTab()})
+        dispatchGTM({ action, event, info: getCurrentTab() })
     }
 
     let _cards = {
@@ -112,7 +131,12 @@ const Usage = () => {
         _dispatchGTM('tabChange')
     }
 
-    const configureTabURL = (key) => window.history.pushState(null, null, `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`)
+    const configureTabURL = (key) =>
+        window.history.pushState(
+            null,
+            null,
+            `?tab=${_cards[key]?.title?.replaceAll(' ', '+')}`
+        )
 
     const highlightSection = (e, key) => {
         configureTabURL(key)
@@ -126,15 +150,19 @@ const Usage = () => {
         for (const [key, value] of Object.entries(_cards)) {
             if (eq(value.title, t)) return key
         }
-       return t 
+        return t
     }
 
     const getCurrentTab = () => {
-        let tabName = Object.keys(indicesSections.current)[0] 
+        let tabName = Object.keys(indicesSections.current)[0]
         const query = new URLSearchParams(window.location.search)
         const tab = query.get('tab')
-        
-        if (tab && (Object.keys(indicesSections.current).comprises(tab) || tabTitles.comprises(tab.toLowerCase())) ) {
+
+        if (
+            tab &&
+            (Object.keys(indicesSections.current).comprises(tab) ||
+                tabTitles.comprises(tab.toLowerCase()))
+        ) {
             tabName = getTabByTitle(tab)
         }
         return tabName
@@ -147,19 +175,39 @@ const Usage = () => {
         let _tabs = []
         let title, date
         for (let s in indicesSections.current) {
-            let from = fromDate || (data[`${s}MinDate`] ? data[`${s}MinDate`].hits.hits[0].sort[0] : null)
+            let from =
+                fromDate ||
+                (data[`${s}MinDate`]
+                    ? data[`${s}MinDate`].hits.hits[0].sort[0]
+                    : null)
             if (eq(typeof from, 'number')) {
                 date = new Date(from)
                 from = formatDate(date)
             }
             let to = toDate || 'now'
             _cards[s].dates = { from, to }
-            title = <>{_cards[s].icon}<span className='mx-3'><span className='c-logCard__title'>{_cards[s].title}</span><br />{from && <small className='c-logCard__date'><CalendarOutlined /> {from} - {to}</small>}</span> </>
-     
+            title = (
+                <>
+                    {_cards[s].icon}
+                    <span className='mx-3'>
+                        <span className='c-logCard__title'>
+                            {_cards[s].title}
+                        </span>
+                        <br />
+                        {from && (
+                            <small className='c-logCard__date'>
+                                <CalendarOutlined /> {from} - {to}
+                            </small>
+                        )}
+                    </span>{' '}
+                </>
+            )
+
             summaryCards.push(
-                <UsageAnalyticsSummaryCard
+                <SummaryCard
                     key={s}
-                    fromDate={from} toDate={to}
+                    fromDate={from}
+                    toDate={to}
                     cardType={{ isFiles, isApi }}
                     title={title}
                     tabName={tabName}
@@ -170,7 +218,13 @@ const Usage = () => {
             _tabs.push({
                 label: `${_cards[s].title}`,
                 key: getTabId(s),
-                children: <UsageAnalyticsTabContent key={s} tabKey={s} cardType={{ isFiles, isApi }} />,
+                children: (
+                    <TabContent
+                        key={s}
+                        tabKey={s}
+                        cardType={{ isFiles, isApi }}
+                    />
+                ),
                 icon: _cards[s].icon
             })
         }
@@ -200,22 +254,23 @@ const Usage = () => {
             let index = indicesSections.current[s]
             url = ENVS.urlFormat.search(index)
             headers = getHeadersWith(globusToken).headers
-      
+
             if (!fromDate) {
                 // get the min date for each index to use as default fromDate if user doesn't select a date range
-                q = SQL.minDate({ field: _cards[s].dateField || 'timestamp', table: index })
-                promisesMinDate.push(callService(url,
-                        headers,
-                        q,
-                        'POST'));
+                q = SQL.minDate({
+                    field: _cards[s].dateField || 'timestamp',
+                    table: index
+                })
+                promisesMinDate.push(callService(url, headers, q, 'POST'))
             }
         }
 
         const resultsMinDate = await Promise.all(promisesMinDate)
-       
+
         for (let i = 0; i < resultsMinDate.length; i++) {
             if (resultsMinDate[i].status == 200) {
-                _data[`${Object.keys(indicesSections.current)[i]}MinDate`] = resultsMinDate[i].data
+                _data[`${Object.keys(indicesSections.current)[i]}MinDate`] =
+                    resultsMinDate[i].data
             }
         }
         return _data
@@ -225,10 +280,9 @@ const Usage = () => {
         if (globusToken) {
             fetchData().then((data) => {
                 getCards(data)
-                
             })
         }
-    }, [globusToken, fromDate, toDate]);
+    }, [globusToken, fromDate, toDate])
 
     useEffect(() => {
         exportData.current = {}
@@ -246,68 +300,137 @@ const Usage = () => {
         setIsOverviewCollapsed(!isOverviewCollapsed)
     }
 
-
     if (!isAuthenticated) {
         return <Spinner tip='' size='small' />
     }
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <AppSideNavBar activeTab={getCurrentTab()} exportHandler={showUnauthorized ? undefined : exportHandler} />
-            {showUnauthorized && <div className='container mt-5'><Unauthorized withLayout={true} /></div>}
-            {!showUnauthorized && <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }} className='c-barHead'>
-                    <Row>
-                        <Col className='c-barHead__col c-barHead__col--title' >
-                            <div style={{ padding: '10px 24px' }}>
-                                <h2 className='text-truncate'>Usage Dashboard</h2>
-                            </div>
-
-                        </Col>
-                        <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
+            <AppSideNavBar
+                activeTab={getCurrentTab()}
+                exportHandler={showUnauthorized ? undefined : exportHandler}
+            />
+            {showUnauthorized && (
+                <div className='container mt-5'>
+                    <Unauthorized withLayout={true} />
+                </div>
+            )}
+            {!showUnauthorized && (
+                <Layout>
+                    <Header
+                        style={{ padding: 0, background: colorBgContainer }}
+                        className='c-barHead'
+                    >
+                        <Row>
+                            <Col className='c-barHead__col c-barHead__col--title'>
+                                <div style={{ padding: '10px 24px' }}>
+                                    <h2 className='text-truncate'>
+                                        Usage Dashboard
+                                    </h2>
+                                </div>
+                            </Col>
+                            <Col className='c-barHead__col c-barHead__col--date d-md c-pickerRange'>
+                                <RangePicker
+                                    defaultValue={[
+                                        dayjs(fromDate, dateFormat),
+                                        dayjs(toDate, dateFormat)
+                                    ]}
+                                    onCalendarChange={onCalendarChange}
+                                    onChange={handleDateRange}
+                                />
+                                <button
+                                    onClick={filterResults}
+                                    className='btn btn-primary rounded-0 c-pickerRange__filterBtn'
+                                >
+                                    Filter
+                                </button>
+                            </Col>
+                        </Row>
+                    </Header>
+                    <Content
+                        className='ant-content--logs'
+                        style={{
+                            background: colorBgContainer,
+                            borderRadius: borderRadiusLG
+                        }}
+                    >
+                        <span style={{ float: 'right' }}>
+                            {!isOverviewCollapsed && (
+                                <Tooltip
+                                    title='Hide overview section'
+                                    placement='left'
+                                >
+                                    <MinusOutlined
+                                        className='txt-lnk'
+                                        onClick={toggleOverview}
+                                    />
+                                </Tooltip>
+                            )}
+                            {isOverviewCollapsed && (
+                                <Tooltip
+                                    title='Show overview section'
+                                    placement='left'
+                                >
+                                    <PlusOutlined
+                                        className='txt-lnk'
+                                        onClick={toggleOverview}
+                                    />
+                                </Tooltip>
+                            )}
+                        </span>
+                        <Col
+                            md={{ span: 6 }}
+                            className='d-sm mx-2 mb-2 c-pickerRange'
+                        >
                             <RangePicker
-                                defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
+                                defaultValue={[
+                                    dayjs(fromDate, dateFormat),
+                                    dayjs(toDate, dateFormat)
+                                ]}
                                 onCalendarChange={onCalendarChange}
-                                onChange={handleDateRange} />
-                            <button onClick={filterResults} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
+                                onChange={handleDateRange}
+                            />
+                            <button
+                                onClick={filterResults}
+                                className='btn btn-primary rounded-0 c-pickerRange__filterBtn'
+                            >
+                                Filter
+                            </button>
                         </Col>
-
-                    </Row>
-                </Header>
-                <Content
-                    className='ant-content--logs'
-                    style={{
-                        background: colorBgContainer,
-                        borderRadius: borderRadiusLG,
-                    }}
-                >
-                    <span style={{float: 'right'}}>
-                        {!isOverviewCollapsed && <Tooltip title='Hide overview section' placement='left'><MinusOutlined className='txt-lnk' onClick={toggleOverview} /></Tooltip>}
-                        {isOverviewCollapsed && <Tooltip title='Show overview section' placement='left'><PlusOutlined className='txt-lnk' onClick={toggleOverview}  /></Tooltip>}
-                    </span>
-                    <Col md={{ span: 6 }} className='d-sm mx-2 mb-2 c-pickerRange'>
-                        <RangePicker
-                            defaultValue={[dayjs(fromDate, dateFormat), dayjs(toDate, dateFormat)]}
-                            onCalendarChange={onCalendarChange}
-                            onChange={handleDateRange} />
-                        <button onClick={filterResults} className='btn btn-primary rounded-0 c-pickerRange__filterBtn'>Filter</button>
-                    </Col>
-                    {!isOverviewCollapsed && <Row className={`c-logCards ${isBusy ? 'isBusy' : ''}`}>{cards}</Row>}
-                    {tabs && <Row className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}>
-                      <Tabs
-                        onChange={onTabChange}
-                        tabBarExtraContent={extraActions[activeSection]}
-                        activeKey={activeSection}
-                        type="card"
-                        size={'middle'}
-                        style={{ marginBottom: 32, width: '100%' }}
-                        items={tabs}
-                    /></Row>}
-                    {isBusy && <Spinner />}
-                    <AppModal modal={modal} setModal={setModal} id='modal--logs' />
-                </Content>
-            </Layout>}
+                        {!isOverviewCollapsed && (
+                            <Row
+                                className={`c-logCards ${isBusy ? 'isBusy' : ''}`}
+                            >
+                                {cards}
+                            </Row>
+                        )}
+                        {tabs && (
+                            <Row
+                                className={`mt-5 c-tabsWrap ${isBusy ? 'isBusy' : ''}`}
+                            >
+                                <Tabs
+                                    onChange={onTabChange}
+                                    tabBarExtraContent={
+                                        extraActions[activeSection]
+                                    }
+                                    activeKey={activeSection}
+                                    type='card'
+                                    size={'middle'}
+                                    style={{ marginBottom: 32, width: '100%' }}
+                                    items={tabs}
+                                />
+                            </Row>
+                        )}
+                        {isBusy && <Spinner />}
+                        <AppModal
+                            modal={modal}
+                            setModal={setModal}
+                            id='modal--logs'
+                        />
+                    </Content>
+                </Layout>
+            )}
         </Layout>
-    );
-};
-export default Usage;
+    )
+}
+export default Usage

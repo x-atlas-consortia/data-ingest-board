@@ -1,12 +1,5 @@
 import React, { memo } from 'react'
-import {
-    Card,
-    Col,
-    Row,
-    Tooltip,
-    Skeleton,
-    Spin
-} from 'antd'
+import { Card, Col, Row, Tooltip, Skeleton, Spin } from 'antd'
 import {
     formatNum,
     formatBytes,
@@ -66,9 +59,8 @@ const ApiUsageSummary = memo(({ data, skeleton }) => {
     return <>{getSummary()}</>
 })
 
-const UsageAnalyticsSummaryCard = memo(
+const SummaryCard = memo(
     ({ from, to, title, tabName, cardKey, highlightSection, cardType }) => {
-      
         const fileDownloadsCardSummary = () => {
             const totalBytesQuery = SQL.fileDownloads.totalBytesTransferred({
                 from,
@@ -195,4 +187,4 @@ const UsageAnalyticsSummaryCard = memo(
     }
 )
 
-export default UsageAnalyticsSummaryCard
+export default SummaryCard
