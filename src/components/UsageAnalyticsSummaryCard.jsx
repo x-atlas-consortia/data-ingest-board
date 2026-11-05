@@ -2,13 +2,7 @@ import React, { memo } from 'react'
 import {
     Card,
     Col,
-    DatePicker,
-    Layout,
     Row,
-    theme,
-    Tabs,
-    Carousel,
-    Button,
     Tooltip,
     Skeleton,
     Spin
@@ -19,7 +13,7 @@ import {
     roundToTheNearest
 } from '@/lib/helpers/general'
 import { InfoCircleOutlined } from '@ant-design/icons'
-import DetailSuspence, { DetailUI } from './DetailSuspence'
+import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
 
 const ApiUsageSummary = memo(({ data, skeleton }) => {
@@ -74,6 +68,7 @@ const ApiUsageSummary = memo(({ data, skeleton }) => {
 
 const UsageAnalyticsSummaryCard = memo(
     ({ from, to, title, tabName, cardKey, highlightSection, cardType }) => {
+      
         const fileDownloadsCardSummary = () => {
             const totalBytesQuery = SQL.fileDownloads.totalBytesTransferred({
                 from,

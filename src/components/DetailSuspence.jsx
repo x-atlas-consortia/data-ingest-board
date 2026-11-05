@@ -8,7 +8,7 @@ import URLS from '@/lib/helpers/urls';
 function DetailSuspence({ query, buildCallback, suspenseFallback }) {
 
   const [data, setData] = useState(null);
-  const { globusToken } = useContext(AppContext); // Replace SomeContext with the actual context providing globusToken
+  const { globusToken } = useContext(AppContext); 
 
   useEffect(() => {
     // Fetch or initialize data here

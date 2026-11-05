@@ -35,6 +35,22 @@ const SQL = {
     totalBytesTransferred: ({ from, to }) => {
       const whereClause = SQL.whereClause({ from, to, field: 'download_date_time' })
       return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download ${whereClause}`.trim()
+    },
+    lastXMonths: {
+      totalBytesTransferred: ({ months = 12}) => {
+        return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      },
+      filesDownloaded: ({ months = 12 }) => {
+        return `SELECT COUNT(*) AS files_downloaded FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      }
+    },
+    priorToLastXMonths: {
+      totalBytesTransferred: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      },
+      filesDownloaded: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT COUNT(*) AS files_downloaded FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      },
     }
   }
 }

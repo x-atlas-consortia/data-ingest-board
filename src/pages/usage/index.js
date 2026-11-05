@@ -27,6 +27,7 @@ import AppModal from '@/components/AppModal';
 import { modalDefault } from '@/lib/constants';
 import Unauthorized from '@/components/Unauthorized';
 import UsageAnalyticsSummaryCard from '@/components/UsageAnalyticsSummaryCard';
+import UsageAnalyticsTabContent from '@/components/UsageAnalyticsTabContent';
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -71,10 +72,6 @@ const Usage = () => {
     }
 
     let _cards = {
-        openSourceRepos: {
-            title: 'Open Source Repositories',
-            icon: <CodeOutlined />
-        },
         apiUsage: {
             title: 'API Usage',
             icon: <ApiOutlined />,
@@ -96,7 +93,6 @@ const Usage = () => {
         setFromDate(from)
         setToDate(to)
         _dispatchGTM('dateFilter')
-        // dates: [dayjs, dayjs], dateStrings: [string, string]
     }
 
     const filterResults = () => {
@@ -104,8 +100,6 @@ const Usage = () => {
     }
 
     const isApi = (key) => eq(key, 'apiUsage')
-
-    const isRepos = (key) => eq(key, 'openSourceRepos')
 
     const isFiles = (key) => eq(key, 'fileDownloads')
 
@@ -124,60 +118,6 @@ const Usage = () => {
         configureTabURL(key)
         setActiveSection(getTabId(key))
         toggleHighlightClasses(e.currentTarget)
-    }
-
-    const getTabContent = (key, data) => {
-
-        let tableData = []
-
-  
-        if (isApi(key)) {
-
-            for (let d of (data[key]?.aggregations?.services?.buckets || [])) {
-                tableData.push(
-                    {
-                        name: d.key,
-                        requests: d.doc_count,
-                        endpoints: d.totalEndpoints.value,
-                        endpointsHits: d.endpoints
-                    }
-                )
-            }
-
-            return <>
-                <UsageProvider defaultMenuItem={'numOfRows'}
-                    indexKey={key}
-                    exportData={exportData}
-                    exportHandler={exportHandler}
-                    defaultDates={_cards[key].dates}
-                    fromDate={fromDate} toDate={toDate}
-                    tabExtraActions={tabExtraActions}
-                    setExtraActions={setExtraActions}
-                    extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
-                    <LogsApiUsageTable data={tableData} />
-                </UsageProvider>
-            </>
-        }
-
-        if (isFiles(key)) {
-
-            return <>
-                <UsageProvider defaultMenuItem={'byDatasetID'}
-                    indexKey={key}
-                    exportData={exportData}
-                    exportHandler={exportHandler}
-                    defaultDates={_cards[key].dates}
-                    fromDate={fromDate} toDate={toDate}
-                    tabExtraActions={tabExtraActions}
-                    setExtraActions={setExtraActions}
-                    extraActions={extraActions}
-                    defaultIsLogScale={defaultIsLogScale} >
-                    <LogsFilesTable />
-                </UsageProvider>
-
-            </>
-        }
     }
 
     const tabTitles = Object.values(_cards).map((c) => c.title.toLowerCase())
@@ -218,6 +158,7 @@ const Usage = () => {
      
             summaryCards.push(
                 <UsageAnalyticsSummaryCard
+                    key={s}
                     fromDate={from} toDate={to}
                     cardType={{ isFiles, isApi }}
                     title={title}
@@ -229,7 +170,7 @@ const Usage = () => {
             _tabs.push({
                 label: `${_cards[s].title}`,
                 key: getTabId(s),
-                children: <span>Tab data</span>,
+                children: <UsageAnalyticsTabContent key={s} tabKey={s} cardType={{ isFiles, isApi }} />,
                 icon: _cards[s].icon
             })
         }
@@ -298,7 +239,7 @@ const Usage = () => {
     }
 
     const exportHandler = (indexKey) => {
-        
+        // TODO
     }
 
     const toggleOverview = () => {
