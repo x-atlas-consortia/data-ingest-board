@@ -206,8 +206,8 @@ const Usage = () => {
             summaryCards.push(
                 <SummaryCard
                     key={s}
-                    fromDate={from}
-                    toDate={to}
+                    from={from}
+                    to={to}
                     cardType={{ isFiles, isApi }}
                     title={title}
                     tabName={tabName}
@@ -223,6 +223,8 @@ const Usage = () => {
                         key={s}
                         tabKey={s}
                         cardType={{ isFiles, isApi }}
+                        from={from}
+                        to={to}
                     />
                 ),
                 icon: _cards[s].icon

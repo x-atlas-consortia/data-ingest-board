@@ -75,6 +75,12 @@ const SQL = {
       uniqueEntities: ({ months1 = 12, months2 = 24 }) => {
         return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
       }
+    },
+    monthly: ({ from, to }) => {
+      const whereClause = SQL.whereClause({ from, to, field: 'download_date_time' })
+      return `SELECT DATE_TRUNC('month', download_date_time) AS time_bucket, count(*) AS files, sum(bytes_transferred) AS total_bytes_transferred, count(DISTINCT entity_uuid) AS datasets FROM file_download ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
+      //return `WITH fd AS ( SELECT *, coalesce(nullif(trim(regexp_replace(dataset_type, '\s*\[.*\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date) AS mon FROM file_download ) SELECT user_domain AS org, mode(country_name) AS country, count(DISTINCT user_name) AS users, count(*) AS files, sum(bytes_transferred) AS total_bytes_transferred, count(DISTINCT entity_uuid) AS datasets, count(DISTINCT assay) AS assays, count(DISTINCT mon) AS active_months, strftime(min(download_date), '%Y-%m-%d') AS first_download, strftime(max(download_date), '%Y-%m-%d') AS last_download FROM fd ${whereClause} GROUP BY 1 ORDER BY total_bytes_transferred DESC;`
+      //return `WITH fd AS ( SELECT *, coalesce(nullif(trim(regexp_replace(dataset_type, '\s*\[.*\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date) AS mon FROM file_download ) SELECT user_domain AS org, mode(country_name) AS country, count(DISTINCT user_name) AS users, count(*) AS files, round(sum(bytes_transferred) / 1e12, 4) AS tb, count(DISTINCT entity_uuid) AS datasets, count(DISTINCT assay) AS assays, count(DISTINCT mon) AS active_months, strftime(min(download_date), '%Y-%m-%d') AS first_download, strftime(max(download_date), '%Y-%m-%d') AS last_download FROM fd ${whereClause} GROUP BY 1 ORDER BY tb DESC;`
     }
   }
 }

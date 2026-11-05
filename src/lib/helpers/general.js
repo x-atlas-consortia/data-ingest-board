@@ -45,17 +45,39 @@ export function toDateString(timestamp) {
 export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberFormat().format(num) : 0
 
 export const formatBytes = (bytes, decimals = 2) => {
-        if (!+bytes) return '0 Bytes'
-        if (bytes <= 1) return `${bytes} Byte`
+    if (!+bytes) return '0 Bytes'
+    if (bytes <= 1) return `${bytes} Byte`
 
-        const k = 1024
-        const dm = decimals < 0 ? 0 : decimals
-        const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = [
+        'Bytes',
+        'KiB',
+        'MiB',
+        'GiB',
+        'TiB',
+        'PiB',
+        'EiB',
+        'ZiB',
+        'YiB'
+    ]
 
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-    }
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+export const formatAxisDate = (datum, all = false) => {
+    const date = new Date(datum)
+    const year = date.getUTCFullYear()
+
+    const monthName = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        timeZone: 'UTC'
+    }).format(date)
+
+    return monthName == 'Jan' || all ? `${monthName} ${year}` : monthName
+}
 
 Object.assign(Array.prototype, {
     comprises(needle, insensitive = true) {

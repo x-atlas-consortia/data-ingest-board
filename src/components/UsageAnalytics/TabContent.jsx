@@ -18,9 +18,9 @@ import {
     formatBytes,
     roundToTheNearest
 } from '@/lib/helpers/general'
-import { Tabs } from 'antd'
+import FileDownloads from '@/components/UsageAnalytics/FileDownloads'
 
-const TabContent = ({ tabKey, cardType }) => {
+const TabContent = ({ tabKey, cardType, from, to }) => {
     const performancePercentage = (dataNow, dataPrev) => {
         const perc =
             ((dataNow.rows[0][0] - dataPrev.rows[0][0]) / dataPrev.rows[0][0]) *
@@ -113,7 +113,7 @@ const TabContent = ({ tabKey, cardType }) => {
                     </div>
                 )
             }
-            return <div className='row g-3'>{tinyCards}</div>
+            return <div className='row g-3'>{tinyCards} <FileDownloads from={from} to={to} /></div>
         }
     }
     return (
