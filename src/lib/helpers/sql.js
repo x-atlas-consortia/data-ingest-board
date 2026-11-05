@@ -42,7 +42,19 @@ const SQL = {
       },
       filesDownloaded: ({ months = 12 }) => {
         return `SELECT COUNT(*) AS files_downloaded FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
-      }
+      },
+      uniqueUsers: ({ months = 12 }) => {
+        return `SELECT COUNT(DISTINCT user_name) AS unique_users FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      },
+      uniqueOrganizations: ({ months = 12 }) => {
+        return `SELECT COUNT(DISTINCT user_domain) AS unique_organizations FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      },
+      uniqueCountries: ({ months = 12 }) => {
+        return `SELECT COUNT(DISTINCT country_code) AS unique_countries FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      },
+      uniqueEntities: ({ months = 12 }) => {
+        return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+      },
     },
     priorToLastXMonths: {
       totalBytesTransferred: ({ months1 = 12, months2 = 24 }) => {
@@ -51,6 +63,18 @@ const SQL = {
       filesDownloaded: ({ months1 = 12, months2 = 24 }) => {
         return `SELECT COUNT(*) AS files_downloaded FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
       },
+      uniqueUsers: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT COUNT(DISTINCT user_name) AS unique_users FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      },
+      uniqueOrganizations: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT COUNT(DISTINCT user_domain) AS unique_organizations FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      },
+      uniqueCountries: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT COUNT(DISTINCT country_code) AS unique_countries FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      },
+      uniqueEntities: ({ months1 = 12, months2 = 24 }) => {
+        return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND download_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+      }
     }
   }
 }

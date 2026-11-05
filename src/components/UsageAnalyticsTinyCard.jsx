@@ -8,13 +8,13 @@ import DetailSuspence from '@/components/DetailSuspence'
 const UsageAnalyticsTinyCard = memo(
     ({ cardKey, query, formatter, title, query2, formatter2, footer }) => {
         return (
-            <Card key={cardKey}>
+            <Card key={cardKey} className='c-logCard--tiny'>
                 <DetailSuspence
                     query={query}
                     buildCallback={(data) => {
                         return (
                             <span>
-                                <span className='p5 text-muted'>{title}</span> <br />
+                                <small className='p5 text-muted'>{title}</small> <br />
                                 <span className='h4 mt-2 d-block'>{formatter ? formatter(data) : data.rows[0][0]}</span>
                                 <span>
                                     <DetailSuspence

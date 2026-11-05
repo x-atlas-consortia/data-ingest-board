@@ -34,6 +34,7 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
                 )}{' '}
                 <span
                     style={{
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         color: perc > 0 ? 'green' : 'red'
                     }}
@@ -60,7 +61,24 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
                 filesDownloaded: {
                   title: `Files downloaded, last ${months} months`,
                   formatter: (data) => formatNum(data.rows[0][0]),
+                },
+                uniqueUsers: {
+                    title: `Distinct users, last ${months} months`,
+                    formatter: (data) => formatNum(data.rows[0][0]),
+                },
+                uniqueOrganizations: {
+                    title: `Organizations, last ${months} months`,
+                    formatter: (data) => formatNum(data.rows[0][0]),
+                },
+                uniqueCountries: {
+                    title: `Countries, last ${months} months`,
+                    formatter: (data) => formatNum(data.rows[0][0]),
+                },
+                uniqueEntities: {
+                    title: `Datasets touched, last ${months} months`,
+                    formatter: (data) => formatNum(data.rows[0][0]),
                 }
+
             }
         }
     }
@@ -73,7 +91,7 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
         if (cardType.isFiles(tabKey)) {
             for (const q in SQL.fileDownloads.lastXMonths) {
                 tinyCards.push(
-                    <div key={q} className='col-md-4 col-lg-3'>
+                    <div key={q} className='col-md-2'>
                       <UsageAnalyticsTinyCard
                         
                         cardKey={tabKey}
@@ -91,7 +109,7 @@ const UsageAnalyticsTabContent = ({ tabKey, cardType }) => {
                     </div>
                 )
             }
-            return <div className='row'>{tinyCards}</div>
+            return <div className='row g-3'>{tinyCards}</div>
         }
     }
     return (
