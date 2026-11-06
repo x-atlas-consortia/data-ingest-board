@@ -8,6 +8,7 @@ const TabChartCard = memo(({ title, subTitle, data }) => {
       setTabPlacement(e.target.value);
     };
     return (
+      <div className='c-usageCard c-usageCard--tab'>
         <Card title={title}>
             <p>{subTitle}</p>
              <Space style={{ marginBottom: 24 }}>
@@ -21,6 +22,7 @@ const TabChartCard = memo(({ title, subTitle, data }) => {
             </Space>
             <ChartCard data={data?.find((tab) => tab.value === tabPlacement)} />
         </Card>
+      </div>
     )
 })
 

@@ -5,7 +5,7 @@ import { callService, eq, getHeadersWith, formatNum, formatBytes, roundToTheNear
 import URLS from '@/lib/helpers/urls';
 
 
-function DetailSuspence({ query, buildCallback, suspenseFallback }) {
+function DetailSuspence({ query, buildCallback, suspenseFallback, suspenseBlockStyle = false }) {
 
   const [data, setData] = useState(null);
   const { globusToken } = useContext(AppContext); 
@@ -33,7 +33,7 @@ function DetailSuspence({ query, buildCallback, suspenseFallback }) {
   
   return (
     <>
-      {data ? <span>{buildCallback(data)}</span> : suspenseFallback || <Skeleton.Input active={true} size="small" />}
+      {data ? <span>{buildCallback(data)}</span> : suspenseFallback || !suspenseBlockStyle ? <Skeleton.Input active={true} size="small" /> : <Skeleton.Input className="w-100" active style={{ width: '100%', height: '300px', marginTop: '20px' }} />}
     </>
   );
 }

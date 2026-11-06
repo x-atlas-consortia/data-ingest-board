@@ -52,7 +52,7 @@ const ApiUsageSummary = memo(({ data, skeleton }) => {
                         <small>total requests</small>
                     </h3>
                 </div>
-                <div className='c-logCard__flexWrap'>{ms}</div>
+                <div className='c-usageCard__flexWrap'>{ms}</div>
             </>
         )
     }
@@ -168,10 +168,10 @@ const SummaryCard = memo(
 
         return (
             <Card
-                className={`c-logCard c-logCard--${cardKey} ${cardKey == tabName ? 'is-highlighted' : ''}`}
+                className={`c-usageCard c-usageCard--summary c-usageCard--${cardKey} ${cardKey == tabName ? 'is-highlighted' : ''}`}
                 extra={
                     <>
-                        <span className='pull-right c-logCard__spinner'>
+                        <span className='pull-right c-usageCard__spinner'>
                             <Spin size='small' />
                         </span>
                     </>

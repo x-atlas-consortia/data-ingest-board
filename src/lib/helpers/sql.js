@@ -4,8 +4,8 @@ export const indexFixtures = {
 }
 
 const SQL = {
-    whereClause: ({ from, to, field }) => {
-        const whereClauses = [`${field} IS NOT NULL`]
+    whereClause: ({ from, to, field, initialClauses = [] }) => {
+        const whereClauses = [`${field} IS NOT NULL`, ...initialClauses]
         if (from) {
             whereClauses.push(`${field} >= '${from}'`)
         }
@@ -34,7 +34,7 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             return `SELECT COUNT(DISTINCT entity_uuid) AS total_entities FROM file_download ${whereClause}`.trim()
         },
@@ -42,7 +42,7 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             return `SELECT COUNT(*) AS total_downloads FROM file_download ${whereClause}`.trim()
         },
@@ -50,7 +50,7 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download ${whereClause}`.trim()
         },
@@ -98,7 +98,7 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             return `SELECT DATE_TRUNC('month', download_date_time) AS time_bucket, count(*) AS files, sum(bytes_transferred) AS total_bytes_transferred, count(DISTINCT entity_uuid) AS datasets FROM file_download ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
             //return `WITH fd AS ( SELECT *, coalesce(nullif(trim(regexp_replace(dataset_type, '\s*\[.*\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date) AS mon FROM file_download ) SELECT user_domain AS org, mode(country_name) AS country, count(DISTINCT user_name) AS users, count(*) AS files, sum(bytes_transferred) AS total_bytes_transferred, count(DISTINCT entity_uuid) AS datasets, count(DISTINCT assay) AS assays, count(DISTINCT mon) AS active_months, strftime(min(download_date), '%Y-%m-%d') AS first_download, strftime(max(download_date), '%Y-%m-%d') AS last_download FROM fd ${whereClause} GROUP BY 1 ORDER BY total_bytes_transferred DESC;`
@@ -108,7 +108,7 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             //return `SELECT DATE_TRUNC('month', download_date_time) AS time_bucket, coalesce(nullif(trim(regexp_replace(dataset_type, '\s*\[.*\]$', '')), ''), 'NA') AS assay, SUM(bytes_transferred) AS total_bytes_transferred FROM file_download ${whereClause} GROUP BY ALL ORDER BY time_bucket ASC, assay ASC`
             return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date_time) AS mon  FROM file_download ), top_assays AS (SELECT assay FROM fd GROUP BY 1 ORDER BY sum(bytes_transferred) DESC LIMIT 7) SELECT mon AS time_bucket,   CASE WHEN assay IN (SELECT assay FROM top_assays) THEN assay ELSE 'Other' END AS assay, sum(bytes_transferred) AS total_bytes_transferred FROM fd ${whereClause} GROUP BY ALL ORDER BY time_bucket, assay;`
@@ -117,9 +117,26 @@ const SQL = {
           const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'download_date_time'
+                field: indexFixtures.fileDownloads.date
             })
             return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay,       date_trunc('month', download_date_time) AS mon   FROM file_download ), m AS (SELECT * FROM fd ${whereClause}), first_month AS (SELECT user_name, min(mon) AS first_mon FROM m GROUP BY 1) SELECT um.mon AS time_bucket,   count(*) AS users,   count(*) FILTER (WHERE um.mon = f.first_mon) AS new_users,   count(*) FILTER (WHERE um.mon > f.first_mon) AS returning_users FROM (SELECT DISTINCT user_name, mon FROM m WHERE user_name IS NOT NULL) um JOIN first_month f USING (user_name) GROUP BY um.mon ORDER BY um.mon;`
+        },
+        datasetTypes: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.fileDownloads.date
+            })
+            return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay,       date_trunc('month', download_date_time) AS mon   FROM file_download ) SELECT dataset_type, assay,   count(*) AS files,   round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   count(DISTINCT user_name) AS users,   count(DISTINCT entity_uuid) AS datasets,   count(DISTINCT user_tld) AS orgs,   round(median(bytes_transferred) / 1e6, 2) AS median_mb FROM fd ${whereClause} GROUP BY ALL ORDER BY terabytes DESC; `
+        },
+        popularDatasets: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.fileDownloads.date,
+                initialClauses: [`entity_type NOT IN ('UNRESOLVED', 'UNTRACKED')`]
+            })
+            return `SELECT application_id, entity_type,   any_value(dataset_type) AS dataset_type,   count(DISTINCT user_name) AS users,   count(DISTINCT user_tld) AS orgs,   count(*) AS files,   approx_count_distinct(relative_file_path) AS unique_files, round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   strftime(max(download_date), '%Y-%m-%d') AS last_download FROM file_download ${whereClause} GROUP BY application_id, entity_type ORDER BY users DESC, terabytes DESC LIMIT 50;`
         }
     }
 }

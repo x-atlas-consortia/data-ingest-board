@@ -8,7 +8,8 @@ import DetailSuspence from '@/components/DetailSuspence'
 const TinyCard = memo(
     ({ cardKey, query, formatter, title, query2, formatter2, footer }) => {
         return (
-            <Card key={cardKey} className='c-logCard--tiny'>
+            <div className='c-usageCard c-usageCard--tiny'>
+            <Card key={cardKey}>
                 <DetailSuspence
                     query={query}
                     buildCallback={(data) => {
@@ -37,6 +38,7 @@ const TinyCard = memo(
                     }}
                 />
             </Card>
+            </div>
         )
     }
 )

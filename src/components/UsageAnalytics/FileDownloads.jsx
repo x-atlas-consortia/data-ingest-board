@@ -5,6 +5,7 @@ import SQL from '@/lib/helpers/sql'
 import TabChartCard from './TabChartCard'
 import { formatBytes, formatNum, formatAxisDate } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
+import TableCard from './TableCard'
 
 const dataToArrayofObjects = (rawData) => {
     return rawData.rows.map((row) =>
@@ -17,6 +18,7 @@ const downloadsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    suspenseBlockStyle={true}
                     query={SQL.fileDownloads.monthly({ from, to })}
                     buildCallback={(rawData) => {
                         const data = dataToArrayofObjects(rawData)
@@ -107,18 +109,19 @@ const downloadsCharts = (from, to) => {
                 <div className='row mt-2'>
                     <div className='col-md-6'>
                         <DetailSuspence
+                            suspenseBlockStyle={true}
                             query={SQL.fileDownloads.perAssay({ from, to })}
                             buildCallback={(rawData) => {
-                              console.log('Raw Data:', rawData)
+                                console.log('Raw Data:', rawData)
                                 const data = dataToArrayofObjects(rawData)
                                 const config = {
-                                  data,
+                                    data,
                                     xField: 'time_bucket',
                                     yField: 'total_bytes_transferred',
                                     colorField: 'assay',
                                     stack: true,
                                     tooltip: {
-                                      shared: true,
+                                        shared: true,
                                         title: (datum) => {
                                             return formatAxisDate(
                                                 datum.time_bucket,
@@ -127,25 +130,12 @@ const downloadsCharts = (from, to) => {
                                         },
                                         items: [
                                             (datum, index, data, column) => ({
-                                              name: datum.assay, // Map it directly to avoid duplicate field evaluation
-                                              value: formatBytes(datum.total_bytes_transferred ),
-                                            }),
-                                          ],
-                                        // fields: ['assay', 'total_bytes_transferred'], // limit fields to exactly these two
-                                        // formatter: (datum) => {
-                                        //   return { 
-                                        //     name: datum.assay, 
-                                        //     value: formatBytes(datum.total_bytes_transferred )
-                                        //   };
-                                        // },
-                                        // items: [
-                                        //     {
-                                        //         channel: 'y', // or field name
-                                        //         valueFormatter: (datum) => {
-                                        //             return formatBytes(datum)
-                                        //         }
-                                        //     }
-                                        // ]
+                                                name: datum.assay,
+                                                value: formatBytes(
+                                                    datum.total_bytes_transferred
+                                                )
+                                            })
+                                        ]
                                     },
                                     axis: {
                                         x: {
@@ -154,7 +144,6 @@ const downloadsCharts = (from, to) => {
                                             }
                                         },
                                         y: {
-                                            
                                             labelFormatter: (datum) =>
                                                 formatBytes(datum)
                                         }
@@ -165,20 +154,28 @@ const downloadsCharts = (from, to) => {
                                         title='Data transferred by assay, per month'
                                         subTitle={`Dataset types grouped to their base assay (pipeline suffix removed). Seven largest by all-time volume, the rest as Other. NA is mostly uploads and publications. From ${from} to ${to}`}
                                         data={config}
-                                        footer={<small><strong>Why this view:</strong> shows which data modalities drive demand over time and when a new assay starts to be picked up.</small>}
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                shows which data modalities
+                                                drive demand over time and when
+                                                a new assay starts to be picked
+                                                up.
+                                            </small>
+                                        }
                                     />
                                 )
                             }}
                         />
                     </div>
                     <div className='col-md-6'>
-                      <DetailSuspence
+                        <DetailSuspence
+                            suspenseBlockStyle={true}
                             query={SQL.fileDownloads.activeUsers({ from, to })}
                             buildCallback={(rawData) => {
-                         
                                 const list = dataToArrayofObjects(rawData)
                                 const data = []
-                                for(const item of list) {
+                                for (const item of list) {
                                     data.push({
                                         time_bucket: item.time_bucket,
                                         type: 'new_users',
@@ -192,13 +189,13 @@ const downloadsCharts = (from, to) => {
                                 }
 
                                 const config = {
-                                  data,
+                                    data,
                                     xField: 'time_bucket',
                                     yField: 'count',
                                     colorField: 'type',
                                     stack: true,
                                     tooltip: {
-                                      shared: true,
+                                        shared: true,
                                         title: (datum) => {
                                             return formatAxisDate(
                                                 datum.time_bucket,
@@ -207,11 +204,10 @@ const downloadsCharts = (from, to) => {
                                         },
                                         items: [
                                             (datum, index, data, column) => ({
-                                              name: datum.type, 
-                                              value: formatNum(datum.count ),
-                                            }),
-                                          ],
-                                     
+                                                name: datum.type,
+                                                value: formatNum(datum.count)
+                                            })
+                                        ]
                                     },
                                     axis: {
                                         x: {
@@ -220,7 +216,6 @@ const downloadsCharts = (from, to) => {
                                             }
                                         },
                                         y: {
-                                            
                                             labelFormatter: (datum) =>
                                                 formatNum(datum)
                                         }
@@ -231,13 +226,166 @@ const downloadsCharts = (from, to) => {
                                         title='Active Users by Month'
                                         subTitle={`Tracking user engagement and retention. From ${from} to ${to}`}
                                         data={config}
-                                        footer={<small><strong>Why this view:</strong> shows user activity patterns and identifies trends in user engagement over time.</small>}
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                shows user activity patterns and
+                                                identifies trends in user
+                                                engagement over time.
+                                            </small>
+                                        }
                                     />
                                 )
                             }}
                         />
                     </div>
                 </div>
+            )
+        },
+        {
+            component: (
+                <DetailSuspence
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.datasetTypes({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'Dataset type',
+                                dataIndex: 'dataset_type',
+                                key: 'dataset_type'
+                            },
+                            {
+                                title: 'Assay',
+                                dataIndex: 'assay',
+                                key: 'assay'
+                            },
+                            {
+                                title: 'TB',
+                                dataIndex: 'terabytes',
+                                key: 'terabytes',
+                                minWidth: '150px',
+                                render: (text) => (
+                                    <span className='c-inbar'>
+                                        <span
+                                            className='js-inbar c-inbar__fill'
+                                            data-value={text}
+                                        ></span>
+                                        <span className='c-inbar__text'>
+                                            {' '}
+                                            {text}
+                                        </span>
+                                    </span>
+                                )
+                            },
+                            {
+                                title: 'Files',
+                                dataIndex: 'files',
+                                key: 'files'
+                            },
+                            {
+                                title: 'Users',
+                                dataIndex: 'users',
+                                key: 'users'
+                            },
+                            {
+                                title: 'Datasets',
+                                dataIndex: 'datasets',
+                                key: 'datasets'
+                            },
+                            {
+                                title: 'Median MB',
+                                dataIndex: 'median_mb',
+                                key: 'median_mb'
+                            }
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Dataset Types'
+                                subTitle={`All time, one row per dataset type including pipeline. Median file size helps explain file-count vs volume differences. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+        {
+            component: (
+                <DetailSuspence
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.popularDatasets({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'ID',
+                                dataIndex: 'application_id',
+                                key: 'application_id'
+                            },
+                            {
+                                title: 'Dataset type',
+                                dataIndex: 'dataset_type',
+                                key: 'dataset_type'
+                            },
+                            {
+                                title: 'Users',
+                                dataIndex: 'users',
+                                key: 'users',
+                                render: (text) => (
+                                    <span className='c-inbar'>
+                                        <span
+                                            className='js-inbar c-inbar__fill'
+                                            data-value={text}
+                                        ></span>
+                                        <span className='c-inbar__text'>
+                                            {' '}
+                                            {text}
+                                        </span>
+                                    </span>
+                                )
+                            },
+                            {
+                                title: 'Orgs',
+                                dataIndex: 'orgs',
+                                key: 'orgs'
+                            },
+
+                            {
+                                title: 'Files',
+                                dataIndex: 'files',
+                                key: 'files'
+                            },
+
+                            {
+                                title: 'Unique files',
+                                dataIndex: 'unique_files',
+                                key: 'unique_files'
+                            },
+                            {
+                                title: 'TB',
+                                dataIndex: 'terabytes',
+                                key: 'terabytes',
+                                minWidth: '150px'
+                            },
+                            {
+                                title: 'Last download',
+                                dataIndex: 'last_download',
+                                key: 'last_download'
+                            }
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Most widely used datasets'
+                                subTitle={`Top 50 entities by distinct users. Unique files is the number of different files taken; the gap to Files shows repeat downloads. From ${from} to ${to}`}
+                                footer={<small><strong>Why this view:</strong> ranking by distinct users, rather than bytes, surfaces the datasets with the broadest community value. Good candidates for featuring or caching.</small>}
+                            />
+                        )
+                    }}
+                />
             )
         }
     ]
@@ -248,12 +396,11 @@ const FileDownloads = memo(({ from, to }) => {
         {
             key: 'downloads',
             label: 'Downloads',
-            children: <div>
-              
-              {downloadsCharts(from, to)[0].component}
-              {downloadsCharts(from, to)[1].component}
-            
-            </div>
+            children: (
+                <div>
+                    {downloadsCharts(from, to).map((chart) => chart.component)}
+                </div>
+            )
         },
         {
             key: 'locations',

@@ -126,7 +126,7 @@ const Usage = () => {
 
     const toggleHighlightClasses = (sel) => {
         const className = 'is-highlighted'
-        $('.c-logCard').removeClass(className)
+        $('.c-usageCard').removeClass(className)
         $(sel).addClass(className)
         _dispatchGTM('tabChange')
     }
@@ -190,12 +190,12 @@ const Usage = () => {
                 <>
                     {_cards[s].icon}
                     <span className='mx-3'>
-                        <span className='c-logCard__title'>
+                        <span className='c-usageCard__title'>
                             {_cards[s].title}
                         </span>
                         <br />
                         {from && (
-                            <small className='c-logCard__date'>
+                            <small className='c-usageCard__date'>
                                 <CalendarOutlined /> {from} - {to}
                             </small>
                         )}
@@ -243,7 +243,7 @@ const Usage = () => {
     const onTabChange = (active) => {
         setActiveSection(active)
         configureTabURL(getIndexKeyByActiveTab(active))
-        toggleHighlightClasses('.c-logCard--' + getIndexKeyByActiveTab(active))
+        toggleHighlightClasses('.c-usageCard--' + getIndexKeyByActiveTab(active))
     }
 
     const fetchData = async () => {
@@ -401,7 +401,7 @@ const Usage = () => {
                         </Col>
                         {!isOverviewCollapsed && (
                             <Row
-                                className={`c-logCards ${isBusy ? 'isBusy' : ''}`}
+                                className={`c-usageCards ${isBusy ? 'isBusy' : ''}`}
                             >
                                 {cards}
                             </Row>

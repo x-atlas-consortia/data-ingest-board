@@ -1,0 +1,54 @@
+.c-usageCard
+  margin-top 20px
+  &--summary
+    border solid 3px transparent
+    margin 10px
+    cursor pointer
+    width 320px
+    word-break break-all
+    h3 
+      small 
+        font-size .5em
+    +xxlg()
+      width 25%
+    +md-max()
+      width 45%
+    +sm()
+      width 100%
+      margin 0
+      
+    &.is-highlighted
+      border-color $col-hover-blue
+    &:hover
+      background-color $col-dirty-white
+  &--tiny
+    .ant-card-body 
+      padding 15px
+  
+  &__flexWrap 
+    overflowY auto
+    max-height 150px
+    display flex 
+    flex-wrap wrap
+
+  &__date
+    font-size 12px
+    color grey
+
+  &__slickWrap
+    margin-bottom 25px
+
+  .ant
+    &-card
+      &-head-title 
+        padding-top 20px
+
+  &s
+    &.isBusy  
+      .c-usageCard
+        opacity 0.5
+        &__spinner 
+          display block
+    .c-usageCard
+      &__spinner 
+        display none
