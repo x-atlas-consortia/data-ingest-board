@@ -59,7 +59,7 @@ export const logger = {
       } else {
         log[level](data)
       }
-      logger.toIngest(level, data)
+      //logger.toIngest(level, data)
   },
 
   all: {

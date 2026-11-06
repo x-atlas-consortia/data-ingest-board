@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import {
     DownloadOutlined,
     ApiOutlined,
@@ -20,7 +20,7 @@ import {
 } from '@/lib/helpers/general'
 import FileDownloads from '@/components/UsageAnalytics/FileDownloads'
 
-const TabContent = ({ tabKey, cardType, from, to }) => {
+const TabContent = memo(({ tabKey, cardType, from, to }) => {
     const performancePercentage = (dataNow, dataPrev) => {
         const perc =
             ((dataNow.rows[0][0] - dataPrev.rows[0][0]) / dataPrev.rows[0][0]) *
@@ -122,6 +122,6 @@ const TabContent = ({ tabKey, cardType, from, to }) => {
             {getTabContent()}
         </div>
     )
-}
+})
 
 export default TabContent
