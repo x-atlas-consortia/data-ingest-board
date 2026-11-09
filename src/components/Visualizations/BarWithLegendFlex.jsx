@@ -1,25 +1,28 @@
 import React, { useState, memo } from 'react'
-import { ChartProvider } from '@/context/ChartContext';
-import Bar from '@/components/Visualizations/Charts/Bar';
-import WithChartFlex from './WithChartFlex';
+import { ChartProvider } from '@/context/ChartContext'
+import Column from '@/components/Visualizations/Charts/Column'
+import WithChartFlex from './WithChartFlex'
 
-const BarWithLegendFlex = memo(({ chartId, data, yAxis, xAxis, style = {}}) => {
-    const [legend, setLegend] = useState({})
+const BarWithLegendFlex = memo(
+    ({ chartId, data, yAxis, xAxis, style = {} }) => {
+        const [legend, setLegend] = useState({})
 
-    return (
-        <WithChartFlex legend={legend} data={data}>
+        return (
+            <WithChartFlex legend={legend} data={data}>
                 <ChartProvider>
-                    <Bar
+                    <Column
                         style={style}
                         xAxis={xAxis}
                         yAxis={yAxis}
                         reload={false}
                         setLegend={setLegend}
                         data={data}
-                        chartId={chartId} />
+                        chartId={chartId}
+                    />
                 </ChartProvider>
-        </WithChartFlex>
-    )
-})
+            </WithChartFlex>
+        )
+    }
+)
 
 export default BarWithLegendFlex

@@ -14,7 +14,7 @@ export const ChartProvider = ({ children }) => {
         base: 'c-visualizations__'
     }
 
-    const getChartSelector = (chartId, chart = 'bar', withHash = true) => `${withHash ? '#' : ''}${selectors.base}${chart}--${chartId}`
+    const getChartSelector = (chartId, chart = 'column', withHash = true) => `${withHash ? '#' : ''}${selectors.base}${chart}--${chartId}`
 
     const randomColor = () => {
         let colors = THEME.lightColors()
@@ -29,7 +29,7 @@ export const ChartProvider = ({ children }) => {
         return { color }
     }
 
-    const appendTooltip = (id, chart = 'bar') => {
+    const appendTooltip = (id, chart = 'column') => {
         chartId.current = id
         d3.select(getChartSelector(id, chart))
             .append('div')
@@ -77,7 +77,7 @@ export const ChartProvider = ({ children }) => {
             .style('cursor', 'pointer')
     }
 
-    const toolTipHandlers = (id, chart = 'bar') => {
+    const toolTipHandlers = (id, chart = 'column') => {
         return {
             mouseover: function (e, d) {
                 visibleTooltip(id, chart, e, d)
@@ -111,7 +111,7 @@ export const ChartProvider = ({ children }) => {
             return label.length > 30 ? label.substring(0, 27) + "..." : label;
         }
         return {
-            sizing: (style, chartId, chart = 'bar') => {
+            sizing: (style, chartId, chart = 'column') => {
                 let $parent = $(getChartSelector(chartId, chart))
                 let divWidth = $parent.width()
                 let i = 0
