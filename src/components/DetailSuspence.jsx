@@ -16,19 +16,35 @@ function DetailSuspence({ query, buildCallback, suspenseFallback, suspenseBlockS
       try {
         const url = URLS.ingest.analytics.query();
         const headers = getHeadersWith(globusToken).headers
-        const response = await callService(url,
-                                headers,
-                                {query},
-                                'POST');
-      
-        if (response.status == 200) {
-          setData(response.data);
+
+        if (Array.isArray(query)) {
+         
+            const responses = await Promise.all(
+                query.map((q) =>
+                    callService(url, headers, { query: q }, 'POST')
+                )
+            )
+
+            if (responses.every((response) => response.status == 200)) {
+                setData(responses.map((response) => response.data))
+            }
+        } else {
+            const response = await callService(url, headers, { query }, 'POST')
+
+            if (response.status == 200) {
+                setData(response.data)
+            }
         }
+        
       } catch (error) {
         console.error(error);
       }
     };
-    fetchData();
+    
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [query]);
   
   return (

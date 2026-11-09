@@ -19,9 +19,10 @@ const downloadsCharts = (from, to) => {
             component: (
                 <DetailSuspence
                     suspenseBlockStyle={true}
-                    query={SQL.fileDownloads.monthly({ from, to })}
+                    query={[SQL.fileDownloads.monthly({ from, to }), SQL.fileDownloads.monthlyDatasetPullsTouched({ from, to })]}
                     buildCallback={(rawData) => {
-                        const data = dataToArrayofObjects(rawData)
+                        const data = dataToArrayofObjects(rawData[0])
+                        const datasetPullsTouchedData = dataToArrayofObjects(rawData[1])
                         const config = [
                             {
                                 label: 'Data transferred (TB)',
@@ -91,6 +92,72 @@ const downloadsCharts = (from, to) => {
                                         }
                                     }
                                 }
+                            },
+                            {
+                                label: 'Dataset pulls',
+                                value: 'dataset_pulls',
+                                footer: <small><strong>Dataset pulls:</strong> one user downloading any files from one dataset on one day counts as one pull, however many files that is. Monthly bars add up the pulls on each day of the month.</small>,
+                                config: {
+                                    data: datasetPullsTouchedData,
+                                    xField: 'time_bucket',
+                                    yField: 'dataset_pulls',
+                                    tooltip: {
+                                        title: (datum) => {
+                                            return formatAxisDate(
+                                                datum.time_bucket,
+                                                true
+                                            )
+                                        },
+                                        items: [
+                                            {
+                                                name: 'Dataset pulls',
+                                                channel: 'y', // or field name
+                                                valueFormatter: (datum) => {
+                                                    return formatNum(datum)
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    axis: {
+                                        y: {
+                                            labelFormatter: (datum) =>
+                                                formatNum(datum)
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                label: 'Datasets touched',
+                                value: 'datasets_touched',
+                                footer: <small><strong>Datasets touched:</strong> the number of distinct datasets that had at least one file downloaded that month, by anyone.</small>,
+                                config: {
+                                    data: datasetPullsTouchedData,
+                                    xField: 'time_bucket',
+                                    yField: 'datasets_touched',
+                                    tooltip: {
+                                        title: (datum) => {
+                                            return formatAxisDate(
+                                                datum.time_bucket,
+                                                true
+                                            )
+                                        },
+                                        items: [
+                                            {
+                                                name: 'Datasets touched',
+                                                channel: 'y', // or field name
+                                                valueFormatter: (datum) => {
+                                                    return formatNum(datum)
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    axis: {
+                                        y: {
+                                            labelFormatter: (datum) =>
+                                                formatNum(datum)
+                                        }
+                                    }
+                                }
                             }
                         ]
                         return (
@@ -98,6 +165,7 @@ const downloadsCharts = (from, to) => {
                                 title='Monthly usage'
                                 subTitle={`Pick a measure. From ${from} to ${to}`}
                                 data={config}
+                                footer={<small><strong>Why this view:</strong> volume, file counts and pulls tell different stories. A single user syncing a CODEX dataset can add millions of files in one month, so a dataset pull, one user taking files from one dataset on one day, is a steadier measure of demand.</small>}
                             />
                         )
                     }}
