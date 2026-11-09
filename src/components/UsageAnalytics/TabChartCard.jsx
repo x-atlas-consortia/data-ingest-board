@@ -1,8 +1,8 @@
 import React, { memo, useState } from 'react'
 import { Card, Radio, Space } from 'antd'
-import { Column } from '@ant-design/plots';
+import { Bar, Column } from '@ant-design/plots';
 
-const TabChartCard = memo(({ title, subTitle, data, footer }) => {
+const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
     const [tabPlacement, setTabPlacement] = useState(data?.[0]?.value);
     const changeTabPlacement = e => {
       setTabPlacement(e.target.value);
@@ -22,7 +22,7 @@ const TabChartCard = memo(({ title, subTitle, data, footer }) => {
               </Radio.Group>
             </Space>
        
-            <Column {...currentChartData?.config} />
+            {chartType === 'bar' ? <Bar {...currentChartData?.config} /> : <Column {...currentChartData?.config} />}
             {currentChartData?.footer && <span>{currentChartData.footer}</span>}
             {footer && <div className='ant-card-actions pt-2 mt-2'>{footer}</div>}
         </Card>

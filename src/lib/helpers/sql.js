@@ -146,6 +146,15 @@ const SQL = {
                 initialClauses: [`entity_type NOT IN ('UNRESOLVED', 'UNTRACKED')`]
             })
             return `SELECT application_id, entity_type,   any_value(dataset_type) AS dataset_type,   count(DISTINCT user_name) AS users,   count(DISTINCT user_tld) AS orgs,   count(*) AS files,   approx_count_distinct(relative_file_path) AS unique_files, round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   strftime(max(download_date), '%Y-%m-%d') AS last_download FROM file_download ${whereClause} GROUP BY application_id, entity_type ORDER BY users DESC, terabytes DESC LIMIT 50;`
+        },
+        // Locations 
+        locations: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.fileDownloads.date
+            })
+            return `SELECT country_name AS country, country_code AS code,   count(*) AS files,   round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   count(DISTINCT user_name) AS users,   count(DISTINCT user_tld) AS orgs,   count(DISTINCT entity_uuid) AS datasets,   count(DISTINCT city_name) AS cities FROM file_download ${whereClause} GROUP BY ALL ORDER BY terabytes DESC`
         }
     }
 }

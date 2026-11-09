@@ -3,15 +3,9 @@ import { Tabs } from 'antd'
 import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
 import TabChartCard from './TabChartCard'
-import { formatBytes, formatNum, formatAxisDate } from '@/lib/helpers/general'
+import { formatBytes, formatNum, formatAxisDate, dataToArrayofObjects } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
-
-const dataToArrayofObjects = (rawData) => {
-    return rawData.rows.map((row) =>
-        Object.fromEntries(rawData.columns.map((key, i) => [key, row[i]]))
-    )
-}
 
 const downloadsCharts = (from, to) => {
     return [
@@ -459,6 +453,152 @@ const downloadsCharts = (from, to) => {
     ]
 }
 
+const locationsCharts = (from, to) => {
+    return [
+        {
+            component: (
+                <DetailSuspence
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.locations({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const config = [
+                            {
+                                label: 'Data transferred (TB)',
+                                value: 'bytes',
+                                config: {
+                                    data,
+                                    xField: 'country',
+                                    yField: 'terabytes',
+                                    tooltip: {
+                                        title: (datum) => datum.country,
+                                        items: [
+                                            {
+                                                name: 'Data transferred',
+                                                channel: 'y', // or field name
+                                                valueFormatter: (datum) => {
+                                                    return `${datum} TB`
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    label: {
+                                        style: {
+                                            dx: (d) => {
+                                                const str = d.terabytes.toString()
+                                                return str.length * 8
+                                            }
+                                        }
+                                    },
+                                    axis: {
+                                        x: {
+                                            label: {
+                                                autoHide: false, 
+                                            }
+                                        },
+                                    }
+                                }
+                            },
+                            {
+                                label: 'Users',
+                                value: 'users',
+                                config: {
+                                    data,
+                                    xField: 'country',
+                                    yField: 'users',
+                                    tooltip: {
+                                        title: (datum) => datum.country,
+                                        items: [
+                                            {
+                                                name: 'Users',
+                                                channel: 'y', // or field name
+                                                valueFormatter: (datum) => {
+                                                    return formatNum(datum)
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    label: {
+                                        style: {
+                                            dx: (d) => {
+                                                const str = d.users.toString()
+                                                return str.length * 8
+                                            }
+                                        }
+                                    },
+                                    axis: {
+                                        x: {
+                                            label: {
+                                                autoHide: false, 
+                                            }
+                                        },
+                                        y: {
+                                            labelFormatter: (datum) =>
+                                                formatNum(datum)
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                label: 'Files',
+                                value: 'files',
+                                config: {
+                                    data,
+                                    xField: 'country',
+                                    yField: 'files',
+                                    tooltip: {
+                                        title: (datum) => datum.country,
+                                        items: [
+                                            {
+                                                name: 'Files',
+                                                channel: 'y', // or field name
+                                                valueFormatter: (datum) => {
+                                                    return formatNum(datum)
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    label: {
+                                        formatter: (datum) => {
+                                            return formatNum(datum)
+                                        },
+                                        style: {
+                                            dx: (d) => {
+                                                const str = d.files.toString()
+                                                return str.length * 8
+                                            }
+                                        }
+                                    },
+                                    axis: {
+                                        x: {
+                                            label: {
+                                                autoHide: false, 
+                                            }
+                                        },
+                                        y: {
+                                            labelFormatter: (datum) =>
+                                                formatNum(datum)
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                        return (
+                            <TabChartCard
+                                title='Countries'
+                                subTitle={`Destination country from the download IP. From ${from} to ${to}`}
+                                data={config}
+                                chartType='bar'
+                                footer={<small><strong>Why this view:</strong>  international reach for reporting.</small>}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+    ]
+}
+
 const FileDownloads = memo(({ from, to }) => {
     const items = [
         {
@@ -473,7 +613,11 @@ const FileDownloads = memo(({ from, to }) => {
         {
             key: 'locations',
             label: 'Locations',
-            children: <div>Content of Tab Pane 2</div>
+            children: (
+                <div>
+                    {locationsCharts(from, to).map((chart) => chart.component)}
+                </div>
+            )
         }
     ]
 

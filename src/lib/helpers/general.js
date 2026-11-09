@@ -198,3 +198,9 @@ export function autoBlobDownloader(data, type, filename) {
     a.remove()
     window.URL.revokeObjectURL(url)
 }
+
+export const dataToArrayofObjects = (rawData) => {
+    return rawData.rows.map((row) =>
+        Object.fromEntries(rawData.columns.map((key, i) => [key, row[i]]))
+    )
+}
