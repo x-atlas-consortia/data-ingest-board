@@ -1,38 +1,53 @@
-import { useEffect, useContext, useRef, useMemo } from "react";
-import { Button, Table } from 'antd';
-import ESQ from "@/lib/helpers/esq";
-import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
-import AppContext from "@/context/AppContext";
-import TABLE from '@/lib/helpers/table';
-import LogsContext from "@/context/LogsContext";
-import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
-import LineWithLegend from "@/components/Visualizations/LineWithLegend";
-import SearchFilterTable from "./SearchFilterTable";
-import GroupedBarWithLegend from "../Visualizations/GroupedBarWithLegend";
+import { useEffect, useContext, useRef, useMemo } from 'react'
+import { Button, Table } from 'antd'
+import ESQ from '@/lib/helpers/esq'
+import {
+    callService,
+    eq,
+    formatNum,
+    getHeadersWith
+} from '@/lib/helpers/general'
+import AppContext from '@/context/AppContext'
+import TABLE from '@/lib/helpers/table'
+import LogsContext from '@/context/LogsContext'
+import OverlappedBarWithLegend from '@/components/Visualizations/OverlappedBarWithLegend'
+import LineWithLegend from '@/components/Visualizations/LineWithLegend'
+import SearchFilterTable from './SearchFilterTable'
+import GroupedColumnWithLegend from '../Visualizations/GroupedColumnWithLegend'
 
-const LogsReposTable = ({ }) => {
+const LogsReposTable = ({}) => {
     const { globusToken } = useContext(AppContext)
     const {
-        tableData, setTableData,
-        isBusy, setIsBusy,
-        hasMoreData, setHasMoreData,
+        tableData,
+        setTableData,
+        isBusy,
+        setIsBusy,
+        hasMoreData,
+        setHasMoreData,
         afterKey,
         numOfRows,
-        vizData, setVizData,
+        vizData,
+        setVizData,
         updateTableData,
-        fromDate, toDate,
-        getFromDate, getToDate,
+        fromDate,
+        toDate,
+        getFromDate,
+        getToDate,
         indexKey,
-        selectedRows, setSelectedRows, setMenuItems,
-        stackedGroupedBarMenuItems, setSelectedRowObjects,
+        selectedRows,
+        setSelectedRows,
+        setMenuItems,
+        stackedGroupedBarMenuItems,
+        setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
         getAxisTick,
         getDatePart,
-        histogramDetails, setHistogramDetails,
-        selectedMenuItem, setSelectedMenuItem,
+        histogramDetails,
+        setHistogramDetails,
+        selectedMenuItem,
+        setSelectedMenuItem,
         tableScroll
-
     } = useContext(LogsContext)
 
     const subgroupLabels = useRef({})
@@ -40,14 +55,18 @@ const LogsReposTable = ({ }) => {
     const xAxis = useRef({})
     const histogramBuckets = useRef({})
 
-
     const fetchData = async (includePrevData = true) => {
         setIsBusy(true)
         let dataSize = numOfRows
 
         let url = getUrl()
         if (!url) return
-        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), collapse: true, size: dataSize })[`${indexKey}Table`]
+        let q = ESQ.indexQueries({
+            from: getFromDate(),
+            to: getToDate(),
+            collapse: true,
+            size: dataSize
+        })[`${indexKey}Table`]
         let headers = getHeadersWith(globusToken).headers
 
         if (afterKey.current !== null) {
@@ -58,7 +77,6 @@ const LogsReposTable = ({ }) => {
         let _data = res.data?.aggregations?.buckets || {}
 
         if (res.status === 200 && _data?.buckets?.length) {
-
             afterKey.current = _data.after_key
 
             let repo, types
@@ -70,11 +88,13 @@ const LogsReposTable = ({ }) => {
             let _ownerBuckets = {}
 
             const valuesObj = (t) => {
-                return { [`unique${t.key.upCaseFirst()}s`]: t.unique?.value, [`${t.key}s`]: t.count?.value }
+                return {
+                    [`unique${t.key.upCaseFirst()}s`]: t.unique?.value,
+                    [`${t.key}s`]: t.count?.value
+                }
             }
 
             if (list.length) {
-             
                 for (let d of list) {
                     types = d['type.keyword'].buckets
                     repo = d.key['repository.keyword']
@@ -90,17 +110,20 @@ const LogsReposTable = ({ }) => {
                         ...repos[repo]
                     })
                     repos[repo] = { ...repos[repo], i: _tableData.length - 1 }
-                  
                 }
 
                 Addon.log(`${indexKey}.Table`, { data: _tableData })
 
                 // Get per repo histogram for table
-                q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}RepoHistogram`](histogramOps)
+                q = ESQ.indexQueries({
+                    from: getFromDate(),
+                    to: getToDate(),
+                    list: Object.keys(repos)
+                })[`${indexKey}RepoHistogram`](histogramOps)
                 res = await callService(url, headers, q, 'POST')
                 if (res.status == 200) {
-
-                    let _data = res.data?.aggregations?.calendarHistogram?.buckets
+                    let _data =
+                        res.data?.aggregations?.calendarHistogram?.buckets
                     Addon.log(`${indexKey}.RepoHistogram`, { data: _data })
 
                     for (let d of _data) {
@@ -109,41 +132,66 @@ const LogsReposTable = ({ }) => {
                         if (!d['type.keyword'].buckets.length) {
                             // account for empty buckets so the respective d.key_as_string is plotted as 0 on the graph (line)
                             for (let e of _tableData) {
-                                e.histogram[d.key_as_string] = {uniqueViews: 0, views: 0, uniqueClones: 0, clones: 0}
+                                e.histogram[d.key_as_string] = {
+                                    uniqueViews: 0,
+                                    views: 0,
+                                    uniqueClones: 0,
+                                    clones: 0
+                                }
                             }
                         }
 
                         for (let t of d['type.keyword'].buckets) {
                             for (let r of t['repository.keyword'].buckets) {
                                 repo = r.key
-                                _ownerBuckets[repo] = {owner: r.owner?.buckets[0]?.key}
-                                _histogramBuckets[repo] = { ...(_histogramBuckets[repo] || {}), ...valuesObj({ ...r, key: t.key }) }
+                                _ownerBuckets[repo] = {
+                                    owner: r.owner?.buckets[0]?.key
+                                }
+                                _histogramBuckets[repo] = {
+                                    ...(_histogramBuckets[repo] || {}),
+                                    ...valuesObj({ ...r, key: t.key })
+                                }
                             }
                         }
-                        
+
                         for (let r in _histogramBuckets) {
-                            _tableData[repos[r].i].owner = _ownerBuckets[r].owner
-                            _tableData[repos[r].i].histogram[d.key_as_string] = _histogramBuckets[r]
+                            _tableData[repos[r].i].owner =
+                                _ownerBuckets[r].owner
+                            _tableData[repos[r].i].histogram[d.key_as_string] =
+                                _histogramBuckets[r]
                         }
                     }
                 }
 
                 // Get data for bar charts
-                q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: Object.keys(repos) })[`${indexKey}Histogram`](histogramOps)
+                q = ESQ.indexQueries({
+                    from: getFromDate(),
+                    to: getToDate(),
+                    list: Object.keys(repos)
+                })[`${indexKey}Histogram`](histogramOps)
                 res = await callService(url, headers, q, 'POST')
 
                 if (res.status == 200) {
-                    _histogramBuckets = includePrevData ? histogramBuckets.current : {}
+                    _histogramBuckets = includePrevData
+                        ? histogramBuckets.current
+                        : {}
                     let dKey
-                    for (let d of res.data?.aggregations?.calendarHistogram?.buckets) {
+                    for (let d of res.data?.aggregations?.calendarHistogram
+                        ?.buckets) {
                         dKey = d.key_as_string
                         _histogramBuckets[dKey] = { group: dKey }
                         for (let t of d['type.keyword'].buckets) {
-                            _histogramBuckets[dKey] = { ..._histogramBuckets[dKey], ...valuesObj(t) }
+                            _histogramBuckets[dKey] = {
+                                ..._histogramBuckets[dKey],
+                                ...valuesObj(t)
+                            }
                         }
                     }
                     histogramBuckets.current = _histogramBuckets
-                    setVizData({ ...vizData, bar: Object.values(_histogramBuckets) })
+                    setVizData({
+                        ...vizData,
+                        bar: Object.values(_histogramBuckets)
+                    })
                 }
                 // end get data for bar charts
             }
@@ -171,16 +219,16 @@ const LogsReposTable = ({ }) => {
             key: 'group',
             sorter: (a, b) => a.group.localeCompare(b.group),
             render: (v, r) => {
-                return <span data-field="group">{v}</span>
+                return <span data-field='group'>{v}</span>
             }
         },
-         {
+        {
             title: 'Owner',
             dataIndex: 'owner',
             key: 'owner',
             sorter: (a, b) => a.owner.localeCompare(b.owner),
             render: (v, r) => {
-                return <span data-field="owner">{v}</span>
+                return <span data-field='owner'>{v}</span>
             }
         },
         {
@@ -189,7 +237,7 @@ const LogsReposTable = ({ }) => {
             key: 'views',
             sorter: (a, b) => sorter(a, b, 'views'),
             render: (v, r) => {
-                return <span data-field="views">{formatNum(v)}</span>
+                return <span data-field='views'>{formatNum(v)}</span>
             }
         },
         {
@@ -198,7 +246,7 @@ const LogsReposTable = ({ }) => {
             key: 'uniqueViews',
             sorter: (a, b) => sorter(a, b, 'uniqueViews'),
             render: (v, r) => {
-                return <span data-field="uniqueViews">{formatNum(v)}</span>
+                return <span data-field='uniqueViews'>{formatNum(v)}</span>
             }
         },
         {
@@ -207,7 +255,11 @@ const LogsReposTable = ({ }) => {
             key: 'clones',
             sorter: (a, b) => sorter(a, b, 'clones'),
             render: (v, r) => {
-                return <span data-field="clones">{v > 0 ? formatNum(v) : '-'}</span>
+                return (
+                    <span data-field='clones'>
+                        {v > 0 ? formatNum(v) : '-'}
+                    </span>
+                )
             }
         },
         {
@@ -216,7 +268,11 @@ const LogsReposTable = ({ }) => {
             key: 'uniqueClones',
             sorter: (a, b) => sorter(a, b, 'uniqueClones'),
             render: (v, r) => {
-                return <span data-field="uniqueClones">{v > 0 ? formatNum(v) : '-'}</span>
+                return (
+                    <span data-field='uniqueClones'>
+                        {v > 0 ? formatNum(v) : '-'}
+                    </span>
+                )
             }
         }
     ]
@@ -224,7 +280,6 @@ const LogsReposTable = ({ }) => {
     useEffect(() => {
         setMenuItems(stackedGroupedBarMenuItems)
     }, [selectedMenuItem])
-
 
     useEffect(() => {
         setSelectedMenuItem('groupedBar')
@@ -246,23 +301,21 @@ const LogsReposTable = ({ }) => {
         resetView()
     }, [fromDate, toDate])
 
-     useEffect(() => {
+    useEffect(() => {
         if (!histogramDetails || histogramDetails.isMenuAction) {
             resetView()
         }
     }, [histogramDetails])
 
-
     useEffect(() => {
         for (let c of cols) {
             if (!eq(c.key, 'group') && !eq(c.key, 'owner')) {
-               subgroupLabels.current[c.dataIndex] = c.title 
+                subgroupLabels.current[c.dataIndex] = c.title
             }
         }
     }, [])
 
     const buildLineChart = (_data = []) => {
-
         let histogramOps = determineCalendarInterval()
         let _vizData = []
         let buckets = {}
@@ -287,14 +340,16 @@ const LogsReposTable = ({ }) => {
         _vizData = Object.values(buckets)
 
         if (_vizData.length) {
-            const nextDate = new Date(_vizData[_vizData.length - 1].xValue + getDatePart(histogramOps))
+            const nextDate = new Date(
+                _vizData[_vizData.length - 1].xValue + getDatePart(histogramOps)
+            )
             xAxis.current.suffix = getAxisTick(nextDate, histogramOps, 1)
         }
 
         repos.current = Array.from(_repos)
         Addon.log(`${indexKey}.buildLineChart`, { data: _vizData })
 
-       return _vizData
+        return _vizData
     }
 
     const rowSelection = {
@@ -302,63 +357,116 @@ const LogsReposTable = ({ }) => {
         onChange: (rowKeys, rows) => {
             setSelectedRowObjects(rows)
             setSelectedRows(rowKeys)
-        },
-    };
+        }
+    }
 
     const yAxis = useMemo(() => {
-        return { label: "Views/Clones" }
+        return { label: 'Views/Clones' }
     }, [])
 
     const _xAxis = useMemo(() => {
-        return  {...xAxis.current, label: `Views/Clones per ${histogramDetails?.interval}`}
+        return {
+            ...xAxis.current,
+            label: `Views/Clones per ${histogramDetails?.interval}`
+        }
     }, [histogramDetails])
 
     const formatAnalytics = (v, details) => {
         let cols = []
         for (let i of Object.keys(v)) {
             cols.push({
-            title: <span className="text-muted">{subgroupLabels.current[i]}</span>,
-            dataIndex: i,
-            key: i,
-            render: (v, r) => {
-                return <span>{formatNum(v)}</span>
-            }
-        },)
+                title: (
+                    <span className='text-muted'>
+                        {subgroupLabels.current[i]}
+                    </span>
+                ),
+                dataIndex: i,
+                key: i,
+                render: (v, r) => {
+                    return <span>{formatNum(v)}</span>
+                }
+            })
         }
-        return <Table pagination={false} columns={cols} dataSource={[{...v, id: crypto.randomUUID()}]} rowKey={'id'} />
+        return (
+            <Table
+                pagination={false}
+                columns={cols}
+                dataSource={[{ ...v, id: crypto.randomUUID() }]}
+                rowKey={'id'}
+            />
+        )
     }
 
     const svgStyle = useMemo(() => {
-        return {valueFormatter: ({v}) => formatNum(v)}
+        return { valueFormatter: ({ v }) => formatNum(v) }
     }, [])
 
     const repoLineChart = (row) => {
         const _vizData = buildLineChart(row)
-        return <>
-            {_vizData.length > 0 && fromDate && <LineWithLegend style={svgStyle} xAxis={_xAxis} groups={repos.current} yAxis={yAxis} data={_vizData} chartId={`reposHistogram-${row.group}`} />}
-        </>
+        return (
+            <>
+                {_vizData.length > 0 && fromDate && (
+                    <LineWithLegend
+                        style={svgStyle}
+                        xAxis={_xAxis}
+                        groups={repos.current}
+                        yAxis={yAxis}
+                        data={_vizData}
+                        chartId={`reposHistogram-${row.group}`}
+                    />
+                )}
+            </>
+        )
     }
 
-    return (<>
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle} yAxis={yAxis} xAxis={_xAxis} data={vizData.bar} subGroupLabels={subgroupLabels.current} chartId={'repos'} />}
+    return (
+        <>
+            {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && (
+                <GroupedColumnWithLegend
+                    style={svgStyle}
+                    yAxis={yAxis}
+                    xAxis={_xAxis}
+                    data={vizData.bar}
+                    subGroupLabels={subgroupLabels.current}
+                    chartId={'repos'}
+                />
+            )}
+            {vizData.bar?.length > 0 &&
+                eq(selectedMenuItem, 'overlappedBar') && (
+                    <OverlappedBarWithLegend
+                        style={svgStyle}
+                        yAxis={yAxis}
+                        xAxis={_xAxis}
+                        data={vizData.bar}
+                        subGroupLabels={subgroupLabels.current}
+                        chartId={'repos'}
+                    />
+                )}
 
-        <SearchFilterTable data={tableData} columns={cols}
-            formatters={{}}
-            tableProps={{
-                ...TABLE.expandableHistogram('group', formatAnalytics, repoLineChart),
-                rowKey: 'group',
-                rowSelection: { type: 'checkbox', ...rowSelection },
-                pagination: false,
-                loading: isBusy,
-                ...tableScroll
-            }} />
-        {hasMoreData && <Button onClick={fetchData} type="primary" block>
-            Load More
-        </Button>}
-
-    </>)
+            <SearchFilterTable
+                data={tableData}
+                columns={cols}
+                formatters={{}}
+                tableProps={{
+                    ...TABLE.expandableHistogram(
+                        'group',
+                        formatAnalytics,
+                        repoLineChart
+                    ),
+                    rowKey: 'group',
+                    rowSelection: { type: 'checkbox', ...rowSelection },
+                    pagination: false,
+                    loading: isBusy,
+                    ...tableScroll
+                }}
+            />
+            {hasMoreData && (
+                <Button onClick={fetchData} type='primary' block>
+                    Load More
+                </Button>
+            )}
+        </>
+    )
 }
 
-export default LogsReposTable;
-
+export default LogsReposTable

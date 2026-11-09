@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react'
 import { Card, Radio, Space } from 'antd'
-import { Bar, Column } from '@ant-design/plots';
+import { Bar, Column } from '@ant-design/charts';
 
 const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
     const [tabPlacement, setTabPlacement] = useState(data?.[0]?.value);

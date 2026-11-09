@@ -3,7 +3,12 @@ import { Tabs } from 'antd'
 import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
 import TabChartCard from './TabChartCard'
-import { formatBytes, formatNum, formatAxisDate, dataToArrayofObjects } from '@/lib/helpers/general'
+import {
+    formatBytes,
+    formatNum,
+    formatAxisDate,
+    dataToArrayofObjects
+} from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
@@ -13,10 +18,18 @@ const downloadsCharts = (from, to) => {
             component: (
                 <DetailSuspence
                     suspenseBlockStyle={true}
-                    query={[SQL.fileDownloads.monthly({ from, to }), SQL.fileDownloads.monthlyDatasetPullsTouched({ from, to })]}
+                    query={[
+                        SQL.fileDownloads.monthly({ from, to }),
+                        SQL.fileDownloads.monthlyDatasetPullsTouched({
+                            from,
+                            to
+                        })
+                    ]}
                     buildCallback={(rawData) => {
                         const data = dataToArrayofObjects(rawData[0])
-                        const datasetPullsTouchedData = dataToArrayofObjects(rawData[1])
+                        const datasetPullsTouchedData = dataToArrayofObjects(
+                            rawData[1]
+                        )
                         const config = [
                             {
                                 label: 'Data transferred (TB)',
@@ -90,7 +103,15 @@ const downloadsCharts = (from, to) => {
                             {
                                 label: 'Dataset pulls',
                                 value: 'dataset_pulls',
-                                footer: <small><strong>Dataset pulls:</strong> one user downloading any files from one dataset on one day counts as one pull, however many files that is. Monthly bars add up the pulls on each day of the month.</small>,
+                                footer: (
+                                    <small>
+                                        <strong>Dataset pulls:</strong> one user
+                                        downloading any files from one dataset
+                                        on one day counts as one pull, however
+                                        many files that is. Monthly bars add up
+                                        the pulls on each day of the month.
+                                    </small>
+                                ),
                                 config: {
                                     data: datasetPullsTouchedData,
                                     xField: 'time_bucket',
@@ -123,7 +144,14 @@ const downloadsCharts = (from, to) => {
                             {
                                 label: 'Datasets touched',
                                 value: 'datasets_touched',
-                                footer: <small><strong>Datasets touched:</strong> the number of distinct datasets that had at least one file downloaded that month, by anyone.</small>,
+                                footer: (
+                                    <small>
+                                        <strong>Datasets touched:</strong> the
+                                        number of distinct datasets that had at
+                                        least one file downloaded that month, by
+                                        anyone.
+                                    </small>
+                                ),
                                 config: {
                                     data: datasetPullsTouchedData,
                                     xField: 'time_bucket',
@@ -159,7 +187,17 @@ const downloadsCharts = (from, to) => {
                                 title='Monthly usage'
                                 subTitle={`Pick a measure. From ${from} to ${to}`}
                                 data={config}
-                                footer={<small><strong>Why this view:</strong> volume, file counts and pulls tell different stories. A single user syncing a CODEX dataset can add millions of files in one month, so a dataset pull, one user taking files from one dataset on one day, is a steadier measure of demand.</small>}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> volume,
+                                        file counts and pulls tell different
+                                        stories. A single user syncing a CODEX
+                                        dataset can add millions of files in one
+                                        month, so a dataset pull, one user
+                                        taking files from one dataset on one
+                                        day, is a steadier measure of demand.
+                                    </small>
+                                }
                             />
                         )
                     }}
@@ -443,7 +481,15 @@ const downloadsCharts = (from, to) => {
                                 columns={columns}
                                 title='Most widely used datasets'
                                 subTitle={`Top 50 entities by distinct users. Unique files is the number of different files taken; the gap to Files shows repeat downloads. From ${from} to ${to}`}
-                                footer={<small><strong>Why this view:</strong> ranking by distinct users, rather than bytes, surfaces the datasets with the broadest community value. Good candidates for featuring or caching.</small>}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> ranking
+                                        by distinct users, rather than bytes,
+                                        surfaces the datasets with the broadest
+                                        community value. Good candidates for
+                                        featuring or caching.
+                                    </small>
+                                }
                             />
                         )
                     }}
@@ -461,7 +507,10 @@ const locationsCharts = (from, to) => {
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.locations({ from, to })}
                     buildCallback={(rawData) => {
-                        const data = dataToArrayofObjects(rawData)
+                        const data = dataToArrayofObjects(rawData).filter(
+                            (d) => d.total_bytes_transferred !== 0
+                        )
+                        console.log('locations data:', data)
                         const config = [
                             {
                                 label: 'Data transferred (TB)',
@@ -475,7 +524,7 @@ const locationsCharts = (from, to) => {
                                         items: [
                                             {
                                                 name: 'Data transferred',
-                                                channel: 'y', 
+                                                channel: 'y',
                                                 valueFormatter: (datum) => {
                                                     return formatBytes(datum)
                                                 }
@@ -483,25 +532,36 @@ const locationsCharts = (from, to) => {
                                         ]
                                     },
                                     label: {
-                                        formatter: (datum) => formatBytes(datum),
+                                        formatter: (datum) =>
+                                            formatBytes(datum),
                                         style: {
                                             dx: (d) => {
-                                                const str = formatBytes(d.total_bytes_transferred).toString() 
+                                                const str = formatBytes(
+                                                    d.total_bytes_transferred
+                                                ).toString()
                                                 return (str.length - 2) * 8
                                             }
                                         }
                                     },
                                     axis: {
                                         y: {
-                                            labelFormatter: (datum) =>
-                                                formatBytes(datum)
-                                        }
+                                            labelFormatter: (v) => {
+                                                return Math.log10(v) + 1;
+                                            },
+                                            },
+                                        // y: {
+                                        //     labelFormatter: (datum) =>
+                                        //         formatBytes(datum)
+                                        // }
                                     },
-                                    // scale: {
-                                    //     y: {
-                                    //         type: 'log',
-                                    //     },
-                                    // },
+                                    scale: {
+                                        y: {
+                                            type: 'log',
+                                            tickCount: 3,
+                                            base: 100,
+                                            //domain: [1, 10000]
+                                        },
+                                    },
                                 }
                             },
                             {
@@ -534,7 +594,7 @@ const locationsCharts = (from, to) => {
                                     axis: {
                                         x: {
                                             label: {
-                                                autoHide: false, 
+                                                autoHide: false
                                             }
                                         },
                                         y: {
@@ -577,7 +637,7 @@ const locationsCharts = (from, to) => {
                                     axis: {
                                         x: {
                                             label: {
-                                                autoHide: false, 
+                                                autoHide: false
                                             }
                                         },
                                         y: {
@@ -594,13 +654,18 @@ const locationsCharts = (from, to) => {
                                 subTitle={`Destination country from the download IP. From ${from} to ${to}`}
                                 data={config}
                                 chartType='bar'
-                                footer={<small><strong>Why this view:</strong>  international reach for reporting.</small>}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong>{' '}
+                                        international reach for reporting.
+                                    </small>
+                                }
                             />
                         )
                     }}
                 />
             )
-        },
+        }
     ]
 }
 

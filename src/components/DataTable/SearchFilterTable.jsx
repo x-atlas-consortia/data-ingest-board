@@ -39,7 +39,7 @@ function SearchFilterTable({ data, columns, tableProps, formatters = {} }) {
                 onChange={(e) => handleSearch(e.target.value)} 
                 style={{ marginBottom: 16 }}
             />
-            <Table  dataSource={filteredData} columns={columns} {...tableProps} />
+            <Table key={searchText} dataSource={filteredData} columns={columns} {...tableProps} />
             
         </div>
     )

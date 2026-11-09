@@ -1,39 +1,53 @@
-import { useEffect, useContext, useRef, useMemo } from "react";
-import { Button, Table, Collapse, Badge, List } from 'antd';
-import ESQ from "@/lib/helpers/esq";
-import { callService, eq, formatNum, getHeadersWith } from "@/lib/helpers/general";
-import AppContext from "@/context/AppContext";
-import TABLE from '@/lib/helpers/table';
-import LogsContext from "@/context/LogsContext";
-import OverlappedBarWithLegend from "@/components/Visualizations/OverlappedBarWithLegend";
-import SearchFilterTable from "./SearchFilterTable";
-import ModalOverComponent from "../ModalOverComponent";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import GroupedBarWithLegend from "@/components/Visualizations/GroupedBarWithLegend";
+import { useEffect, useContext, useRef, useMemo } from 'react'
+import { Button, Table, Collapse, Badge, List } from 'antd'
+import ESQ from '@/lib/helpers/esq'
+import {
+    callService,
+    eq,
+    formatNum,
+    getHeadersWith
+} from '@/lib/helpers/general'
+import AppContext from '@/context/AppContext'
+import TABLE from '@/lib/helpers/table'
+import LogsContext from '@/context/LogsContext'
+import OverlappedBarWithLegend from '@/components/Visualizations/OverlappedBarWithLegend'
+import SearchFilterTable from './SearchFilterTable'
+import ModalOverComponent from '../ModalOverComponent'
+import { InfoCircleOutlined } from '@ant-design/icons'
+import GroupedColumnWithLegend from '@/components/Visualizations/GroupedColumnWithLegend'
 
 const LogsApiUsageTable = ({ data }) => {
     const { globusToken } = useContext(AppContext)
     const {
-        tableData, setTableData,
-        isBusy, setIsBusy,
-        hasMoreData, setHasMoreData,
+        tableData,
+        setTableData,
+        isBusy,
+        setIsBusy,
+        hasMoreData,
+        setHasMoreData,
         numOfRows,
-        vizData, setVizData,
+        vizData,
+        setVizData,
         updateTableData,
-        fromDate, toDate,
-        getFromDate, getToDate,
+        fromDate,
+        toDate,
+        getFromDate,
+        getToDate,
         indexKey,
-        selectedRows, setSelectedRows,
-        stackedGroupedBarMenuItems, setSelectedRowObjects,
+        selectedRows,
+        setSelectedRows,
+        stackedGroupedBarMenuItems,
+        setSelectedRowObjects,
         getUrl,
         determineCalendarInterval,
         selectedMenuItem,
         setSelectedMenuItem,
         setMenuItems,
-        histogramDetails, setHistogramDetails,
-        tableScroll, isLogScale,
-        getScaleSwitchMenuItem,
-
+        histogramDetails,
+        setHistogramDetails,
+        tableScroll,
+        isLogScale,
+        getScaleSwitchMenuItem
     } = useContext(LogsContext)
 
     const apis = useRef({})
@@ -66,27 +80,68 @@ const LogsApiUsageTable = ({ data }) => {
             list.push({
                 key: e.key.replaceAll('/', '_'),
                 label: e.key,
-                children: <div style={style}><List
-                    size="small"
-                    bordered
-                    dataSource={e.endpoints.buckets}
-                    renderItem={(item) => <List.Item actions={[<Badge count={formatNum(item.doc_count)} color="#495057" />]}>{item.key}</List.Item>}
-                /></div>,
-                extra: <Badge count={formatNum(e.doc_count)} color="#495057" />,
+                children: (
+                    <div style={style}>
+                        <List
+                            size='small'
+                            bordered
+                            dataSource={e.endpoints.buckets}
+                            renderItem={(item) => (
+                                <List.Item
+                                    actions={[
+                                        <Badge
+                                            count={formatNum(item.doc_count)}
+                                            color='#495057'
+                                        />
+                                    ]}
+                                >
+                                    {item.key}
+                                </List.Item>
+                            )}
+                        />
+                    </div>
+                ),
+                extra: <Badge count={formatNum(e.doc_count)} color='#495057' />
             })
-
         }
         let apiName = r.name || details.row?.name
-        let modalContent = <div style={style}>
-            {apis.current[apiName] > 20 && <p className="alert alert-info"><InfoCircleOutlined /><small className="mx-2">Only the top 20 endpoints are displayed.</small></p>}
-            <Collapse
-                expandIconPosition={'start'}
-                items={list}
-            /></div>
-        return (<ModalOverComponent modalOps={{ width: '60%', title: <><h4>Top requested endpoints for {apiName} {details.field ? `in ${details.field}` : `from ${getFromDate()} to ${getToDate()}`}</h4></> }}
-            modalContent={modalContent} childrenAsTrigger={true} popoverText="See top requested endpoints.">
-            <span data-field="endpoints" className="txt-lnk">{formatNum(r.endpoints || r.requests)}</span>
-        </ModalOverComponent>)
+        let modalContent = (
+            <div style={style}>
+                {apis.current[apiName] > 20 && (
+                    <p className='alert alert-info'>
+                        <InfoCircleOutlined />
+                        <small className='mx-2'>
+                            Only the top 20 endpoints are displayed.
+                        </small>
+                    </p>
+                )}
+                <Collapse expandIconPosition={'start'} items={list} />
+            </div>
+        )
+        return (
+            <ModalOverComponent
+                modalOps={{
+                    width: '60%',
+                    title: (
+                        <>
+                            <h4>
+                                Top requested endpoints for {apiName}{' '}
+                                {details.field
+                                    ? `in ${details.field}`
+                                    : `from ${getFromDate()} to ${getToDate()}`}
+                            </h4>
+                        </>
+                    )
+                }}
+                modalContent={modalContent}
+                childrenAsTrigger={true}
+                popoverText='See top requested endpoints.'
+            >
+                <span data-field='endpoints' className='txt-lnk'>
+                    {formatNum(r.endpoints || r.requests)}
+                </span>
+            </ModalOverComponent>
+        )
     }
 
     const cols = [
@@ -94,7 +149,7 @@ const LogsApiUsageTable = ({ data }) => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            sorter: (a, b) => a.name.localeCompare(b.name),
+            sorter: (a, b) => a.name.localeCompare(b.name)
         },
         {
             title: 'Endpoints',
@@ -112,7 +167,7 @@ const LogsApiUsageTable = ({ data }) => {
             key: 'requests',
             sorter: (a, b) => a.requests - b.requests,
             render: (v, r) => {
-                return <span data-field="requests">{formatNum(v)}</span>
+                return <span data-field='requests'>{formatNum(v)}</span>
             }
         }
     ]
@@ -120,7 +175,6 @@ const LogsApiUsageTable = ({ data }) => {
     useEffect(() => {
         setMenuItems([...stackedGroupedBarMenuItems, getScaleSwitchMenuItem()])
     }, [selectedMenuItem, isLogScale])
-
 
     useEffect(() => {
         setSelectedMenuItem('groupedBar')
@@ -149,7 +203,11 @@ const LogsApiUsageTable = ({ data }) => {
         let url = getUrl()
         if (!url) return
 
-        let q = ESQ.indexQueries({ from: getFromDate(), to: getToDate(), list: data.map((r) => r.name) })[`${indexKey}Histogram`](histogramOps)
+        let q = ESQ.indexQueries({
+            from: getFromDate(),
+            to: getToDate(),
+            list: data.map((r) => r.name)
+        })[`${indexKey}Histogram`](histogramOps)
         let headers = getHeadersWith(globusToken).headers
 
         let res = await callService(url, headers, q, 'POST')
@@ -170,13 +228,19 @@ const LogsApiUsageTable = ({ data }) => {
             let apiName, bKey
             for (let d of _data) {
                 bKey = d.key_as_string
-                histogramBuckets[bKey] = histogramBuckets[bKey] || { group: bKey }
+                histogramBuckets[bKey] = histogramBuckets[bKey] || {
+                    group: bKey
+                }
                 for (let t of d['host.keyword'].buckets) {
                     apiName = `${t.key}`
                     apis.current[apiName] = apiName
-                    endpointsPerApi[apiName] =  _tableData[apiListIndexes[apiName]].endpoints
+                    endpointsPerApi[apiName] =
+                        _tableData[apiListIndexes[apiName]].endpoints
                     histogramBuckets[bKey][apiName] = t.doc_count
-                    _tableData[apiListIndexes[apiName]].histogram[bKey] = {requests: t.doc_count, endpointsHits: t.endpoints}
+                    _tableData[apiListIndexes[apiName]].histogram[bKey] = {
+                        requests: t.doc_count,
+                        endpointsHits: t.endpoints
+                    }
                 }
             }
 
@@ -185,7 +249,6 @@ const LogsApiUsageTable = ({ data }) => {
 
             setVizData({ ...vizData, bar: _vizData })
             updateTableData(includePrevData, _tableData)
-            
         }
     }
 
@@ -194,46 +257,69 @@ const LogsApiUsageTable = ({ data }) => {
         onChange: (rowKeys, rows) => {
             setSelectedRowObjects(rows)
             setSelectedRows(rowKeys)
-        },
-    };
+        }
+    }
 
     const yAxis = useMemo(() => {
-        return { label: "Requests", formatter: formatNum, scaleLog: isLogScale }
+        return { label: 'Requests', formatter: formatNum, scaleLog: isLogScale }
     }, [isLogScale])
 
-    const xAxis =  useMemo(() => {
+    const xAxis = useMemo(() => {
         return { label: `Requests per ${histogramDetails?.interval}` }
     }, [histogramDetails])
 
     const svgStyle = useMemo(() => {
-        return {valueFormatter: ({v}) => formatNum(v)}
+        return { valueFormatter: ({ v }) => formatNum(v) }
     }, [])
 
     const formatAnalytics = (v, details) => {
         return endpointsDetails(v, details)
     }
 
-    return (<>
+    return (
+        <>
+            {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && (
+                <GroupedColumnWithLegend
+                    style={svgStyle}
+                    xAxis={xAxis}
+                    subGroupLabels={apis.current}
+                    yAxis={yAxis}
+                    data={vizData.bar}
+                    chartId={'usageHistogram'}
+                />
+            )}
+            {vizData.bar?.length > 0 &&
+                eq(selectedMenuItem, 'overlappedBar') && (
+                    <OverlappedBarWithLegend
+                        style={svgStyle}
+                        xAxis={xAxis}
+                        subGroupLabels={apis.current}
+                        yAxis={yAxis}
+                        data={vizData.bar}
+                        chartId={'usageHistogram'}
+                    />
+                )}
 
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && <GroupedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-        {vizData.bar?.length > 0 && eq(selectedMenuItem, 'overlappedBar') && <OverlappedBarWithLegend style={svgStyle}  xAxis={xAxis} subGroupLabels={apis.current} yAxis={yAxis} data={vizData.bar} chartId={'usageHistogram'} />}
-
-        <SearchFilterTable data={tableData} columns={cols}
-            formatters={{ bytes: formatNum }}
-            tableProps={{
-                ...TABLE.expandableHistogram('name', formatAnalytics),
-                rowKey: 'name',
-                rowSelection: { type: 'checkbox', ...rowSelection },
-                pagination: false,
-                loading: isBusy,
-                ...tableScroll
-            }} />
-        {hasMoreData && <Button onClick={fetchData} type="primary" block>
-            Load More
-        </Button>}
-
-    </>)
+            <SearchFilterTable
+                data={tableData}
+                columns={cols}
+                formatters={{ bytes: formatNum }}
+                tableProps={{
+                    ...TABLE.expandableHistogram('name', formatAnalytics),
+                    rowKey: 'name',
+                    rowSelection: { type: 'checkbox', ...rowSelection },
+                    pagination: false,
+                    loading: isBusy,
+                    ...tableScroll
+                }}
+            />
+            {hasMoreData && (
+                <Button onClick={fetchData} type='primary' block>
+                    Load More
+                </Button>
+            )}
+        </>
+    )
 }
 
-export default LogsApiUsageTable;
-
+export default LogsApiUsageTable

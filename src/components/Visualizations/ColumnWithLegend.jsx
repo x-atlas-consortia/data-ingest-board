@@ -3,7 +3,7 @@ import { ChartProvider } from '@/context/ChartContext'
 import Column from '@/components/Visualizations/Charts/Column'
 import WithChart from './WithChart'
 
-const BarWithLegend = memo(({ chartId, data, yAxis, xAxis, style = {} }) => {
+const ColumnWithLegend = memo(({ chartId, data, yAxis, xAxis, style = {} }) => {
     const [legend, setLegend] = useState({})
 
     return (
@@ -23,4 +23,4 @@ const BarWithLegend = memo(({ chartId, data, yAxis, xAxis, style = {} }) => {
     )
 })
 
-export default BarWithLegend
+export default ColumnWithLegend

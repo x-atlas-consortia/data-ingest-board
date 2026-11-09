@@ -4,7 +4,7 @@ import { prepareStackedData } from '@/components/Visualizations/Charts/Overlappe
 import GroupedColumn from '@/components/Visualizations/Charts/GroupedColumn'
 import WithChart from './WithChart'
 
-const GroupedBarWithLegend = memo(
+const GroupedColumnWithLegend = memo(
     ({ chartId, data, subGroupLabels, yAxis, xAxis, style = {} }) => {
         const [legend, setLegend] = useState({})
 
@@ -27,4 +27,4 @@ const GroupedBarWithLegend = memo(
     }
 )
 
-export default GroupedBarWithLegend
+export default GroupedColumnWithLegend
