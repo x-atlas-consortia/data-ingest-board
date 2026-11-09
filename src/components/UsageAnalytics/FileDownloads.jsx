@@ -469,34 +469,39 @@ const locationsCharts = (from, to) => {
                                 config: {
                                     data,
                                     xField: 'country',
-                                    yField: 'terabytes',
+                                    yField: 'total_bytes_transferred',
                                     tooltip: {
                                         title: (datum) => datum.country,
                                         items: [
                                             {
                                                 name: 'Data transferred',
-                                                channel: 'y', // or field name
+                                                channel: 'y', 
                                                 valueFormatter: (datum) => {
-                                                    return `${datum} TB`
+                                                    return formatBytes(datum)
                                                 }
                                             }
                                         ]
                                     },
                                     label: {
+                                        formatter: (datum) => formatBytes(datum),
                                         style: {
                                             dx: (d) => {
-                                                const str = d.terabytes.toString()
-                                                return str.length * 8
+                                                const str = formatBytes(d.total_bytes_transferred).toString() 
+                                                return (str.length - 2) * 8
                                             }
                                         }
                                     },
                                     axis: {
-                                        x: {
-                                            label: {
-                                                autoHide: false, 
-                                            }
-                                        },
-                                    }
+                                        y: {
+                                            labelFormatter: (datum) =>
+                                                formatBytes(datum)
+                                        }
+                                    },
+                                    // scale: {
+                                    //     y: {
+                                    //         type: 'log',
+                                    //     },
+                                    // },
                                 }
                             },
                             {

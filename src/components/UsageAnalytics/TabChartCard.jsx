@@ -22,7 +22,7 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
               </Radio.Group>
             </Space>
        
-            {chartType === 'bar' ? <Bar {...currentChartData?.config} /> : <Column {...currentChartData?.config} />}
+            {chartType === 'bar' ? <Bar key={currentChartData?.value} {...currentChartData?.config} /> : <Column key={currentChartData?.value} {...currentChartData?.config} />}
             {currentChartData?.footer && <span>{currentChartData.footer}</span>}
             {footer && <div className='ant-card-actions pt-2 mt-2'>{footer}</div>}
         </Card>

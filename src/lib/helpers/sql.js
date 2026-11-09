@@ -154,7 +154,7 @@ const SQL = {
                 to,
                 field: indexFixtures.fileDownloads.date
             })
-            return `SELECT country_name AS country, country_code AS code,   count(*) AS files,   round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   count(DISTINCT user_name) AS users,   count(DISTINCT user_tld) AS orgs,   count(DISTINCT entity_uuid) AS datasets,   count(DISTINCT city_name) AS cities FROM file_download ${whereClause} GROUP BY ALL ORDER BY terabytes DESC`
+            return `SELECT country_name AS country, country_code AS code,   count(*) AS files,   sum(bytes_transferred) AS total_bytes_transferred,   count(DISTINCT user_name) AS users,   count(DISTINCT user_tld) AS orgs,   count(DISTINCT entity_uuid) AS datasets,   count(DISTINCT city_name) AS cities FROM file_download ${whereClause} GROUP BY ALL ORDER BY total_bytes_transferred DESC`
         }
     }
 }
