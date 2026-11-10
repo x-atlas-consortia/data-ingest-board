@@ -1,17 +1,9 @@
-import React, {  useEffect, useState, memo } from 'react'
-import Legend from "@/components/Visualizations/Legend";
-import { Button } from "antd";
-import {
-    LeftOutlined, 
-    RightOutlined,
-} from "@ant-design/icons";
+import React, { memo } from 'react'
 
-const WithOnlyChart = memo(({ children, legend, data }) => {
+const WithOnlyChart = memo(({ children }) => {
   
-
     return (
         <div className='row'>
-            
             <div className='col-12' style={{overflowX: 'auto', marginBottom: '2em'}}>
                 {children}
             </div>

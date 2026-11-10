@@ -34,6 +34,11 @@ const downloadsCharts = (from, to) => {
                             {
                                 label: 'Data transferred (TB)',
                                 value: 'bytes',
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
                                 config: {
                                     data,
                                     xField: 'time_bucket',
@@ -514,6 +519,11 @@ const locationsCharts = (from, to) => {
                             {
                                 label: 'Data transferred (TB)',
                                 value: 'bytes',
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.country,

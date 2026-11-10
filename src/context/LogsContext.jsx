@@ -32,7 +32,7 @@ export const LogsProvider = ({ children, defaultMenuItem, indexKey, fromDate, to
     setIsLogScale(checked)
   }
 
-  const getScaleSwitchMenuItem = () => {
+  const getScaleSwitchMenuItem = () => { 
     if (defaultIsLogScale !== undefined) {
       return {
             key: 'scaleType'+indexKey,

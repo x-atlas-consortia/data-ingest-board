@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import * as d3 from 'd3'
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext'
@@ -16,7 +16,7 @@ export const prepareStackedData = (data) => {
     return sorted
 }
 
-function OverlappedColumn({
+const OverlappedColumn = memo(({
     setLegend,
     filters,
     data = [],
@@ -25,14 +25,14 @@ function OverlappedColumn({
     style = {},
     yAxis = {},
     xAxis = {}
-}) {
+}) => {
+    const hasLoaded = useRef(false)
     const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'overlappedColumn'
     const colors = useRef({})
     const chartData = useRef([])
-    const hasLoaded = useRef(false)
 
     const getSubGroupSum = (key) => {
         let sum = 0
@@ -209,6 +209,6 @@ function OverlappedColumn({
             id={`c-visualizations__overlappedColumn--${chartId}`}
         ></div>
     )
-}
+})
 
 export default OverlappedColumn

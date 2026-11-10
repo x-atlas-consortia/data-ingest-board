@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { memo } from 'react'
 import * as d3 from 'd3';
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
 import THEME from "@/lib/helpers/theme";
 
-function Line({
+const Line = memo(({
     setLegend,
     filters,
     data = [],
@@ -13,7 +13,7 @@ function Line({
     style = {},
     yAxis = {},
     xAxis = {}
-}) {
+}) => {
 
     const chartType = 'line'
     const colors = useRef({})
@@ -241,6 +241,6 @@ function Line({
     return (
         <div className={`c-visualizations__chart c-visualizations__line`} id={`c-visualizations__line--${chartId}`} data-type='line'></div>
     )
-}
+})
 
 export default Line

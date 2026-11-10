@@ -1,9 +1,9 @@
 import * as d3 from 'd3'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, memo } from 'react'
 import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext'
 
-function Column({
+const Column = memo(({
     setLegend,
     filters,
     data = [],
@@ -12,14 +12,13 @@ function Column({
     style = {},
     yAxis = {},
     xAxis = {}
-}) {
+}) => {
     const hasLoaded = useRef(false)
     const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const colors = useRef({})
     const chartData = useRef([])
-    const chartOptions = useRef({})
 
     const truncateLabel = (label) => {
         return label.length > 30 ? label.substring(0, 27) + '...' : label
@@ -193,18 +192,7 @@ function Column({
     }, [data])
 
     useEffect(() => {
-        if (
-            (chartOptions.current.yAxis &&
-                JSON.stringify(chartOptions.current.yAxis) !==
-                    JSON.stringify(yAxis)) ||
-
-            (chartOptions.current.filters &&
-                JSON.stringify(chartOptions.current.filters) !==
-                    JSON.stringify(filters))
-        ) {
-            chartOptions.current = { yAxis, filters }
-            updateChart()
-        }
+        updateChart()
     }, [filters, yAxis])
 
     return (
@@ -213,7 +201,7 @@ function Column({
             id={`c-visualizations__column--${chartId}`}
         ></div>
     )
-}
+})
 
 Column.propTypes = {
     children: PropTypes.node

@@ -20,7 +20,6 @@ const Bar = memo(({
     const chartType = 'bar'
     const colors = useRef({})
     const chartData = useRef([])
-    const chartOptions = useRef({})
 
     const showXLabels = () =>
         xAxis.showLabels !== undefined ? xAxis.showLabels : true
@@ -223,18 +222,7 @@ const Bar = memo(({
     }, [data])
 
     useEffect(() => {
-        if (
-            (chartOptions.current.xAxis &&
-                JSON.stringify(chartOptions.current.xAxis) !==
-                    JSON.stringify(xAxis)) ||
-
-            (chartOptions.current.filters &&
-                JSON.stringify(chartOptions.current.filters) !==
-                    JSON.stringify(filters))
-        ) {
-            chartOptions.current = { xAxis, filters }
-            updateChart()
-        }
+        updateChart()
     }, [filters, xAxis])
 
     return (

@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { memo } from 'react'
 import * as d3 from 'd3'
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext'
 
-function GroupedColumn({
+const GroupedColumn = memo(({
     setLegend,
     filters,
     data = [],
@@ -12,7 +12,7 @@ function GroupedColumn({
     style = {},
     yAxis = {},
     xAxis = {}
-}) {
+}) => {
     const hasLoaded = useRef(false)
     const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
@@ -20,7 +20,6 @@ function GroupedColumn({
     const chartType = 'groupedColumn'
     const colors = useRef({})
     const chartData = useRef([])
-    const chartOptions = useRef({})
     
 
     const getSubGroupSum = (key) => {
@@ -188,18 +187,7 @@ function GroupedColumn({
     }, [data])
 
     useEffect(() => {
-        if (
-            (chartOptions.current.yAxis &&
-                JSON.stringify(chartOptions.current.yAxis) !==
-                    JSON.stringify(yAxis)) ||
-
-            (chartOptions.current.filters &&
-                JSON.stringify(chartOptions.current.filters) !==
-                    JSON.stringify(filters))
-        ) {
-            chartOptions.current = { yAxis, filters }
-            updateChart()
-        }
+        updateChart()
     }, [filters, yAxis])
 
     return (
@@ -208,6 +196,6 @@ function GroupedColumn({
             id={`c-visualizations__groupedColumn--${chartId}`}
         ></div>
     )
-}
+})
 
 export default GroupedColumn

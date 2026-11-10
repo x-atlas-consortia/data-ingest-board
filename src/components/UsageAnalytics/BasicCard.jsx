@@ -8,7 +8,7 @@ const BasicCard = memo(({ title, data, children, footer }) => {
     
     return (
         <div className='c-usageCard c-usageCard--basic'>
-          <Card title={title} extra={<ChartCardActions />}>
+          <Card title={title} extra={<ChartCardActions indexKey={title.toDashedCase()} config={data} />}>
               {children}
               <Column {...data} />
               {footer && <div className="ant-card-actions pt-2">{footer}</div>}
