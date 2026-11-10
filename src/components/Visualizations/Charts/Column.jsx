@@ -167,6 +167,28 @@ const Column = memo(({
 
         svgDo({ xAxis, yAxis }).axisLabels({ svg, sizing })
 
+        const highlightGroup = svg.append("g").attr("class", "highlights")
+
+        highlightGroup.selectAll(".column-hover")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class", "column-hover")
+            .attr("x", d => x(d.label)) // Match the x position of the data band
+            .attr("width", x.bandwidth())  // Match the exact width of the column band
+            .attr("y", d => y(maxY))                       // Start from the very top of the chart
+            .attr("height", d => y(minY) - y(maxY))        // Stretch to the very bottom of the chart
+            .style("fill", "transparent")       // Invisible by default, but still interactive
+            .style("pointer-events", "all")     // Crucial: ensures transparent elements catch mouse events
+            .on("mouseover", function(event, d) {
+                // Turn the background a subtle gray or light color on hover
+                d3.select(this).style("fill", "rgba(0, 0, 0, 0.05)");
+            })
+            .on("mouseout", function() {
+                // Reset to transparent when the mouse leaves the column space
+                d3.select(this).style("fill", "transparent");
+            });
+
         // Return the SVG element.
         return svg.node()
     }
