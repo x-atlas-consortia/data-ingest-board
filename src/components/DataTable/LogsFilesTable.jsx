@@ -13,7 +13,7 @@ import {
 import AppContext from '@/context/AppContext'
 import LogsContext from '@/context/LogsContext'
 import IdLinkDropdown from '../IdLinkDropdown'
-import ColumnWithLegendFlex from '@/components/Visualizations/ColumnWithLegendFlex'
+import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
 import SearchFilterTable from './SearchFilterTable'
 import Column from '@/components/Visualizations/Charts/Column'
 import { ChartProvider } from '@/context/ChartContext'
@@ -353,7 +353,8 @@ const LogsFilesTable = ({}) => {
                         type and visualized in the bar chart below for time
                         period {fromDate} to {toDate}.
                     </p>
-                    <ColumnWithLegendFlex
+                    <ChartWithLegendFlex
+                        chartType='Column'
                         style={{ valueFormatter: ({ v }) => formatBytes(v) }}
                         yAxis={{ ...yAxis, labelPadding: -20 }}
                         data={byDatasetTypes.current}

@@ -1,6 +1,8 @@
 import React, { memo, useState } from 'react'
 import { Card, Radio, Space } from 'antd'
-import { Bar, Column } from '@ant-design/charts';
+import { Column } from '@ant-design/charts';
+import { Bar } from '@ant-design/charts';
+import ChartWithLegendFlex from '../Visualizations/ChartWithLegdendFlex'
 
 const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
     const [tabPlacement, setTabPlacement] = useState(data?.[0]?.value);
@@ -22,7 +24,7 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
               </Radio.Group>
             </Space>
        
-            {chartType === 'bar' ? <Bar key={currentChartData?.value} {...currentChartData?.config} /> : <Column key={currentChartData?.value} {...currentChartData?.config} />}
+            {chartType === 'bar' ? <ChartWithLegendFlex chartType='Bar' legendLayout={'none'} key={currentChartData?.value} {...currentChartData?.config} /> : <Column key={currentChartData?.value} {...currentChartData?.config} />}
             {currentChartData?.footer && <span>{currentChartData.footer}</span>}
             {footer && <div className='ant-card-actions pt-2 mt-2'>{footer}</div>}
         </Card>

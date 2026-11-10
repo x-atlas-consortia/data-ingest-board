@@ -111,6 +111,34 @@ export const ChartProvider = ({ children }) => {
             return label.length > 30 ? label.substring(0, 27) + "..." : label;
         }
         return {
+            getColor: (label, style, colorScale) => {
+                const color =
+                    style?.colorMethods &&
+                    style?.colorMethods[style.colorMethodKey]
+                        ? style?.colorMethods[style.colorMethodKey](label)
+                        : style?.monoColor
+                          ? style?.monoColor
+                          : colorScale(label)
+                return color
+            },
+            truncateLabel: (label) => {
+                return label.length > 30 ? label.substring(0, 27) + '...' : label
+            },
+            sortLabels: () => {
+                let names
+                if (xAxis.noSortLabels) {
+                    names = data.map((d) => d.label)
+                } else {
+                    data.sort((a, b) => b.value - a.value)
+                    const groups = d3.groupSort(
+                        data,
+                        ([d]) => -d.value,
+                        (d) => d.label
+                    )
+                    names = groups.map((g) => g)
+                }
+                return names
+            },
             sizing: (style, chartId, chart = 'column') => {
                 let $parent = $(getChartSelector(chartId, chart))
                 let divWidth = $parent.width()

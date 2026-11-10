@@ -113,7 +113,8 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                     </div>
                 )
             }
-            return <div className='row g-3'>{tinyCards} <FileDownloads from={from} to={to} /></div>
+            // {tinyCards}
+            return <div className='row g-3'> <FileDownloads from={from} to={to} /></div>
         }
     }
     return (

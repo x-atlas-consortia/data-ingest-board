@@ -10,10 +10,8 @@ import {
 import AppContext from '@/context/AppContext'
 import TABLE from '@/lib/helpers/table'
 import LogsContext from '@/context/LogsContext'
-import OverlappedBarWithLegend from '@/components/Visualizations/OverlappedBarWithLegend'
-import LineWithLegend from '@/components/Visualizations/LineWithLegend'
+import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
 import SearchFilterTable from './SearchFilterTable'
-import GroupedColumnWithLegend from '../Visualizations/GroupedColumnWithLegend'
 
 const LogsReposTable = ({}) => {
     const { globusToken } = useContext(AppContext)
@@ -406,7 +404,8 @@ const LogsReposTable = ({}) => {
         return (
             <>
                 {_vizData.length > 0 && fromDate && (
-                    <LineWithLegend
+                    <ChartWithLegendFlex
+                        chartType='Line'
                         style={svgStyle}
                         xAxis={_xAxis}
                         groups={repos.current}
@@ -419,29 +418,27 @@ const LogsReposTable = ({}) => {
         )
     }
 
+    const chartType = eq(selectedMenuItem, 'groupedBar')
+        ? 'GroupedColumn'
+        : eq(selectedMenuItem, 'overlappedBar')
+          ? 'OverlappedColumn'
+          : 'Column';
+
     return (
         <>
-            {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && (
-                <GroupedColumnWithLegend
+            {vizData.bar?.length > 0 && (
+                <ChartWithLegendFlex
+                    chartType={chartType}
                     style={svgStyle}
                     yAxis={yAxis}
                     xAxis={_xAxis}
                     data={vizData.bar}
                     subGroupLabels={subgroupLabels.current}
                     chartId={'repos'}
+                    legendLayout='list'
                 />
             )}
-            {vizData.bar?.length > 0 &&
-                eq(selectedMenuItem, 'overlappedBar') && (
-                    <OverlappedBarWithLegend
-                        style={svgStyle}
-                        yAxis={yAxis}
-                        xAxis={_xAxis}
-                        data={vizData.bar}
-                        subGroupLabels={subgroupLabels.current}
-                        chartId={'repos'}
-                    />
-                )}
+         
 
             <SearchFilterTable
                 data={tableData}

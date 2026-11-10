@@ -105,13 +105,7 @@ function Column({
             .attr('x', (d) => x(d.label))
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', function (d) {
-                const color =
-                    style?.colorMethods &&
-                    style?.colorMethods[style.colorMethodKey]
-                        ? style?.colorMethods[style.colorMethodKey](d.label)
-                        : style?.monoColor
-                          ? style?.monoColor
-                          : colorScale(d.label)
+                const color = svgDo({}).getColor(d.label, style, colorScale)
                 colors[d.label] = {
                     color,
                     value: formatVal({ d, v: d.value }),

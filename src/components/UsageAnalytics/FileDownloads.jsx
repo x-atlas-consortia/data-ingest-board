@@ -516,137 +516,150 @@ const locationsCharts = (from, to) => {
                                 label: 'Data transferred (TB)',
                                 value: 'bytes',
                                 config: {
-                                    data,
-                                    xField: 'country',
-                                    yField: 'total_bytes_transferred',
-                                    tooltip: {
-                                        title: (datum) => datum.country,
-                                        items: [
-                                            {
-                                                name: 'Data transferred',
-                                                channel: 'y',
-                                                valueFormatter: (datum) => {
-                                                    return formatBytes(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    label: {
-                                        formatter: (datum) =>
-                                            formatBytes(datum),
-                                        style: {
-                                            dx: (d) => {
-                                                const str = formatBytes(
-                                                    d.total_bytes_transferred
-                                                ).toString()
-                                                return (str.length - 2) * 8
-                                            }
+                                    data: data.map((d) => ({
+                                        id: d.country,
+                                        label: d.country,
+                                        value: d.total_bytes_transferred
+                                    })),
+                                    style: {
+                                        valueFormatter: ({d, v}) => {
+                                            return formatBytes(v)
                                         }
                                     },
-                                    axis: {
-                                        y: {
-                                            labelFormatter: (v) => {
-                                                return Math.log10(v) + 1;
-                                            },
-                                            },
-                                        // y: {
-                                        //     labelFormatter: (datum) =>
-                                        //         formatBytes(datum)
-                                        // }
-                                    },
-                                    scale: {
-                                        y: {
-                                            type: 'log',
-                                            tickCount: 3,
-                                            base: 100,
-                                            //domain: [1, 10000]
-                                        },
-                                    },
+                                    xAxis: {
+                                        scaleLog: true,
+                                        formatter: (v) => formatBytes(v)
+                                    }
+                                    // xField: 'country',
+                                    // yField: 'total_bytes_transferred',
+                                    // tooltip: {
+                                    //     title: (datum) => datum.country,
+                                    //     items: [
+                                    //         {
+                                    //             name: 'Data transferred',
+                                    //             channel: 'y',
+                                    //             valueFormatter: (datum) => {
+                                    //                 return formatBytes(datum)
+                                    //             }
+                                    //         }
+                                    //     ]
+                                    // },
+                                    // label: {
+                                    //     formatter: (datum) =>
+                                    //         formatBytes(datum),
+                                    //     style: {
+                                    //         dx: (d) => {
+                                    //             const str = formatBytes(
+                                    //                 d.total_bytes_transferred
+                                    //             ).toString()
+                                    //             return (str.length - 2) * 8
+                                    //         }
+                                    //     }
+                                    // },
+                                    // axis: {
+                                    //     y: {
+                                    //         labelFormatter: (v) => {
+                                    //             return Math.log10(v) + 1;
+                                    //         },
+                                    //         },
+                                    //     // y: {
+                                    //     //     labelFormatter: (datum) =>
+                                    //     //         formatBytes(datum)
+                                    //     // }
+                                    // },
+                                    // scale: {
+                                    //     y: {
+                                    //         type: 'log',
+                                    //         tickCount: 3,
+                                    //         base: 100,
+                                    //         //domain: [1, 10000]
+                                    //     },
+                                    // },
                                 }
                             },
-                            {
-                                label: 'Users',
-                                value: 'users',
-                                config: {
-                                    data,
-                                    xField: 'country',
-                                    yField: 'users',
-                                    tooltip: {
-                                        title: (datum) => datum.country,
-                                        items: [
-                                            {
-                                                name: 'Users',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatNum(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    label: {
-                                        style: {
-                                            dx: (d) => {
-                                                const str = d.users.toString()
-                                                return str.length * 8
-                                            }
-                                        }
-                                    },
-                                    axis: {
-                                        x: {
-                                            label: {
-                                                autoHide: false
-                                            }
-                                        },
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                label: 'Files',
-                                value: 'files',
-                                config: {
-                                    data,
-                                    xField: 'country',
-                                    yField: 'files',
-                                    tooltip: {
-                                        title: (datum) => datum.country,
-                                        items: [
-                                            {
-                                                name: 'Files',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatNum(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    label: {
-                                        formatter: (datum) => {
-                                            return formatNum(datum)
-                                        },
-                                        style: {
-                                            dx: (d) => {
-                                                const str = d.files.toString()
-                                                return str.length * 8
-                                            }
-                                        }
-                                    },
-                                    axis: {
-                                        x: {
-                                            label: {
-                                                autoHide: false
-                                            }
-                                        },
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
-                                        }
-                                    }
-                                }
-                            }
+                            // {
+                            //     label: 'Users',
+                            //     value: 'users',
+                            //     config: {
+                            //         data,
+                            //         xField: 'country',
+                            //         yField: 'users',
+                            //         tooltip: {
+                            //             title: (datum) => datum.country,
+                            //             items: [
+                            //                 {
+                            //                     name: 'Users',
+                            //                     channel: 'y', // or field name
+                            //                     valueFormatter: (datum) => {
+                            //                         return formatNum(datum)
+                            //                     }
+                            //                 }
+                            //             ]
+                            //         },
+                            //         label: {
+                            //             style: {
+                            //                 dx: (d) => {
+                            //                     const str = d.users.toString()
+                            //                     return str.length * 8
+                            //                 }
+                            //             }
+                            //         },
+                            //         axis: {
+                            //             x: {
+                            //                 label: {
+                            //                     autoHide: false
+                            //                 }
+                            //             },
+                            //             y: {
+                            //                 labelFormatter: (datum) =>
+                            //                     formatNum(datum)
+                            //             }
+                            //         }
+                            //     }
+                            // },
+                            // {
+                            //     label: 'Files',
+                            //     value: 'files',
+                            //     config: {
+                            //         data,
+                            //         xField: 'country',
+                            //         yField: 'files',
+                            //         tooltip: {
+                            //             title: (datum) => datum.country,
+                            //             items: [
+                            //                 {
+                            //                     name: 'Files',
+                            //                     channel: 'y', // or field name
+                            //                     valueFormatter: (datum) => {
+                            //                         return formatNum(datum)
+                            //                     }
+                            //                 }
+                            //             ]
+                            //         },
+                            //         label: {
+                            //             formatter: (datum) => {
+                            //                 return formatNum(datum)
+                            //             },
+                            //             style: {
+                            //                 dx: (d) => {
+                            //                     const str = d.files.toString()
+                            //                     return str.length * 8
+                            //                 }
+                            //             }
+                            //         },
+                            //         axis: {
+                            //             x: {
+                            //                 label: {
+                            //                     autoHide: false
+                            //                 }
+                            //             },
+                            //             y: {
+                            //                 labelFormatter: (datum) =>
+                            //                     formatNum(datum)
+                            //             }
+                            //         }
+                            //     }
+                            // }
                         ]
                         return (
                             <TabChartCard

@@ -10,11 +10,10 @@ import {
 import AppContext from '@/context/AppContext'
 import TABLE from '@/lib/helpers/table'
 import LogsContext from '@/context/LogsContext'
-import OverlappedBarWithLegend from '@/components/Visualizations/OverlappedBarWithLegend'
+import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
 import SearchFilterTable from './SearchFilterTable'
 import ModalOverComponent from '../ModalOverComponent'
 import { InfoCircleOutlined } from '@ant-design/icons'
-import GroupedColumnWithLegend from '@/components/Visualizations/GroupedColumnWithLegend'
 
 const LogsApiUsageTable = ({ data }) => {
     const { globusToken } = useContext(AppContext)
@@ -276,29 +275,26 @@ const LogsApiUsageTable = ({ data }) => {
         return endpointsDetails(v, details)
     }
 
+    const chartType = eq(selectedMenuItem, 'groupedBar')
+        ? 'GroupedColumn'
+        : eq(selectedMenuItem, 'overlappedBar')
+          ? 'OverlappedColumn'
+          : 'Column';
+
     return (
         <>
-            {vizData.bar?.length > 0 && eq(selectedMenuItem, 'groupedBar') && (
-                <GroupedColumnWithLegend
+            {vizData.bar?.length > 0 && (
+                <ChartWithLegendFlex
                     style={svgStyle}
+                    chartType={chartType}
                     xAxis={xAxis}
                     subGroupLabels={apis.current}
                     yAxis={yAxis}
                     data={vizData.bar}
                     chartId={'usageHistogram'}
+                    legendLayout='list'
                 />
             )}
-            {vizData.bar?.length > 0 &&
-                eq(selectedMenuItem, 'overlappedBar') && (
-                    <OverlappedBarWithLegend
-                        style={svgStyle}
-                        xAxis={xAxis}
-                        subGroupLabels={apis.current}
-                        yAxis={yAxis}
-                        data={vizData.bar}
-                        chartId={'usageHistogram'}
-                    />
-                )}
 
             <SearchFilterTable
                 data={tableData}
