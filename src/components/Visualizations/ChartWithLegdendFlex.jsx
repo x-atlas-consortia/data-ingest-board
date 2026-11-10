@@ -55,7 +55,6 @@ const ChartWithLegendFlex = memo(
                         style={style}
                         xAxis={xAxis}
                         yAxis={yAxis}
-                        reload={false}
                         groups={groups}
                         subGroupLabels={subGroupLabels}
                         setLegend={setLegend}

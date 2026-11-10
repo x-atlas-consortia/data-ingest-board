@@ -8,7 +8,6 @@ function Column({
     filters,
     data = [],
     chartId = 'modal',
-    reload = true,
     onSectionClick,
     style = {},
     yAxis = {},
@@ -183,7 +182,6 @@ function Column({
     }
     useEffect(() => {
         if (
-            reload ||
             chartData.current.length !== data.length ||
             !hasLoaded.current
         ) {

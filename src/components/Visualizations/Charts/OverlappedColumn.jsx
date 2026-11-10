@@ -20,7 +20,6 @@ function OverlappedColumn({
     setLegend,
     filters,
     data = [],
-    reload = true,
     subGroupLabels = {},
     chartId = 'modal',
     style = {},
@@ -191,7 +190,6 @@ function OverlappedColumn({
 
     useEffect(() => {
         if (
-            reload ||
             chartData.current.length !== data.length ||
             !hasLoaded.current
         ) {

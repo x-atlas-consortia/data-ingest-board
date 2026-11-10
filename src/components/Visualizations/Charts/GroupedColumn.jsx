@@ -7,7 +7,6 @@ function GroupedColumn({
     setLegend,
     filters,
     data = [],
-    reload = true,
     subGroupLabels = {},
     chartId = 'modal',
     style = {},
@@ -177,7 +176,6 @@ function GroupedColumn({
 
     useEffect(() => {
         if (
-            reload ||
             chartData.current.length !== data.length ||
             !hasLoaded.current
         ) {

@@ -8,7 +8,6 @@ function Line({
     setLegend,
     filters,
     data = [],
-    reload = true,
     groups = [],
     chartId = 'modal',
     style = {},
@@ -226,7 +225,7 @@ function Line({
     }
 
     useEffect(() => {
-        if (reload || chartData.current.length !== groups.length || !hasLoaded.current) {
+        if ( chartData.current.length !== groups.length || !hasLoaded.current) {
             hasLoaded.current = true
             chartData.current = Array.from(groups)
             colors.current = {}

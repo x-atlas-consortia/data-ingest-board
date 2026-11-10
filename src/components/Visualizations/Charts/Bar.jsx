@@ -8,7 +8,6 @@ const Bar = memo(({
     filters,
     data = [],
     chartId = 'modal',
-    reload = true,
     onSectionClick,
     style = {},
     yAxis = {},
@@ -172,7 +171,7 @@ const Bar = memo(({
             .data(data)
             .enter()
             .append('text')
-            .attr('class', 'label')
+            .attr('class', 'number-label')
             .text(function (d) {
                 return formatVal({ d, v: d.value })
             })
@@ -180,11 +179,24 @@ const Bar = memo(({
                 return y(d.label) + y.bandwidth() / 1.3
             }) // Center vertically on the bar
             .attr('x', function (d) {
-                return x(d.value) + 20
+                return x(minX)
             }) // 5px above the top of the bar
             .attr('text-anchor', 'middle') // Align center
             .style('font-size', '12px')
             .style('fill', '#333')
+            .style('opacity', 0)
+
+        g.selectAll('.number-label')
+            .transition()
+            .duration(800)
+            .style('opacity', 1)
+            .attr('x', function (d) {
+                return x(d.value) + 20
+            })
+            .delay(function (d, i) {
+                return i * 100
+            })
+
 
         // Return the SVG element.
         return svg.node()
@@ -201,7 +213,6 @@ const Bar = memo(({
     }
     useEffect(() => {
         if (
-            reload ||
             chartData.current.length !== data.length ||
             !hasLoaded.current
         ) {
@@ -213,8 +224,13 @@ const Bar = memo(({
 
     useEffect(() => {
         if (
-            chartOptions.current.xAxis !== xAxis ||
-            chartOptions.current.filters !== filters
+            (chartOptions.current.xAxis &&
+                JSON.stringify(chartOptions.current.xAxis) !==
+                    JSON.stringify(xAxis)) ||
+
+            (chartOptions.current.filters &&
+                JSON.stringify(chartOptions.current.filters) !==
+                    JSON.stringify(filters))
         ) {
             chartOptions.current = { xAxis, filters }
             updateChart()
