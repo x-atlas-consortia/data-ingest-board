@@ -12,6 +12,15 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
+const InbarCell = ({ text }) => {
+    return (
+        <span className='c-inbar'>
+            <span className='js-inbar c-inbar__fill' data-value={text}></span>
+            <span className='c-inbar__text'> {text}</span>
+        </span>
+    )
+}
+
 const downloadsCharts = (from, to) => {
     return [
         {
@@ -371,16 +380,7 @@ const downloadsCharts = (from, to) => {
                                 key: 'terabytes',
                                 minWidth: '150px',
                                 render: (text) => (
-                                    <span className='c-inbar'>
-                                        <span
-                                            className='js-inbar c-inbar__fill'
-                                            data-value={text}
-                                        ></span>
-                                        <span className='c-inbar__text'>
-                                            {' '}
-                                            {text}
-                                        </span>
-                                    </span>
+                                    <InbarCell text={text} />
                                 )
                             },
                             {
@@ -600,7 +600,138 @@ const locationsCharts = (from, to) => {
                     }}
                 />
             )
-        }
+        },
+        {
+            component: (
+                <DetailSuspence
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.organizations({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'Organization',
+                                dataIndex: 'organization',
+                                key: 'organization'
+                            },
+                            {
+                                title: 'Country',
+                                dataIndex: 'country',
+                                key: 'country'
+                            },
+                            {
+                                title: 'Users',
+                                dataIndex: 'users',
+                                key: 'users'
+                            },
+                            {
+                                title: 'TB',
+                                dataIndex: 'terabytes',
+                                key: 'terabytes',
+                                minWidth: '150px',
+                                render: (text) => (
+                                    <InbarCell text={text} />
+                                )
+                            },
+                            {
+                                title: 'Files',
+                                dataIndex: 'files',
+                                key: 'files'
+                            },
+                            {
+                                title: 'Datasets',
+                                dataIndex: 'datasets',
+                                key: 'datasets'
+                            },
+                            {
+                                title: 'Assays',
+                                dataIndex: 'assays',
+                                key: 'assays'
+                            },
+                            {
+                                title: 'Active Months',
+                                dataIndex: 'active_months',
+                                key: 'active_months'
+                            },
+                            {
+                                title: 'First',
+                                dataIndex: 'first_download',
+                                key: 'first_download'
+                            },
+                            {
+                                title: 'Last',
+                                dataIndex: 'last_download',
+                                key: 'last_download'
+                            }
+                            
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Organizations'
+                                subTitle={`Top 50 by volume, grouped by the registrable part of the user's login domain. github.com, orcid.org and gmail.com are sign-in providers that hide the real institution; UNDETERMINED could not be parsed. Country is the most common download country. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+        {
+            component: (
+                <DetailSuspence
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.topCities({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                             {
+                                title: 'City',
+                                dataIndex: 'city',
+                                key: 'city'
+                            },
+                            {
+                                title: 'Region',
+                                dataIndex: 'region',
+                                key: 'region'
+                            },
+                            {
+                                title: 'Country',
+                                dataIndex: 'country',
+                                key: 'country'
+                            },
+                            {
+                                title: 'Users',
+                                dataIndex: 'users',
+                                key: 'users'
+                            },
+                            {
+                                title: 'TB',
+                                dataIndex: 'terabytes',
+                                key: 'terabytes',
+                                minWidth: '150px',
+                                render: (text) => (
+                                    <InbarCell text={text} />
+                                )
+                            },
+                            {
+                                title: 'Files',
+                                dataIndex: 'files',
+                                key: 'files'
+                            },
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Top cities'
+                                subTitle={`Top 25 destination cities by volume. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
     ]
 }
 

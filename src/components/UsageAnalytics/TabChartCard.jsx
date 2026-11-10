@@ -33,7 +33,7 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
     }, [currentChartData, logScales, tabPlacement])
 
     return (
-        <div className='c-usageCard c-usageCard--tab'>
+        <div className='c-usageCard c-usageCard--tab w-100'>
             <Card
                 title={title}
                 extra={
