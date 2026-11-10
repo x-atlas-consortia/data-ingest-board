@@ -18,7 +18,7 @@ const Bar = memo(({
         useContext(ChartContext)
 
     const chartType = 'bar'
-    const colors = {}
+    const colors = useRef({})
     const chartData = useRef([])
     const chartOptions = useRef({})
 
@@ -101,7 +101,7 @@ const Bar = memo(({
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', function (d) {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
-                colors[d.label] = {
+                colors.current[d.label] = {
                     color,
                     value: formatVal({ d, v: d.value }),
                     label: d.label
@@ -208,7 +208,7 @@ const Bar = memo(({
         $(getChartSelector(chartId, chartType)).append(buildChart())
 
         if (setLegend) {
-            setLegend(colors)
+            setLegend(colors.current)
         }
     }
     useEffect(() => {

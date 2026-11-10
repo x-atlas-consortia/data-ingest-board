@@ -294,9 +294,7 @@ const Usage = () => {
         window.location = '/'
     }
 
-    const exportHandler = (indexKey) => {
-        // TODO
-    }
+   
 
     const toggleOverview = () => {
         setIsOverviewCollapsed(!isOverviewCollapsed)
@@ -319,6 +317,7 @@ const Usage = () => {
             )}
             {!showUnauthorized && (
                 <Layout>
+                    <UsageProvider>
                     <Header
                         style={{ padding: 0, background: colorBgContainer }}
                         className='c-barHead'
@@ -430,6 +429,7 @@ const Usage = () => {
                             id='modal--logs'
                         />
                     </Content>
+                    </UsageProvider>
                 </Layout>
             )}
         </Layout>

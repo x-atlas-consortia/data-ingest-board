@@ -17,8 +17,9 @@ function Column({
     const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
-    const colors = {}
+    const colors = useRef({})
     const chartData = useRef([])
+    const chartOptions = useRef({})
 
     const truncateLabel = (label) => {
         return label.length > 30 ? label.substring(0, 27) + '...' : label
@@ -105,7 +106,7 @@ function Column({
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', function (d) {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
-                colors[d.label] = {
+                colors.current[d.label] = {
                     color,
                     value: formatVal({ d, v: d.value }),
                     label: d.label
@@ -177,7 +178,7 @@ function Column({
         $(getChartSelector(chartId)).append(buildChart())
 
         if (setLegend) {
-            setLegend(colors)
+            setLegend(colors.current)
         }
     }
     useEffect(() => {
@@ -192,7 +193,18 @@ function Column({
     }, [data])
 
     useEffect(() => {
-        updateChart()
+        if (
+            (chartOptions.current.yAxis &&
+                JSON.stringify(chartOptions.current.yAxis) !==
+                    JSON.stringify(yAxis)) ||
+
+            (chartOptions.current.filters &&
+                JSON.stringify(chartOptions.current.filters) !==
+                    JSON.stringify(filters))
+        ) {
+            chartOptions.current = { yAxis, filters }
+            updateChart()
+        }
     }, [filters, yAxis])
 
     return (

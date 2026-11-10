@@ -510,7 +510,6 @@ const locationsCharts = (from, to) => {
                         const data = dataToArrayofObjects(rawData).filter(
                             (d) => d.total_bytes_transferred !== 0
                         )
-                        console.log('locations data:', data)
                         const config = [
                             {
                                 label: 'Data transferred (TB)',

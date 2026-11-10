@@ -13,13 +13,15 @@ function GroupedColumn({
     yAxis = {},
     xAxis = {}
 }) {
+    const hasLoaded = useRef(false)
     const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'groupedColumn'
     const colors = useRef({})
     const chartData = useRef([])
-    const hasLoaded = useRef(false)
+    const chartOptions = useRef({})
+    
 
     const getSubGroupSum = (key) => {
         let sum = 0
@@ -186,7 +188,18 @@ function GroupedColumn({
     }, [data])
 
     useEffect(() => {
-        updateChart()
+        if (
+            (chartOptions.current.yAxis &&
+                JSON.stringify(chartOptions.current.yAxis) !==
+                    JSON.stringify(yAxis)) ||
+
+            (chartOptions.current.filters &&
+                JSON.stringify(chartOptions.current.filters) !==
+                    JSON.stringify(filters))
+        ) {
+            chartOptions.current = { yAxis, filters }
+            updateChart()
+        }
     }, [filters, yAxis])
 
     return (

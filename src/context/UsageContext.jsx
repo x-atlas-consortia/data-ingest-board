@@ -4,11 +4,13 @@ const UsageContext = createContext()
 
 export const UsageProvider = ({ children }) => {
 
+     const onExport = (indexKey) => {
+        // TODO
+    }
+
 
     return (
-        <UsageContext.Provider value={{ 
-          
-         }}>
+        <UsageContext.Provider value={{ onExport }}>
             {children}
         </UsageContext.Provider>
     )
