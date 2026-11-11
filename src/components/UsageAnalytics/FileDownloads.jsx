@@ -263,15 +263,15 @@ const downloadsCharts = (from, to) => {
                                            
                                             if (!e.colors) return null
                                             const colors = e.colors
-                                            return `<span class="text-muted">${formatAxisDate(
+                                            return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
                                                 d,
                                                 true
                                             )}</span><br>${Object.values(colors)
                                                 .map(
                                                     ({ color, label, value }) =>
-                                                        `<span style="color: ${color}; width: 5px; display: block;">${label}</span>: <strong>${value}</strong>`
+                                                        `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>${label}: <strong>${value}</strong></span>`
                                                 )
-                                                .join('<br>')}`
+                                                .join('<br>')}</div>`
                                         }
                                     },
                                     optionsMenu: {

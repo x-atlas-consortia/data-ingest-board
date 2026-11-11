@@ -52,11 +52,10 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
     }
 
     const buildTooltip = (id, e, d) => {
-        const container = $(getTooltipSelector(id)).parent()
+        const containerRect = $(getTooltipSelector(id)).parent()[0]?.getBoundingClientRect()
         const gap = 30 // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
-        const containerRect = container[0]?.getBoundingClientRect()
 
         const xPos = e.clientX - containerRect.left
         const yPos = e.clientY - containerRect.top - gap
@@ -70,8 +69,31 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
 
         getTooltip(id)
             .html(html)
-            .style('left', xPos + 'px')
-            .style('top', yPos + 'px')
+
+        // 1. Get dimensions and bounding boxes
+
+        const tooltipRect = $(getTooltipSelector(id))[0]?.getBoundingClientRect() // 2. Calculate cursor position relative to the container coordinates
+
+        let targetX = e.clientX - containerRect.left + gap
+        let targetY = e.clientY - containerRect.top + gap // 3. Right boundary collision check
+
+        if (targetX + tooltipRect.width > containerRect.width) {
+            // Flip to left side of the cursor if it overflows right
+            targetX =
+                e.clientX - containerRect.left - tooltipRect.width - gap
+        } // Left boundary fallback safety
+        if (targetX < 0) targetX = 0 // 4. Bottom boundary collision check
+
+        if (targetY + tooltipRect.height > containerRect.height) {
+            // Flip above the cursor if it overflows bottom
+            targetY =
+                e.clientY - containerRect.top - tooltipRect.height - gap
+        } // Top boundary fallback safety
+        if (targetY < 0) targetY = 0 // 5. Apply bounded positions
+
+        getTooltip(id)
+            .style('left', targetX + 'px')
+            .style('top', targetY + 'px')
     }
 
     const visibleTooltip = (id, e, d) => {

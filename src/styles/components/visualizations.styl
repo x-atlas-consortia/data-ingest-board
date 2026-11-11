@@ -8,6 +8,11 @@
   &__chartDropdown
     border-bottom-left-radius 0
     border-top-left-radius 0
+  &__itemCol
+    display inline-block
+    width 8px
+    height 8px
+    margin-right 5px
   &__tooltip
     background-color white
     border solid $col-gal-grey 1px
@@ -17,6 +22,9 @@
     z-index 1000
     font-size 12px
     width max-content
+    transition left 0.1s ease-in
+    &Wrap
+      text-align left
   &__chart
     overflow-x auto
     position relative
