@@ -10,7 +10,7 @@ import {
 import AppContext from '@/context/AppContext'
 import TABLE from '@/lib/helpers/table'
 import LogsContext from '@/context/LogsContext'
-import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
+import ChartWithLegend from '@/components/Visualizations/ChartWithLegend'
 import SearchFilterTable from './SearchFilterTable'
 import ModalOverComponent from '../ModalOverComponent'
 import { InfoCircleOutlined } from '@ant-design/icons'
@@ -279,12 +279,12 @@ const LogsApiUsageTable = ({ data }) => {
         ? 'GroupedColumn'
         : eq(selectedMenuItem, 'overlappedBar')
           ? 'OverlappedColumn'
-          : 'Column';
+          : 'Column'
 
     return (
         <>
             {vizData.bar?.length > 0 && (
-                <ChartWithLegendFlex
+                <ChartWithLegend
                     style={svgStyle}
                     chartType={chartType}
                     xAxis={xAxis}

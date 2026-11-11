@@ -1,20 +1,54 @@
-import React, { memo } from 'react'
-import { Card, Button } from 'antd'
-import { Column } from '@ant-design/plots';
+import React, { memo, useState, useMemo } from 'react'
+import { Card } from 'antd'
+import ChartCardActions from './ChartCardActions'
+import ChartWithLegend from '@/components/Visualizations/ChartWithLegend'
 
-import ChartCardActions from './ChartCardActions';
+const BasicCard = memo(({ title, chartType, data, children, footer }) => {
+    const [logScale, setLogScale] = useState(
+        data.optionsMenu.logScale.checked
+    )
+    const onChangeLogScale = (checked) => {
+        setLogScale(checked)
+    }
+    const isBarChart = chartType === 'Bar'
 
-const BasicCard = memo(({ title, data, children, footer }) => {
-    
+    const chartProps = useMemo(
+        () => {
+            const valueAxisName = isBarChart ? 'xAxis' : 'yAxis'
+            return {
+                ...data,
+                chartType,
+                [valueAxisName]: {
+                    ...data[valueAxisName],
+                    scaleLog: logScale
+                }
+            }
+        },
+        [chartType, data, logScale]
+    )
+
     return (
         <div className='c-usageCard c-usageCard--basic'>
-          <Card title={title} extra={<ChartCardActions indexKey={title.toDashedCase()} config={data} />}>
-              {children}
-              <Column {...data} />
-              {footer && <div className="ant-card-actions pt-2">{footer}</div>}
-          </Card>
+            <Card
+                title={title}
+                extra={
+                    <ChartCardActions
+                        indexKey={title.toDashedCase()}
+                        config={data}
+                        logScale={logScale}
+                        onChangeLogScale={onChangeLogScale}
+                    />
+                }
+            >
+                {children}
+                <ChartWithLegend chartId={title.toDashedCase()} {...chartProps} />
+                {/* <Column {...data} /> */}
+                {footer && (
+                    <div className='ant-card-actions pt-2'>{footer}</div>
+                )}
+            </Card>
         </div>
     )
 })
 
-export default BasicCard;
+export default BasicCard

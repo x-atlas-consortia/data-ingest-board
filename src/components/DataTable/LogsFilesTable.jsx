@@ -13,14 +13,14 @@ import {
 import AppContext from '@/context/AppContext'
 import LogsContext from '@/context/LogsContext'
 import IdLinkDropdown from '../IdLinkDropdown'
-import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
+import ChartWithLegend from '@/components/Visualizations/ChartWithLegend'
 import SearchFilterTable from './SearchFilterTable'
 import Column from '@/components/Visualizations/Charts/Column'
 import { ChartProvider } from '@/context/ChartContext'
 import { modalDefault } from '@/lib/constants'
 import AppModal from '@/components/AppModal'
 import { BarChartOutlined, DownloadOutlined } from '@ant-design/icons'
-import WithChart from '../Visualizations/WithChart'
+import WithChartFlex from '../Visualizations/WithChartFlex'
 
 const LogsFilesTable = ({}) => {
     const { globusToken } = useContext(AppContext)
@@ -353,7 +353,7 @@ const LogsFilesTable = ({}) => {
                         type and visualized in the bar chart below for time
                         period {fromDate} to {toDate}.
                     </p>
-                    <ChartWithLegendFlex
+                    <ChartWithLegend
                         chartType='Column'
                         style={{ valueFormatter: ({ v }) => formatBytes(v) }}
                         yAxis={{ ...yAxis, labelPadding: -20 }}
@@ -440,7 +440,7 @@ const LogsFilesTable = ({}) => {
     return (
         <>
             {vizData.bar?.length > 0 && (
-                <WithChart data={vizData.bar}>
+                <WithChartFlex data={vizData.bar}>
                     <div className='mx-5 mb-5'>
                         <ChartProvider>
                             <Column
@@ -452,7 +452,7 @@ const LogsFilesTable = ({}) => {
                             />
                         </ChartProvider>
                     </div>
-                </WithChart>
+                </WithChartFlex>
             )}
             <>
                 <SearchFilterTable

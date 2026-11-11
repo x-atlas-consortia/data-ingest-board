@@ -8,8 +8,10 @@ import OverlappedColumn from './Charts/OverlappedColumn'
 import GroupedColumn from './Charts/GroupedColumn'
 import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedColumn'
 import WithOnlyChart from './WithOnlyChart'
+import StackedColumn from './Charts/StackedColumn'
+import WithChartSider from './WithChartSider'
 
-const ChartWithLegendFlex = memo(
+const ChartWithLegend = memo(
     ({
         chartId,
         data,
@@ -30,7 +32,8 @@ const ChartWithLegendFlex = memo(
                 Bar,
                 Line,
                 OverlappedColumn,
-                GroupedColumn
+                GroupedColumn,
+                StackedColumn
             }
             return types[chartType]
         }, [chartType])
@@ -47,7 +50,8 @@ const ChartWithLegendFlex = memo(
             [data, supportsStackedData]
         )
 
-        const ChartWrapper = legendLayout === 'flex' ? WithChartFlex : WithOnlyChart
+        const ChartWrapper =
+            legendLayout === 'flex' ? WithChartFlex : legendLayout === 'sider' ? WithChartSider : WithOnlyChart
 
         return (
             <ChartWrapper legend={legend} data={preparedData}>
@@ -68,4 +72,4 @@ const ChartWithLegendFlex = memo(
     }
 )
 
-export default ChartWithLegendFlex
+export default ChartWithLegend

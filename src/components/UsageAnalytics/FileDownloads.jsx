@@ -240,51 +240,59 @@ const downloadsCharts = (from, to) => {
                 <div className='row mt-2'>
                     <div className='col-md-6'>
                         <DetailSuspence
+                            key='data-transferred-by-assay'
                             suspenseBlockStyle={true}
                             query={SQL.fileDownloads.perAssay({ from, to })}
                             buildCallback={(rawData) => {
                                
                                 const data = dataToArrayofObjects(rawData)
-                                const config = {
-                                    data,
-                                    xField: 'time_bucket',
-                                    yField: 'total_bytes_transferred',
-                                    colorField: 'assay',
-                                    stack: true,
-                                    tooltip: {
-                                        shared: true,
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            (datum, index, data, column) => ({
-                                                name: datum.assay,
-                                                value: formatBytes(
-                                                    datum.total_bytes_transferred
-                                                )
-                                            })
-                                        ]
-                                    },
-                                    axis: {
-                                        x: {
-                                            labelFormatter: (datum) => {
-                                                return formatAxisDate(datum)
-                                            }
-                                        },
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatBytes(datum)
-                                        }
+                                
+                                const formattedData = {}
+                                const subGroupLabels = {}
+                                for (const d of data) {
+                                    formattedData[d.time_bucket] = {
+                                        ...(formattedData[d.time_bucket] || {}),
+                                        [d.assay]: d.total_bytes_transferred
                                     }
+                                    subGroupLabels[d.assay] = d.assay
+                                    
                                 }
+                                const config2 = {
+                                    optionsMenu: {
+                                        logScale: {
+                                            checked: true
+                                        }
+                                    },
+                                    data: Object.keys(formattedData).map((time_bucket) => ({
+                                        id: time_bucket,
+                                        group: time_bucket,
+                                        ...formattedData[time_bucket]
+                                    })),
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatBytes(v)
+                                    },
+                                    xAxis: {
+                                   
+                                        formatter: (v, i) => formatAxisDate(v)
+                                    },
+                                    style: {
+                                   
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatBytes(v)
+                                        }
+                                    },
+                                    legendLayout: 'flex',
+                                    subGroupLabels,
+                                }
+                        
                                 return (
                                     <BasicCard
+                                        key='data-transferred-by-assay'
+                                        chartType='StackedColumn'
                                         title='Data transferred by assay, per month'
                                         subTitle={`Dataset types grouped to their base assay (pipeline suffix removed). Seven largest by all-time volume, the rest as Other. NA is mostly uploads and publications. From ${from} to ${to}`}
-                                        data={config}
+                                        data={config2}
                                         footer={
                                             <small>
                                                 <strong>Why this view:</strong>{' '}
@@ -301,6 +309,7 @@ const downloadsCharts = (from, to) => {
                     </div>
                     <div className='col-md-6'>
                         <DetailSuspence
+                            key='active-users-by-month'
                             suspenseBlockStyle={true}
                             query={SQL.fileDownloads.activeUsers({ from, to })}
                             buildCallback={(rawData) => {
@@ -310,53 +319,61 @@ const downloadsCharts = (from, to) => {
                                     data.push({
                                         time_bucket: item.time_bucket,
                                         type: 'new_users',
-                                        count: item.new_users
+                                        count: item.new_users,
+                                        label: 'New',
                                     })
                                     data.push({
                                         time_bucket: item.time_bucket,
                                         type: 'returning_users',
-                                        count: item.returning_users
+                                        count: item.returning_users,
+                                        label: 'Returning',
                                     })
                                 }
 
-                                const config = {
-                                    data,
-                                    xField: 'time_bucket',
-                                    yField: 'count',
-                                    colorField: 'type',
-                                    stack: true,
-                                    tooltip: {
-                                        shared: true,
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            (datum, index, data, column) => ({
-                                                name: datum.type,
-                                                value: formatNum(datum.count)
-                                            })
-                                        ]
-                                    },
-                                    axis: {
-                                        x: {
-                                            labelFormatter: (datum) => {
-                                                return formatAxisDate(datum)
-                                            }
-                                        },
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
-                                        }
+                                const formattedData = {}
+                                const subGroupLabels = {}
+                                for (const d of data) {
+                                    formattedData[d.time_bucket] = {
+                                        ...(formattedData[d.time_bucket] || {}),
+                                        [d.type]: d.count
                                     }
+                                    subGroupLabels[d.type] = d.label
+                                    
                                 }
+                                const config = {
+                                    optionsMenu: {
+                                        logScale: {
+                                            checked: true
+                                        }
+                                    },
+                                    data: Object.keys(formattedData).map((time_bucket) => ({
+                                        id: time_bucket,
+                                        group: time_bucket,
+                                        ...formattedData[time_bucket]
+                                    })),
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) => formatAxisDate(v)
+                                    },
+                                    style: {
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                    legendLayout: 'flex',
+                                    subGroupLabels,
+                                }
+                        
                                 return (
                                     <BasicCard
+                                        key='active-users-by-month'
                                         title='Active Users by Month'
                                         subTitle={`Tracking user engagement and retention. From ${from} to ${to}`}
                                         data={config}
+                                        chartType='StackedColumn'
                                         footer={
                                             <small>
                                                 <strong>Why this view:</strong>{' '}

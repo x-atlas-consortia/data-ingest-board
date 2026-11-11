@@ -10,7 +10,7 @@ import {
 import AppContext from '@/context/AppContext'
 import TABLE from '@/lib/helpers/table'
 import LogsContext from '@/context/LogsContext'
-import ChartWithLegendFlex from '@/components/Visualizations/ChartWithLegdendFlex'
+import ChartWithLegend from '@/components/Visualizations/ChartWithLegend'
 import SearchFilterTable from './SearchFilterTable'
 
 const LogsReposTable = ({}) => {
@@ -404,7 +404,7 @@ const LogsReposTable = ({}) => {
         return (
             <>
                 {_vizData.length > 0 && fromDate && (
-                    <ChartWithLegendFlex
+                    <ChartWithLegend
                         chartType='Line'
                         style={svgStyle}
                         xAxis={_xAxis}
@@ -422,12 +422,12 @@ const LogsReposTable = ({}) => {
         ? 'GroupedColumn'
         : eq(selectedMenuItem, 'overlappedBar')
           ? 'OverlappedColumn'
-          : 'Column';
+          : 'Column'
 
     return (
         <>
             {vizData.bar?.length > 0 && (
-                <ChartWithLegendFlex
+                <ChartWithLegend
                     chartType={chartType}
                     style={svgStyle}
                     yAxis={yAxis}
@@ -438,7 +438,6 @@ const LogsReposTable = ({}) => {
                     legendLayout='list'
                 />
             )}
-         
 
             <SearchFilterTable
                 data={tableData}
