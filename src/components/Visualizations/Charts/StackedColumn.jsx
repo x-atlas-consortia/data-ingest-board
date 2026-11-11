@@ -14,11 +14,10 @@ const StackedColumn = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip, colors } =
         useContext(ChartContext)
 
     const chartType = 'stackedColumn'
-    const colors = useRef({})
     const chartData = useRef([])
     
 
@@ -121,7 +120,7 @@ const StackedColumn = memo(({
               .attr("fill", d => {
                 const color = style.colorScale  ? style.colorScale({d, maxY}) : colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[label] = { color, label, key: d.key, value: formatVal({d, v: getSubGroupSum(d.key)}) }
+                colors.current[d.key] = { color, label, key: d.key, value: formatVal({d, v: getSubGroupSum(d.key)}) }
                 return color
             })
             .selectAll("rect")
@@ -142,10 +141,6 @@ const StackedColumn = memo(({
             })
             .attr("height", 0)
             .attr("width", x.bandwidth() )
-            // .append("title")
-            // .text(d => {
-            //     return `${xAxis.formatter ? xAxis.formatter(d.data.group) : d.data.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.data[d.key]})}`
-            // })
 
         svg.selectAll('rect')
             .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)

@@ -22,26 +22,31 @@ const InbarCell = ({ text }) => {
 }
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
-    debugger
-    if (!e.fromTick) return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
-                                            d.data.group,
-                                            true
-                                        )}</span><br> <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong></div>`
-    if (!e.colors) return null
     const colors = e.colors
+    if (!e.fromTick)
+        return `<div class="c-visualizations__tooltipWrap">
+            <span class="text-muted">${formatAxisDate(d.data.group,true)}</span>
+            <br> 
+            <span>
+                <span class="c-visualizations__itemCol" style="background-color: ${colors[d.key].color};"></span>
+                <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong>
+            </span>
+        </div>`
+    
+    
     let total = 0
-    return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
-        d,
-        true
-    )}</span><br>${Object.values(colors)
-        .map(
-            ({ color, label, key, value }) => {
-                total += row[key] || 0
-                return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>${label}: <strong>${formatter(row[key])}</strong></span>`
-            }
-                
-        )
-        .join('<br>')}<br>Total: <strong>${formatter(total)}</strong></div>`
+    if (!row) return null
+    return `<div class="c-visualizations__tooltipWrap">
+    <span class="text-muted">${formatAxisDate(d,true)}</span>
+    <br>${Object.values(colors)
+        .map(({ color, label, key, value }) => {
+            total += row[key] || 0
+            return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>
+            ${label}: <strong>${formatter(row[key])}</strong></span>`
+        })
+        .join('<br>')}
+        <br>Total: <strong>${formatter(total)}</strong>
+    </div>`
 }
 
 const downloadsCharts = (from, to) => {
@@ -100,7 +105,6 @@ const downloadsCharts = (from, to) => {
                                             formatAxisDate(v, i == 0)
                                     }
                                 }
-
                             },
                             {
                                 label: 'Files',
@@ -232,7 +236,6 @@ const downloadsCharts = (from, to) => {
                                             formatAxisDate(v, i == 0)
                                     }
                                 }
-                             
                             }
                         ]
                         return (
@@ -267,9 +270,8 @@ const downloadsCharts = (from, to) => {
                             suspenseBlockStyle={true}
                             query={SQL.fileDownloads.perAssay({ from, to })}
                             buildCallback={(rawData) => {
-                               
                                 const data = dataToArrayofObjects(rawData)
-                                
+
                                 const formattedData = {}
                                 const subGroupLabels = {}
                                 for (const d of data) {
@@ -278,12 +280,17 @@ const downloadsCharts = (from, to) => {
                                         [d.assay]: d.total_bytes_transferred
                                     }
                                     subGroupLabels[d.assay] = d.assay
-                                    
                                 }
                                 const config = {
                                     providerProps: {
                                         onBuildToolTip: (id, e, d) => {
-                                            return onBuildToolTip(id, e, d, {row: formattedData[d] || formattedData[d.data.group], subGroupLabels, formatter: formatBytes})
+                                            return onBuildToolTip(id, e, d, {
+                                                row:
+                                                    formattedData[d] ||
+                                                    formattedData[d.data.group],
+                                                subGroupLabels,
+                                                formatter: formatBytes
+                                            })
                                         }
                                     },
                                     optionsMenu: {
@@ -291,29 +298,29 @@ const downloadsCharts = (from, to) => {
                                             checked: true
                                         }
                                     },
-                                    data: Object.keys(formattedData).map((time_bucket) => ({
-                                        id: time_bucket,
-                                        group: time_bucket,
-                                        ...formattedData[time_bucket]
-                                    })),
+                                    data: Object.keys(formattedData).map(
+                                        (time_bucket) => ({
+                                            id: time_bucket,
+                                            group: time_bucket,
+                                            ...formattedData[time_bucket]
+                                        })
+                                    ),
                                     yAxis: {
                                         scaleLog: true,
                                         formatter: (v, i) => formatBytes(v)
                                     },
                                     xAxis: {
-                                   
                                         formatter: (v, i) => formatAxisDate(v)
                                     },
                                     style: {
-                                   
                                         valueFormatter: ({ d, v }) => {
                                             return formatBytes(v)
                                         }
                                     },
                                     legendLayout: 'flex',
-                                    subGroupLabels,
+                                    subGroupLabels
                                 }
-                        
+
                                 return (
                                     <BasicCard
                                         key='data-transferred-by-assay'
@@ -348,13 +355,13 @@ const downloadsCharts = (from, to) => {
                                         time_bucket: item.time_bucket,
                                         type: 'new_users',
                                         count: item.new_users,
-                                        label: 'New',
+                                        label: 'New'
                                     })
                                     data.push({
                                         time_bucket: item.time_bucket,
                                         type: 'returning_users',
                                         count: item.returning_users,
-                                        label: 'Returning',
+                                        label: 'Returning'
                                     })
                                 }
 
@@ -363,15 +370,20 @@ const downloadsCharts = (from, to) => {
                                 for (const d of data) {
                                     formattedData[d.time_bucket] = {
                                         ...(formattedData[d.time_bucket] || {}),
-                                        [d.type]: d.count,
+                                        [d.type]: d.count
                                     }
                                     subGroupLabels[d.type] = d.label
-                                    
                                 }
                                 const config = {
                                     providerProps: {
                                         onBuildToolTip: (id, e, d) => {
-                                            return onBuildToolTip(id, e, d, {row: formattedData[d] || formattedData[d.data.group], subGroupLabels, formatter: formatNum})
+                                            return onBuildToolTip(id, e, d, {
+                                                row:
+                                                    formattedData[d] ||
+                                                    formattedData[d.data.group],
+                                                subGroupLabels,
+                                                formatter: formatNum
+                                            })
                                         }
                                     },
                                     // optionsMenu: {
@@ -379,11 +391,13 @@ const downloadsCharts = (from, to) => {
                                     //         checked: true
                                     //     }
                                     // },
-                                    data: Object.keys(formattedData).map((time_bucket) => ({
-                                        id: time_bucket,
-                                        group: time_bucket,
-                                        ...formattedData[time_bucket]
-                                    })),
+                                    data: Object.keys(formattedData).map(
+                                        (time_bucket) => ({
+                                            id: time_bucket,
+                                            group: time_bucket,
+                                            ...formattedData[time_bucket]
+                                        })
+                                    ),
                                     yAxis: {
                                         // scaleLog: true,
                                         formatter: (v, i) => formatNum(v)
@@ -397,9 +411,9 @@ const downloadsCharts = (from, to) => {
                                         }
                                     },
                                     legendLayout: 'flex',
-                                    subGroupLabels,
+                                    subGroupLabels
                                 }
-                        
+
                                 return (
                                     <BasicCard
                                         key='active-users-by-month'
@@ -446,9 +460,7 @@ const downloadsCharts = (from, to) => {
                                 dataIndex: 'terabytes',
                                 key: 'terabytes',
                                 minWidth: '150px',
-                                render: (text) => (
-                                    <InbarCell text={text} />
-                                )
+                                render: (text) => <InbarCell text={text} />
                             },
                             {
                                 title: 'Files',
@@ -598,7 +610,7 @@ const locationsCharts = (from, to) => {
                                         value: d.total_bytes_transferred
                                     })),
                                     style: {
-                                        valueFormatter: ({d, v}) => {
+                                        valueFormatter: ({ d, v }) => {
                                             return formatBytes(v)
                                         }
                                     },
@@ -618,7 +630,7 @@ const locationsCharts = (from, to) => {
                                         value: d.users
                                     })),
                                     style: {
-                                        valueFormatter: ({d, v}) => {
+                                        valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }
                                     },
@@ -638,7 +650,7 @@ const locationsCharts = (from, to) => {
                                         value: d.files
                                     })),
                                     style: {
-                                        valueFormatter: ({d, v}) => {
+                                        valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }
                                     },
@@ -647,7 +659,6 @@ const locationsCharts = (from, to) => {
                                         formatter: (v) => formatNum(v)
                                     }
                                 }
-
                             }
                         ]
                         return (
@@ -696,9 +707,7 @@ const locationsCharts = (from, to) => {
                                 dataIndex: 'terabytes',
                                 key: 'terabytes',
                                 minWidth: '150px',
-                                render: (text) => (
-                                    <InbarCell text={text} />
-                                )
+                                render: (text) => <InbarCell text={text} />
                             },
                             {
                                 title: 'Files',
@@ -730,7 +739,6 @@ const locationsCharts = (from, to) => {
                                 dataIndex: 'last_download',
                                 key: 'last_download'
                             }
-                            
                         ]
                         return (
                             <TableCard
@@ -752,7 +760,7 @@ const locationsCharts = (from, to) => {
                     buildCallback={(rawData) => {
                         const data = dataToArrayofObjects(rawData)
                         const columns = [
-                             {
+                            {
                                 title: 'City',
                                 dataIndex: 'city',
                                 key: 'city'
@@ -777,15 +785,13 @@ const locationsCharts = (from, to) => {
                                 dataIndex: 'terabytes',
                                 key: 'terabytes',
                                 minWidth: '150px',
-                                render: (text) => (
-                                    <InbarCell text={text} />
-                                )
+                                render: (text) => <InbarCell text={text} />
                             },
                             {
                                 title: 'Files',
                                 dataIndex: 'files',
                                 key: 'files'
-                            },
+                            }
                         ]
                         return (
                             <TableCard
@@ -798,7 +804,7 @@ const locationsCharts = (from, to) => {
                     }}
                 />
             )
-        },
+        }
     ]
 }
 

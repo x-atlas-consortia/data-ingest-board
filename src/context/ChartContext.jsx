@@ -8,6 +8,8 @@ const ChartContext = createContext({})
 export const ChartProvider = ({ children, onBuildToolTip }) => {
 
     const chartId = useRef('main')
+    const colors = useRef({})
+
     let currentColorPointer = 1
     let currentColorIndex = 0
     const selectors = {
@@ -57,13 +59,11 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
 
-        const xPos = e.clientX - containerRect.left
-        const yPos = e.clientY - containerRect.top - gap
-
         handleLineLabel(id, e, '1')
 
         let html = `<em>${label}</em>: <strong>${value}</strong>`
         if (onBuildToolTip) {
+            e.colors = colors.current
             html = onBuildToolTip(id, e, d, { label, value }) || html
         }
 
@@ -274,7 +274,8 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         toolTipHandlers,
         appendTooltip,
         svgDo,
-        selectors
+        selectors,
+        colors,
     }}>{children}</ChartContext.Provider>
 }
 
