@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react'
+import React, { memo, useState, Fragment } from 'react'
 import { Tabs } from 'antd'
 import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
@@ -54,6 +54,7 @@ const downloadsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="fileDownloads"
                     suspenseBlockStyle={true}
                     query={[
                         SQL.fileDownloads.monthly({ from, to }),
@@ -440,6 +441,7 @@ const downloadsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="datasetTypes"
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.datasetTypes({ from, to })}
                     buildCallback={(rawData) => {
@@ -498,6 +500,7 @@ const downloadsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="popularDatasets"
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.popularDatasets({ from, to })}
                     buildCallback={(rawData) => {
@@ -588,6 +591,7 @@ const locationsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="locations"
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.locations({ from, to })}
                     buildCallback={(rawData) => {
@@ -682,6 +686,7 @@ const locationsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="organizations"
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.organizations({ from, to })}
                     buildCallback={(rawData) => {
@@ -755,6 +760,7 @@ const locationsCharts = (from, to) => {
         {
             component: (
                 <DetailSuspence
+                    key="cities"
                     suspenseBlockStyle={true}
                     query={SQL.fileDownloads.topCities({ from, to })}
                     buildCallback={(rawData) => {
@@ -815,7 +821,7 @@ const FileDownloads = memo(({ from, to }) => {
             label: 'Downloads',
             children: (
                 <div>
-                    {downloadsCharts(from, to).map((chart) => chart.component)}
+                    {downloadsCharts(from, to).map((chart, i) => chart.component)}
                 </div>
             )
         },
