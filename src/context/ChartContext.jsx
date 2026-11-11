@@ -5,7 +5,7 @@ import { eq } from "@/lib/helpers/general";
 
 const ChartContext = createContext({})
 
-export const ChartProvider = ({ children }) => {
+export const ChartProvider = ({ children, onBuildToolTip }) => {
 
     const chartId = useRef('main')
     let currentColorPointer = 1
@@ -51,9 +51,9 @@ export const ChartProvider = ({ children }) => {
         }
     }
 
-    const buildTooltip = (id, chart, e, d) => {
+    const buildTooltip = (id, e, d) => {
         const $element = $(getTooltipSelector(id)).parent()
-        const marginY = 40 // add a margin to prevent chrome flickering due to overlapping with tooltip
+        const marginY = 60 // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
         const rect = $element[0]?.getBoundingClientRect()
@@ -63,13 +63,18 @@ export const ChartProvider = ({ children }) => {
 
         handleLineLabel(id, e, '1')
 
+        let html = `<em>${label}</em>: <strong>${value}</strong>`
+        if (onBuildToolTip) {
+            html = onBuildToolTip(id, e, d, { label, value }) || html
+        }
+
         getTooltip(id)
-            .html(`<em>${label}</em>: <strong>${value}</strong>`)
+            .html(html)
             .style('left', xPos + 'px')
             .style('top', yPos + 'px')
     }
 
-    const visibleTooltip = (id, chart, e, d) => {
+    const visibleTooltip = (id, e, d) => {
         getTooltip(id)
             .style('opacity', 1)
         d3.select(this)
@@ -80,25 +85,27 @@ export const ChartProvider = ({ children }) => {
     const toolTipHandlers = (id, chart = 'column') => {
         return {
             mouseover: function (e, d) {
-                visibleTooltip(id, chart, e, d)
+                visibleTooltip(id, e, d)
             },
             mouseenter: function (e, d) {
                 e.stopPropagation()
-                visibleTooltip(id, chart, e, d)
-                buildTooltip(id, chart, e, d)
+                visibleTooltip(id, e, d)
+                buildTooltip(id, e, d)
             },
             mousemove: function (e, d) {
-                buildTooltip(id, chart, e, d)
+                buildTooltip(id, e, d)
             },
-            mouseleave: function (e, d) {
+            mouseleave: function (e, d, modShape = true) {
                 e.stopPropagation()
                 handleLineLabel(id, e, '0')
                 getTooltip(id)
                     .style('opacity', 0)
-                d3.select(this)
+                if (modShape) {
+                    d3.select(this)
                     .style('stroke', 'none')
                     .style('cursor', 'default')
                     .style('opacity', 1)
+                }
             }
         };
     }
@@ -152,7 +159,7 @@ export const ChartProvider = ({ children }) => {
 
                 let _minWidth = 728
 
-                divWidth = Math.min(divWidth, data?.length * 110)
+                //divWidth = Math.min(divWidth, data?.length * 110)
                 divWidth = Math.max(_minWidth, divWidth)
 
                 const minWidth = style.minWidth || divWidth || 728
@@ -160,7 +167,7 @@ export const ChartProvider = ({ children }) => {
 
                 const width = style.width || minWidth
                 const height = style.height || minHeight
-                const margin = { top: 30, right: 0, bottom: 30 * 1.5, left: 70, ...(style.margin || {}) };
+                const margin = { top: 30, right: 0, bottom: 10, left: 70, ...(style.margin || {}) };
             
                 return {width, height, margin,
                     isMobile: width < 500,
@@ -191,7 +198,7 @@ export const ChartProvider = ({ children }) => {
                 sz.height = sz.height + maxLabelWidth * Math.sin(Math.PI / 4);
             },
             axisLabels: ({svg, sizing}) => {
-                 if (showYLabels()) {
+                 if (yAxis.label && showYLabels()) {
                     svg.append("g")
                     .append("text")
                     .style("font-size", sizing.font.title)
@@ -201,7 +208,7 @@ export const ChartProvider = ({ children }) => {
                     .attr("x", (sizing.height / 2) * -1)
                     .attr("dy", ".74em")
                     .attr("transform", "rotate(-90)")
-                    .text(yAxis.label || "Frequency")
+                    .text(yAxis.label)
                 }
                 
                     

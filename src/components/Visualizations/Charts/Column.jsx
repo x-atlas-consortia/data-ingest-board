@@ -28,23 +28,12 @@ const Column = memo(({
         xAxis.showLabels !== undefined ? xAxis.showLabels : true
 
     const buildChart = () => {
-        let names
-        if (xAxis.noSortLabels) {
-            names = data.map((d) => d.label)
-        } else {
-            data.sort((a, b) => b.value - a.value)
-            const groups = d3.groupSort(
-                data,
-                ([d]) => -d.value,
-                (d) => d.label
-            )
-            names = groups.map((g) => g)
-        }
+        let names =  svgDo({ data, xAxis }).sortLabels()
 
         // Declare the chart dimensions and margins.
         const sizing = svgDo({ data }).sizing(style, chartId)
 
-        if (showXLabels()) {
+        if (showXLabels() && xAxis.rotateLabels) {
             svgDo({}).adjustSizingByTicks(sizing, names)
         }
 
@@ -133,25 +122,31 @@ const Column = memo(({
                 return i * 100
             })
 
-        svg.selectAll('rect')
-            .on('mouseover', toolTipHandlers(chartId).mouseover)
-            .on('mousemove', toolTipHandlers(chartId).mousemove)
-            .on('mouseleave', toolTipHandlers(chartId).mouseleave)
-
         // Add the x-axis and label.
         svg.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
-            .call(d3.axisBottom(x))
+            .call(
+                d3
+                    .axisBottom(x)
+                    .tickFormat((x, i) =>
+                        xAxis.formatter ? xAxis.formatter(x, i) : x
+                    )
+            )
             .selectAll('text')
             .style('display', showXLabels() ? 'block' : 'none')
-            .style('text-anchor', 'end')
             .style('font-size', '11px')
-            .attr('dx', '-0.8em')
-            .attr('dy', '0.15em')
-            .attr('transform', 'rotate(-45)')
-            .text(function (d) {
-                return truncateLabel(d)
+            
+
+         if (xAxis.rotateLabels) {
+            xAxisGroup
+                .style('text-anchor', 'end')
+                .attr('dx', '-0.8em')
+                .attr('dy', '0.15em')
+                .attr('transform', 'rotate(-45)')
+                .text(function (d) {
+                    return truncateLabel(d)
             })
+        } 
 
         // Add the y-axis and label, and remove the domain line.
         svg.append('g')
@@ -174,20 +169,25 @@ const Column = memo(({
             .enter()
             .append("rect")
             .attr("class", "column-hover")
+            .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr("x", d => x(d.label)) // Match the x position of the data band
             .attr("width", x.bandwidth())  // Match the exact width of the column band
-            .attr("y", d => y(maxY))                       // Start from the very top of the chart
-            .attr("height", d => y(minY) - y(maxY))        // Stretch to the very bottom of the chart
+            .attr("y", d => margin.top)                       // Start from the very top of the chart
+            .attr("height", d => y(minY) - margin.top)        // Stretch to the very bottom of the chart
             .style("fill", "transparent")       // Invisible by default, but still interactive
             .style("pointer-events", "all")     // Crucial: ensures transparent elements catch mouse events
             .on("mouseover", function(event, d) {
                 // Turn the background a subtle gray or light color on hover
                 d3.select(this).style("fill", "rgba(0, 0, 0, 0.05)");
+                toolTipHandlers(chartId).mouseover(event, d)
             })
-            .on("mouseout", function() {
+            .on("mouseout", function(event, d) {
+                toolTipHandlers(chartId).mouseleave(event, d, false)
                 // Reset to transparent when the mouse leaves the column space
                 d3.select(this).style("fill", "transparent");
-            });
+               
+            })
+            .on('mousemove', toolTipHandlers(chartId).mousemove)
 
         // Return the SVG element.
         return svg.node()

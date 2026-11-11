@@ -138,8 +138,8 @@ const Bar = memo(({
             .call(
                 d3
                     .axisBottom(x)
-                    .tickFormat((x) =>
-                        xAxis.formatter ? xAxis.formatter(x) : x
+                    .tickFormat((x, i) =>
+                        xAxis.formatter ? xAxis.formatter(x, i) : x
                     )
             )
             .selectAll('text')

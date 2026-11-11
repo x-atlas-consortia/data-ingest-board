@@ -48,69 +48,72 @@ const downloadsCharts = (from, to) => {
                                         checked: true
                                     }
                                 },
+                                providerProps: {
+                                    onBuildToolTip: (id, e, d) => {
+                                        return `<span class="text-muted">${formatAxisDate(
+                                            d.label,
+                                            true
+                                        )}</span><br><strong>${formatBytes(d.value)}</strong>`
+                                    }
+                                },
                                 config: {
-                                    data,
-                                    xField: 'time_bucket',
-                                    yField: 'total_bytes_transferred',
-                                    tooltip: {
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            {
-                                                name: 'Data transferred',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatBytes(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    axis: {
-                                        x: {
-                                            labelFormatter: (datum) => {
-                                                return formatAxisDate(datum)
-                                            }
-                                        },
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatBytes(datum)
+                                    data: data.map((d) => ({
+                                        id: d.time_bucket,
+                                        label: d.time_bucket,
+                                        value: d.total_bytes_transferred
+                                    })),
+                                    style: {
+                                        monoColor: '#2f6fb3',
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatBytes(v)
                                         }
+                                    },
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatBytes(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) =>
+                                            formatAxisDate(v, i == 0)
                                     }
                                 }
+
                             },
                             {
                                 label: 'Files',
                                 value: 'files',
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
+                                providerProps: {
+                                    onBuildToolTip: (id, e, d) => {
+                                        return `<span class="text-muted">${formatAxisDate(
+                                            d.label,
+                                            true
+                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                    }
+                                },
                                 config: {
-                                    data,
-                                    xField: 'time_bucket',
-                                    yField: 'files',
-                                    tooltip: {
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            {
-                                                name: 'Files',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatNum(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    axis: {
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
+                                    data: data.map((d) => ({
+                                        id: d.time_bucket,
+                                        label: d.time_bucket,
+                                        value: d.files
+                                    })),
+                                    style: {
+                                        monoColor: '#2f6fb3',
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
                                         }
+                                    },
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) =>
+                                            formatAxisDate(v, i == 0)
                                     }
                                 }
                             },
@@ -126,32 +129,38 @@ const downloadsCharts = (from, to) => {
                                         the pulls on each day of the month.
                                     </small>
                                 ),
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
+                                providerProps: {
+                                    onBuildToolTip: (id, e, d) => {
+                                        return `<span class="text-muted">${formatAxisDate(
+                                            d.label,
+                                            true
+                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                    }
+                                },
                                 config: {
-                                    data: datasetPullsTouchedData,
-                                    xField: 'time_bucket',
-                                    yField: 'dataset_pulls',
-                                    tooltip: {
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            {
-                                                name: 'Dataset pulls',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatNum(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    axis: {
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
+                                    data: datasetPullsTouchedData.map((d) => ({
+                                        id: d.time_bucket,
+                                        label: d.time_bucket,
+                                        value: d.dataset_pulls
+                                    })),
+                                    style: {
+                                        monoColor: '#2f6fb3',
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
                                         }
+                                    },
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) =>
+                                            formatAxisDate(v, i == 0)
                                     }
                                 }
                             },
@@ -166,39 +175,47 @@ const downloadsCharts = (from, to) => {
                                         anyone.
                                     </small>
                                 ),
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
+                                providerProps: {
+                                    onBuildToolTip: (id, e, d) => {
+                                        return `<span class="text-muted">${formatAxisDate(
+                                            d.label,
+                                            true
+                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                    }
+                                },
                                 config: {
-                                    data: datasetPullsTouchedData,
-                                    xField: 'time_bucket',
-                                    yField: 'datasets_touched',
-                                    tooltip: {
-                                        title: (datum) => {
-                                            return formatAxisDate(
-                                                datum.time_bucket,
-                                                true
-                                            )
-                                        },
-                                        items: [
-                                            {
-                                                name: 'Datasets touched',
-                                                channel: 'y', // or field name
-                                                valueFormatter: (datum) => {
-                                                    return formatNum(datum)
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    axis: {
-                                        y: {
-                                            labelFormatter: (datum) =>
-                                                formatNum(datum)
+                                    data: datasetPullsTouchedData.map((d) => ({
+                                        id: d.time_bucket,
+                                        label: d.time_bucket,
+                                        value: d.datasets_touched
+                                    })),
+                                    style: {
+                                        monoColor: '#2f6fb3',
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
                                         }
+                                    },
+                                    yAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) =>
+                                            formatAxisDate(v, i == 0)
                                     }
                                 }
+                             
                             }
                         ]
                         return (
                             <TabChartCard
                                 title='Monthly usage'
+                                chartType='Column'
                                 subTitle={`Pick a measure. From ${from} to ${to}`}
                                 data={config}
                                 footer={
@@ -226,7 +243,7 @@ const downloadsCharts = (from, to) => {
                             suspenseBlockStyle={true}
                             query={SQL.fileDownloads.perAssay({ from, to })}
                             buildCallback={(rawData) => {
-                                console.log('Raw Data:', rawData)
+                               
                                 const data = dataToArrayofObjects(rawData)
                                 const config = {
                                     data,
@@ -588,7 +605,7 @@ const locationsCharts = (from, to) => {
                                 title='Countries'
                                 subTitle={`Destination country from the download IP. From ${from} to ${to}`}
                                 data={config}
-                                chartType='bar'
+                                chartType='Bar'
                                 footer={
                                     <small>
                                         <strong>Why this view:</strong>{' '}

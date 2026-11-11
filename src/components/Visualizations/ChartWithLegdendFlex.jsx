@@ -19,6 +19,7 @@ const ChartWithLegendFlex = memo(
         subGroupLabels,
         chartType = 'Column',
         legendLayout = 'flex',
+        providerProps = {},
         style = {}
     }) => {
         const [legend, setLegend] = useState({})
@@ -50,7 +51,7 @@ const ChartWithLegendFlex = memo(
 
         return (
             <ChartWrapper legend={legend} data={preparedData}>
-                <ChartProvider>
+                <ChartProvider {...providerProps}>
                     <ChartComponent
                         style={style}
                         xAxis={xAxis}

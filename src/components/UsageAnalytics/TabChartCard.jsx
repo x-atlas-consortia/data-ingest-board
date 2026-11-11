@@ -20,7 +20,7 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
             [tabPlacement]: checked
         }))
     }
-    const isBarChart = chartType === 'bar'
+    const isBarChart = chartType === 'Bar'
     const chartProps = useMemo(() => {
         let valueAxisName = isBarChart ? 'xAxis' : 'yAxis'
         return {
@@ -59,20 +59,14 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
                     </Radio.Group>
                 </Space>
 
-                {isBarChart ? (
-                    <ChartWithLegendFlex
-                        chartType='Bar'
+                <ChartWithLegendFlex
+                        chartType={chartType}
                         legendLayout={'none'}
                         key={currentChartData?.value}
                         chartId={tabPlacement}
+                        providerProps={currentChartData?.providerProps}
                         {...chartProps}
                     />
-                ) : (
-                    <Column
-                        key={currentChartData?.value}
-                        {...chartProps}
-                    />
-                )}
                 {currentChartData?.footer && (
                     <span>{currentChartData.footer}</span>
                 )}
