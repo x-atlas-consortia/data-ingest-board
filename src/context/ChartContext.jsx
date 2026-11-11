@@ -52,14 +52,14 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
     }
 
     const buildTooltip = (id, e, d) => {
-        const $element = $(getTooltipSelector(id)).parent()
-        const marginY = 60 // add a margin to prevent chrome flickering due to overlapping with tooltip
+        const container = $(getTooltipSelector(id)).parent()
+        const gap = 30 // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
-        const rect = $element[0]?.getBoundingClientRect()
+        const containerRect = container[0]?.getBoundingClientRect()
 
-        const xPos = e.clientX - rect.left
-        const yPos = e.clientY - rect.top - marginY
+        const xPos = e.clientX - containerRect.left
+        const yPos = e.clientY - containerRect.top - gap
 
         handleLineLabel(id, e, '1')
 
@@ -82,7 +82,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             .style('cursor', 'pointer')
     }
 
-    const toolTipHandlers = (id, chart = 'column') => {
+    const toolTipHandlers = (id) => {
         return {
             mouseover: function (e, d) {
                 visibleTooltip(id, e, d)

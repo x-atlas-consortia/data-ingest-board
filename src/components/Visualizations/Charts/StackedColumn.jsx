@@ -56,18 +56,15 @@ const StackedColumn = memo(({
             .range([margin.left, width - margin.right])
             .padding([0.2])
 
-        g.append('g')
+        const xAxisGroup = g.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x).tickFormat((x, i) =>
                         xAxis.formatter ? xAxis.formatter(x, i) : x
                     ))
 
-
         const ticks =
             yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
         const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-
-  
 
         const _minY = yAxis.minY || (yAxis.scaleLog ? 1 : 0)
 
@@ -165,6 +162,23 @@ const StackedColumn = memo(({
                 const x = d[0] == _minY ? minRange : y(d[0] || minY)
                 return x - y(d[1])
             })
+
+
+        xAxisGroup.selectAll(".tick text")
+        .style("cursor", "pointer") 
+        .on("mouseover", function(event, d) {
+          toolTipHandlers(chartId).mouseover(event, d)
+        })
+        .on("mousemove", function(event, d) {
+          event.fromTick = true
+          event.colors = colors.current
+          toolTipHandlers(chartId).mousemove(event, d)
+        })
+        .on("mouseout", function(event, d) {
+          event.fromTick = true
+
+          toolTipHandlers(chartId).mouseleave(event, d, false)
+        })
 
         return svg.node()
     }

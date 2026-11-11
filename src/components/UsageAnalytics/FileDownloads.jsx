@@ -257,7 +257,23 @@ const downloadsCharts = (from, to) => {
                                     subGroupLabels[d.assay] = d.assay
                                     
                                 }
-                                const config2 = {
+                                const config = {
+                                    providerProps: {
+                                        onBuildToolTip: (id, e, d) => {
+                                           
+                                            if (!e.colors) return null
+                                            const colors = e.colors
+                                            return `<span class="text-muted">${formatAxisDate(
+                                                d,
+                                                true
+                                            )}</span><br>${Object.values(colors)
+                                                .map(
+                                                    ({ color, label, value }) =>
+                                                        `<span style="color: ${color}; width: 5px; display: block;">${label}</span>: <strong>${value}</strong>`
+                                                )
+                                                .join('<br>')}`
+                                        }
+                                    },
                                     optionsMenu: {
                                         logScale: {
                                             checked: true
@@ -292,7 +308,7 @@ const downloadsCharts = (from, to) => {
                                         chartType='StackedColumn'
                                         title='Data transferred by assay, per month'
                                         subTitle={`Dataset types grouped to their base assay (pipeline suffix removed). Seven largest by all-time volume, the rest as Other. NA is mostly uploads and publications. From ${from} to ${to}`}
-                                        data={config2}
+                                        data={config}
                                         footer={
                                             <small>
                                                 <strong>Why this view:</strong>{' '}
