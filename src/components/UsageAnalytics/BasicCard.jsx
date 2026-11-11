@@ -5,7 +5,7 @@ import ChartWithLegend from '@/components/Visualizations/ChartWithLegend'
 
 const BasicCard = memo(({ title, chartType, data, children, footer }) => {
     const [logScale, setLogScale] = useState(
-        data.optionsMenu.logScale.checked
+        data.optionsMenu?.logScale?.checked
     )
     const onChangeLogScale = (checked) => {
         setLogScale(checked)

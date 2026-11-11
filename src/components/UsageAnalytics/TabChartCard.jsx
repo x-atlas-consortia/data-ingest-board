@@ -1,6 +1,5 @@
 import React, { memo, useState, useMemo } from 'react'
 import { Card, Radio, Space } from 'antd'
-import { Column } from '@ant-design/charts'
 import ChartWithLegend from '../Visualizations/ChartWithLegend'
 import ChartCardActions from './ChartCardActions'
 

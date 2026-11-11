@@ -121,7 +121,7 @@ const StackedColumn = memo(({
               .attr("fill", d => {
                 const color = style.colorScale  ? style.colorScale({d, maxY}) : colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[label] = { color, label, value: formatVal({d, v: getSubGroupSum(d.key)}) }
+                colors.current[label] = { color, label, key: d.key, value: formatVal({d, v: getSubGroupSum(d.key)}) }
                 return color
             })
             .selectAll("rect")
@@ -142,10 +142,10 @@ const StackedColumn = memo(({
             })
             .attr("height", 0)
             .attr("width", x.bandwidth() )
-            .append("title")
-            .text(d => {
-                return `${xAxis.formatter ? xAxis.formatter(d.data.group) : d.data.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.data[d.key]})}`
-            })
+            // .append("title")
+            // .text(d => {
+            //     return `${xAxis.formatter ? xAxis.formatter(d.data.group) : d.data.group}\n${getSubgroupLabel(d.key)}: ${formatVal({d, v: d.data[d.key]})}`
+            // })
 
         svg.selectAll('rect')
             .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
@@ -175,8 +175,6 @@ const StackedColumn = memo(({
           toolTipHandlers(chartId).mousemove(event, d)
         })
         .on("mouseout", function(event, d) {
-          event.fromTick = true
-
           toolTipHandlers(chartId).mouseleave(event, d, false)
         })
 

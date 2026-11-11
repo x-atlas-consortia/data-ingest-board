@@ -21,6 +21,29 @@ const InbarCell = ({ text }) => {
     )
 }
 
+const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
+    debugger
+    if (!e.fromTick) return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
+                                            d.data.group,
+                                            true
+                                        )}</span><br> <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong></div>`
+    if (!e.colors) return null
+    const colors = e.colors
+    let total = 0
+    return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
+        d,
+        true
+    )}</span><br>${Object.values(colors)
+        .map(
+            ({ color, label, key, value }) => {
+                total += row[key] || 0
+                return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>${label}: <strong>${formatter(row[key])}</strong></span>`
+            }
+                
+        )
+        .join('<br>')}<br>Total: <strong>${formatter(total)}</strong></div>`
+}
+
 const downloadsCharts = (from, to) => {
     return [
         {
@@ -260,18 +283,7 @@ const downloadsCharts = (from, to) => {
                                 const config = {
                                     providerProps: {
                                         onBuildToolTip: (id, e, d) => {
-                                           
-                                            if (!e.colors) return null
-                                            const colors = e.colors
-                                            return `<div class="c-visualizations__tooltipWrap"><span class="text-muted">${formatAxisDate(
-                                                d,
-                                                true
-                                            )}</span><br>${Object.values(colors)
-                                                .map(
-                                                    ({ color, label, value }) =>
-                                                        `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>${label}: <strong>${value}</strong></span>`
-                                                )
-                                                .join('<br>')}</div>`
+                                            return onBuildToolTip(id, e, d, {row: formattedData[d] || formattedData[d.data.group], subGroupLabels, formatter: formatBytes})
                                         }
                                     },
                                     optionsMenu: {
@@ -351,24 +363,29 @@ const downloadsCharts = (from, to) => {
                                 for (const d of data) {
                                     formattedData[d.time_bucket] = {
                                         ...(formattedData[d.time_bucket] || {}),
-                                        [d.type]: d.count
+                                        [d.type]: d.count,
                                     }
                                     subGroupLabels[d.type] = d.label
                                     
                                 }
                                 const config = {
-                                    optionsMenu: {
-                                        logScale: {
-                                            checked: true
+                                    providerProps: {
+                                        onBuildToolTip: (id, e, d) => {
+                                            return onBuildToolTip(id, e, d, {row: formattedData[d] || formattedData[d.data.group], subGroupLabels, formatter: formatNum})
                                         }
                                     },
+                                    // optionsMenu: {
+                                    //     logScale: {
+                                    //         checked: true
+                                    //     }
+                                    // },
                                     data: Object.keys(formattedData).map((time_bucket) => ({
                                         id: time_bucket,
                                         group: time_bucket,
                                         ...formattedData[time_bucket]
                                     })),
                                     yAxis: {
-                                        scaleLog: true,
+                                        // scaleLog: true,
                                         formatter: (v, i) => formatNum(v)
                                     },
                                     xAxis: {
