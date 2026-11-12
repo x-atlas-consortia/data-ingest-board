@@ -2,6 +2,7 @@ import React, { memo, useState, Fragment } from 'react'
 import { Tabs } from 'antd'
 import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
+import THEME from '@/lib/helpers/theme'
 import TabChartCard from './TabChartCard'
 import {
     formatBytes,
@@ -92,7 +93,7 @@ const downloadsCharts = (from, to) => {
                                         value: d.total_bytes_transferred
                                     })),
                                     style: {
-                                        monoColor: '#2f6fb3',
+                                        monoColor: THEME.visualizations.defaultFill,
                                         valueFormatter: ({ d, v }) => {
                                             return formatBytes(v)
                                         }
@@ -130,7 +131,7 @@ const downloadsCharts = (from, to) => {
                                         value: d.files
                                     })),
                                     style: {
-                                        monoColor: '#2f6fb3',
+                                        monoColor: THEME.visualizations.defaultFill,
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }
@@ -177,7 +178,7 @@ const downloadsCharts = (from, to) => {
                                         value: d.dataset_pulls
                                     })),
                                     style: {
-                                        monoColor: '#2f6fb3',
+                                        monoColor: THEME.visualizations.defaultFill,
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }
@@ -223,7 +224,7 @@ const downloadsCharts = (from, to) => {
                                         value: d.datasets_touched
                                     })),
                                     style: {
-                                        monoColor: '#2f6fb3',
+                                        monoColor: THEME.visualizations.defaultFill,
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }

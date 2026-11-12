@@ -176,10 +176,10 @@ const Bar = memo(({
             })
             .attr('y', function (d) {
                 return y(d.label) + y.bandwidth() / 1.3
-            }) // Center vertically on the bar
+            }) 
             .attr('x', function (d) {
                 return x(minX)
-            }) // 5px above the top of the bar
+            }) 
             .attr('text-anchor', 'middle') // Align center
             .style('font-size', '12px')
             .style('fill', '#333')

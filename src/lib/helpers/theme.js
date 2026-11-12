@@ -3,6 +3,9 @@ import ENVS from "./envs";
 let THEME_CONFIG
 
 const THEME = {
+    visualizations:  {
+        defaultFill: '#2f6fb3'
+    },
     colors: () => {
         return THEME.lightColors().concat(THEME.darkColors())
     },
