@@ -192,11 +192,13 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 }
 
                 let _minWidth = 728
+                console.log('minWidth', _minWidth, style, divWidth)
 
                 //divWidth = Math.min(divWidth, data?.length * 110)
                 divWidth = Math.max(_minWidth, divWidth)
 
                 const minWidth = style.minWidth || divWidth || 728
+                
                 const minHeight = style.minHeight || 500
 
                 const width = style.width || minWidth

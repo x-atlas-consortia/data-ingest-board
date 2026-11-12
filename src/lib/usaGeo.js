@@ -1,4 +1,4 @@
-export const usaTopo = [
+export const usaGeo = [
 {":id":"row-jk7e.hi5k-5wu4",":version":"rv-g6pd.r9b2.qnji",":created_at":"2026-11-12T11:38:46.027Z",":updated_at":"2026-11-12T11:38:46.027Z","state_name":"ALABAMA","county_name":"AUTAUGA","city_name":"AUTAUGAVILLE","state_code":"AL","state_fipcode":"01","county_code":"C001","county_fipcode":"01001","city_code":"0220","city_fipcode":"010010220"},
 {":id":"row-75qp.e5hy_8a4f",":version":"rv-crta~jsag_h83q",":created_at":"2026-11-12T11:38:46.027Z",":updated_at":"2026-11-12T11:38:46.027Z","state_name":"ALABAMA","county_name":"AUTAUGA","city_name":"BILLINGSLEY","state_code":"AL","state_fipcode":"01","county_code":"C001","county_fipcode":"01001","city_code":"0340","city_fipcode":"010010340"},
 {":id":"row-4wr6~xz6g~6smh",":version":"rv-itnd.k2ny_j252",":created_at":"2026-11-12T11:38:46.027Z",":updated_at":"2026-11-12T11:38:46.027Z","state_name":"ALABAMA","county_name":"AUTAUGA","city_name":"BOOTH","state_code":"AL","state_fipcode":"01","county_code":"C001","county_fipcode":"01001","city_code":"0425","city_fipcode":"010010425"},

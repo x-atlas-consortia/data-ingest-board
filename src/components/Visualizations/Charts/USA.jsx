@@ -1,7 +1,7 @@
 import {useContext, useEffect, useRef, memo} from "react";
 import * as d3 from "d3";
 import ChartContext from "@/context/ChartContext";
-import { usaTopo } from "@/lib/usaTopo";
+import { usaGeo } from "@/lib/usaGeo";
 import * as topojson from "topojson-client";
 import us from "@/lib/counties-albers-10m.json"
 
@@ -23,7 +23,7 @@ const USA = memo(({
     const chartData = useRef([])
     const hasLoaded = useRef(false)
 
-    const cityMap = usaTopo.reduce((map, d) => {
+    const cityMap = usaGeo.reduce((map, d) => {
         map.set(d.city_name, d)
         return map
     }, new Map())
@@ -116,6 +116,8 @@ const USA = memo(({
             .attr('data-label', d => `${d.county.properties.name}, ${d.state.properties.name}`)
             .attr("transform", d => `translate(${centroid(d.county)})`)
             .attr("r", d => radius(d.value));
+
+        
 
         svg.selectAll('.circle-value')
             .on("mouseover", toolTipHandlers(chartId).mouseover)
