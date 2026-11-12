@@ -14,21 +14,12 @@ const GroupedColumn = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const {colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const {getSubGroupSum, colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'groupedColumn'
     const chartData = useRef([])
     
-
-    const getSubGroupSum = (key) => {
-        let sum = 0
-        for (let d of data) {
-            sum += d[key] || 0
-        }
-        return sum
-    }
-
     const buildChart = () => {
         colors.current = {}
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)

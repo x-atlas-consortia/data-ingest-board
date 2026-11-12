@@ -14,19 +14,11 @@ const StackedColumn = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip, colors } =
+    const { getSubGroupSum, getChartSelector, toolTipHandlers, svgDo, appendTooltip, colors } =
         useContext(ChartContext)
 
     const chartType = 'stackedColumn'
     const chartData = useRef([])
-
-    const getSubGroupSum = (key) => {
-        let sum = 0
-        for (let d of data) {
-            sum += d[key] || 0
-        }
-        return sum
-    }
 
     const buildChart = () => {
         colors.current = {}

@@ -9,15 +9,16 @@ export default function Pie({
     onSectionClick,
     style = {},
 }) {
-    const colors = {}
 
     const {
+        colors,
         getChartSelector,
         toolTipHandlers,
         selectors,
         appendTooltip } = useContext(ChartContext)
 
     const buildChart = ()  => {
+        colors.current = {}
 
         // Specify the chart’s dimensions.
         const width = 928;
@@ -65,7 +66,7 @@ export default function Pie({
             .attr("class", d => `slice--${d.data.id}`)
             .attr("fill", d => {
                 const color = style?.colorMethods && style?.colorMethods[style.colorMethodKey] ? style?.colorMethods[style.colorMethodKey](d.data.label) : colorS(d.data.label)
-                colors[d.data.label] = {color, value: d.data.value, label: d.data.label};
+                colors.current[d.data.label] = {color, value: d.data.value, label: d.data.label};
                 return color
             })
             .attr("d", arc)
@@ -109,7 +110,7 @@ export default function Pie({
         appendTooltip(chartId, 'pie')
         $(getChartSelector(chartId, 'pie')).append(buildChart())
         if (setLegend) {
-            setLegend(colors)
+            setLegend(colors.current)
         }
 
     }, [data])

@@ -118,6 +118,14 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         };
     }
 
+    const getSubGroupSum = (key) => {
+        let sum = 0
+        for (let d of data) {
+            sum += d[key] || 0
+        }
+        return sum
+    }
+
     const svgDo = ({xAxis, yAxis, data}) => {
         const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
         const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
@@ -293,6 +301,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         selectors,
         colors,
         chartData,
+        getSubGroupSum,
     }}>{children}</ChartContext.Provider>
 }
 
