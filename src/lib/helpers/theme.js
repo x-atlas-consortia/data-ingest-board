@@ -7,7 +7,7 @@ const THEME = {
         defaultFill: '#2f6fb3',
         font: {
             size: '12px',
-            color: '#333'
+            color: '#3e3737'
         }
 
     },

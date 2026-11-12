@@ -19,7 +19,6 @@ const StackedColumn = memo(({
 
     const chartType = 'stackedColumn'
     const chartData = useRef([])
-    
 
     const getSubGroupSum = (key) => {
         let sum = 0
@@ -30,10 +29,9 @@ const StackedColumn = memo(({
     }
 
     const buildChart = () => {
-      
+        colors.current = {}
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
-        let { width, height, margin } = sizing
-        const rotateLabels = xAxis.rotateLabels || sizing.isMobile
+        const { width, height, margin } = sizing
 
         // append the svg object to the body of the page
         const svg = d3
@@ -61,10 +59,7 @@ const StackedColumn = memo(({
                         xAxis.formatter ? xAxis.formatter(x, i) : x
                     ))
 
-        const ticks =
-            yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
-        const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-
+   
         const _minY = yAxis.minY || (yAxis.scaleLog ? 1 : 0)
 
         const stackGen = d3.stack()
@@ -75,17 +70,11 @@ const StackedColumn = memo(({
 
         const stackedSeries = stackGen(data)
         const maxY = d3.max(stackedSeries, d => d3.max(d, d => d[1]))
-        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
         const minRange = height - margin.bottom
 
-        const yaxis = scaleMethod().domain([minY, maxY])
-
-        if (yAxis.scaleLog) {
-            yaxis.nice()
-        }
-
-        // Add Y axis
-        const y = yaxis.range([minRange, margin.top])
+    
+        const {y, domain, ticks} = svgDo({ data }).axis({max: maxY, axis: yAxis, range: [minRange, margin.top] })
+        const minY = domain[0]
 
         g.append('g')
             .attr('transform', `translate(${margin.left},0)`)

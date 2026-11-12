@@ -16,11 +16,11 @@ const Line = memo(({
 }) => {
 
     const chartType = 'line'
-    const colors = useRef({})
     const chartData = useRef([])
     const hasLoaded = useRef(false)
 
     const {
+        colors,
         getChartSelector,
         toolTipHandlers,
         appendTooltip,
@@ -28,7 +28,7 @@ const Line = memo(({
     } = useContext(ChartContext)
 
     const buildChart = () => {
-
+        colors.current = {}
         const sizing = svgDo({data}).sizing(style, chartId, chartType)
         let {width, height, margin} = sizing
 

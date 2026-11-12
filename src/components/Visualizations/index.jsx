@@ -429,7 +429,8 @@ function Visualizations({
                                                             handleChartItemClick
                                                         }
                                                         xAxis={{
-                                                            showLabels: true
+                                                            showLabels: true,
+                                                            rotateLabels: true
                                                         }}
                                                         yAxis={yAxis.current}
                                                         style={{

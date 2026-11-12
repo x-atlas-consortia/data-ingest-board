@@ -150,7 +150,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 let ax = axis.scaleLog
                     ? d3.scaleLog().domain(domain).nice()
                     : d3.scaleLinear().domain(domain)
-                    
+
                 if (range) {
                     ax = ax.range(range)
                 }
@@ -266,6 +266,18 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             },
             valueFormatter: ({style, d, v}) => { 
                 return style.valueFormatter ? style.valueFormatter({d, v}) : v
+            },
+            rotateLabels: ({ axisGroup, axis}) => {
+                if (axis.rotateLabels) {
+                    axisGroup
+                        .style("text-anchor", "end")
+                        .attr("dx", "-0.8em")
+                        .attr("dy", "0.15em")
+                        .attr("transform", "rotate(-45)")
+                        .text(function (d) {
+                            return _truncateLabel(d)
+                        })
+                }
             }
 
         }

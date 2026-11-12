@@ -14,30 +14,22 @@ const Column = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const { colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
-
-    const colors = useRef({})
     const chartData = useRef([])
 
-    const truncateLabel = (label) => {
-        return label.length > 30 ? label.substring(0, 27) + '...' : label
-    }
-
-    const showXLabels = () =>
-        xAxis.showLabels !== undefined ? xAxis.showLabels : true
-
     const buildChart = () => {
+        colors.current = {}
         let names =  svgDo({ data, xAxis }).sortLabels()
 
         // Declare the chart dimensions and margins.
         const sizing = svgDo({ data }).sizing(style, chartId)
 
-        if (showXLabels() && xAxis.rotateLabels) {
+        if (svgDo({ xAxis }).showXLabels() && xAxis.rotateLabels) {
             svgDo({}).adjustSizingByTicks(sizing, names)
         }
 
-        let { width, height, margin } = sizing
+        const { width, height, margin } = sizing
 
         // Declare the x (horizontal position) scale.
         const x = d3
@@ -58,20 +50,9 @@ const Column = memo(({
                     scaleRange
                 )
             )
-
-        // Bar must have a minimum height to be able to click. 2% of the max value seems good
-        const maxY = d3.max(data, (d) => d.value)
-        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
-        const yDomain = [minY, maxY]
-        const ticks =
-            yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
-
-        // Declare the y (vertical position) scale.
-        let y = yAxis.scaleLog
-            ? d3.scaleLog().domain(yDomain).nice()
-            : d3.scaleLinear().domain(yDomain)
-
-        y = y.range([height - margin.bottom, margin.top])
+  
+        const {y, domain, ticks} = svgDo({ data }).axis({ axis: yAxis, range: [height - margin.bottom, margin.top] })
+        const [minY, maxY] = domain
 
         // Create the SVG container.
         const svg = d3
@@ -123,7 +104,7 @@ const Column = memo(({
             })
 
         // Add the x-axis and label.
-        svg.append('g')
+        const xAxisGroup = svg.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
             .call(
                 d3
@@ -133,20 +114,12 @@ const Column = memo(({
                     )
             )
             .selectAll('text')
-            .style('display', showXLabels() ? 'block' : 'none')
+            .attr('class', 'x-axis-label')
+            .style('display', svgDo({  xAxis }).showXLabels() ? 'block' : 'none')
             .style('font-size', '11px')
             
 
-         if (xAxis.rotateLabels) {
-            xAxisGroup
-                .style('text-anchor', 'end')
-                .attr('dx', '-0.8em')
-                .attr('dy', '0.15em')
-                .attr('transform', 'rotate(-45)')
-                .text(function (d) {
-                    return truncateLabel(d)
-            })
-        } 
+        svgDo({ xAxis }).rotateLabels({ axisGroup: xAxisGroup, axis: xAxis })
 
         // Add the y-axis and label, and remove the domain line.
         svg.append('g')

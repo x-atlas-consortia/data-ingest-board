@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import { useContext, useEffect, useRef, memo } from 'react'
 import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext'
+import THEME from '@/lib/helpers/theme'
 
 const Bar = memo(({
     setLegend,
@@ -13,13 +14,14 @@ const Bar = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { chartData, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const { colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'bar'
-    const colors = useRef({})
+    const chartData = useRef([])
 
     const buildChart = () => {
+        colors.current = {}
         let names = svgDo({ data, xAxis }).sortLabels()
 
         // Declare the chart dimensions and margins.
@@ -122,13 +124,8 @@ const Bar = memo(({
             )
             .selectAll('text')
             .style('font-size', '14px')
-        if (xAxis.rotateLabels) {
-            xAxisGroup
-                .style('text-anchor', 'end')
-                .attr('dx', '-0.8em')
-                .attr('dy', '0.15em')
-                .attr('transform', 'rotate(-45)')
-        }         
+            
+        svgDo({ xAxis }).rotateLabels({ axisGroup: xAxisGroup, axis: xAxis })
 
         // Add the y-axis and label, and remove the domain line.
         g.append('g')

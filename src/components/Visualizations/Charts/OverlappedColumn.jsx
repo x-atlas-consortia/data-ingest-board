@@ -27,11 +27,10 @@ const OverlappedColumn = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const {colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'overlappedColumn'
-    const colors = useRef({})
     const chartData = useRef([])
 
     const getSubGroupSum = (key) => {
@@ -43,6 +42,7 @@ const OverlappedColumn = memo(({
     }
 
     const buildChart = () => {
+        colors.current = {}
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
         let { width, height, margin } = sizing
 
@@ -92,15 +92,8 @@ const OverlappedColumn = memo(({
             stackedSorted.push(subgroupsSorted)
         }
 
-        const ticks =
-            yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
-        const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
-
-        // Add Y axis
-        const y = scaleMethod()
-            .domain([minY, maxY])
-            .range([height - margin.bottom, margin.top])
+        const {y, domain, ticks} = svgDo({ data }).axis({max: maxY, axis: yAxis, range: [height - margin.bottom, margin.top] })
+        const minY = domain[0]
 
         g.append('g')
             .attr('transform', `translate(${margin.left},0)`)

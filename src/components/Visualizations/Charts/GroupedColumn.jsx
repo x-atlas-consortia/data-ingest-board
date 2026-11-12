@@ -14,11 +14,10 @@ const GroupedColumn = memo(({
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const {colors, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'groupedColumn'
-    const colors = useRef({})
     const chartData = useRef([])
     
 
@@ -31,6 +30,7 @@ const GroupedColumn = memo(({
     }
 
     const buildChart = () => {
+        colors.current = {}
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
         let { width, height, margin } = sizing
 
@@ -65,25 +65,14 @@ const GroupedColumn = memo(({
             }
         }
 
-        const ticks =
-            yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 3 : undefined
-        const scaleMethod = yAxis.scaleLog ? d3.scaleLog : d3.scaleLinear
-        const minY = yAxis.scaleLog ? 1 : -(maxY * 0.02)
-
-        const yaxis = scaleMethod().domain([minY, maxY])
-
-        if (yAxis.scaleLog) {
-            yaxis.nice()
-        }
-
-        // Add Y axis
-        const y = yaxis.range([height - margin.bottom, margin.top])
+        const {y, domain, ticks} = svgDo({ data }).axis({max: maxY, axis: yAxis, range: [height - margin.bottom, margin.top] })
+        const minY = domain[0]
 
         g.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(ticks))
 
-        var xSubgroup = d3
+        const xSubgroup = d3
             .scaleBand()
             .domain(subgroups)
             .range([0, x.bandwidth()])
