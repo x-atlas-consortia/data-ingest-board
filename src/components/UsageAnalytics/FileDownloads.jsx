@@ -811,6 +811,65 @@ const locationsCharts = (from, to) => {
                     }}
                 />
             )
+        },
+                {
+            component: (
+                <DetailSuspence
+                    key="map"
+                    suspenseBlockStyle={true}
+                    query={SQL.fileDownloads.topCities({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const config = [
+                            {
+                                label: 'United States',
+                                value: 'unitedStates',
+                                chartType: 'USA',
+                                config: {
+                                    data: data.filter((d) => d.country === 'United States of America').map((d) => ({
+                                        id: d.city,
+                                        label: d.city,
+                                        value: d.terabytes,
+                                        data: d
+                                    })),
+                                }
+                            },
+                            {
+                                label: 'World',
+                                value: 'world',
+                                chartType: 'World',
+                                config: {
+                                    data: data.map((d) => ({
+                                        id: d.country,
+                                        label: d.country,
+                                        value: d.terabytes,
+                                        data: d
+                                    })),
+                                    style: {
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                }
+                            }
+                        ]
+                        return (
+                            <TabChartCard
+                                title='Countries'
+                                subTitle={`Destination country from the download IP. From ${from} to ${to}`}
+                                data={config}
+                                chartType='Bar'
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong>{' '}
+                                        international reach for reporting.
+                                    </small>
+                                }
+                            />
+                        )
+                    }}
+                />
+            )
         }
     ]
 }

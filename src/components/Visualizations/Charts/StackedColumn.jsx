@@ -101,7 +101,7 @@ const StackedColumn = memo(({
               .attr("fill", d => {
                 const color = style.colorScale  ? style.colorScale({d, maxY}) : colorScale(d.key)
                 const label = getSubgroupLabel(d.key)
-                colors.current[d.key] = { color, label, key: d.key, value: formatVal({d, v: getSubGroupSum(d.key)}) }
+                colors.current[d.key] = { color, label, key: d.key, value: formatVal({d, v: getSubGroupSum(data, d.key)}) }
                 return color
             })
             .selectAll("rect")

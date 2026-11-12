@@ -2,14 +2,16 @@ import React, { useState, memo, useMemo } from 'react'
 import { ChartProvider } from '@/context/ChartContext'
 import Column from '@/components/Visualizations/Charts/Column'
 import Bar from '@/components/Visualizations/Charts/Bar'
-import WithChartFlex from './WithChartFlex'
-import Line from './Charts/Line'
-import OverlappedColumn from './Charts/OverlappedColumn'
-import GroupedColumn from './Charts/GroupedColumn'
+import WithChartFlex from '@/components/Visualizations/WithChartFlex'
+import Line from '@/components/Visualizations/Charts/Line'
+import OverlappedColumn from '@/components/Visualizations/Charts/OverlappedColumn'
+import GroupedColumn from '@/components/Visualizations/Charts/GroupedColumn'
 import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedColumn'
-import WithOnlyChart from './WithOnlyChart'
-import StackedColumn from './Charts/StackedColumn'
-import WithChartSider from './WithChartSider'
+import WithOnlyChart from '@/components/Visualizations/WithOnlyChart'
+import StackedColumn from '@/components/Visualizations/Charts/StackedColumn'
+import WithChartSider from '@/components/Visualizations/WithChartSider'
+import USA from '@/components/Visualizations/Charts/USA'
+import World from '@/components/Visualizations/Charts/World'
 
 const ChartWithLegend = memo(
     ({
@@ -33,7 +35,9 @@ const ChartWithLegend = memo(
                 Line,
                 OverlappedColumn,
                 GroupedColumn,
-                StackedColumn
+                StackedColumn,
+                USA,
+                World,
             }
             return types[chartType]
         }, [chartType])

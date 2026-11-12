@@ -59,7 +59,7 @@ const TabChartCard = memo(({ title, subTitle, data, chartType, footer }) => {
                 </Space>
 
                 <ChartWithLegend
-                    chartType={chartType}
+                    chartType={currentChartData?.chartType || chartType}
                     legendLayout={'none'}
                     key={currentChartData?.value}
                     chartId={tabPlacement}

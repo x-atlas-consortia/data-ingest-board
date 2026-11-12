@@ -118,7 +118,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         };
     }
 
-    const getSubGroupSum = (key) => {
+    const getSubGroupSum = (data, key) => {
         let sum = 0
         for (let d of data) {
             sum += d[key] || 0

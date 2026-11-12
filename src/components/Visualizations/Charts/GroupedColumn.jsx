@@ -104,7 +104,7 @@ const GroupedColumn = memo(({
                 colors.current[label] = {
                     color,
                     label,
-                    value: formatVal({ d, v: getSubGroupSum(d.key) })
+                    value: formatVal({ d, v: getSubGroupSum(data, d.key) })
                 }
                 return color
             })
