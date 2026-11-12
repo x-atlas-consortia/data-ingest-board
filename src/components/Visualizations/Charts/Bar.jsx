@@ -8,21 +8,16 @@ const Bar = memo(({
     filters,
     data = [],
     chartId = 'modal',
-    onSectionClick,
     style = {},
     yAxis = {},
     xAxis = {}
 }) => {
     const hasLoaded = useRef(false)
-    const { getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
+    const { chartData, getChartSelector, toolTipHandlers, svgDo, appendTooltip } =
         useContext(ChartContext)
 
     const chartType = 'bar'
     const colors = useRef({})
-    const chartData = useRef([])
-
-    const showXLabels = () =>
-        xAxis.showLabels !== undefined ? xAxis.showLabels : true
 
     const buildChart = () => {
         let names = svgDo({ data, xAxis }).sortLabels()
@@ -30,11 +25,11 @@ const Bar = memo(({
         // Declare the chart dimensions and margins.
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
 
-        if (showXLabels()) {
+        if (svgDo({ xAxis }).showXLabels()) {
             svgDo({}).adjustSizingByTicks(sizing, names)
         }
 
-        let { width, height, margin } = sizing
+        const { width, height, margin } = sizing
 
         // Declare the x (horizontal position) scale.
         const y = d3
@@ -56,19 +51,9 @@ const Bar = memo(({
                 )
             )
 
-        // Bar must have a minimum height to be able to click. 2% of the max value seems good
-        const maxX = d3.max(data, (d) => d.value)
-        const minX = xAxis.scaleLog ? 1 : -(maxX * 0.02)
-        const xDomain = [minX, maxX]
-        const ticks =
-            xAxis.scaleLog || xAxis.ticks ? xAxis.ticks || 3 : undefined
-
-        // Declare the y (vertical position) scale.
-        let x = xAxis.scaleLog
-            ? d3.scaleLog().domain(xDomain).nice()
-            : d3.scaleLinear().domain(xDomain)
-
-        x = x.range([margin.left, width])
+        // Declare the x (horizontal position) scale.
+        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', axis: xAxis, range: [margin.left, width] })
+        const minX = domain[0]
 
         // Create the SVG container.
         const svg = d3
@@ -98,7 +83,7 @@ const Bar = memo(({
             .attr('class', (d) => `bar--${d.id?.toDashedCase()}`)
             .attr('y', (d) => y(d.label))
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
-            .attr('fill', function (d) {
+            .attr('fill', (d) => {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
                 colors.current[d.label] = {
                     color,
@@ -110,19 +95,12 @@ const Bar = memo(({
             .attr('x', (d) => x(minX))
             .attr('height', y.bandwidth())
             .attr('width', (d) => x(minX) - x(minX))
-            .on('click', function (event, d) {
-                if (onSectionClick) {
-                    onSectionClick(d.label)
-                }
-            })
 
         // Animation
         g.selectAll('rect')
             .transition()
             .duration(800)
-            .attr('width', function (d) {
-                return x(d.value)
-            })
+            .attr('width', (d) => x(d.value))
             .delay(function (d, i) {
                 return i * 100
             })
@@ -171,27 +149,19 @@ const Bar = memo(({
             .enter()
             .append('text')
             .attr('class', 'number-label')
-            .text(function (d) {
-                return formatVal({ d, v: d.value })
-            })
-            .attr('y', function (d) {
-                return y(d.label) + y.bandwidth() / 1.3
-            }) 
-            .attr('x', function (d) {
-                return x(minX)
-            }) 
-            .attr('text-anchor', 'middle') // Align center
-            .style('font-size', '12px')
-            .style('fill', '#333')
+            .text((d) => formatVal({ d, v: d.value }))
+            .attr('y',(d) => y(d.label) + y.bandwidth() / 1.3) 
+            .attr('x', (d) => x(minX))
+            .attr('text-anchor', 'middle')
+            .style('font-size', THEME.visualizations.font.size)
+            .style('fill', THEME.visualizations.font.color)
             .style('opacity', 0)
 
         g.selectAll('.number-label')
             .transition()
             .duration(800)
             .style('opacity', 1)
-            .attr('x', function (d) {
-                return x(d.value) + 20
-            })
+            .attr('x', (d) => x(d.value) + 20)
             .delay(function (d, i) {
                 return i * 100
             })

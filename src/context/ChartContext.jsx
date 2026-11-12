@@ -9,27 +9,14 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
 
     const chartId = useRef('main')
     const colors = useRef({})
+    const chartData = useRef([])
 
-    let currentColorPointer = 1
-    let currentColorIndex = 0
     const selectors = {
         base: 'c-visualizations__'
     }
 
     const getChartSelector = (chartId, chart = 'column', withHash = true) => `${withHash ? '#' : ''}${selectors.base}${chart}--${chartId}`
 
-    const randomColor = () => {
-        let colors = THEME.lightColors()
-
-        let color = THEME.lightenDarkenColor(colors[currentColorIndex].slice(1), currentColorPointer * -5);
-        currentColorPointer++
-        currentColorIndex++
-        if (currentColorPointer >= colors.length) {
-            currentColorPointer = 1
-            currentColorIndex = 0
-        }
-        return { color }
-    }
 
     const appendTooltip = (id, chart = 'column') => {
         chartId.current = id
@@ -71,10 +58,9 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             .html(html)
 
         // 1. Get dimensions and bounding boxes
+        const tooltipRect = $(getTooltipSelector(id))[0]?.getBoundingClientRect() 
 
-        const tooltipRect = $(getTooltipSelector(id))[0]?.getBoundingClientRect() // 2. Calculate cursor position relative to the container coordinates
-
-        let targetX = e.clientX - containerRect.left + gap
+        let targetX = e.clientX - containerRect.left + gap // 2. Calculate cursor position relative to the container coordinates
         let targetY = e.clientY - containerRect.top + gap // 3. Right boundary collision check
 
         if (targetX + tooltipRect.width > containerRect.width) {
@@ -139,7 +125,10 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         const _truncateLabel = (label) => {
             return label.length > 30 ? label.substring(0, 27) + "..." : label;
         }
+
         return {
+            showXLabels,
+            showYLabels,
             getColor: (label, style, colorScale) => {
                 const color =
                     style?.colorMethods &&
@@ -150,8 +139,23 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                           : colorScale(label)
                 return color
             },
-            truncateLabel: (label) => {
-                return label.length > 30 ? label.substring(0, 27) + '...' : label
+            axis: ({ name = 'y', max, axis, range}) => {
+                max = max || d3.max(data, (d) => d.value)
+                // Chart must have a minimum height/width to be able to click. 2% of the max value seems good
+                const min = axis.scaleLog ? 1 : -(max * 0.02)
+                const domain = [min, max]
+                const ticks =
+                    axis.scaleLog || axis.ticks ? axis.ticks || 3 : undefined
+        
+                let ax = axis.scaleLog
+                    ? d3.scaleLog().domain(domain).nice()
+                    : d3.scaleLinear().domain(domain)
+                    
+                if (range) {
+                    ax = ax.range(range)
+                }
+                
+                return {[name]: ax, ticks, domain}
             },
             sortLabels: () => {
                 let names
@@ -276,6 +280,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         svgDo,
         selectors,
         colors,
+        chartData,
     }}>{children}</ChartContext.Provider>
 }
 

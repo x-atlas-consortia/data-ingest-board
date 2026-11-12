@@ -4,7 +4,12 @@ let THEME_CONFIG
 
 const THEME = {
     visualizations:  {
-        defaultFill: '#2f6fb3'
+        defaultFill: '#2f6fb3',
+        font: {
+            size: '12px',
+            color: '#333'
+        }
+
     },
     colors: () => {
         return THEME.lightColors().concat(THEME.darkColors())
