@@ -601,7 +601,7 @@ const locationsCharts = (from, to) => {
                         )
                         const onBuildToolTip = (id, e, d) => {
                             return `<div>
-                                <span>${d.data.country}</span> <br>
+                                <strong>${d.data.country}</strong> <br>
                                 <span>${formatBytes(d.data.total_bytes_transferred)}</span> <br>
                                 <span>${formatNum(d.data.files)} files</span> <br>
                                 <span>${formatNum(d.data.users)} users</span>

@@ -54,7 +54,7 @@ const Bar = memo(({
             )
 
         // Declare the x (horizontal position) scale.
-        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', axis: xAxis, range: [margin.left, width] })
+        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', axis: xAxis, range: [margin.left, width - margin.left] })
         const minX = domain[0]
 
         // Create the SVG container.
@@ -71,7 +71,7 @@ const Bar = memo(({
 
         const g = svg
             .append('g')
-            .attr('transform', `translate(${margin.left}, ${margin.top * 2})`)
+            .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
         //svgDo({}).grid({ g: svg, y: x, hideGrid: style.hideGrid, ticks, sizing })
         const formatVal = ({ d, v }) =>
