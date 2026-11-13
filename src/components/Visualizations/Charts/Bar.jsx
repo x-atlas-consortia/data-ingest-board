@@ -28,7 +28,7 @@ const Bar = memo(({
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
 
         if (svgDo({ xAxis }).showXLabels()) {
-            svgDo({}).adjustSizingByTicks(sizing, names)
+            svgDo({}).adjustSizingByTicks(sizing, names, 'left')
         }
 
         const { width, height, margin } = sizing

@@ -213,7 +213,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             truncateLabel: (label) => {
                 return _truncateLabel(label)
             },
-            adjustSizingByTicks: (sz, names) => {
+            adjustSizingByTicks: (sz, names, marginX = 'bottom') => {
             
                 // We need to calculate the maximum label width to adjust for the label being at 45 degrees.
                 const tempSvg = d3.select("body").append("svg").attr("class", "temp-svg").style("visibility", "hidden");
@@ -230,7 +230,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 tempSvg.remove();
     
                 // Adjust the bottom margin and height to not cut off the labels.
-                sz.margin.bottom = sz.margin.bottom + maxLabelWidth * Math.sin(Math.PI / 4);
+                sz.margin[marginX] = sz.margin[marginX] + maxLabelWidth * Math.sin(Math.PI / 4);
                 sz.height = sz.height + maxLabelWidth * Math.sin(Math.PI / 4);
             },
             axisLabels: ({svg, sizing}) => {
