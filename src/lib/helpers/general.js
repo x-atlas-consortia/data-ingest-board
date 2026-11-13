@@ -42,7 +42,10 @@ export function toDateString(timestamp) {
     return date.toUTCString()
 }
 
-export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberFormat().format(num) : 0
+export const formatNum = (num) => typeof num === 'number' ?  new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1
+}).format(num) : 0
 
 export const formatBytes = (bytes, decimals = 2) => {
     if (!+bytes) return '0 Bytes'
@@ -52,14 +55,14 @@ export const formatBytes = (bytes, decimals = 2) => {
     const dm = decimals < 0 ? 0 : decimals
     const sizes = [
         'Bytes',
-        'KiB',
-        'MiB',
-        'GiB',
-        'TiB',
-        'PiB',
-        'EiB',
-        'ZiB',
-        'YiB'
+        'KB',
+        'MB',
+        'GB',
+        'TB',
+        'PB',
+        'EB',
+        'ZB',
+        'YB'
     ]
 
     const i = Math.floor(Math.log(bytes) / Math.log(k))

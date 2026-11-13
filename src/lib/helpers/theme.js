@@ -5,6 +5,9 @@ let THEME_CONFIG
 const THEME = {
     visualizations:  {
         defaultFill: '#2f6fb3',
+        axis: {
+            color: '#6B6966'
+        },
         font: {
             size: '12px',
             color: '#3e3737'

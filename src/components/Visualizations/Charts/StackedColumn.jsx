@@ -2,6 +2,7 @@ import React, { memo } from 'react'
 import * as d3 from 'd3'
 import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext'
+import THEME from '@/lib/helpers/theme'
 
 const StackedColumn = memo(({
     setLegend,
@@ -47,6 +48,7 @@ const StackedColumn = memo(({
 
         const xAxisGroup = g.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
+            .style("color", THEME.visualizations.axis.color)
             .call(d3.axisBottom(x).tickFormat((x, i) =>
                         xAxis.formatter ? xAxis.formatter(x, i) : x
                     ))
@@ -70,6 +72,7 @@ const StackedColumn = memo(({
 
         g.append('g')
             .attr('transform', `translate(${margin.left},0)`)
+            .style("color", THEME.visualizations.axis.color)
             .call(
                 d3
                     .axisLeft(y)

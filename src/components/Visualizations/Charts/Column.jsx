@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import { useContext, useEffect, useRef, memo } from 'react'
 import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext'
+import THEME from '@/lib/helpers/theme'
 
 const Column = memo(({
     setLegend,
@@ -106,6 +107,7 @@ const Column = memo(({
         // Add the x-axis and label.
         const xAxisGroup = svg.append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
+            .style("color", THEME.visualizations.axis.color)
             .call(
                 d3
                     .axisBottom(x)
@@ -124,6 +126,7 @@ const Column = memo(({
         // Add the y-axis and label, and remove the domain line.
         svg.append('g')
             .attr('transform', `translate(${margin.left},0)`)
+            .style("color", THEME.visualizations.axis.color)
             .call(
                 d3
                     .axisLeft(y)
