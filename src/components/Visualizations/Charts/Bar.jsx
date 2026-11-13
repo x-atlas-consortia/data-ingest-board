@@ -82,7 +82,7 @@ const Bar = memo(({
             .selectAll()
             .data(data)
             .join('rect')
-            .attr('class', (d) => `bar--${d.id?.toDashedCase()}`)
+            .attr('class', (d) => `bar bar--${d.id?.toDashedCase()}`)
             .attr('y', (d) => y(d.label))
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', (d) => {
@@ -97,6 +97,9 @@ const Bar = memo(({
             .attr('x', (d) => x(minX))
             .attr('height', y.bandwidth())
             .attr('width', (d) => x(minX) - x(minX))
+            .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
+            .on('mousemove', toolTipHandlers(chartId, chartType).mousemove)
+            .on('mouseleave', toolTipHandlers(chartId, chartType).mouseleave)
 
         // Animation
         g.selectAll('rect')
@@ -107,10 +110,8 @@ const Bar = memo(({
                 return i * 100
             })
 
-        g.selectAll('rect')
-            .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
-            .on('mousemove', toolTipHandlers(chartId, chartType).mousemove)
-            .on('mouseleave', toolTipHandlers(chartId, chartType).mouseleave)
+        // g.selectAll('rect')
+            
 
         // Add the x-axis and label.
         const xAxisGroup = g.append('g')
@@ -194,7 +195,7 @@ const Bar = memo(({
 
     return (
         <div
-            className={`c-visualizations__chart c-visualizations__bar c-bar`}
+            className={`c-visualizations__chart c-visualizations__bar`}
             id={`c-visualizations__bar--${chartId}`}
         ></div>
     )

@@ -599,20 +599,33 @@ const locationsCharts = (from, to) => {
                         const data = dataToArrayofObjects(rawData).filter(
                             (d) => d.total_bytes_transferred !== 0
                         )
+                        const onBuildToolTip = (id, e, d) => {
+                            return `<div>
+                                <span>${d.data.country}</span> <br>
+                                <span>${formatBytes(d.data.total_bytes_transferred)}</span> <br>
+                                <span>${formatNum(d.data.files)} files</span> <br>
+                                <span>${formatNum(d.data.users)} users</span>
+                                
+                            </div>`
+                        }
                         const config = [
                             {
                                 label: 'Data transferred (TB)',
-                                value: 'bytes',
+                                value: 'locations-bytes',
                                 optionsMenu: {
                                     logScale: {
                                         checked: true
                                     }
                                 },
+                                providerProps: {
+                                    onBuildToolTip
+                                },
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.country,
                                         label: d.country,
-                                        value: d.total_bytes_transferred
+                                        value: d.total_bytes_transferred,
+                                        data: d
                                     })),
                                     style: {
                                         valueFormatter: ({ d, v }) => {
@@ -627,12 +640,16 @@ const locationsCharts = (from, to) => {
                             },
                             {
                                 label: 'Users',
-                                value: 'users',
+                                value: 'locations-users',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.country,
                                         label: d.country,
-                                        value: d.users
+                                        value: d.users,
+                                        data: d
                                     })),
                                     style: {
                                         valueFormatter: ({ d, v }) => {
@@ -647,12 +664,16 @@ const locationsCharts = (from, to) => {
                             },
                             {
                                 label: 'Files',
-                                value: 'files',
+                                value: 'locations-files',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.country,
                                         label: d.country,
-                                        value: d.files
+                                        value: d.files,
+                                        data: d
                                     })),
                                     style: {
                                         valueFormatter: ({ d, v }) => {

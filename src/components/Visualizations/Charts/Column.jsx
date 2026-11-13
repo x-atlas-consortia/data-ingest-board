@@ -192,7 +192,7 @@ const Column = memo(({
 
     return (
         <div
-            className={`c-visualizations__chart c-visualizations__bar c-bar`}
+            className={`c-visualizations__chart c-visualizations__column`}
             id={`c-visualizations__column--${chartId}`}
         ></div>
     )

@@ -42,7 +42,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
 
     const buildTooltip = (id, e, d) => {
         const containerRect = $(getTooltipSelector(id)).parent()[0]?.getBoundingClientRect()
-        const gap = 30 // add a margin to prevent chrome flickering due to overlapping with tooltip
+        const gap = 10 // add a margin to prevent chrome flickering due to overlapping with tooltip
         const label = (e.currentTarget.getAttribute('data-label')) || d.label || d.data?.label
         const value = (e.currentTarget.getAttribute('data-value')) || d.value || d.data?.value
 
@@ -192,7 +192,6 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 }
 
                 let _minWidth = 728
-                console.log('minWidth', _minWidth, style, divWidth)
 
                 //divWidth = Math.min(divWidth, data?.length * 110)
                 divWidth = Math.max(_minWidth, divWidth)
@@ -291,6 +290,9 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             },
             bubbleLegend: ({svg, radius, height, width = 90}) => {
                 let legendData = radius.ticks(4).slice(1)
+                if (legendData.length > 3) {
+                    legendData = legendData.slice(0, 3)
+                }
                 legendData = legendData.reduce((acc, d, i) => {
                     let value
                     if (i == 0) {
@@ -298,7 +300,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                     } else if (i == 1) {
                         value = d * 2.5
                     } else {
-                        value = d * 5
+                        value = d * 3
                     }
                     acc.push(value)
                     return acc

@@ -109,7 +109,7 @@ const SQL = {
                 field: indexFixtures.fileDownloads.date,
                 initialClauses: [`entity_type = 'Dataset'`, `coalesce(dataset_type, '') NOT LIKE 'Publication%'`]
             })
-            return `SELECT DATE_TRUNC('month', download_date_time) AS time_bucket, count(DISTINCT (user_name, entity_uuid, download_date)) AS dataset_pulls, count(DISTINCT entity_uuid) AS datasets_touched FROM file_download ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
+            return ` WITH pulls AS (   SELECT date_trunc('month', download_date_time) AS time_bucket,          user_name,          entity_uuid,          download_date   FROM file_download ${whereClause}   GROUP BY ALL ) SELECT time_bucket,        count(*) AS dataset_pulls,        count(DISTINCT entity_uuid) AS datasets_touched FROM pulls GROUP BY time_bucket ORDER BY time_bucket ASC`
         },
         perAssay: ({ from, to }) => {
             const whereClause = SQL.whereClause({
