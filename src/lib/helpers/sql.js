@@ -120,7 +120,7 @@ const SQL = {
                 field: indexFixtures.fileDownloads.date
             })
             return `WITH all_time AS (  SELECT dataset_type, sum(bytes_transferred) AS bytes   FROM file_download   GROUP BY dataset_type ), top_assays AS (     SELECT coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay   FROM all_time   GROUP BY 1   ORDER BY sum(bytes) DESC   LIMIT 7 ), monthly AS (   SELECT date_trunc('month', download_date_time) AS mon,          dataset_type,          sum(bytes_transferred) AS bytes   FROM file_download  ${whereClause}   GROUP BY ALL ), labeled AS (   SELECT mon,          coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay,          bytes   FROM monthly ) SELECT mon AS time_bucket,        CASE WHEN assay IN (SELECT assay FROM top_assays) THEN assay ELSE 'Other' END AS assay,        sum(bytes) AS total_bytes_transferred FROM labeled GROUP BY ALL ORDER BY time_bucket, assay;`
-            return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date_time) AS mon  FROM file_download ), top_assays AS (SELECT assay FROM fd GROUP BY 1 ORDER BY sum(bytes_transferred) DESC LIMIT 7) SELECT mon AS time_bucket,   CASE WHEN assay IN (SELECT assay FROM top_assays) THEN assay ELSE 'Other' END AS assay, sum(bytes_transferred) AS total_bytes_transferred FROM fd ${whereClause} GROUP BY ALL ORDER BY time_bucket, assay;`
+            //return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay, date_trunc('month', download_date_time) AS mon  FROM file_download ), top_assays AS (SELECT assay FROM fd GROUP BY 1 ORDER BY sum(bytes_transferred) DESC LIMIT 7) SELECT mon AS time_bucket,   CASE WHEN assay IN (SELECT assay FROM top_assays) THEN assay ELSE 'Other' END AS assay, sum(bytes_transferred) AS total_bytes_transferred FROM fd ${whereClause} GROUP BY ALL ORDER BY time_bucket, assay;`
         },
         activeUsers: ({ from, to }) => {
           const whereClause = SQL.whereClause({
@@ -136,7 +136,7 @@ const SQL = {
                 to,
                 field: indexFixtures.fileDownloads.date
             })
-            return `WITH fd AS (   SELECT *,     coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay,       date_trunc('month', download_date_time) AS mon   FROM file_download ) SELECT dataset_type, assay,   count(*) AS files,   round(sum(bytes_transferred) / 1e12, 4) AS terabytes,   count(DISTINCT user_name) AS users,   count(DISTINCT entity_uuid) AS datasets,   count(DISTINCT user_tld) AS orgs,   round(median(bytes_transferred) / 1e6, 2) AS median_mb FROM fd ${whereClause} GROUP BY ALL ORDER BY terabytes DESC; `
+            return ` SELECT dataset_type,        coalesce(nullif(trim(regexp_replace(dataset_type, '\\s*\\[.*\\]$', '')), ''), 'NA') AS assay,        count(*) AS files,        round(sum(bytes_transferred) / 1e12, 4) AS terabytes,        count(DISTINCT user_name) AS users,        count(DISTINCT entity_uuid) AS datasets,        count(DISTINCT user_tld) AS orgs,        round(median(bytes_transferred) / 1e6, 2) AS median_mb FROM file_download ${whereClause} GROUP BY dataset_type ORDER BY terabytes DESC, dataset_type`
         },
         popularDatasets: ({ from, to }) => {
             const whereClause = SQL.whereClause({
