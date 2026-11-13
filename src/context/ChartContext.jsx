@@ -289,7 +289,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                         })
                 }
             },
-            bubbleLegend: ({svg, radius, height}) => {
+            bubbleLegend: ({svg, radius, height, width = 90}) => {
                 let legendData = radius.ticks(4).slice(1)
                 legendData = legendData.reduce((acc, d, i) => {
                     let value
@@ -305,7 +305,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 }, [])
                 const legend = svg.append("g")
                     .attr("fill", "#777")
-                    .attr("transform", `translate(90, ${height - 10})`)
+                    .attr("transform", `translate(${width}, ${height - 10})`)
                     .attr("text-anchor", "middle")
                     .style("font", "10px sans-serif")
                     .selectAll()

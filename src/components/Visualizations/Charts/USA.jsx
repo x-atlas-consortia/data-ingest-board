@@ -4,6 +4,7 @@ import ChartContext from "@/context/ChartContext";
 import usaCities from "@/lib/usa-cities"; // https://catalog.data.gov/dataset/state-county-and-city-fips-reference-table
 import * as topojson from "topojson-client";
 import us from "@/lib/counties-albers-10m.json" // https://github.com/topojson/us-atlas
+import THEME from "@/lib/helpers/theme";
 
 const USA = memo(({
     setLegend,
@@ -82,12 +83,11 @@ const USA = memo(({
             .attr("d", path);
 
         // Create the legend.
-        svgDo({}).bubbleLegend({svg, radius, height, width})
+        svgDo({}).bubbleLegend({svg, radius, height, width: width - 100})
 
         // Add a circle for each county, with a title (tooltip).
-       
         svg.append("g")
-            .attr("fill", "brown")
+            .attr("fill", THEME.visualizations.defaultFill)
             .attr("fill-opacity", 0.5)
             .attr("stroke", "#fff")
             .attr("stroke-width", 0.5)
@@ -99,8 +99,6 @@ const USA = memo(({
             .attr('data-label', d => `${d.county.properties.name}, ${d.state.properties.name}`)
             .attr("transform", d => `translate(${centroid(d.county)})`)
             .attr("r", d => radius(d.value));
-
-        
 
         svg.selectAll('.circle-value')
             .on("mouseover", toolTipHandlers(chartId).mouseover)

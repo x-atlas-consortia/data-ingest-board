@@ -820,11 +820,23 @@ const locationsCharts = (from, to) => {
                     query={SQL.fileDownloads.topCities({ from, to })}
                     buildCallback={(rawData) => {
                         const data = dataToArrayofObjects(rawData)
+                        const onBuildToolTip = (id, e, d) => {
+                            return `<div>
+                                <span>${d.data.city}, ${d.data.region}, ${d.data.country}</span> <br>
+                                <span>${formatNum(d.data.terabytes)} TB</span> <br>
+                                <span>${formatNum(d.data.files)} files</span> <br>
+                                <span>${formatNum(d.data.users)} users</span>
+                                
+                            </div>`
+                        }
                         const config = [
                             {
                                 label: 'United States',
                                 value: 'unitedStates',
                                 chartType: 'USA',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
                                 config: {
                                     data: data.filter((d) => d.country === 'United States of America').map((d) => ({
                                         id: d.city,
@@ -838,6 +850,9 @@ const locationsCharts = (from, to) => {
                                 label: 'World',
                                 value: 'world',
                                 chartType: 'World',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.country,

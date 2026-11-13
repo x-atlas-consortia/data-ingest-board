@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import ChartContext from '@/context/ChartContext'
 import world from '@/lib/world-topology.json'
 import worldCities from '@/lib/world-cities.json' //https://simplemaps.com/data/world-cities
+import THEME from '@/lib/helpers/theme'
 
 const World = memo(
     ({ setLegend, data = [], chartId = 'modal', style = {} }) => {
@@ -30,18 +31,9 @@ const World = memo(
                 .filter((d) => d.meta)
                 .sort((a, b) => d3.descending(a.value, b.value))
 
-
-            console.log('FS', formattedData)
-
             // Construct the radius scale.
             const radius = d3.scaleSqrt([0, d3.max(formattedData, d => d.value)], [0, 40]);
 
-           
-            // const valueExtent = d3.extent(data, (d) => +d.value)
-            // const size = d3
-            //     .scaleSqrt()
-            //     .domain(valueExtent) // What's in the data
-            //     .range([1, 50])
 
             const width = 1300
             const height = 700
@@ -80,9 +72,9 @@ const World = memo(
                     return projection([d.meta.lng, d.meta.lat])[1]
                 })
                 .attr('r', d => radius(d.value))
-                .style('fill', 'red')
-                .attr('stroke-width', 1)
-                .attr('fill-opacity', 0.4)
+                .style('fill', THEME.visualizations.defaultFill)
+                .attr('fill-opacity', 0.5)
+                .attr("stroke", "#fff")
                 .attr('class', 'circle-value')
                 .attr('data-value', d => d.value)
                 .attr('data-label', d => `${d.data.country}, ${d.data.city}`)
