@@ -1,9 +1,9 @@
 import {useContext, useEffect, useRef, memo} from "react";
 import * as d3 from "d3";
 import ChartContext from "@/context/ChartContext";
-import { usaGeo } from "@/lib/usaGeo";
+import usaCities from "@/lib/usa-cities"; // https://catalog.data.gov/dataset/state-county-and-city-fips-reference-table
 import * as topojson from "topojson-client";
-import us from "@/lib/counties-albers-10m.json"
+import us from "@/lib/counties-albers-10m.json" // https://github.com/topojson/us-atlas
 
 const USA = memo(({
     setLegend,
@@ -17,13 +17,14 @@ const USA = memo(({
         getChartSelector,
         toolTipHandlers,
         selectors,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
     const chartType = 'geoUSA'
     const chartData = useRef([])
     const hasLoaded = useRef(false)
 
-    const cityMap = usaGeo.reduce((map, d) => {
+    const cityMap = usaCities.reduce((map, d) => {
         map.set(d.city_name, d)
         return map
     }, new Map())
@@ -81,28 +82,10 @@ const USA = memo(({
             .attr("d", path);
 
         // Create the legend.
-        const legend = svg.append("g")
-            .attr("fill", "#777")
-            .attr("transform", `translate(${width - 50}, ${height - 10})`)
-            .attr("text-anchor", "middle")
-            .style("font", "10px sans-serif")
-          .selectAll()
-            .data(radius.ticks(4).slice(1))
-          .join("g");
-
-        legend.append("circle")
-            .attr("fill", "none")
-            .attr("stroke", "#ccc")
-            .attr("cy", d => -radius(d))
-            .attr("r", radius);
-
-        legend.append("text")
-            .attr("y", d => -2 * radius(d))
-            .attr("dy", "1.3em")
-            .text(radius.tickFormat(4, "s"));
+        svgDo({}).bubbleLegend({svg, radius, height, width})
 
         // Add a circle for each county, with a title (tooltip).
-        const format = d3.format(",.0f");
+       
         svg.append("g")
             .attr("fill", "brown")
             .attr("fill-opacity", 0.5)

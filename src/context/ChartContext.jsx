@@ -288,6 +288,40 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                             return _truncateLabel(d)
                         })
                 }
+            },
+            bubbleLegend: ({svg, radius, height}) => {
+                let legendData = radius.ticks(4).slice(1)
+                legendData = legendData.reduce((acc, d, i) => {
+                    let value
+                    if (i == 0) {
+                        value = d
+                    } else if (i == 1) {
+                        value = d * 2.5
+                    } else {
+                        value = d * 5
+                    }
+                    acc.push(value)
+                    return acc
+                }, [])
+                const legend = svg.append("g")
+                    .attr("fill", "#777")
+                    .attr("transform", `translate(90, ${height - 10})`)
+                    .attr("text-anchor", "middle")
+                    .style("font", "10px sans-serif")
+                    .selectAll()
+                    .data(legendData)
+                    .join("g")
+
+                legend.append("circle")
+                    .attr("fill", "none")
+                    .attr("stroke", "#ccc")
+                    .attr("cy", d => -radius(d))
+                    .attr("r", radius)
+
+                legend.append("text")
+                    .attr("y", d => -2 * radius(d))
+                    .attr("dy", "1.3em")
+                    .text(radius.tickFormat(4, "s"))
             }
 
         }

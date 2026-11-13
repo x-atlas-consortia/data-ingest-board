@@ -1,9 +1,8 @@
 import { useContext, useEffect, useRef, memo } from 'react'
 import * as d3 from 'd3'
 import ChartContext from '@/context/ChartContext'
-import * as topojson from 'topojson-client'
-import worldGeo from '@/lib/worldGeo.json'
-import worldCities from '@/lib/worldCities.json'
+import world from '@/lib/world-topology.json'
+import worldCities from '@/lib/world-cities.json' //https://simplemaps.com/data/world-cities
 
 const World = memo(
     ({ setLegend, data = [], chartId = 'modal', style = {} }) => {
@@ -37,22 +36,16 @@ const World = memo(
             // Construct the radius scale.
             const radius = d3.scaleSqrt([0, d3.max(formattedData, d => d.value)], [0, 40]);
 
-            const sizing = svgDo({ data }).sizing(style, chartId, chartType)
-            const valueExtent = d3.extent(data, (d) => +d.value)
-            const size = d3
-                .scaleSqrt()
-                .domain(valueExtent) // What's in the data
-                .range([1, 50])
+           
+            // const valueExtent = d3.extent(data, (d) => +d.value)
+            // const size = d3
+            //     .scaleSqrt()
+            //     .domain(valueExtent) // What's in the data
+            //     .range([1, 50])
 
             const width = 1300
             const height = 700
-            // const { width, height } = sizing
-
-            // const projection = d3.geoMercator()
-            //     .center([0,20])                // GPS of location to zoom on
-            //     .scale(99)                       // This is like the zoom
-            //     .translate([ width/2, height/2 ])
-
+            
             const projection = d3
                 .geoNaturalEarth1()
                 .scale(width / 1.5 / Math.PI)
@@ -67,7 +60,7 @@ const World = memo(
 
             svg.append('g')
                 .selectAll('path')
-                .data(worldGeo.features)
+                .data(world.features)
                 .join('path')
                 .attr('fill', '#b8b8b8')
                 .attr('d', d3.geoPath().projection(projection))
@@ -86,7 +79,7 @@ const World = memo(
                 .attr('cy', function (d) {
                     return projection([d.meta.lng, d.meta.lat])[1]
                 })
-                .attr('r', d => size(d.value))
+                .attr('r', d => radius(d.value))
                 .style('fill', 'red')
                 .attr('stroke-width', 1)
                 .attr('fill-opacity', 0.4)
@@ -95,25 +88,7 @@ const World = memo(
                 .attr('data-label', d => `${d.data.country}, ${d.data.city}`)
 
             // Create the legend.
-            const legend = svg.append("g")
-                .attr("fill", "#777")
-                .attr("transform", `translate(${50}, ${height - 10})`)
-                .attr("text-anchor", "middle")
-                .style("font", "10px sans-serif")
-              .selectAll()
-                .data(radius.ticks(4).slice(1))
-              .join("g");
-
-            legend.append("circle")
-                .attr("fill", "none")
-                .attr("stroke", "#ccc")
-                .attr("cy", d => -radius(d))
-                .attr("r", radius);
-
-            legend.append("text")
-                .attr("y", d => -2 * radius(d))
-                .attr("dy", "1.3em")
-                .text(radius.tickFormat(4, "s"));
+            svgDo({}).bubbleLegend({svg, radius, height})
 
             svg.selectAll('.circle-value')
                 .on("mouseover", toolTipHandlers(chartId).mouseover)
