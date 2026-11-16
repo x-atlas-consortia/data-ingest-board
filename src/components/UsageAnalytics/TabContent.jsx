@@ -1,13 +1,5 @@
 import React, { memo } from 'react'
 import {
-    DownloadOutlined,
-    ApiOutlined,
-    CodeOutlined,
-    CalendarOutlined,
-    ExclamationCircleFilled,
-    MinusOutlined,
-    PlusOutlined,
-    InfoCircleOutline,
     ArrowUpOutlined,
     ArrowDownOutlined
 } from '@ant-design/icons'
@@ -19,6 +11,7 @@ import {
     roundToTheNearest
 } from '@/lib/helpers/general'
 import FileDownloads from '@/components/UsageAnalytics/FileDownloads'
+import ApiRequests from '@/components/UsageAnalytics/ApiRequests'
 
 const TabContent = memo(({ tabKey, cardType, from, to }) => {
     const performancePercentage = (dataNow, dataPrev) => {
@@ -45,49 +38,107 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
             </span>
         )
     }
-    const months = 12
+    const _months = {
+        apiRequests: 1,
+        fileDownloads: 12
+    }
     const _tabs = {
-        apiUsage: {
+        apiRequests: {
             title: 'API usage',
-            lastXMonths: {}
+            lastXMonths: {
+                totalRequests: {
+                    title: `Total requests, last ${'month'.plural(_months.apiRequests)}`,
+                    formatter: (data) => formatNum(data.rows[0][0])
+                },
+                clientIps: {
+                    title: `Client IPs, last ${'month'.plural(_months.apiRequests)}`,
+                    formatter: (data) => formatNum(data.rows[0][0])
+                },
+                entitiesRequested: {
+                    title: `Entities requested, last ${'month'.plural(_months.apiRequests)}`,
+                    formatter: (data) => formatNum(data.rows[0][0])
+                },
+                errorRate: {
+                    title: `Error rate, last ${'month'.plural(_months.apiRequests)}`,
+                    formatter: (data) => `${data.rows[0][0]} %`
+                },
+                serverErrors: {
+                    title: `Server errors, last ${'month'.plural(_months.apiRequests)}`,
+                    formatter: (data) => formatNum(data.rows[0][0])
+                }
+            }
         },
         fileDownloads: {
             title: 'File download usage',
             lastXMonths: {
                 totalBytesTransferred: {
-                    title: `Data transferred, last ${months} months`,
+                    title: `Data transferred, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatBytes(data.rows[0][0])
                 },
                 filesDownloaded: {
-                    title: `Files downloaded, last ${months} months`,
+                    title: `Files downloaded, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueUsers: {
-                    title: `Distinct users, last ${months} months`,
+                    title: `Distinct users, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueOrganizations: {
-                    title: `Organizations, last ${months} months`,
+                    title: `Organizations, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueCountries: {
-                    title: `Countries, last ${months} months`,
+                    title: `Countries, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatNum(data.rows[0][0])
                 },
                 uniqueEntities: {
-                    title: `Datasets touched, last ${months} months`,
+                    title: `Datasets touched, last ${'month'.plural(_months.fileDownloads)}`,
                     formatter: (data) => formatNum(data.rows[0][0])
                 }
             }
         }
     }
 
+    const getLastMonthName = (months) => {
+        const now = new Date()
+        const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - months, 1);
+        return firstDayLastMonth.toLocaleString('default', { month: 'short' })
+    }
+
     const getTabContent = () => {
         const tinyCards = []
         if (cardType.isApi(tabKey)) {
-            return <TinyCard cardKey={tabKey} />
+            let months = _months.apiRequests
+            for (const q in SQL.apiRequests.lastXMonths) {
+                tinyCards.push(
+                    <div key={q} className='col-md-2'>
+                        <TinyCard
+                            cardKey={tabKey}
+                            query={SQL.apiRequests.lastXMonths[q]({ months })}
+                            query2={SQL.apiRequests.priorToLastXMonths[q]({
+                                months
+                            })}
+                            title={_tabs.apiRequests.lastXMonths[q].title}
+                            formatter={
+                                _tabs.apiRequests.lastXMonths[q].formatter
+                            }
+                            footer={
+                                _tabs.apiRequests.lastXMonths[q].footer ||
+                                `vs ${getLastMonthName(months * 2)}`
+                            }
+                            formatter2={
+                                _tabs.apiRequests.lastXMonths[q].formatter2 ||
+                                performancePercentage
+                            }
+                        />
+                    </div>
+                )
+            }
+            
+            return <div className='row g-3'>{tinyCards}<ApiRequests from={from} to={to} /></div>
         }
         if (cardType.isFiles(tabKey)) {
+            let months = _months.fileDownloads
             for (const q in SQL.fileDownloads.lastXMonths) {
                 tinyCards.push(
                     <div key={q} className='col-md-2'>

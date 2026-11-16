@@ -1,5 +1,5 @@
 export const indexFixtures = {
-    apiUsage:  {date: 'request_date_time',},
+    apiRequests:  {date: 'request_date_time',},
     fileDownloads:  {date: 'download_date_time'} 
 }
 
@@ -19,7 +19,7 @@ const SQL = {
     minDate: ({ table, field }) => {
         return `SELECT MIN(${field}) AS min_date FROM ${table}`
     },
-    apiUsage: {
+    apiRequests: {
         summary: ({ from, to }) => {
             const whereClause = SQL.whereClause({
                 from,
@@ -27,6 +27,40 @@ const SQL = {
                 field: 'request_date_time'
             })
             return `SELECT host, COUNT(*) AS total_usage FROM api_usage ${whereClause} GROUP BY host`
+        },
+        lastXMonths: {
+            totalRequests: ({ months = 12 }) => {
+                return `SELECT COUNT(*) AS total_requests FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+            },
+            clientIps: ({ months = 12 }) => {
+                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+            },
+            entitiesRequested: ({ months = 12 }) => {
+                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+            },
+            errorRate: ({ months = 12 }) => {
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS error_rate FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+            },
+            serverErrors: ({ months = 12 }) => {
+                return `SELECT COUNT(*) AS server_errors FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH AND response_code >= 500`.trim()
+            }
+        },
+        priorToLastXMonths: {
+            totalRequests: ({ months1 = 12, months2 = 24 }) => {
+                return `SELECT COUNT(*) AS total_requests FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+            },
+            clientIps: ({ months1 = 12, months2 = 24 }) => {
+                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+            },
+            entitiesRequested: ({ months1 = 12, months2 = 24 }) => {
+                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+            },
+            errorRate: ({ months1 = 12, months2 = 24 }) => {
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS error_rate FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+            },
+            serverErrors: ({ months1 = 12, months2 = 24 }) => {
+                return `SELECT COUNT(*) AS server_errors FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH AND response_code >= 500`.trim()
+            }
         }
     },
     fileDownloads: {

@@ -123,7 +123,7 @@ const SummaryCard = memo(
         }
 
         const apiUsageCardSummary = () => {
-            const totalEntities = SQL.apiUsage.summary({ from, to })
+            const totalEntities = SQL.apiRequests.summary({ from, to })
             return (
                 <>
                     <DetailSuspence

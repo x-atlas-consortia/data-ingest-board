@@ -83,7 +83,7 @@ const Usage = () => {
 
     const [modal, setModal] = useState(modalDefault)
     const [isOverviewCollapsed, setIsOverviewCollapsed] = useState(false)
-    const defaultIsLogScale = useRef({ apiUsage: true, fileDownloads: true })
+    const defaultIsLogScale = useRef({ apiRequests: true, fileDownloads: true })
     const repoCarouselRef = useRef(null)
 
     const _dispatchGTM = (action, event = 'cta') => {
@@ -91,10 +91,10 @@ const Usage = () => {
     }
 
     let _cards = {
-        apiUsage: {
+        apiRequests: {
             title: 'API Usage',
             icon: <ApiOutlined />,
-            dateField: indexFixtures.apiUsage.date
+            dateField: indexFixtures.apiRequests.date
         },
         fileDownloads: {
             title: 'Data Transfers',
@@ -118,7 +118,7 @@ const Usage = () => {
         handleDateRange(null, currentdateStrings.current)
     }
 
-    const isApi = (key) => eq(key, 'apiUsage')
+    const isApi = (key) => eq(key, 'apiRequests')
 
     const isFiles = (key) => eq(key, 'fileDownloads')
 

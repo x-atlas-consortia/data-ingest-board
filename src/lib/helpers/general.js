@@ -129,7 +129,13 @@ Object.assign(String.prototype, {
                 : match
                 ;
         });
-    }
+    },
+    plural(count, plural) {
+        if (count === 1) {
+            return this
+        }
+    return plural || `${count} ${this}s`
+}
 })
 
 export const getUBKGName = (o) => {
