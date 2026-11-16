@@ -24,9 +24,41 @@ const SQL = {
             const whereClause = SQL.whereClause({
                 from,
                 to,
-                field: 'request_date_time'
+                field: indexFixtures.apiRequests.date
             })
             return `SELECT host, COUNT(*) AS total_usage FROM api_usage ${whereClause} GROUP BY host`
+        },
+        requestsPerDay: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT DATE_TRUNC('day', request_date_time) AS time_bucket, COUNT(*) AS requests, count(*) FILTER (WHERE host = 'search-api') AS search_api, count(*) FILTER (WHERE host = 'entity-api') AS entity_api, count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api, count(DISTINCT client_ip) AS clients FROM api_usage ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
+        },
+        monthly: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT DATE_TRUNC('month', request_date_time) AS time_bucket, COUNT(*) AS requests, count(*) FILTER (WHERE host = 'search-api') AS search_api, count(*) FILTER (WHERE host = 'entity-api') AS entity_api, count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api, count(DISTINCT client_ip) AS clients, COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
+        },
+        requestsPerResponseCode: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT response_code, COUNT(*) AS requests FROM api_usage ${whereClause} GROUP BY response_code ORDER BY requests DESC`
+        },
+        requestsByTimeOfDay: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT isodow(request_date_time) AS dow, hour(request_date_time) AS hour, count(*) AS requests, count(DISTINCT client_ip) AS clients FROM api_usage ${whereClause} IS NOT NULL GROUP BY ALL ORDER BY 1, 2;`
         },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {
