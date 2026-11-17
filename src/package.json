@@ -1,6 +1,6 @@
 {
   "name": "data-ingest-board",
-  "version": "1.4.27",
+  "version": "1.4.28",
   "private": true,
   "watch": {
     "addons": "./lib/addons/core/*.js"
@@ -44,7 +44,7 @@
     "react-idle-timer": "^5.7.2",
     "stylus": "^0.64.0",
     "xac-loglevel": "github:x-atlas-consortia/xac-loglevel#1.0.4",
-    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.1.2"
+    "xac-sankey": "github:x-atlas-consortia/data-sankey#1.2.0"
   },
   "devDependencies": {
     "eslint": "^9.38.0",
