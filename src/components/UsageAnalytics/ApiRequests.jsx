@@ -14,36 +14,101 @@ import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
 const trafficCharts = (from, to) => {
-  return [
-    // {
-    //   component: (
-    //     <TabChartCard
-    //       title="API Requests"
-    //       from={from}
-    //       to={to}
-    //       sql={SQL.apiRequests(from, to)}
-    //       formatData={(data) => {
-    //         const formattedData = dataToArrayofObjects(data)
-    //         return formattedData.map((item) => ({
-    //           x: formatAxisDate(item.date),
-    //           y: item.requests
-    //         }))
-    //       }}
-    //       yAxisLabel="Requests"
-    //     />
-    //   )
-    // },
-  ]
+    return [
+        {
+            component: (
+                <DetailSuspence
+                    key='requests-per-day-by-api'
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.requestsPerDay({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+
+                        const formattedData = {}
+                        const subGroupLabels = {
+                          uuid_api: 'UUID API',
+                          search_api: 'Search API',
+                          entity_api: 'Entity API'
+                        }
+                        const chartData = []
+                        for (const d of data) {
+                            formattedData[d.time_bucket] = {
+                                ...(formattedData[d.time_bucket] || {}),
+                                ...d,
+                                group: new Date(d.time_bucket)
+                            } 
+                            for (const group of Object.keys(subGroupLabels)) {
+                                if (d[group] !== undefined) {
+                                    chartData.push({
+                                        ...d,
+                                        group: d.time_bucket,
+                                        subGroup: group,
+                                        value: d[group]
+                                    })
+                                }
+                            }
+                        }
+                        const config = {
+                            providerProps: {
+                                onBuildToolTip: (id, e, d) => {
+                                    return onBuildToolTip(id, e, d, {
+                                        row:
+                                            formattedData[d] ||
+                                            formattedData[d.data.group],
+                                        subGroupLabels,
+                                        formatter: formatBytes
+                                    })
+                                }
+                            },
+                            // optionsMenu: {
+                            //     logScale: {
+                            //         checked: true
+                            //     }
+                            // },
+                            data: chartData,
+                            yAxis: {
+                                //scaleLog: true,
+                                formatter: (v, i) => formatNum(v)
+                            },
+                            xAxis: {
+                                formatter: (v, i) => formatAxisDate(v)
+                            },
+                            style: {
+                                valueFormatter: ({ d, v }) => {
+                                    return formatNum(v)
+                                }
+                            },
+                            legendLayout: 'flex',
+                            subGroupLabels
+                        }
+                        
+                        return (
+                            <BasicCard
+                                key='requests-per-day-by-api'
+                                chartType='Line'
+                                title='Requests per day by API'
+                                subTitle={`Every request logged, ${from} – ${to}, UTC days. Hover for the day's numbers.`}
+                                data={config}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> daily resolution shows load spikes and outages that monthly totals hide, and separates the three services, which scale and fail independently.
+                                    </small>
+                                }
+                            />
+                        )
+                    }}
+                />
+            )
+        }
+    ]
 }
 
 const endpointsCharts = (from, to) => {
-  return [
-  ]
+    return []
 }
 
 const clientsAndUsersCharts = (from, to) => {
-  return [
-  ]
+    return []
 }
 
 const ApiRequests = memo(({ from, to }) => {
@@ -71,7 +136,9 @@ const ApiRequests = memo(({ from, to }) => {
             label: 'Clients and users',
             children: (
                 <div>
-                    {clientsAndUsersCharts(from, to).map((chart) => chart.component)}
+                    {clientsAndUsersCharts(from, to).map(
+                        (chart) => chart.component
+                    )}
                 </div>
             )
         }

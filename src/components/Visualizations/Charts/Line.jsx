@@ -8,7 +8,6 @@ const Line = memo(({
     setLegend,
     filters,
     data = [],
-    groups = [],
     chartId = 'modal',
     style = {},
     yAxis = {},
@@ -41,175 +40,121 @@ const Line = memo(({
         const g = svg
             .append("g")
 
-        // Reformat the data: we need an array of arrays of {x, y} tuples
-        const dataReady = groups.map(function (group) {
-            return {
-                name: group,
-                values: data.map(function (d) {
-                    return { xValue: d.xValue, yValue: d[group] || 0, group };
-                })
-            };
-        });
-
-        let maxY = 0;
-        for (let d of data) {
-            let list = Object.values(d)
-            for (let x of list) {
-                if (typeof x === 'number') {
-                    maxY = Math.max(maxY, x)
-                }
-            }
-
-        }
-
-        let xGroups = data.map((d) => d.xValue)
-        if (xAxis.prefix) {
-            xGroups.unshift(xAxis.prefix)
-        }
-        if (xAxis.suffix) {
-            xGroups.push(xAxis.suffix)
-        }
-
+ 
+        const maxY = d3.max(data, function(d) { return +d.value; })
         const minY = -(maxY * .02)
 
         // A color scale: one color for each group
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        //const groups = d3.extent(data, function(d) { return d.group; })
+        const groups = data.map((d) => d.group)
 
-        const groupColor = (d) => {
-            let pos = -1
-            let name = d.name
-            for (let i = 0; i < style?.colorGroups?.length; i++) {
-                if (d.name.includes(style?.colorGroups[i])) {
-                    pos = (i + 1) * 20;
-                    name = name.replace(style?.colorGroups[i], '')
-                    break;
-                }
-            }
-            let gColor = colorScale(name)
-            let color = gColor
-          
-            if (pos !== -1) {
-                gColor = THEME.lightenDarkenColor(gColor, pos)
-            }
+        const sumstat = d3.group(data, d => d.subGroup); // nest function allows to group the calculation per level of a factor
 
-            return {color, gColor}
-
-        }
-
-        const formatVal = ({d, v}) => svgDo({}).valueFormatter({d, v, style})
-        const ticks = yAxis.scaleLog || yAxis.ticks ? yAxis.ticks || 5 : undefined
-
+        
         // Add X axis --> it is a date format
-        const x = d3.scalePoint()
-            .domain(xGroups)
-            .range([margin.left, width - margin.right])
-            .padding(0.2)
+        const x = d3.scaleBand()
+          .domain(groups)
+          .range([ 0, width ])
+          .padding(0.1);
 
-        g.append("g")
-            .attr("transform", `translate(0,${height - margin.bottom})`)
-            .call(d3.axisBottom(x));
+        const xAxisGroup =svg.append("g")
+          .attr("transform", `translate(0, ${height})`)
+          .call(d3.axisBottom(x).ticks(10).tickFormat((d, i) => i % 12 === 0 ? new Date(d).getMonth() : ""))
+          .selectAll('text')
+          .style('font-size', '14px')
+          .style("text-anchor", "end")
+                        .attr("dx", "-0.8em")
+                        .attr("dy", "0.15em")
+                        .attr("transform", "rotate(-45)")
 
         // Add Y axis
         const y = d3.scaleLinear()
-            .domain([minY, maxY * 1.02])
-            .range([height - margin.bottom, margin.top]);
-            
-        g.append("g")
-            .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y).tickFormat((y) => yAxis.formatter ? yAxis.formatter(y) : y))
-        
-        svgDo({xAxis, yAxis}).axisLabels({svg, sizing})
+          .domain([0, maxY])
+          .range([ height, 0 ]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
 
-        // Add the lines
-        const line = d3.line()
-            .x(d => x(d.xValue))
-            .y(d => y(d.yValue))
-        
-        svgDo({}).grid({g, y, hideGrid: style.hideGrid, ticks, sizing})
-
-
-        const paths = g.selectAll("line--lines")
-            .data(dataReady)
+        // Draw the line
+        svg.selectAll(".line")
+            .data(sumstat)
             .join("path")
-            .attr("d", d => {
-                return line(d.values)
-            })
-            .attr('pointer-events', 'none')
-            .attr("stroke", d => {
-                const {color, gColor} = groupColor(d)
-                const label = d.name
-                const sum = d.values.reduce((accumulator, c) => accumulator + (c.yValue || 0), 0);
-                colors.current[label] = { color: gColor, style: { border: `solid 3px ${color}`, borderRadius: '50%' }, label, value: formatVal({d, v: sum}) }
-                return color
-            })
-            .style("stroke-width", 4)
-            .style("fill", "none")
+              .attr("fill", "none")
+              .attr("stroke", function(d){ 
+                return colorScale(d[0]) 
+              })
+              .attr("stroke-width", 1.5)
+              .attr("d", function(d){
+                return d3.line()
+                  .x(function(d) { 
+                    return x(d.group) //+ x.bandwidth() / 2; 
 
+                  })
+                  .y(function(d) { 
+                    return y(d.value); 
+                  })
+                  (d[1])
+                  
+              })
+           
 
-        // Add the points
-        g
-            // First we need to enter in a group
-            .selectAll("line--nodes")
-            .data(dataReady)
-            .join('g')
-            .style("fill", d => {
-                const {gColor} = groupColor(d)
-                return gColor
-            })
-            // Second we need to enter in the 'values' part of this group
-            .selectAll("line--dots")
-            .data(d => d.values)
-            .join("circle")
-            .attr("cx", d => x(d.xValue))
-            .attr("cy", d => y(d.yValue))
-            .attr("r", 5)
-            .attr('pointer-events', 'all')
-            .attr('data-linename', (d) => d.group.replaceAll(':', '_'))
-            .attr('data-value', (d) => formatVal({d, v: d.yValue}))
-            .attr('data-label', (d) => `${d.group} \n ${d.xValue}`)
+        // Interactive Elements (Hover Line & Point)
+        const hoverGroup = svg.append("g")
+          .style("display", "none");
 
-        // Add a legend at the end of each line
-        g
-            .selectAll("line--labels")
-            .data(dataReady)
-            .join('g')
-            .append("text")
-            .datum(d => { return { name: d.name, value: d.values[d.values.length - 1] }; }) // keep only the last value of each time series
-            .attr("transform", d => `translate(${x(d.value.xValue)},${y(d.value.yValue)})`) // Put the text at the position of the last point
-            .attr("x", 12) // shift the text a bit more right
-            .attr('class', (d) => `line--${d.name.replaceAll(':', '_')}`)
-            .text(d => d.name)
-            .style("fill", d => {
-                const {gColor} = groupColor(d)
-                return gColor
-            })
-            .style("font-size", 10)
-            .style("opacity", 0)
+        hoverGroup.append("line")
+          .attr("class", "hover-line")
+          .attr("y1", 0)
+          .attr("y2", height)
+          .attr("stroke", "#999")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "4,4");
 
+        // Add a transparent overlay to catch mouse events across the chart area
+        svg.append("rect")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("fill", "none")
+          .attr("pointer-events", "all")
+          .on("mouseover", () => hoverGroup.style("display", null))
+          .on("mouseout", () => {
+            hoverGroup.style("display", "none");
+            d3.selectAll(".highlight-circle").remove();
+          })
+          .on("mousemove", function(event) {
+            const [mouseX] = d3.pointer(event);
+            
+            // Find the closest category band based on mouseX
+            const step = x.step();
+            const index = Math.min(
+              groups.length - 1,
+              Math.max(0, Math.floor(mouseX / step))
+            );
+            const hoveredCategory = groups[index];
+            console.log("Hovered Category:", hoveredCategory);
+            const xPos = x(hoveredCategory); // + x.bandwidth() / 2;
 
-        svg.selectAll("circle")
-            .on("mouseenter", toolTipHandlers(chartId, chartType).mouseenter)
-            .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
+            // Move vertical line to the center of the band
+            hoverGroup.select(".hover-line")
+              .attr("transform", `translate(${xPos}, 0)`);
 
-        let path, length
+            // Remove old highlight circles and draw current ones
+            svg.selectAll(".highlight-circle").remove();
 
-
-        paths
-            .each(function (d, i) {
-
-                path = d3.select(this)
-                length = path.node().getTotalLength()
-
-                path
-                    .attr("stroke-dasharray", length + " " + length)
-                    .attr("stroke-dashoffset", length)
-                    .transition()
-                    .ease(d3.easeLinear)
-                    .attr("stroke-dashoffset", 0)
-                    .duration(500)
-
-            })
-
+            // data.forEach(series => {
+            //   const pointData = series.values.find(v => v.category === hoveredCategory);
+            //   if (pointData) {
+            //     svg.append("circle")
+            //       .attr("class", "highlight-circle")
+            //       .attr("cx", xPos)
+            //       .attr("cy", y(pointData.value))
+            //       .attr("r", 6)
+            //       .attr("fill", color(series.name))
+            //       .attr("stroke", "#fff")
+            //       .attr("stroke-width", 2);
+            //   }
+            // });
+          });
 
         return svg.node();
     }
@@ -225,9 +170,8 @@ const Line = memo(({
     }
 
     useEffect(() => {
-        if ( chartData.current.length !== groups.length || !hasLoaded.current) {
+        if ( !hasLoaded.current) {
             hasLoaded.current = true
-            chartData.current = Array.from(groups)
             colors.current = {}
             updateChart()
         }
