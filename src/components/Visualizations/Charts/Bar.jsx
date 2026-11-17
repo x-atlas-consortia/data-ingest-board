@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { transition } from 'd3-transition';
 import { useContext, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import ChartContext from '@/context/ChartContext';
