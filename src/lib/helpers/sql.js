@@ -1,4 +1,5 @@
 export const indexFixtures = {
+    decimalPlaces: 4,
     apiRequests:  {date: 'request_date_time',},
     fileDownloads:  {date: 'download_date_time'} 
 }
@@ -18,6 +19,12 @@ const SQL = {
     },
     minDate: ({ table, field }) => {
         return `SELECT MIN(${field}) AS min_date FROM ${table}`
+    },
+    wherePrior: ({ months = 12, field }) => {
+        return `WHERE ${field} >= date_trunc('month', current_date) - INTERVAL ${months} MONTH AND ${field} < date_trunc('month', current_date)`
+    },
+    wherePriorToPrior: ({ months1 = 12, months2 = 24, field }) => {
+        return `WHERE ${field} >= date_trunc('month', current_date) - INTERVAL ${months2} MONTH AND ${field} <  date_trunc('month', current_date) - INTERVAL ${months1} MONTH`
     },
     apiRequests: {
         summary: ({ from, to }) => {
@@ -42,7 +49,7 @@ const SQL = {
                 to,
                 field: indexFixtures.apiRequests.date
             })
-            return `SELECT DATE_TRUNC('month', request_date_time) AS time_bucket, COUNT(*) AS requests, count(*) FILTER (WHERE host = 'search-api') AS search_api, count(*) FILTER (WHERE host = 'entity-api') AS entity_api, count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api, count(DISTINCT client_ip) AS clients, COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
+            return `SELECT DATE_TRUNC('month', request_date_time) AS time_bucket, COUNT(*) AS requests, count(*) FILTER (WHERE host = 'search-api') AS search_api, count(*) FILTER (WHERE host = 'entity-api') AS entity_api, count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api, count(DISTINCT client_ip) AS clients, COUNT(DISTINCT entity_uuid) AS entities FROM api_usage ${whereClause} GROUP BY 1 ORDER BY 1 ASC`
         },
         requestsPerResponseCode: ({ from, to }) => {
             const whereClause = SQL.whereClause({
@@ -62,36 +69,46 @@ const SQL = {
         },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {
-                return `SELECT COUNT(*) AS total_requests FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(*) AS total_requests FROM api_usage ${wherePriorClause}`.trim()
             },
             clientIps: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage ${wherePriorClause}`.trim()
             },
             entitiesRequested: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage ${wherePriorClause}`.trim()
             },
             errorRate: ({ months = 12 }) => {
-                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS error_rate FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), ${indexFixtures.decimalPlaces}) AS error_rate FROM api_usage ${wherePriorClause}`.trim()
             },
             serverErrors: ({ months = 12 }) => {
-                return `SELECT COUNT(*) AS server_errors FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH AND response_code >= 500`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 500 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), ${indexFixtures.decimalPlaces}) AS error_rate FROM api_usage ${wherePriorClause}`.trim()
             }
         },
         priorToLastXMonths: {
             totalRequests: ({ months1 = 12, months2 = 24 }) => {
-                return `SELECT COUNT(*) AS total_requests FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+                const wherePriorClause = SQL.wherePriorToPrior({ months1, months2, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(*) AS total_requests FROM api_usage ${wherePriorClause}`.trim()
             },
             clientIps: ({ months1 = 12, months2 = 24 }) => {
-                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+                const wherePriorClause = SQL.wherePriorToPrior({ months1, months2, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(DISTINCT client_ip) AS unique_client_ips FROM api_usage ${wherePriorClause}`.trim()
             },
             entitiesRequested: ({ months1 = 12, months2 = 24 }) => {
-                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+                const wherePriorClause = SQL.wherePriorToPrior({ months1, months2, field: indexFixtures.apiRequests.date })
+                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM api_usage ${wherePriorClause}`.trim()
             },
             errorRate: ({ months1 = 12, months2 = 24 }) => {
-                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS error_rate FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH`.trim()
+                const wherePriorClause = SQL.wherePriorToPrior({ months1, months2, field: indexFixtures.apiRequests.date })
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 400 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), ${indexFixtures.decimalPlaces}) AS error_rate FROM api_usage ${wherePriorClause}`.trim()
             },
             serverErrors: ({ months1 = 12, months2 = 24 }) => {
-                return `SELECT COUNT(*) AS server_errors FROM api_usage WHERE request_date_time >= CURRENT_DATE - INTERVAL ${months2} MONTH AND request_date_time < CURRENT_DATE - INTERVAL ${months1} MONTH AND response_code >= 500`.trim()
+                const wherePriorClause = SQL.wherePriorToPrior({ months1, months2, field: indexFixtures.apiRequests.date })
+                return `SELECT ROUND(SUM(CASE WHEN response_code >= 500 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), ${indexFixtures.decimalPlaces}) AS error_rate FROM api_usage ${wherePriorClause}`.trim()
             }
         }
     },
@@ -122,22 +139,28 @@ const SQL = {
         },
         lastXMonths: {
             totalBytesTransferred: ({ months = 12 }) => {
-                return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT SUM(bytes_transferred) AS total_bytes_transferred FROM file_download ${wherePriorClause}`.trim()
             },
             filesDownloaded: ({ months = 12 }) => {
-                return `SELECT COUNT(*) AS files_downloaded FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT COUNT(*) AS files_downloaded FROM file_download ${wherePriorClause}`.trim()
             },
             uniqueUsers: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT user_name) AS unique_users FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT COUNT(DISTINCT user_name) AS unique_users FROM file_download ${wherePriorClause}`.trim()
             },
             uniqueOrganizations: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT user_domain) AS unique_organizations FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT COUNT(DISTINCT user_domain) AS unique_organizations FROM file_download ${wherePriorClause}`.trim()
             },
             uniqueCountries: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT country_code) AS unique_countries FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT COUNT(DISTINCT country_code) AS unique_countries FROM file_download ${wherePriorClause}`.trim()
             },
             uniqueEntities: ({ months = 12 }) => {
-                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM file_download WHERE download_date_time >= CURRENT_DATE - INTERVAL ${months} MONTH`.trim()
+                const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.fileDownloads.date })
+                return `SELECT COUNT(DISTINCT entity_uuid) AS unique_entities FROM file_download ${wherePriorClause}`.trim()
             }
         },
         priorToLastXMonths: {

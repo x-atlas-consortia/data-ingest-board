@@ -405,7 +405,7 @@ const LogsReposTable = ({}) => {
             <>
                 {_vizData.length > 0 && fromDate && (
                     <ChartWithLegend
-                        chartType='Line'
+                        chartType='LineV1'
                         style={svgStyle}
                         xAxis={_xAxis}
                         groups={repos.current}

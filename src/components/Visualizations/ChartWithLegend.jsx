@@ -4,6 +4,7 @@ import Column from '@/components/Visualizations/Charts/Column'
 import Bar from '@/components/Visualizations/Charts/Bar'
 import WithChartFlex from '@/components/Visualizations/WithChartFlex'
 import Line from '@/components/Visualizations/Charts/Line'
+import LineV1 from '@/components/Visualizations/Charts/LineV1'
 import OverlappedColumn from '@/components/Visualizations/Charts/OverlappedColumn'
 import GroupedColumn from '@/components/Visualizations/Charts/GroupedColumn'
 import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedColumn'
@@ -33,6 +34,7 @@ const ChartWithLegend = memo(
                 Column,
                 Bar,
                 Line,
+                LineV1,
                 OverlappedColumn,
                 GroupedColumn,
                 StackedColumn,

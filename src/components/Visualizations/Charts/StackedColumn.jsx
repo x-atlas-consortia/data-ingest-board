@@ -149,7 +149,7 @@ const StackedColumn = memo(({
           toolTipHandlers(chartId).mouseover(event, d)
         })
         .on("mousemove", function(event, d) {
-          event.fromTick = true
+          event.stacked = true
           event.colors = colors.current
           toolTipHandlers(chartId).mousemove(event, d)
         })

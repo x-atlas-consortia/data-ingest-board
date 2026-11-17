@@ -24,7 +24,7 @@ const InbarCell = ({ text }) => {
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
     const colors = e.colors
-    if (!e.fromTick)
+    if (!e.stacked)
         return `<div class="c-visualizations__tooltipWrap">
             <span class="text-muted">${formatAxisDate(d.data.group,true)}</span>
             <br> 

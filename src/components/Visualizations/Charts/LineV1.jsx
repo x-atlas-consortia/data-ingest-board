@@ -4,6 +4,7 @@ import { useContext, useEffect, useRef } from 'react'
 import ChartContext from '@/context/ChartContext';
 import THEME from "@/lib/helpers/theme";
 
+// @Deprecated
 const LineV1 = memo(({
     setLegend,
     filters,

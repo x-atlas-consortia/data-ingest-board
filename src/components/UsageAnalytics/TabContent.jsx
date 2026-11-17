@@ -64,7 +64,8 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                 },
                 serverErrors: {
                     title: `Server errors, last ${'month'.plural(_months.apiRequests)}`,
-                    formatter: (data) => formatNum(data.rows[0][0])
+                    debug: true,
+                    formatter: (data) => `${data.rows[0][0]} %`
                 }
             }
         },
@@ -109,14 +110,22 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
         const tinyCards = []
         if (cardType.isApi(tabKey)) {
             let months = _months.apiRequests
+            const months2 = months * 2
             for (const q in SQL.apiRequests.lastXMonths) {
+                if (_tabs.apiRequests.lastXMonths[q].debug) {
+                    console.log('SQL', SQL.apiRequests.lastXMonths[q]({ months }), SQL.apiRequests.priorToLastXMonths[q]({
+                                months1: months,
+                                months2
+                            }))
+                }
                 tinyCards.push(
                     <div key={q} className='col-md-2'>
                         <TinyCard
                             cardKey={tabKey}
                             query={SQL.apiRequests.lastXMonths[q]({ months })}
                             query2={SQL.apiRequests.priorToLastXMonths[q]({
-                                months
+                                months1: months,
+                                months2
                             })}
                             title={_tabs.apiRequests.lastXMonths[q].title}
                             formatter={
@@ -124,7 +133,7 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                             }
                             footer={
                                 _tabs.apiRequests.lastXMonths[q].footer ||
-                                `vs ${getLastMonthName(months * 2)}`
+                                `vs ${getLastMonthName(months2)}`
                             }
                             formatter2={
                                 _tabs.apiRequests.lastXMonths[q].formatter2 ||

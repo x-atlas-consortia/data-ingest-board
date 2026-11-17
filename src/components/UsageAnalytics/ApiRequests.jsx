@@ -13,9 +13,19 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
-
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
     const colors = e.colors
+
+    if (!e.stacked) {
+        return `<div class="c-visualizations__tooltipWrap">
+            <span class="text-muted">${formatAxisDate(d.data.group, true)}</span>
+            <br> 
+            <span>
+                <span class="c-visualizations__itemCol" style="background-color: ${colors[d.key].color};"></span>
+                <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong>
+            </span>
+        </div>`
+    }
 
     let total = 0
     if (!row) return null
@@ -32,6 +42,11 @@ const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
     </div>`
 }
 
+const subGroupLabels = {
+    uuid_api: 'UUID API',
+    search_api: 'Search API',
+    entity_api: 'Entity API'
+}
 const trafficCharts = (from, to) => {
     return [
         {
@@ -44,18 +59,14 @@ const trafficCharts = (from, to) => {
                         const data = dataToArrayofObjects(rawData)
 
                         const formattedData = {}
-                        const subGroupLabels = {
-                          uuid_api: 'UUID API',
-                          search_api: 'Search API',
-                          entity_api: 'Entity API'
-                        }
+
                         const chartData = []
                         for (const d of data) {
                             formattedData[d.time_bucket] = {
                                 ...(formattedData[d.time_bucket] || {}),
                                 ...d,
-                                group: d.time_bucket,
-                            } 
+                                group: d.time_bucket
+                            }
                             for (const group of Object.keys(subGroupLabels)) {
                                 if (d[group] !== undefined) {
                                     chartData.push({
@@ -70,7 +81,6 @@ const trafficCharts = (from, to) => {
                         const config = {
                             providerProps: {
                                 onBuildToolTip: (id, e, d) => {
-
                                     return onBuildToolTip(id, e, d, {
                                         row: formattedData[d.group],
                                         subGroupLabels,
@@ -99,7 +109,7 @@ const trafficCharts = (from, to) => {
                             legendLayout: 'flex',
                             subGroupLabels
                         }
-                        
+
                         return (
                             <BasicCard
                                 key='requests-per-day-by-api'
@@ -109,13 +119,199 @@ const trafficCharts = (from, to) => {
                                 data={config}
                                 footer={
                                     <small>
-                                        <strong>Why this view:</strong> daily resolution shows load spikes and outages that monthly totals hide, and separates the three services, which scale and fail independently.
+                                        <strong>Why this view:</strong> daily
+                                        resolution shows load spikes and outages
+                                        that monthly totals hide, and separates
+                                        the three services, which scale and fail
+                                        independently.
                                     </small>
                                 }
                             />
                         )
                     }}
                 />
+            )
+        },
+        {
+            component: (
+                <div className='row mt-2'>
+                    <div className='col-md-6'>
+                        <DetailSuspence
+                            key='monthly-requests-by-api'
+                            suspenseBlockStyle={true}
+                            query={SQL.apiRequests.monthly({ from, to })}
+                            buildCallback={(rawData) => {
+                                const data = dataToArrayofObjects(rawData)
+
+                                const formattedData = {}
+
+                                const chartData = []
+                                for (const d of data) {
+                                    formattedData[d.time_bucket] = {
+                                        ...(formattedData[d.time_bucket] || {}),
+                                        ...d,
+                                        group: d.time_bucket
+                                    }
+                                }
+                                const _onBuildToolTip = (id, e, d) => {
+                                    return onBuildToolTip(id, e, d, {
+                                        row:
+                                            formattedData[d] ||
+                                            formattedData[d.data.group],
+                                        subGroupLabels,
+                                        formatter: formatNum
+                                    })
+                                }
+                                const config = [
+                                    {
+                                        label: 'Requests',
+                                        value: 'requests',
+                                        chartType: 'StackedColumn',
+                                        providerProps: {
+                                            onBuildToolTip: _onBuildToolTip
+                                        },
+                                        config: {
+                                            data: Object.values(formattedData),
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatAxisDate(v, i == 0)
+                                            },
+                                            legendLayout: 'flex',
+                                            subGroupLabels
+                                        }
+                                    },
+                                    {
+                                        label: 'Client IPs',
+                                        value: 'clients',
+                                        chartType: 'Column',
+
+                                        config: {
+                                            data: data.map((d) => ({
+                                                id: d.time_bucket,
+                                                label: d.time_bucket,
+                                                value: d.clients,
+                                                data: d
+                                            })),
+                                            style: {
+                                                monoColor:
+                                                    THEME.visualizations
+                                                        .defaultFill,
+                                                valueFormatter: ({ d, v }) => {
+                                                    return formatNum(v)
+                                                }
+                                            },
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatAxisDate(v, i == 0)
+                                            }
+                                        }
+                                    },
+                                    {
+                                        label: 'Entities',
+                                        value: 'entities',
+                                        chartType: 'Column',
+
+                                        config: {
+                                            data: data.map((d) => ({
+                                                id: d.time_bucket,
+                                                label: d.time_bucket,
+                                                value: d.entities,
+                                                data: d
+                                            })),
+                                            style: {
+                                                monoColor:
+                                                    THEME.visualizations
+                                                        .defaultFill,
+                                                valueFormatter: ({ d, v }) => {
+                                                    return formatNum(v)
+                                                }
+                                            },
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatAxisDate(v, i == 0)
+                                            }
+                                        }
+                                    }
+                                ]
+
+                                return (
+                                    <TabChartCard
+                                        title='Monthly requests by API'
+                                        chartType='StackedColumn'
+                                        subTitle={`Monthly requests by API From ${from} to ${to}`}
+                                        data={config}
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                the month-level trend for
+                                                reporting, with reach (distinct
+                                                clients) and breadth (distinct
+                                                entities) next to raw volume.
+                                            </small>
+                                        }
+                                    />
+                                )
+                            }}
+                        />
+                    </div>
+                    <div className='col-md-6'>
+                        <DetailSuspence
+                            key='requests-per-response-code'
+                            suspenseBlockStyle={true}
+                            query={SQL.apiRequests.requestsPerResponseCode({ from, to })}
+                            buildCallback={(rawData) => {
+                                const data = dataToArrayofObjects(rawData)
+                                
+                               
+
+                              
+                                const config = {
+                                  
+                                    // optionsMenu: {
+                                    //     logScale: {
+                                    //         checked: true
+                                    //     }
+                                    // },
+                                    data: data.map(
+                                        (d) => ({
+                                            id: d.response_code.toString(),
+                                            label: d.response_code,
+                                            value: d.requests,
+                                            data: d
+                                        })
+                                    ),
+                                    yAxis: {
+                                        // scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    
+                                    style: {
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                    legendLayout: 'flex',
+                                }
+
+                                return (
+                                    <BasicCard
+                                        key='requests-per-response-code'
+                                        title='Response codes'
+                                        subTitle={`Requests by HTTP status code, all time, log scale so rare codes stay visible. From ${from} to ${to}`}
+                                        data={config}
+                                        chartType='Bar'
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                401 and 403 show authorization friction; 307 and 303 show redirect use; 429 shows rate limiting.
+                                            </small>
+                                        }
+                                    />
+                                )
+                            }}
+                        />
+                    </div>
+                </div>
             )
         }
     ]

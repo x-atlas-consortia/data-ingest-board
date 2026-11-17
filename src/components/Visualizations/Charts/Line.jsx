@@ -188,7 +188,7 @@ const Line = memo(
 
                 hoverLine.style("opacity", 1);
                 hoverLine.attr("transform", `translate(${x(dateValue)}, 0)`)
-
+                event.stacked = true
                 toolTipHandlers(chartId).mousemove(event, {
                     ...d,
                     group: d3.timeFormat('%Y-%m-%d')(dateValue) + 'T00:00:00',
