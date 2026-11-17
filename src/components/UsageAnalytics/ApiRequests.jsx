@@ -13,6 +13,25 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
+
+const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
+    const colors = e.colors
+
+    let total = 0
+    if (!row) return null
+    return `<div class="c-visualizations__tooltipWrap">
+    <span class="text-muted">${new Date(d.group).toDateString()}</span>
+    <br>${Object.values(colors)
+        .map(({ color, label, key, value }) => {
+            total += row[key] || 0
+            return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>
+            ${label}: <strong>${formatter(row[key])}</strong></span>`
+        })
+        .join('<br>')}
+        <br>Total: <strong>${formatter(total)}</strong>
+    </div>`
+}
+
 const trafficCharts = (from, to) => {
     return [
         {
@@ -35,13 +54,13 @@ const trafficCharts = (from, to) => {
                             formattedData[d.time_bucket] = {
                                 ...(formattedData[d.time_bucket] || {}),
                                 ...d,
-                                group: new Date(d.time_bucket)
+                                group: d.time_bucket,
                             } 
                             for (const group of Object.keys(subGroupLabels)) {
                                 if (d[group] !== undefined) {
                                     chartData.push({
                                         ...d,
-                                        group: d.time_bucket,
+                                        group: new Date(d.time_bucket),
                                         subGroup: group,
                                         value: d[group]
                                     })
@@ -51,12 +70,11 @@ const trafficCharts = (from, to) => {
                         const config = {
                             providerProps: {
                                 onBuildToolTip: (id, e, d) => {
+
                                     return onBuildToolTip(id, e, d, {
-                                        row:
-                                            formattedData[d] ||
-                                            formattedData[d.data.group],
+                                        row: formattedData[d.group],
                                         subGroupLabels,
-                                        formatter: formatBytes
+                                        formatter: formatNum
                                     })
                                 }
                             },
