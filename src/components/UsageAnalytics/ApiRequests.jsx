@@ -12,6 +12,7 @@ import {
 } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
+import dayjs from 'dayjs';
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
     const colors = e.colors
@@ -358,7 +359,95 @@ const trafficCharts = (from, to) => {
                     </div>
                 </div>
             )
-        }
+        },
+        {
+            component: (
+                <DetailSuspence
+                    key='when-requests-happen'
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.requestsByTimeOfDay({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+
+                        const config = [
+                            {
+                                label: 'Distinct client IPs',
+                                value: 'clients',
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
+                                providerProps: {
+                                    onBuildToolTip: (id, e, d) => {
+                                        return `<span class="text-muted">${formatAxisDate(
+                                            d.label,
+                                            true
+                                        )}</span><br><strong>${formatBytes(d.value)}</strong>`
+                                    }
+                                },
+                                config: {
+                                    data: data.map((d) => ({
+                                        id: d.dow,
+                                        group: d.hour.toString(),
+                                        yGroup: d.dow.toString(),
+                                        value: d.clients,
+                                        data: d
+                                    })),
+                                    yAxis: {
+                                        formatter: (v, i) => dayjs().day(v).format('ddd')
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) => v.toString().padStart(2, '0') + ':00'
+                                    }
+                                }
+                            },
+                            {
+                                label: 'Requests',
+                                value: 'requests',
+                                optionsMenu: {
+                                    logScale: {
+                                        checked: true
+                                    }
+                                },
+                              
+                                config: {
+                                    data: data.map((d) => ({
+                                        id: d.dow,
+                                        group: d.hour.toString(),
+                                        yGroup: d.dow.toString(),
+                                        value: d.requests,
+                                        data: d
+                                    })),
+                                    yAxis: {
+                                        formatter: (v, i) => dayjs().day(v).format('ddd')
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) => v.toString().padStart(2, '0') + ':00'
+                                    }
+                                }
+                            },
+                            
+                          ]
+
+                        return (
+                            <TabChartCard
+                                key='when-requests-happen'
+                                chartType='Heatmap'
+                                title='When requests happen'
+                                subTitle={`Day of week by hour of day, UTC, ${from} – ${to}.`}
+                                data={config}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> people cluster in working hours; scripted load runs around the clock. Useful for picking maintenance windows.
+                                    </small>
+                                }
+                            />
+                        )
+                    }}
+                />
+            )
+        },
     ]
 }
 

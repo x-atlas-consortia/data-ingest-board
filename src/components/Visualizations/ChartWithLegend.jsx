@@ -13,6 +13,7 @@ import StackedColumn from '@/components/Visualizations/Charts/StackedColumn'
 import WithChartSider from '@/components/Visualizations/WithChartSider'
 import USA from '@/components/Visualizations/Charts/USA'
 import World from '@/components/Visualizations/Charts/World'
+import Heatmap from '@/components/Visualizations/Charts/Heatmap'
 
 const ChartWithLegend = memo(
     ({
@@ -40,6 +41,7 @@ const ChartWithLegend = memo(
                 StackedColumn,
                 USA,
                 World,
+                Heatmap
             }
             return types[chartType]
         }, [chartType])
