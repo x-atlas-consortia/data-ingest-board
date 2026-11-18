@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import {
     ArrowUpOutlined,
-    ArrowDownOutlined
+    ArrowDownOutlined,
 } from '@ant-design/icons'
 import SQL, { indexFixtures } from '@/lib/helpers/sql'
 import TinyCard from '@/components/UsageAnalytics/TinyCard'
@@ -12,9 +12,10 @@ import {
 } from '@/lib/helpers/general'
 import FileDownloads from '@/components/UsageAnalytics/FileDownloads'
 import ApiRequests from '@/components/UsageAnalytics/ApiRequests'
+import {Tooltip} from 'antd'
 
 const TabContent = memo(({ tabKey, cardType, from, to }) => {
-    const performancePercentage = (dataNow, dataPrev) => {
+    const performancePercentage = (dataNow, dataPrev, cardConfig) => {
         const perc =
             ((dataNow.rows[0][0] - dataPrev.rows[0][0]) / dataPrev.rows[0][0]) *
             100
@@ -22,7 +23,7 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
             <span>
                 {' '}
                 {perc > 0 ? (
-                    <ArrowUpOutlined style={{ color: 'green' }} />
+                    <ArrowUpOutlined style={{ color: cardConfig?.negative ? 'red' : 'green' }} />
                 ) : (
                     <ArrowDownOutlined style={{ color: 'red' }} />
                 )}{' '}
@@ -30,7 +31,7 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                     style={{
                         fontSize: '12px',
                         fontWeight: 'bold',
-                        color: perc > 0 ? 'green' : 'red'
+                        color: perc > 0 && !cardConfig?.negative ? 'green' : 'red'
                     }}
                 >
                     {perc.toFixed(2)} %
@@ -59,10 +60,12 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                     formatter: (data) => formatNum(data.rows[0][0])
                 },
                 errorRate: {
+                    negative: true,
                     title: `Error rate, last ${'month'.plural(_months.apiRequests)}`,
                     formatter: (data) => `${data.rows[0][0]} %`
                 },
                 serverErrors: {
+                    negative: true,
                     title: `Server errors, last ${'month'.plural(_months.apiRequests)}`,
                     debug: true,
                     formatter: (data) => `${data.rows[0][0]} %`
@@ -106,6 +109,22 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
         return firstDayLastMonth.toLocaleString('default', { month: 'short' })
     }
 
+    const getApiTinyCardFooter = (data, dataPrev, cardKey) => {
+        const cardConfig = _tabs.apiRequests.lastXMonths[cardKey]
+        let months = _months.apiRequests
+        const months2 = months * 2
+        const numStr = dataPrev.rows[0][0].toString()
+        let decimalPlaces = 1
+        if (numStr.includes('.')) {
+            decimalPlaces = numStr.split('.')[1]?.length
+        }
+        return (<>
+            {performancePercentage(data, dataPrev, cardConfig)}
+            <span> vs <Tooltip title={formatNum(dataPrev.rows[0][0], decimalPlaces)}><span style={{ textDecoration: 'underline', textDecorationColor: 'blue' }}>{getLastMonthName(months2)}</span></Tooltip></span>
+        </>)
+      
+    }
+
     const getTabContent = () => {
         const tinyCards = []
         if (cardType.isApi(tabKey)) {
@@ -121,7 +140,7 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                 tinyCards.push(
                     <div key={q} className='col-md-2'>
                         <TinyCard
-                            cardKey={tabKey}
+                            cardKey={q}
                             query={SQL.apiRequests.lastXMonths[q]({ months })}
                             query2={SQL.apiRequests.priorToLastXMonths[q]({
                                 months1: months,
@@ -133,11 +152,10 @@ const TabContent = memo(({ tabKey, cardType, from, to }) => {
                             }
                             footer={
                                 _tabs.apiRequests.lastXMonths[q].footer ||
-                                `vs ${getLastMonthName(months2)}`
+                                ``
                             }
                             formatter2={
-                                _tabs.apiRequests.lastXMonths[q].formatter2 ||
-                                performancePercentage
+                                _tabs.apiRequests.lastXMonths[q].formatter2 || getApiTinyCardFooter
                             }
                         />
                     </div>

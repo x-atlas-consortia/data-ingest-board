@@ -4,6 +4,11 @@ let THEME_CONFIG
 
 const THEME = {
     visualizations:  {
+        swatch: {
+            danger: '#c2524a',
+            warning: '#d9822b',
+            success: '#4c9f70',
+        },
         defaultFill: '#2f6fb3',
         axis: {
             color: '#6B6966'

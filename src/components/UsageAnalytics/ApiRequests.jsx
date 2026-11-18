@@ -13,7 +13,7 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 
-const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
+const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
     const colors = e.colors
 
     if (!e.stacked) {
@@ -30,7 +30,7 @@ const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
     let total = 0
     if (!row) return null
     return `<div class="c-visualizations__tooltipWrap">
-    <span class="text-muted">${new Date(d.group).toDateString()}</span>
+    <span class="text-muted">${title}</span>
     <br>${Object.values(colors)
         .map(({ color, label, key, value }) => {
             total += row[key] || 0
@@ -84,7 +84,8 @@ const trafficCharts = (from, to) => {
                                     return onBuildToolTip(id, e, d, {
                                         row: formattedData[d.group],
                                         subGroupLabels,
-                                        formatter: formatNum
+                                        formatter: formatNum,
+                                        title: new Date(d.group).toDateString()
                                     })
                                 }
                             },
@@ -154,12 +155,12 @@ const trafficCharts = (from, to) => {
                                     }
                                 }
                                 const _onBuildToolTip = (id, e, d) => {
+                                    const dateString = typeof d === "string" ? d : d.data.group
                                     return onBuildToolTip(id, e, d, {
-                                        row:
-                                            formattedData[d] ||
-                                            formattedData[d.data.group],
+                                        row: formattedData[dateString],
                                         subGroupLabels,
-                                        formatter: formatNum
+                                        formatter: formatNum,
+                                        title: formatAxisDate(dateString, true)
                                     })
                                 }
                                 const config = [
@@ -175,6 +176,9 @@ const trafficCharts = (from, to) => {
                                             xAxis: {
                                                 formatter: (v, i) =>
                                                     formatAxisDate(v, i == 0)
+                                            },
+                                            yAxis: {               
+                                                formatter: (v, i) => formatNum(v)
                                             },
                                             legendLayout: 'flex',
                                             subGroupLabels
@@ -199,6 +203,9 @@ const trafficCharts = (from, to) => {
                                                 valueFormatter: ({ d, v }) => {
                                                     return formatNum(v)
                                                 }
+                                            },
+                                            yAxis: {
+                                                formatter: (v, i) => formatNum(v)
                                             },
                                             xAxis: {
                                                 formatter: (v, i) =>
@@ -225,6 +232,9 @@ const trafficCharts = (from, to) => {
                                                 valueFormatter: ({ d, v }) => {
                                                     return formatNum(v)
                                                 }
+                                            },
+                                            yAxis: {
+                                                formatter: (v, i) => formatNum(v)
                                             },
                                             xAxis: {
                                                 formatter: (v, i) =>
@@ -261,17 +271,14 @@ const trafficCharts = (from, to) => {
                             query={SQL.apiRequests.requestsPerResponseCode({ from, to })}
                             buildCallback={(rawData) => {
                                 const data = dataToArrayofObjects(rawData)
-                                
-                               
 
-                              
                                 const config = {
                                   
-                                    // optionsMenu: {
-                                    //     logScale: {
-                                    //         checked: true
-                                    //     }
-                                    // },
+                                    optionsMenu: {
+                                        logScale: {
+                                            checked: true
+                                        }
+                                    },
                                     data: data.map(
                                         (d) => ({
                                             id: d.response_code.toString(),
@@ -280,15 +287,53 @@ const trafficCharts = (from, to) => {
                                             data: d
                                         })
                                     ),
-                                    yAxis: {
-                                        // scaleLog: true,
+                                    xAxis: {
+                                        scaleLog: true,
                                         formatter: (v, i) => formatNum(v)
                                     },
                                     
                                     style: {
+                                        margin: {left: 0, top: 20, right: 0, bottom: 50},
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
-                                        }
+                                        },
+                                        legendKey: (d) => {
+                                            return d.label?.toString()[0] + 'xx'
+                                        },
+                                        legendLabel: (d) => {
+                                          return d.label?.toString()[0] + 'xx'
+                                        },
+                                        legendValue: ({ d, v, data }) => {
+                                          const firstDigit = d.label?.toString()[0]
+                                          const totalForCode = data.filter((item) => item.label?.toString()[0] === firstDigit).reduce((acc, item) => acc + item.value, 0)
+                                          return formatNum(totalForCode)
+                                        },
+                                        valueFormatter: ({ d, v }) => {
+                                          
+                                            return formatNum(v)
+                                        },
+                                        xAxisFormatter: (v, i) => {
+                                            return formatNum(v)
+                                        },
+                                        colorMethods: {
+                                          codes: (label) => {
+                                            const firstDigit = label.toString()[0]
+                                            
+                                            switch (firstDigit) {
+                                              case '2':
+                                                return THEME.visualizations.swatch.success
+                                              case '3':
+                                                return THEME.visualizations.defaultFill
+                                              case '4':
+                                                return THEME.visualizations.swatch.warning
+                                              case '5':
+                                                return THEME.visualizations.swatch.danger
+                                              default:
+                                                return THEME.visualizations.defaultFill
+                                            }
+                                           }
+                                        },
+                                        colorMethodKey: 'codes'
                                     },
                                     legendLayout: 'flex',
                                 }

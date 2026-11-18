@@ -87,10 +87,11 @@ const Bar = memo(({
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', (d) => {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
-                colors.current[d.label] = {
+                const legendKey = style.legendKey ? style.legendKey(d) : d.label
+                colors.current[legendKey] = {
                     color,
-                    value: formatVal({ d, v: d.value }),
-                    label: d.label
+                    value: style.legendValue ? style.legendValue({ d, v: d.value, data }) : formatVal({ d, v: d.value }),
+                    label: style.legendLabel ? style.legendLabel(d) : d.label
                 }
                 return color
             })
@@ -119,6 +120,7 @@ const Bar = memo(({
             .call(
                 d3
                     .axisBottom(x)
+                    .ticks(ticks)
                     .tickFormat((x, i) =>
                         xAxis.formatter ? xAxis.formatter(x, i) : x
                     )

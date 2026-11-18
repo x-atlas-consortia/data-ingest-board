@@ -27,7 +27,7 @@ const TinyCard = memo(
                                         query={query2}
                                         buildCallback={(dataPrev) =>
                                             formatter2
-                                                ? formatter2(data, dataPrev)
+                                                ? formatter2(data, dataPrev, cardKey)
                                                 : dataPrev.rows[0][0]
                                         }
                                     />{' '}

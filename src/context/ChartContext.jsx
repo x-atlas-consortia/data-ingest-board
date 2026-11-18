@@ -150,7 +150,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             axis: ({ name = 'y', max, axis, range}) => {
                 max = max || d3.max(data, (d) => d.value)
                 // Chart must have a minimum height/width to be able to click. 2% of the max value seems good
-                const min = axis.scaleLog ? 1 : -(max * 0.02)
+                const min = axis.scaleLog ? 1 : -(max * 0.009)
                 const domain = [min, max]
                 const ticks =
                     axis.scaleLog || axis.ticks ? axis.ticks || 3 : undefined

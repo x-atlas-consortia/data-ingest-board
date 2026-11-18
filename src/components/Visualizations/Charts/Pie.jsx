@@ -15,6 +15,7 @@ export default function Pie({
         getChartSelector,
         toolTipHandlers,
         selectors,
+        svgDo,
         appendTooltip } = useContext(ChartContext)
 
     const buildChart = ()  => {
@@ -25,7 +26,7 @@ export default function Pie({
         const height = Math.min(width, 500);
 
         // Create the color scale.
-        const colorS = d3.scaleOrdinal()
+        const colorScale = d3.scaleOrdinal()
             .domain(data.map(d => d.label))
             .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length).reverse())
 
@@ -65,7 +66,7 @@ export default function Pie({
             .join("path")
             .attr("class", d => `slice--${d.data.id}`)
             .attr("fill", d => {
-                const color = style?.colorMethods && style?.colorMethods[style.colorMethodKey] ? style?.colorMethods[style.colorMethodKey](d.data.label) : colorS(d.data.label)
+                const color = svgDo({}).getColor(d.data.label, style, colorScale)
                 colors.current[d.data.label] = {color, value: d.data.value, label: d.data.label};
                 return color
             })

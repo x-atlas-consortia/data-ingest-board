@@ -76,10 +76,11 @@ const Column = memo(({
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', function (d) {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
-                colors.current[d.label] = {
+                const legendKey = style.legendKey ? style.legendKey(d) : d.label
+                colors.current[legendKey] = {
                     color,
-                    value: formatVal({ d, v: d.value }),
-                    label: d.label
+                    value: style.legendValue ? style.legendValue({ d, v: d.value, data }) : formatVal({ d, v: d.value }),
+                    label: style.legendLabel ? style.legendLabel(d) : d.label
                 }
                 return color
             })
@@ -145,6 +146,7 @@ const Column = memo(({
             .enter()
             .append("rect")
             .attr("class", "column-hover")
+            .attr('data-label', (d) => xAxis.formatter ? xAxis.formatter(d.label, 0) : d.label)
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr("x", d => x(d.label)) // Match the x position of the data band
             .attr("width", x.bandwidth())  // Match the exact width of the column band
