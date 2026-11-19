@@ -12,15 +12,8 @@ import {
 } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
+import InbarCell from './InbarCell'
 
-const InbarCell = ({ text }) => {
-    return (
-        <span className='c-inbar'>
-            <span className='js-inbar c-inbar__fill' data-value={text}></span>
-            <span className='c-inbar__text'> {text}</span>
-        </span>
-    )
-}
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
     const colors = e.colors

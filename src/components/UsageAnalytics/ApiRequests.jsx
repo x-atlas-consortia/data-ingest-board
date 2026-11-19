@@ -13,6 +13,7 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 import dayjs from 'dayjs';
+import InbarCell from './InbarCell'
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
     const colors = e.colors
@@ -368,7 +369,16 @@ const trafficCharts = (from, to) => {
                     query={SQL.apiRequests.requestsByTimeOfDay({ from, to })}
                     buildCallback={(rawData) => {
                         const data = dataToArrayofObjects(rawData)
-
+                        const formatting = {
+                            yAxis: {
+                                formatter: (v, i) =>
+                                    dayjs().day(v).format('ddd')
+                            },
+                            xAxis: {
+                                formatter: (v, i) =>
+                                    v.toString().padStart(2, '0') + ':00'
+                            }
+                        }
                         const config = [
                             {
                                 label: 'Distinct client IPs',
@@ -394,12 +404,7 @@ const trafficCharts = (from, to) => {
                                         value: d.clients,
                                         data: d
                                     })),
-                                    yAxis: {
-                                        formatter: (v, i) => dayjs().day(v).format('ddd')
-                                    },
-                                    xAxis: {
-                                        formatter: (v, i) => v.toString().padStart(2, '0') + ':00'
-                                    }
+                                    ...formatting
                                 }
                             },
                             {
@@ -419,12 +424,7 @@ const trafficCharts = (from, to) => {
                                         value: d.requests,
                                         data: d
                                     })),
-                                    yAxis: {
-                                        formatter: (v, i) => dayjs().day(v).format('ddd')
-                                    },
-                                    xAxis: {
-                                        formatter: (v, i) => v.toString().padStart(2, '0') + ':00'
-                                    }
+                                    ...formatting
                                 }
                             },
                             
@@ -452,7 +452,145 @@ const trafficCharts = (from, to) => {
 }
 
 const endpointsCharts = (from, to) => {
-    return []
+    return [
+              {
+            component: (
+                <DetailSuspence
+                    key="endpoint-traffic"
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.endpoints({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'API',
+                                dataIndex: 'host',
+                                key: 'host'
+                            },
+                            {
+                                title: 'Method',
+                                dataIndex: 'http_method',
+                                key: 'http_method'
+                            },
+                            {
+                                title: 'Endpoint',
+                                dataIndex: 'endpoint',
+                                key: 'endpoint',
+                                minWidth: '200px',
+                                render: (text) => <code>{text}</code>
+                            },
+                            {
+                                title: 'Requests',
+                                dataIndex: 'requests',
+                                key: 'requests',
+                                minWidth: '120px',
+                                render: (text) => <InbarCell text={formatNum(text)} value={text} />
+                            },
+                            
+                            {
+                                title: 'Share',
+                                dataIndex: 'share',
+                                key: 'share',
+                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                            },
+                            {
+                                title: 'Client IPs',
+                                dataIndex: 'clients',
+                                key: 'clients',
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            {
+                                title: 'Entities',
+                                dataIndex: 'entities',
+                                key: 'entities',
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            {
+                                title: '4xx',
+                                dataIndex: 'rate_4xx',
+                                key: 'rate_4xx',
+                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                            },
+                            {
+                                title: '5xx',
+                                dataIndex: 'rate_5xx',
+                                key: 'rate_5xx',
+                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                            },
+                            {
+                                title: 'Last Call',
+                                dataIndex: 'last_call',
+                                key: 'last_call'
+                            }
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Endpoints'
+                                subTitle={`Top 80 host, method and endpoint pattern combinations by requests, all time. Path variables are shown as patterns such as {id}; (unmatched) means no pattern was recorded. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+                  {
+            component: (
+                <DetailSuspence
+                    key="endpoint-traffic"
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.mostRequestedEntities({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'ID',
+                                dataIndex: 'application_id',
+                                key: 'application_id'
+                            },
+                            {
+                                title: 'Type',
+                                dataIndex: 'dataset_type',
+                                key: 'dataset_type'
+                            },
+                            {
+                                title: 'Client IPs',
+                                dataIndex: 'clients',
+                                key: 'clients',
+                                minWidth: '120px',
+                                render: (text) => <InbarCell text={formatNum(text)} value={text} />
+                            },
+                            
+                            {
+                                title: 'Requests',
+                                dataIndex: 'requests',
+                                key: 'requests',
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            
+                            {
+                                title: 'Endpoints',
+                                dataIndex: 'endpoints',
+                                key: 'endpoints',
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                          
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Most requested datasets'
+                                footer={<small><strong>Why this view:</strong> shows which datasets people look up through the API, which can be compared with what they download.</small>}
+                                subTitle={`Top 50 datasets by distinct client IPs, all time. Publications, their ancillary datasets, uploads and other entity types are left out. ID and type come from the file download table.. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+    ]
 }
 
 const clientsAndUsersCharts = (from, to) => {

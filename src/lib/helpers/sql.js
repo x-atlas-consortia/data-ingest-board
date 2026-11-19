@@ -67,6 +67,30 @@ const SQL = {
             })
             return `SELECT isodow(request_date_time) AS dow, hour(request_date_time) AS hour, count(*) AS requests, count(DISTINCT client_ip) AS clients FROM api_usage ${whereClause} IS NOT NULL GROUP BY ALL ORDER BY 1, 2;`
         },
+        endpoints: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `WITH au AS (   SELECT *,     CASE WHEN response_code >= 500 THEN '5xx' WHEN response_code >= 400 THEN '4xx' WHEN response_code >= 300 THEN '3xx' ELSE '2xx' END AS status_class,     coalesce(resource_path_pattern, '(unmatched)') AS endpoint,     strftime(date_trunc('month', request_date), '%Y-%m') AS month   FROM api_usage ) SELECT endpoint, host, coalesce(http_method, '(none)') AS http_method,   count(*) AS requests,   count(*) / (SELECT count(*) FROM api_usage) AS share,   count(DISTINCT client_ip) AS clients,   count(DISTINCT entity_uuid) AS entities,   avg((response_code >= 400 AND response_code < 500)::INT) AS rate_4xx,   avg((response_code >= 500)::INT) AS rate_5xx,   strftime(max(request_date), '%Y-%m-%d') AS last_call FROM au ${whereClause} GROUP BY ALL ORDER BY requests DESC;`
+        },
+        httpMethods: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT coalesce(http_method, '(none)') AS http_method,   count(*) AS requests,   count(*) FILTER (WHERE host = 'search-api') AS search_api,   count(*) FILTER (WHERE host = 'entity-api') AS entity_api,   count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api FROM api_usage ${whereClause} GROUP BY 1 ORDER BY requests DESC;`
+        },
+        mostRequestedEntities: ({ from, to }) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `WITH f AS (     SELECT entity_uuid, any_value(application_id) AS application_id, any_value(dataset_type) AS dataset_type   FROM file_download   WHERE entity_type = 'Dataset' AND dataset_type NOT LIKE 'Publication%'     GROUP BY 1 ), e AS (   SELECT entity_uuid, count(*) AS requests, count(DISTINCT client_ip) AS clients, count(DISTINCT coalesce(resource_path_pattern, '(unmatched)')) AS endpoints,     strftime(max(request_date), '%Y-%m-%d') AS last_call   FROM api_usage WHERE entity_uuid IN (SELECT entity_uuid FROM f)   GROUP BY 1 ) SELECT e.entity_uuid, f.application_id, 'Dataset' AS entity_type, f.dataset_type,   e.requests, e.clients, e.endpoints, e.last_call FROM e JOIN f USING (entity_uuid) ORDER BY clients DESC, requests DESC, entity_uuid LIMIT 50;`
+        },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {
                 const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })

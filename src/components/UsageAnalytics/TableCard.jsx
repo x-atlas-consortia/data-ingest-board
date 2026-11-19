@@ -55,7 +55,7 @@ const TableCard = memo(({ title, subTitle, data, columns, footer }) => {
                     tableProps={{
                         size: 'small',
                         pagination: false,
-                        scroll: { y: 400 }
+                        scroll: { y: 400, x: 'max-content' }
                     }}
                 />
             </div>
