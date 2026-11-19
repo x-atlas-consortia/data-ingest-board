@@ -63,12 +63,12 @@ const StackedBar = memo(({
         //     .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
         //     .range([margin.left, width - margin.right]);
 
-        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', max: maxX, axis: xAxis, range: [margin.left, width - margin.right] })
+        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', max: maxX, axis: xAxis, range: [margin.left, width - margin.left] })
         const minX = domain[0]
 
         const y =  d3.scaleBand()
             .domain(d3.groupSort(data, D => -d3.sum(D, d => d.value), d => d.group))
-            .range([margin.top, height - margin.bottom])
+            .range([0, height])
             .padding(0.2);
 
 
@@ -80,11 +80,15 @@ const StackedBar = memo(({
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
-            .attr("viewBox", [0, 0, width, height])
-            .attr("style", "max-width: 100%; height: auto;");
+            .attr("viewBox", [0, 0,    width + margin.left + margin.right,
+                height + margin.top + margin.bottom])
+
+        const g = svg
+            .append('g')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
         // Append a group for each series, and a rect for each element in the series.
-        svg.append("g")
+        g.append("g")
           .selectAll()
           .data(series)
           .join("g")
@@ -115,7 +119,7 @@ const StackedBar = memo(({
             .on('mouseleave', toolTipHandlers(chartId, chartType).mouseleave)
 
 
-        svg.selectAll("rect")
+        g.selectAll("rect")
             .transition()
             .duration(800)
             .attr("x", d => {
@@ -128,20 +132,21 @@ const StackedBar = memo(({
             })
 
         // Append the horizontal axis.
-        const xAxisGroup = svg
-            .append('g')
-            .attr('transform', `translate(0,${height})`)
-            .call(
-                d3
-                    .axisTop(x)
-                    .ticks(ticks)
-                    .tickFormat((x, i) =>
-                        xAxis.formatter ? xAxis.formatter(x, i) : x
+        const xAxisGroup = g.append('g')
+                    .attr('transform', `translate(0,${height})`)
+                    .call(
+                        d3
+                            .axisBottom(x)
+                            .ticks(ticks)
+                            .tickFormat((x, i) =>
+                                xAxis.formatter ? xAxis.formatter(x, i) : x
+                            )
                     )
-            )
+                    .selectAll('text')
+                    .style('font-size', '12px')
 
         // Append the vertical axis.
-        const yAxisGroup = svg.append('g')
+        const yAxisGroup = g.append('g')
             .attr('transform', `translate(${margin.left},0)`)
             .call(
                 d3

@@ -579,7 +579,7 @@ const endpointsCharts = (from, to) => {
                                         formatter: (v, i) => formatNum(v)
                                     },
                                     style: {
-                                        margin: {top: 0},
+                                        margin: {top: 0, left: 40},
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         }
