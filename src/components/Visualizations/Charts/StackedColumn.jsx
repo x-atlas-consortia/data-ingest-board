@@ -144,18 +144,18 @@ const StackedColumn = memo(({
 
 
         xAxisGroup.selectAll(".tick text")
-        .style("cursor", "pointer") 
-        .on("mouseover", function(event, d) {
-          toolTipHandlers(chartId).mouseover(event, d)
-        })
-        .on("mousemove", function(event, d) {
-          event.stacked = true
-          event.colors = colors.current
-          toolTipHandlers(chartId).mousemove(event, d)
-        })
-        .on("mouseout", function(event, d) {
-          toolTipHandlers(chartId).mouseleave(event, d, false)
-        })
+            .style("cursor", "pointer") 
+            .on("mouseover", function(event, d) {
+            toolTipHandlers(chartId).mouseover(event, d)
+            })
+            .on("mousemove", function(event, d) {
+            event.stacked = true
+            event.colors = colors.current
+            toolTipHandlers(chartId).mousemove(event, d)
+            })
+            .on("mouseout", function(event, d) {
+            toolTipHandlers(chartId).mouseleave(event, d, false)
+            })
 
         return svg.node()
     }

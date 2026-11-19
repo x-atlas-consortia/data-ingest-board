@@ -20,7 +20,7 @@ const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => 
 
     if (!e.stacked) {
         return `<div class="c-visualizations__tooltipWrap">
-            <span class="text-muted">${formatAxisDate(d.data.group, true)}</span>
+            <span class="text-muted">${title}</span>
             <br> 
             <span>
                 <span class="c-visualizations__itemCol" style="background-color: ${colors[d.key].color};"></span>
@@ -87,7 +87,7 @@ const trafficCharts = (from, to) => {
                                         row: formattedData[d.group],
                                         subGroupLabels,
                                         formatter: formatNum,
-                                        title: new Date(d.group).toDateString()
+                                        title: !e.stacked ? formatAxisDate(d.data.group, true) : new Date(d.group).toDateString()
                                     })
                                 }
                             },
@@ -162,7 +162,7 @@ const trafficCharts = (from, to) => {
                                         row: formattedData[dateString],
                                         subGroupLabels,
                                         formatter: formatNum,
-                                        title: formatAxisDate(dateString, true)
+                                        title: !e.stacked ? formatAxisDate(d.data.group, true) : formatAxisDate(dateString, true)
                                     })
                                 }
                                 const config = [
@@ -535,10 +535,84 @@ const endpointsCharts = (from, to) => {
                 />
             )
         },
-                  {
+        {
+          component: (
+            <DetailSuspence
+                            key='http-methods'
+                            suspenseBlockStyle={true}
+                            query={SQL.apiRequests.httpMethods({ from, to })}
+                            buildCallback={(rawData) => {
+                                const data = dataToArrayofObjects(rawData)
+                                
+                                const formattedData = {}
+                                for (const d of data) {
+                                    formattedData[d.http_method] = {
+                                        ...(formattedData[d.http_method] || {}),
+                                        group: d.http_method,
+                                        value: d.requests,
+                                        ...d
+                                    }
+                                }
+                                const config = {
+                                    providerProps: {
+                                        onBuildToolTip: (id, e, d) => {
+                                             
+                                            return onBuildToolTip(id, e, d, {
+                                                row:
+                                                    formattedData[d] ||
+                                                    formattedData[d.data.group],
+                                                subGroupLabels,
+                                                formatter: formatNum,
+                                                title: !e.stacked ? d.data.group : d
+                                            })
+                                        }
+                                    },
+                                    optionsMenu: {
+                                        logScale: {
+                                            checked: false
+                                        }
+                                    },
+                                    data: Object.values(formattedData),
+                                    
+                                    xAxis: {
+                                        scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    style: {
+                                        margin: {top: 0},
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                    legendLayout: 'flex',
+                                    subGroupLabels
+                                }
+
+                                return (
+                                    <BasicCard
+                                        key='http-methods'
+                                        title='HTTP methods'
+                                        subTitle={`Tracking user engagement and retention. From ${from} to ${to}`}
+                                        data={config}
+                                        chartType='StackedBar'
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                shows user activity patterns and
+                                                identifies trends in user
+                                                engagement over time.
+                                            </small>
+                                        }
+                                    />
+                                )
+                            }}
+                        />
+          )
+        },
+        {
             component: (
                 <DetailSuspence
-                    key="endpoint-traffic"
+                    key="most-requested-entities"
                     suspenseBlockStyle={true}
                     query={SQL.apiRequests.mostRequestedEntities({ from, to })}
                     buildCallback={(rawData) => {

@@ -165,16 +165,16 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 
                 return {[name]: ax, ticks, domain}
             },
-            sortLabels: () => {
+            sortLabels: (key = 'label') => {
                 let names
                 if (xAxis.noSortLabels) {
-                    names = data.map((d) => d.label)
+                    names = data.map((d) => d[key])
                 } else {
                     data.sort((a, b) => b.value - a.value)
                     const groups = d3.groupSort(
                         data,
                         ([d]) => -d.value,
-                        (d) => d.label
+                        (d) => d[key]
                     )
                     names = groups.map((g) => g)
                 }

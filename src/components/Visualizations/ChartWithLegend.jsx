@@ -9,6 +9,7 @@ import OverlappedColumn from '@/components/Visualizations/Charts/OverlappedColum
 import GroupedColumn from '@/components/Visualizations/Charts/GroupedColumn'
 import { prepareStackedData } from '@/components/Visualizations/Charts/OverlappedColumn'
 import WithOnlyChart from '@/components/Visualizations/WithOnlyChart'
+import StackedBar from '@/components/Visualizations/Charts/StackedBar'
 import StackedColumn from '@/components/Visualizations/Charts/StackedColumn'
 import WithChartSider from '@/components/Visualizations/WithChartSider'
 import USA from '@/components/Visualizations/Charts/USA'
@@ -38,6 +39,7 @@ const ChartWithLegend = memo(
                 LineV1,
                 OverlappedColumn,
                 GroupedColumn,
+                StackedBar,
                 StackedColumn,
                 USA,
                 World,
