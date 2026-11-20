@@ -8,7 +8,8 @@ import {
     formatBytes,
     formatNum,
     formatAxisDate,
-    dataToArrayofObjects
+    dataToArrayofObjects,
+    formatPerc
 } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
@@ -509,13 +510,13 @@ const endpointsCharts = (from, to) => {
                                 title: '4xx',
                                 dataIndex: 'rate_4xx',
                                 key: 'rate_4xx',
-                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                                render: (v) => <span>{formatPerc(v)}</span>
                             },
                             {
                                 title: '5xx',
                                 dataIndex: 'rate_5xx',
                                 key: 'rate_5xx',
-                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                                render: (v) => <span>{formatPerc(v)}</span>
                             },
                             {
                                 title: 'Last Call',
@@ -657,7 +658,7 @@ const endpointsCharts = (from, to) => {
                                 columns={columns}
                                 title='Most requested datasets'
                                 footer={<small><strong>Why this view:</strong> shows which datasets people look up through the API, which can be compared with what they download.</small>}
-                                subTitle={`Top 50 datasets by distinct client IPs, all time. Publications, their ancillary datasets, uploads and other entity types are left out. ID and type come from the file download table.. From ${from} to ${to}`}
+                                subTitle={`Top 50 datasets by distinct client IPs, all time. Publications, their ancillary datasets, uploads and other entity types are left out. ID and type come from the file download table. From ${from} to ${to}`}
                             />
                         )
                     }}
@@ -668,7 +669,89 @@ const endpointsCharts = (from, to) => {
 }
 
 const clientsAndUsersCharts = (from, to) => {
-    return []
+    return [
+       {
+            component: (
+                <DetailSuspence
+                    key="client-types"
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.clientTypes({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'Client type',
+                                dataIndex: 'client_type',
+                                key: 'client_type',
+                                sorter: (a, b) => a.client_type.localeCompare(b.client_type)
+                            },
+                            {
+                                title: 'Requests',
+                                dataIndex: 'requests',
+                                key: 'requests',
+                                minWidth: '120px',
+                                sorter: (a, b) => a.requests - b.requests,
+                                render: (text) => <InbarCell text={formatNum(text)} value={text} category='requests' />
+                            },
+                            {
+                                title: 'Client IPs',
+                                dataIndex: 'clients',
+                                key: 'clients',
+                                minWidth: '120px',
+                                sorter: (a, b) => a.clients - b.clients,
+                                render: (text) => <InbarCell text={formatNum(text)} value={text} category='clients' style={{backgroundColor: 'green'}} />
+                            },
+                            {
+                                title: 'User agents',
+                                dataIndex: 'agents',
+                                key: 'agents'
+                            },
+                            {
+                                title: 'Search API',
+                                dataIndex: 'search_api',
+                                key: 'search_api',
+                                sorter: (a, b) => a.search_api - b.search_api,
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            
+                            {
+                                title: 'Entity API',
+                                dataIndex: 'entity_api',
+                                key: 'entity_api',
+                                sorter: (a, b) => a.entity_api - b.entity_api,
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            
+                            {
+                                title: 'UUID API',
+                                dataIndex: 'uuid_api',
+                                key: 'uuid_api',
+                                sorter: (a, b) => a.uuid_api - b.uuid_api,
+                                render: (v) => <span>{formatNum(v)}</span>
+                            },
+                            {
+                                title: 'Error rate',
+                                dataIndex: 'error_rate',
+                                key: 'error_rate',
+                                sorter: (a, b) => a.error_rate - b.error_rate,
+                                render: (v) => <span>{formatPerc(v)}</span>
+                            },
+                          
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Client types'
+                                footer={<small><strong>Why this view:</strong> programmatic use is the API's purpose, so scripted traffic is the core audience. Browsers have far more distinct clients but few calls each; bots are load without users..</small>}
+                                subTitle={`Grouped from the user agent string: Python scripts (requests, urllib), other tools (R httr2, curl), web browsers, crawlers and bots, and uptime monitoring. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+        },
+    ]
 }
 
 const ApiRequests = memo(({ from, to }) => {

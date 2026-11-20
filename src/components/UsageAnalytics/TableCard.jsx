@@ -7,23 +7,35 @@ const TableCard = memo(({ title, subTitle, data, columns, footer }) => {
     const tableRef = useRef(null)
 
     const renderInbars = () => {
-        const cells = tableRef.current.querySelectorAll('.js-inbar')
+        //const cells = tableRef.current.querySelectorAll('.js-inbar')
 
-        // 1. Extract all numeric values to find the maximum
-        const values = Array.from(cells).map(
-            (cell) => parseFloat(cell.getAttribute('data-value')) || 0
-        )
-        const maxVal = Math.max(...values, 1) // prevent division by zero
+        const items = Array.from(document.querySelectorAll('.js-inbar'));
 
-        // 2. Build the inbars proportionally
-        cells.forEach((cell) => {
-            const val = parseFloat(cell.getAttribute('data-value')) || 0
-            const percentage = (val / (maxVal * 2)) * 100
+        // Group by the second class in each element's classList
+        const groupedElements = Object.groupBy(items, (el) => {
+            // Find the class that isn't the base 'item' class
+            const categoryClass = el.getAttribute('data-cat');
+            return categoryClass || 'uncategorized';
+        });
 
-            // Wrap existing text or set content cleanly
+        for (const key in groupedElements) {
+            const cells = groupedElements[key]
+            // 1. Extract all numeric values to find the maximum
+            const values = Array.from(cells).map(
+                (cell) => parseFloat(cell.getAttribute('data-value')) || 0
+            )
+            const maxVal = Math.max(...values, 1) // prevent division by zero
 
-            cell.style.width = `${percentage}%`
-        })
+            // 2. Build the inbars proportionally
+            cells.forEach((cell) => {
+                const val = parseFloat(cell.getAttribute('data-value')) || 0
+                const percentage = (val / (maxVal * 2)) * 100
+
+                // Wrap existing text or set content cleanly
+
+                cell.style.width = `${percentage}%`
+            })
+        }
     }
 
     useEffect(() => {

@@ -58,11 +58,6 @@ const StackedBar = memo(({
         
         const maxX = d3.max(series, d => d3.max(d, d => d[1]))
 
-        // // Prepare the scales for positional and color encodings.
-        // const x = d3.scaleLinear()
-        //     .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
-        //     .range([margin.left, width - margin.right]);
-
         const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', max: maxX, axis: xAxis, range: [margin.left, width - margin.left] })
         const minX = domain[0]
 

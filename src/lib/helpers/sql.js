@@ -84,12 +84,22 @@ const SQL = {
             return `SELECT coalesce(http_method, '(none)') AS http_method,   count(*) AS requests,   count(*) FILTER (WHERE host = 'search-api') AS search_api,   count(*) FILTER (WHERE host = 'entity-api') AS entity_api,   count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api FROM api_usage ${whereClause} GROUP BY 1 ORDER BY requests DESC;`
         },
         mostRequestedEntities: ({ from, to }) => {
+            // TODO test usages of whereClause
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date,
+                initialClauses: ['entity_uuid IN (SELECT entity_uuid FROM f)']
+            })
+            return `WITH f AS (     SELECT entity_uuid, any_value(application_id) AS application_id, any_value(dataset_type) AS dataset_type   FROM file_download   WHERE entity_type = 'Dataset' AND dataset_type NOT LIKE 'Publication%'     GROUP BY 1 ), e AS (   SELECT entity_uuid, count(*) AS requests, count(DISTINCT client_ip) AS clients, count(DISTINCT coalesce(resource_path_pattern, '(unmatched)')) AS endpoints,     strftime(max(request_date), '%Y-%m-%d') AS last_call   FROM api_usage ${whereClause} GROUP BY 1 ) SELECT e.entity_uuid, f.application_id, 'Dataset' AS entity_type, f.dataset_type,   e.requests, e.clients, e.endpoints, e.last_call FROM e JOIN f USING (entity_uuid) ORDER BY clients DESC, requests DESC, entity_uuid LIMIT 50;`
+        },
+        clientTypes: ({from, to}) => {
             const whereClause = SQL.whereClause({
                 from,
                 to,
                 field: indexFixtures.apiRequests.date
             })
-            return `WITH f AS (     SELECT entity_uuid, any_value(application_id) AS application_id, any_value(dataset_type) AS dataset_type   FROM file_download   WHERE entity_type = 'Dataset' AND dataset_type NOT LIKE 'Publication%'     GROUP BY 1 ), e AS (   SELECT entity_uuid, count(*) AS requests, count(DISTINCT client_ip) AS clients, count(DISTINCT coalesce(resource_path_pattern, '(unmatched)')) AS endpoints,     strftime(max(request_date), '%Y-%m-%d') AS last_call   FROM api_usage WHERE entity_uuid IN (SELECT entity_uuid FROM f)   GROUP BY 1 ) SELECT e.entity_uuid, f.application_id, 'Dataset' AS entity_type, f.dataset_type,   e.requests, e.clients, e.endpoints, e.last_call FROM e JOIN f USING (entity_uuid) ORDER BY clients DESC, requests DESC, entity_uuid LIMIT 50;`
+            return `SELECT CASE WHEN regexp_matches(coalesce(user_agent, ''), '(?i)uptimerobot|pingdom|statuscake|health') THEN 'Monitoring'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)bot|spider|crawl|externalagent|slurp|Nexus 5X Build/MMB29P') THEN 'Crawler / bot'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)python|urllib|aiohttp|httpx') THEN 'Python script'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)httr|r-curl|libcurl|curl/|wget|java|go-http|node|axios|okhttp|postman') THEN 'Other script / tool'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)mozilla') THEN 'Web browser'          ELSE 'Other / unknown' END AS client_type,   count(*) AS requests,   count(DISTINCT client_ip) AS clients,   count(DISTINCT user_agent) AS agents,   avg((response_code >= 400)::INT) AS error_rate,   count(*) FILTER (WHERE host = 'search-api') AS search_api,   count(*) FILTER (WHERE host = 'entity-api') AS entity_api,   count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api FROM api_usage ${whereClause} GROUP BY 1 ORDER BY requests DESC`
         },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {

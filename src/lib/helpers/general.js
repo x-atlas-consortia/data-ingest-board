@@ -42,6 +42,8 @@ export function toDateString(timestamp) {
     return date.toUTCString()
 }
 
+export const formatPerc = (num, decimalPlaces = 2) => (num * 100).toFixed(decimalPlaces) + '%'
+
 export const formatNum = (num, decimalPlaces = 1) => typeof num === 'number' ?  new Intl.NumberFormat('en-US', {
   notation: 'compact',
   maximumFractionDigits: decimalPlaces
