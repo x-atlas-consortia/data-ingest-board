@@ -1,4 +1,4 @@
-import React, { memo, useState, Fragment } from 'react'
+import React, { memo, useState, useEffect, useContext, useRef } from 'react'
 import { Tabs } from 'antd'
 import DetailSuspence from '@/components/DetailSuspence'
 import SQL from '@/lib/helpers/sql'
@@ -9,12 +9,17 @@ import {
     formatNum,
     formatAxisDate,
     dataToArrayofObjects,
-    formatPerc
+    formatPerc,
+    getHeadersWith,
+    callService
 } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 import dayjs from 'dayjs';
 import InbarCell from './InbarCell'
+import UsageContext from '@/context/UsageContext'
+import URLS from '@/lib/helpers/urls'
+import AppContext from '@/context/AppContext'
 
 const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
     const colors = e.colors
@@ -755,6 +760,39 @@ const clientsAndUsersCharts = (from, to) => {
 }
 
 const ApiRequests = memo(({ from, to }) => {
+    const { getIpDetails } = useContext(UsageContext)
+    const { globusToken } = useContext(AppContext)
+    const inserted = useRef(false)
+
+    const fetchClientIps = async () => {
+        const url = URLS.ingest.analytics.query();
+
+        const headers = getHeadersWith(globusToken).headers
+        const query = 'SELECT * from api_usage LIMIT 30000'
+        const response = await callService(url, headers, { query }, 'POST')
+        if (response.status == 200) {
+            const data = dataToArrayofObjects(response.data)
+            let details = {}
+            let id = 1;
+            for (const d of data) {
+                if (d.client_ip) {
+                    const ipDetails = await getIpDetails(d.client_ip)
+                    details = {id, ...d, ...ipDetails}
+                    await callService('/api/ip', headers, details, 'PUT')
+                    id++
+                }
+                
+            }
+            inserted.current = true
+        }
+    }
+
+    useEffect(() => {
+        // if (!inserted.current) {
+        //     fetchClientIps()
+        // }
+    }, [])
+
     const items = [
         {
             key: 'traffic',

@@ -140,6 +140,15 @@ Object.assign(String.prototype, {
 }
 })
 
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+// OR convert to Number (useful if passing data directly to UI components/charts)
+BigInt.prototype.toJSON = function () {
+  return Number(this);
+};
+
 export const getUBKGName = (o) => {
     if (!window.UBKG) return o
     let organTypes = window.UBKG?.organTypes

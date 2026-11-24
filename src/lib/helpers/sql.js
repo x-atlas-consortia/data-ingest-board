@@ -101,6 +101,14 @@ const SQL = {
             })
             return `SELECT CASE WHEN regexp_matches(coalesce(user_agent, ''), '(?i)uptimerobot|pingdom|statuscake|health') THEN 'Monitoring'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)bot|spider|crawl|externalagent|slurp|Nexus 5X Build/MMB29P') THEN 'Crawler / bot'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)python|urllib|aiohttp|httpx') THEN 'Python script'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)httr|r-curl|libcurl|curl/|wget|java|go-http|node|axios|okhttp|postman') THEN 'Other script / tool'          WHEN regexp_matches(coalesce(user_agent, ''), '(?i)mozilla') THEN 'Web browser'          ELSE 'Other / unknown' END AS client_type,   count(*) AS requests,   count(DISTINCT client_ip) AS clients,   count(DISTINCT user_agent) AS agents,   avg((response_code >= 400)::INT) AS error_rate,   count(*) FILTER (WHERE host = 'search-api') AS search_api,   count(*) FILTER (WHERE host = 'entity-api') AS entity_api,   count(*) FILTER (WHERE host = 'uuid-api') AS uuid_api FROM api_usage ${whereClause} GROUP BY 1 ORDER BY requests DESC`
         },
+        clientIps: ({from, to}) => {
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+            return `SELECT client_ip, COUNT(*) AS requests FROM api_usage ${whereClause} GROUP BY client_ip ORDER BY requests DESC LIMIT 30`
+        },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {
                 const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })
