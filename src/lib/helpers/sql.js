@@ -109,6 +109,36 @@ const SQL = {
             })
             return `SELECT client_ip, COUNT(*) AS requests FROM api_usage ${whereClause} GROUP BY client_ip ORDER BY requests DESC LIMIT 30`
         },
+        signedInStatus: ({from, to}) => {
+            // TODO use whereClause
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+
+            return `SELECT DATE_TRUNC('month', request_date_time) AS time_bucket, SUM(CASE WHEN user='' THEN 1 ELSE 0 END) AS is_anonymous, SUM(CASE WHEN user <> '' THEN 1 ELSE 0 END) AS is_signed_in FROM api_usage  GROUP BY ALL ORDER BY time_bucket, is_anonymous;`
+        },
+        countries: ({from, to}) => {
+            // TODO use whereClause
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+
+            return `SELECT country_name, COUNT(*) AS requests, COUNT(DISTINCT client_ip) as clients, COUNT(DISTINCT user) as users FROM api_usage GROUP BY country_name ORDER BY requests DESC;;`
+        },
+        cities: ({from, to}) => {
+            // TODO use whereClause
+            const whereClause = SQL.whereClause({
+                from,
+                to,
+                field: indexFixtures.apiRequests.date
+            })
+
+            return `SELECT country_name, city_name, region_name, COUNT(*) AS requests, COUNT(DISTINCT client_ip) as unique_client_ips, COUNT(DISTINCT user) as unique_users FROM api_usage GROUP BY city_name ORDER BY requests DESC;;`
+        },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {
                 const wherePriorClause = SQL.wherePrior({ months, field: indexFixtures.apiRequests.date })

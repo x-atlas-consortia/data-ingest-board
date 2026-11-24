@@ -5,7 +5,7 @@ import { callService, eq, getHeadersWith, formatNum, formatBytes, roundToTheNear
 import URLS from '@/lib/helpers/urls';
 
 
-function DetailSuspence({ query, buildCallback, suspenseFallback, suspenseBlockStyle = false }) {
+function DetailSuspence({ query, hostUrl, buildCallback, suspenseFallback, suspenseBlockStyle = false }) {
 
   const [data, setData] = useState(null);
   const { globusToken } = useContext(AppContext); 
@@ -14,7 +14,7 @@ function DetailSuspence({ query, buildCallback, suspenseFallback, suspenseBlockS
     // Fetch or initialize data here
     const fetchData = async () => {
       try {
-        const url = URLS.ingest.analytics.query();
+        const url = hostUrl || URLS.ingest.analytics.query();
         const headers = getHeadersWith(globusToken).headers
 
         if (Array.isArray(query)) {

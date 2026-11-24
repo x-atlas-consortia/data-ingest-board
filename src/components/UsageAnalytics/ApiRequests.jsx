@@ -15,13 +15,18 @@ import {
 } from '@/lib/helpers/general'
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 import InbarCell from './InbarCell'
 import UsageContext from '@/context/UsageContext'
 import URLS from '@/lib/helpers/urls'
 import AppContext from '@/context/AppContext'
 
-const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
+const onBuildToolTip = (
+    id,
+    e,
+    d,
+    { subGroupLabels, row, formatter, title }
+) => {
     const colors = e.colors
 
     if (!e.stacked) {
@@ -55,6 +60,8 @@ const subGroupLabels = {
     search_api: 'Search API',
     entity_api: 'Entity API'
 }
+
+const localhost = 'http://localhost:3001/api/fixtures'
 const trafficCharts = (from, to) => {
     return [
         {
@@ -93,7 +100,9 @@ const trafficCharts = (from, to) => {
                                         row: formattedData[d.group],
                                         subGroupLabels,
                                         formatter: formatNum,
-                                        title: !e.stacked ? formatAxisDate(d.data.group, true) : new Date(d.group).toDateString()
+                                        title: !e.stacked
+                                            ? formatAxisDate(d.data.group, true)
+                                            : new Date(d.group).toDateString()
                                     })
                                 }
                             },
@@ -163,12 +172,15 @@ const trafficCharts = (from, to) => {
                                     }
                                 }
                                 const _onBuildToolTip = (id, e, d) => {
-                                    const dateString = typeof d === "string" ? d : d.data.group
+                                    const dateString =
+                                        typeof d === 'string' ? d : d.data.group
                                     return onBuildToolTip(id, e, d, {
                                         row: formattedData[dateString],
                                         subGroupLabels,
                                         formatter: formatNum,
-                                        title: !e.stacked ? formatAxisDate(d.data.group, true) : formatAxisDate(dateString, true)
+                                        title: !e.stacked
+                                            ? formatAxisDate(d.data.group, true)
+                                            : formatAxisDate(dateString, true)
                                     })
                                 }
                                 const config = [
@@ -185,8 +197,9 @@ const trafficCharts = (from, to) => {
                                                 formatter: (v, i) =>
                                                     formatAxisDate(v, i == 0)
                                             },
-                                            yAxis: {               
-                                                formatter: (v, i) => formatNum(v)
+                                            yAxis: {
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
                                             },
                                             legendLayout: 'flex',
                                             subGroupLabels
@@ -213,7 +226,8 @@ const trafficCharts = (from, to) => {
                                                 }
                                             },
                                             yAxis: {
-                                                formatter: (v, i) => formatNum(v)
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
                                             },
                                             xAxis: {
                                                 formatter: (v, i) =>
@@ -242,7 +256,8 @@ const trafficCharts = (from, to) => {
                                                 }
                                             },
                                             yAxis: {
-                                                formatter: (v, i) => formatNum(v)
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
                                             },
                                             xAxis: {
                                                 formatter: (v, i) =>
@@ -276,32 +291,37 @@ const trafficCharts = (from, to) => {
                         <DetailSuspence
                             key='requests-per-response-code'
                             suspenseBlockStyle={true}
-                            query={SQL.apiRequests.requestsPerResponseCode({ from, to })}
+                            query={SQL.apiRequests.requestsPerResponseCode({
+                                from,
+                                to
+                            })}
                             buildCallback={(rawData) => {
                                 const data = dataToArrayofObjects(rawData)
 
                                 const config = {
-                                  
                                     optionsMenu: {
                                         logScale: {
                                             checked: true
                                         }
                                     },
-                                    data: data.map(
-                                        (d) => ({
-                                            id: d.response_code.toString(),
-                                            label: d.response_code,
-                                            value: d.requests,
-                                            data: d
-                                        })
-                                    ),
+                                    data: data.map((d) => ({
+                                        id: d.response_code.toString(),
+                                        label: d.response_code,
+                                        value: d.requests,
+                                        data: d
+                                    })),
                                     xAxis: {
                                         scaleLog: true,
                                         formatter: (v, i) => formatNum(v)
                                     },
-                                    
+
                                     style: {
-                                        margin: {left: 0, top: 20, right: 0, bottom: 50},
+                                        margin: {
+                                            left: 0,
+                                            top: 20,
+                                            right: 0,
+                                            bottom: 50
+                                        },
                                         valueFormatter: ({ d, v }) => {
                                             return formatNum(v)
                                         },
@@ -309,41 +329,62 @@ const trafficCharts = (from, to) => {
                                             return d.label?.toString()[0] + 'xx'
                                         },
                                         legendLabel: (d) => {
-                                          return d.label?.toString()[0] + 'xx'
+                                            return d.label?.toString()[0] + 'xx'
                                         },
                                         legendValue: ({ d, v, data }) => {
-                                          const firstDigit = d.label?.toString()[0]
-                                          const totalForCode = data.filter((item) => item.label?.toString()[0] === firstDigit).reduce((acc, item) => acc + item.value, 0)
-                                          return formatNum(totalForCode)
+                                            const firstDigit =
+                                                d.label?.toString()[0]
+                                            const totalForCode = data
+                                                .filter(
+                                                    (item) =>
+                                                        item.label?.toString()[0] ===
+                                                        firstDigit
+                                                )
+                                                .reduce(
+                                                    (acc, item) =>
+                                                        acc + item.value,
+                                                    0
+                                                )
+                                            return formatNum(totalForCode)
                                         },
                                         valueFormatter: ({ d, v }) => {
-                                          
                                             return formatNum(v)
                                         },
                                         xAxisFormatter: (v, i) => {
                                             return formatNum(v)
                                         },
                                         colorMethods: {
-                                          codes: (label) => {
-                                            const firstDigit = label.toString()[0]
-                                            
-                                            switch (firstDigit) {
-                                              case '2':
-                                                return THEME.visualizations.swatch.success
-                                              case '3':
-                                                return THEME.visualizations.defaultFill
-                                              case '4':
-                                                return THEME.visualizations.swatch.warning
-                                              case '5':
-                                                return THEME.visualizations.swatch.danger
-                                              default:
-                                                return THEME.visualizations.defaultFill
+                                            codes: (label) => {
+                                                const firstDigit =
+                                                    label.toString()[0]
+
+                                                switch (firstDigit) {
+                                                    case '2':
+                                                        return THEME
+                                                            .visualizations
+                                                            .swatch.success
+                                                    case '3':
+                                                        return THEME
+                                                            .visualizations
+                                                            .defaultFill
+                                                    case '4':
+                                                        return THEME
+                                                            .visualizations
+                                                            .swatch.warning
+                                                    case '5':
+                                                        return THEME
+                                                            .visualizations
+                                                            .swatch.danger
+                                                    default:
+                                                        return THEME
+                                                            .visualizations
+                                                            .defaultFill
+                                                }
                                             }
-                                           }
                                         },
                                         colorMethodKey: 'codes'
                                     },
-                                    legendLayout: 'flex',
+                                    legendLayout: 'flex'
                                 }
 
                                 return (
@@ -356,7 +397,10 @@ const trafficCharts = (from, to) => {
                                         footer={
                                             <small>
                                                 <strong>Why this view:</strong>{' '}
-                                                401 and 403 show authorization friction; 307 and 303 show redirect use; 429 shows rate limiting.
+                                                401 and 403 show authorization
+                                                friction; 307 and 303 show
+                                                redirect use; 429 shows rate
+                                                limiting.
                                             </small>
                                         }
                                     />
@@ -421,7 +465,7 @@ const trafficCharts = (from, to) => {
                                         checked: true
                                     }
                                 },
-                              
+
                                 config: {
                                     data: data.map((d) => ({
                                         id: d.dow,
@@ -432,9 +476,8 @@ const trafficCharts = (from, to) => {
                                     })),
                                     ...formatting
                                 }
-                            },
-                            
-                          ]
+                            }
+                        ]
 
                         return (
                             <TabChartCard
@@ -445,7 +488,10 @@ const trafficCharts = (from, to) => {
                                 data={config}
                                 footer={
                                     <small>
-                                        <strong>Why this view:</strong> people cluster in working hours; scripted load runs around the clock. Useful for picking maintenance windows.
+                                        <strong>Why this view:</strong> people
+                                        cluster in working hours; scripted load
+                                        runs around the clock. Useful for
+                                        picking maintenance windows.
                                     </small>
                                 }
                             />
@@ -453,16 +499,16 @@ const trafficCharts = (from, to) => {
                     }}
                 />
             )
-        },
+        }
     ]
 }
 
 const endpointsCharts = (from, to) => {
     return [
-              {
+        {
             component: (
                 <DetailSuspence
-                    key="endpoint-traffic"
+                    key='endpoint-traffic'
                     suspenseBlockStyle={true}
                     query={SQL.apiRequests.endpoints({ from, to })}
                     buildCallback={(rawData) => {
@@ -490,14 +536,21 @@ const endpointsCharts = (from, to) => {
                                 dataIndex: 'requests',
                                 key: 'requests',
                                 minWidth: '120px',
-                                render: (text) => <InbarCell text={formatNum(text)} value={text} />
+                                render: (text) => (
+                                    <InbarCell
+                                        text={formatNum(text)}
+                                        value={text}
+                                    />
+                                )
                             },
-                            
+
                             {
                                 title: 'Share',
                                 dataIndex: 'share',
                                 key: 'share',
-                                render: (v) => <span>{(v * 100).toFixed(2)}%</span>
+                                render: (v) => (
+                                    <span>{(v * 100).toFixed(2)}%</span>
+                                )
                             },
                             {
                                 title: 'Client IPs',
@@ -542,83 +595,81 @@ const endpointsCharts = (from, to) => {
             )
         },
         {
-          component: (
-            <DetailSuspence
-                            key='http-methods'
-                            suspenseBlockStyle={true}
-                            query={SQL.apiRequests.httpMethods({ from, to })}
-                            buildCallback={(rawData) => {
-                                const data = dataToArrayofObjects(rawData)
-                                
-                                const formattedData = {}
-                                for (const d of data) {
-                                    formattedData[d.http_method] = {
-                                        ...(formattedData[d.http_method] || {}),
-                                        group: d.http_method,
-                                        value: d.requests,
-                                        ...d
-                                    }
-                                }
-                                const config = {
-                                    providerProps: {
-                                        onBuildToolTip: (id, e, d) => {
-                                             
-                                            return onBuildToolTip(id, e, d, {
-                                                row:
-                                                    formattedData[d] ||
-                                                    formattedData[d.data.group],
-                                                subGroupLabels,
-                                                formatter: formatNum,
-                                                title: !e.stacked ? d.data.group : d
-                                            })
-                                        }
-                                    },
-                                    optionsMenu: {
-                                        logScale: {
-                                            checked: false
-                                        }
-                                    },
-                                    data: Object.values(formattedData),
-                                    
-                                    xAxis: {
-                                        scaleLog: true,
-                                        formatter: (v, i) => formatNum(v)
-                                    },
-                                    style: {
-                                        margin: {top: 0, left: 40},
-                                        valueFormatter: ({ d, v }) => {
-                                            return formatNum(v)
-                                        }
-                                    },
-                                    legendLayout: 'flex',
-                                    subGroupLabels
-                                }
+            component: (
+                <DetailSuspence
+                    key='http-methods'
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.httpMethods({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = dataToArrayofObjects(rawData)
 
-                                return (
-                                    <BasicCard
-                                        key='http-methods'
-                                        title='HTTP methods'
-                                        subTitle={`Tracking user engagement and retention. From ${from} to ${to}`}
-                                        data={config}
-                                        chartType='StackedBar'
-                                        footer={
-                                            <small>
-                                                <strong>Why this view:</strong>{' '}
-                                                shows user activity patterns and
-                                                identifies trends in user
-                                                engagement over time.
-                                            </small>
-                                        }
-                                    />
-                                )
-                            }}
-                        />
-          )
+                        const formattedData = {}
+                        for (const d of data) {
+                            formattedData[d.http_method] = {
+                                ...(formattedData[d.http_method] || {}),
+                                group: d.http_method,
+                                value: d.requests,
+                                ...d
+                            }
+                        }
+                        const config = {
+                            providerProps: {
+                                onBuildToolTip: (id, e, d) => {
+                                    return onBuildToolTip(id, e, d, {
+                                        row:
+                                            formattedData[d] ||
+                                            formattedData[d.data.group],
+                                        subGroupLabels,
+                                        formatter: formatNum,
+                                        title: !e.stacked ? d.data.group : d
+                                    })
+                                }
+                            },
+                            optionsMenu: {
+                                logScale: {
+                                    checked: false
+                                }
+                            },
+                            data: Object.values(formattedData),
+
+                            xAxis: {
+                                scaleLog: true,
+                                formatter: (v, i) => formatNum(v)
+                            },
+                            style: {
+                                margin: { top: 0, left: 40 },
+                                valueFormatter: ({ d, v }) => {
+                                    return formatNum(v)
+                                }
+                            },
+                            legendLayout: 'flex',
+                            subGroupLabels
+                        }
+
+                        return (
+                            <BasicCard
+                                key='http-methods'
+                                title='HTTP methods'
+                                subTitle={`Tracking user engagement and retention. From ${from} to ${to}`}
+                                data={config}
+                                chartType='StackedBar'
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> shows
+                                        user activity patterns and identifies
+                                        trends in user engagement over time.
+                                    </small>
+                                }
+                            />
+                        )
+                    }}
+                />
+            )
         },
         {
             component: (
                 <DetailSuspence
-                    key="most-requested-entities"
+                    key='most-requested-entities'
                     suspenseBlockStyle={true}
                     query={SQL.apiRequests.mostRequestedEntities({ from, to })}
                     buildCallback={(rawData) => {
@@ -639,46 +690,57 @@ const endpointsCharts = (from, to) => {
                                 dataIndex: 'clients',
                                 key: 'clients',
                                 minWidth: '120px',
-                                render: (text) => <InbarCell text={formatNum(text)} value={text} />
+                                render: (text) => (
+                                    <InbarCell
+                                        text={formatNum(text)}
+                                        value={text}
+                                    />
+                                )
                             },
-                            
+
                             {
                                 title: 'Requests',
                                 dataIndex: 'requests',
                                 key: 'requests',
                                 render: (v) => <span>{formatNum(v)}</span>
                             },
-                            
+
                             {
                                 title: 'Endpoints',
                                 dataIndex: 'endpoints',
                                 key: 'endpoints',
                                 render: (v) => <span>{formatNum(v)}</span>
-                            },
-                          
+                            }
                         ]
                         return (
                             <TableCard
                                 data={data}
                                 columns={columns}
                                 title='Most requested datasets'
-                                footer={<small><strong>Why this view:</strong> shows which datasets people look up through the API, which can be compared with what they download.</small>}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong> shows
+                                        which datasets people look up through
+                                        the API, which can be compared with what
+                                        they download.
+                                    </small>
+                                }
                                 subTitle={`Top 50 datasets by distinct client IPs, all time. Publications, their ancillary datasets, uploads and other entity types are left out. ID and type come from the file download table. From ${from} to ${to}`}
                             />
                         )
                     }}
                 />
             )
-        },
+        }
     ]
 }
 
 const clientsAndUsersCharts = (from, to) => {
     return [
-       {
+        {
             component: (
                 <DetailSuspence
-                    key="client-types"
+                    key='client-types'
                     suspenseBlockStyle={true}
                     query={SQL.apiRequests.clientTypes({ from, to })}
                     buildCallback={(rawData) => {
@@ -688,7 +750,8 @@ const clientsAndUsersCharts = (from, to) => {
                                 title: 'Client type',
                                 dataIndex: 'client_type',
                                 key: 'client_type',
-                                sorter: (a, b) => a.client_type.localeCompare(b.client_type)
+                                sorter: (a, b) =>
+                                    a.client_type.localeCompare(b.client_type)
                             },
                             {
                                 title: 'Requests',
@@ -696,7 +759,13 @@ const clientsAndUsersCharts = (from, to) => {
                                 key: 'requests',
                                 minWidth: '120px',
                                 sorter: (a, b) => a.requests - b.requests,
-                                render: (text) => <InbarCell text={formatNum(text)} value={text} category='requests' />
+                                render: (text) => (
+                                    <InbarCell
+                                        text={formatNum(text)}
+                                        value={text}
+                                        category='requests'
+                                    />
+                                )
                             },
                             {
                                 title: 'Client IPs',
@@ -704,7 +773,14 @@ const clientsAndUsersCharts = (from, to) => {
                                 key: 'clients',
                                 minWidth: '120px',
                                 sorter: (a, b) => a.clients - b.clients,
-                                render: (text) => <InbarCell text={formatNum(text)} value={text} category='clients' style={{backgroundColor: 'green'}} />
+                                render: (text) => (
+                                    <InbarCell
+                                        text={formatNum(text)}
+                                        value={text}
+                                        category='clients'
+                                        style={{ backgroundColor: 'green' }}
+                                    />
+                                )
                             },
                             {
                                 title: 'User agents',
@@ -718,7 +794,7 @@ const clientsAndUsersCharts = (from, to) => {
                                 sorter: (a, b) => a.search_api - b.search_api,
                                 render: (v) => <span>{formatNum(v)}</span>
                             },
-                            
+
                             {
                                 title: 'Entity API',
                                 dataIndex: 'entity_api',
@@ -726,7 +802,7 @@ const clientsAndUsersCharts = (from, to) => {
                                 sorter: (a, b) => a.entity_api - b.entity_api,
                                 render: (v) => <span>{formatNum(v)}</span>
                             },
-                            
+
                             {
                                 title: 'UUID API',
                                 dataIndex: 'uuid_api',
@@ -740,15 +816,23 @@ const clientsAndUsersCharts = (from, to) => {
                                 key: 'error_rate',
                                 sorter: (a, b) => a.error_rate - b.error_rate,
                                 render: (v) => <span>{formatPerc(v)}</span>
-                            },
-                          
+                            }
                         ]
                         return (
                             <TableCard
                                 data={data}
                                 columns={columns}
                                 title='Client types'
-                                footer={<small><strong>Why this view:</strong> programmatic use is the API's purpose, so scripted traffic is the core audience. Browsers have far more distinct clients but few calls each; bots are load without users..</small>}
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong>{' '}
+                                        programmatic use is the API's purpose,
+                                        so scripted traffic is the core
+                                        audience. Browsers have far more
+                                        distinct clients but few calls each;
+                                        bots are load without users..
+                                    </small>
+                                }
                                 subTitle={`Grouped from the user agent string: Python scripts (requests, urllib), other tools (R httr2, curl), web browsers, crawlers and bots, and uptime monitoring. From ${from} to ${to}`}
                             />
                         )
@@ -756,6 +840,239 @@ const clientsAndUsersCharts = (from, to) => {
                 />
             )
         },
+        {
+            component: (
+                <div className='row mt-2'>
+                    <div className='col-md-6'>
+                        <DetailSuspence
+                            key='signed-in-vs-anonymous'
+                            suspenseBlockStyle={true}
+                            hostUrl={localhost}
+                            query={SQL.apiRequests.signedInStatus({ from, to })}
+                            buildCallback={(rawData) => {
+                                // TODO use real api
+                                const list = rawData //dataToArrayofObjects(rawData)
+                                const data = []
+                                let timeBucket
+                                for (const item of list) {
+                                    const date = new Date(
+                                        item.time_bucket.micros  / 1000
+                                    )
+                                
+                                    timeBucket = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01T00:00:00`
+                                    data.push({
+                                        time_bucket: timeBucket, //item.time_bucket
+                                        type: 'is_anonymous',
+                                        count: item.is_anonymous,
+                                        label: 'Anonymous'
+                                    })
+                                    data.push({
+                                        time_bucket: timeBucket, //item.time_bucket
+                                        type: 'is_signed_in',
+                                        count: item.is_signed_in,
+                                        label: 'Signed in'
+                                    })
+                                }
+
+                                const formattedData = {}
+                                const subGroupLabels = {}
+                                for (const d of data) {
+                                    formattedData[d.time_bucket] = {
+                                        ...(formattedData[d.time_bucket] || {}),
+                                        [d.type]: d.count
+                                    }
+                                    subGroupLabels[d.type] = d.label
+                                }
+                                const config = {
+                                    providerProps: {
+                                        onBuildToolTip: (id, e, d) => {
+                                            return onBuildToolTip(id, e, d, {
+                                                row:
+                                                    formattedData[d] ||
+                                                    formattedData[d.data.group],
+                                                subGroupLabels,
+                                                title: !e.stacked
+                                                ? formatAxisDate(d.data.group, true)
+                                                : formatAxisDate(d, true),
+                                                formatter: formatNum
+                                            })
+                                        }
+                                    },
+                                    data: Object.keys(formattedData).map(
+                                        (time_bucket) => ({
+                                            id: time_bucket,
+                                            group: time_bucket,
+                                            ...formattedData[time_bucket]
+                                        })
+                                    ),
+                                    yAxis: {
+                                        // scaleLog: true,
+                                        formatter: (v, i) => formatNum(v)
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) => formatAxisDate(v)
+                                    },
+                                    style: {
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                    legendLayout: 'flex',
+                                    subGroupLabels
+                                }
+                                console.log('SIGN', config)
+                                return (
+                                    <BasicCard
+                                        key='signed-in-vs-anonymous'
+                                        title='Signed-in vs anonymous requests'
+                                        subTitle={`Requests per month made with or without a user token. From ${from} to ${to}`}
+                                        data={config}
+                                        chartType='StackedColumn'
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                401 and 403 show authorization
+                                                friction; 307 and 303 show
+                                                redirect use; 429 shows rate
+                                                limiting.
+                                            </small>
+                                        }
+                                    />
+                                )
+                            }}
+                        />
+                    </div>
+                    <div className='col-md-6'>
+                        <DetailSuspence
+                            key='requests-by-countries'
+                            suspenseBlockStyle={true}
+                            hostUrl={localhost}
+                            query={SQL.apiRequests.countries({ from, to })}
+                            buildCallback={(rawData) => {
+                                //const data = dataToArrayofObjects(rawData)
+                                const data = rawData
+
+                                const formattedData = {}
+
+                                for (const d of data) {
+                                    formattedData[d.country_name] = {
+                                        ...(formattedData[d.country_name] ||
+                                            {}),
+                                        ...d,
+                                        group: d.country_name
+                                    }
+                                }
+                                const _onBuildToolTip = (id, e, d) => {
+                                    const dateString =
+                                        typeof d === 'string' ? d : d.data.group
+                                    return onBuildToolTip(id, e, d, {
+                                        row: formattedData[dateString],
+                                        subGroupLabels,
+                                        formatter: formatNum,
+                                        title: !e.stacked
+                                            ? formatAxisDate(d.data.group, true)
+                                            : formatAxisDate(dateString, true)
+                                    })
+                                }
+                                const config = [
+                                    {
+                                        label: 'Requests',
+                                        value: 'requests',
+                                        chartType: 'Bar',
+
+                                        config: {
+                                            data: data.map((d) => ({
+                                                id: d.country_name,
+                                                label: d.country_name,
+                                                value: d.requests,
+                                                data: d
+                                            })),
+
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
+                                            },
+                                            legendLayout: 'flex',
+                                            subGroupLabels
+                                        }
+                                    },
+                                    {
+                                        label: 'Client IPs',
+                                        value: 'clients',
+                                        chartType: 'Bar',
+
+                                        config: {
+                                            data: data.map((d) => ({
+                                                id: d.country_name,
+                                                label: d.country_name,
+                                                value: d.clients,
+                                                data: d
+                                            })),
+                                            style: {
+                                                monoColor:
+                                                    THEME.visualizations
+                                                        .defaultFill,
+                                                valueFormatter: ({ d, v }) => {
+                                                    return formatNum(v)
+                                                }
+                                            },
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
+                                            }
+                                        }
+                                    },
+                                    {
+                                        label: 'Users',
+                                        value: 'users',
+                                        chartType: 'Bar',
+
+                                        config: {
+                                            data: data.map((d) => ({
+                                                id: d.country_name,
+                                                label: d.country_name,
+                                                value: d.users,
+                                                data: d
+                                            })),
+                                            style: {
+                                                monoColor:
+                                                    THEME.visualizations
+                                                        .defaultFill,
+                                                valueFormatter: ({ d, v }) => {
+                                                    return formatNum(v)
+                                                }
+                                            },
+                                            xAxis: {
+                                                formatter: (v, i) =>
+                                                    formatNum(v)
+                                            }
+                                        }
+                                    }
+                                ]
+
+                                return (
+                                    <TabChartCard
+                                        title='Countries'
+                                        chartType='Bar'
+                                        subTitle={`Request origin by client IP location. From ${from} to ${to}`}
+                                        data={config}
+                                        footer={
+                                            <small>
+                                                <strong>Why this view:</strong>{' '}
+                                                international reach; client IPs
+                                                are a better reach measure than
+                                                requests, which a single script
+                                                can inflate.
+                                            </small>
+                                        }
+                                    />
+                                )
+                            }}
+                        />
+                    </div>
+                </div>
+            )
+        }
     ]
 }
 
@@ -765,23 +1082,55 @@ const ApiRequests = memo(({ from, to }) => {
     const inserted = useRef(false)
 
     const fetchClientIps = async () => {
-        const url = URLS.ingest.analytics.query();
+        const url = URLS.ingest.analytics.query()
 
         const headers = getHeadersWith(globusToken).headers
-        const query = 'SELECT * from api_usage LIMIT 30000'
+        const query = 'SELECT * from api_usage LIMIT 300 OFFSET 600'
         const response = await callService(url, headers, { query }, 'POST')
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+        const ips = {}
         if (response.status == 200) {
             const data = dataToArrayofObjects(response.data)
             let details = {}
-            let id = 1;
+            let id = 800
+            const users = [
+                {
+                    user: 'etsou2@johnshopkins.edu',
+                    user_domain: 'johnshopkins.edu',
+                    user_tld: 'johnshopkins.edu'
+                },
+                {
+                    user: 'james@johnshopkins.edu',
+                    user_domain: 'johnshopkins.edu',
+                    user_tld: 'johnshopkins.edu'
+                },
+                {
+                    user: 'jane@pitt.edu',
+                    user_domain: 'pitt.edu',
+                    user_tld: 'pitt.edu'
+                },
+                {
+                    user: 'brendan@psc.edu',
+                    user_domain: 'psc.edu',
+                    user_tld: 'psc.edu'
+                }
+            ]
             for (const d of data) {
                 if (d.client_ip) {
-                    const ipDetails = await getIpDetails(d.client_ip)
-                    details = {id, ...d, ...ipDetails}
-                    await callService('/api/ip', headers, details, 'PUT')
+                    let ipDetails = ips[d.client_ip]
+                    if (!ipDetails) {
+                        ipDetails = await getIpDetails(d.client_ip)
+                        ips[d.client_ip] = ipDetails
+                    }
+
+                    // Get a random index (0 to 3)
+                    const randomIndex = Math.floor(Math.random() * users.length)
+
+                    details = { id, ...d, ...ipDetails, ...users[randomIndex] }
+                    await sleep(2000)
+                    await callService(localhost, headers, details, 'PUT')
                     id++
                 }
-                
             }
             inserted.current = true
         }

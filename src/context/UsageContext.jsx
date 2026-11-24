@@ -5,7 +5,7 @@ const UsageContext = createContext()
 export const UsageProvider = ({ children }) => {
 
     const getIpDetails = async (ip) => {
-        const result = await fetch(`/api/ip/location?q=${ip}`)
+        const result = await fetch(`/api/ip?q=${ip}`)
         const htmlString = await result.text();
         const parser = new DOMParser();
 
