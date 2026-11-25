@@ -1,4 +1,4 @@
-import {useContext, useEffect, memo} from "react";
+import {useContext, useEffect, memo, useRef} from "react";
 import * as d3 from "d3";
 import ChartContext from "@/context/ChartContext";
 import THEME from "@/lib/helpers/theme";
@@ -13,6 +13,7 @@ const Heatmap = memo(({
     style = {},
 }) => {
 
+    const hasLoaded = useRef(false)
     const {
         colors,
         getChartSelector,
@@ -22,6 +23,7 @@ const Heatmap = memo(({
         appendTooltip } = useContext(ChartContext)
 
     const chartType = 'heatmap'
+    const chartData = useRef([])
 
     const buildChart = ()  => {
         colors.current = {}
@@ -67,29 +69,42 @@ const Heatmap = memo(({
         
 
         svg.selectAll()
-        .data(data, function(d) {return d.group+':'+d.yGroup;})
-        .join("rect")
-        .attr("x", function(d) { return x(d.group) })
-        .attr("y", function(d) { return y(d.yGroup) })
-        .attr("width", x.bandwidth() )
-        .attr("height", y.bandwidth() )
-        .style("fill", function(d) { return colorScale(d.value)} )
+            .data(data, function(d) {return d.group+':'+d.yGroup;})
+            .join("rect")
+            .attr("x", function(d) { return x(d.group) })
+            .attr("y", function(d) { return y(d.yGroup) })
+            .attr("width", x.bandwidth() )
+            .attr("height", y.bandwidth() )
+            .style("fill", function(d) { return colorScale(d.value)} )
+            .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
+            .on('mousemove', toolTipHandlers(chartId, chartType).mousemove)
+            .on('mouseleave', toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();
     }
 
-    useEffect(() => {
+     const updateChart = () => {
         $(getChartSelector(chartId, chartType)).html('')
         appendTooltip(chartId, chartType)
         $(getChartSelector(chartId, chartType)).append(buildChart())
         if (setLegend) {
             setLegend(colors.current)
         }
-
+    }
+    
+    useEffect(() => {
+        if (
+            !hasLoaded.current ||
+            JSON.stringify(chartData.current) !== JSON.stringify(data)
+        ) {
+            hasLoaded.current = true
+            chartData.current = Array.from(data)
+            updateChart()
+        }
     }, [data])
 
     return (
-        <div className={`${selectors.base}chart ${selectors.base}heatmap c-heatmap`} id={`${selectors.base}heatmap--${chartId}`}></div>
+        <div className={`${selectors.base}chart ${selectors.base}heatmap`} id={`${selectors.base}heatmap--${chartId}`}></div>
     )
 })
 

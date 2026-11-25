@@ -130,8 +130,8 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
         const showXLabels = () => xAxis.showLabels !== undefined ? xAxis.showLabels : true
         const showYLabels = () => yAxis.showLabels !== undefined ? yAxis.showLabels : true
 
-        const _truncateLabel = (label) => {
-            return label.length > 30 ? label.substring(0, 27) + "..." : label;
+        const _truncateLabel = (label, max = 30) => {
+            return label.length > max ? label.substring(0, max - 3) + "..." : label;
         }
 
         return {
@@ -195,9 +195,11 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                     i++
                 }
 
+                const viewportWidth = document.documentElement.clientWidth;
                 let _minWidth = 728
 
                 //divWidth = Math.min(divWidth, data?.length * 110)
+                divWidth = Math.min(divWidth, viewportWidth)
                 divWidth = Math.max(_minWidth, divWidth)
 
                 const minWidth = style.minWidth || divWidth || 728
@@ -213,8 +215,8 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                     font: style.fontSize || {title: '16px'}
                 }
             },
-            truncateLabel: (label) => {
-                return _truncateLabel(label)
+            truncateLabel: (label, max = 30) => {
+                return _truncateLabel(label, max)
             },
             adjustSizingByTicks: (sz, names, marginX = 'bottom') => {
             

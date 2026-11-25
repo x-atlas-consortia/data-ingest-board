@@ -119,12 +119,12 @@ const StackedColumn = memo(({
             })
             .attr("class", d => `stackedColumn--${getSubgroupLabel(d.key)?.toDashedCase()} ${style.highlight === d.key ? 'stackedColumn--highlighted' : ''}`)
             
-            .attr("x", d => x(d.data.group))
+            .attr("x", d => x(d.data.group) + svgDo({}).shapeBandwidth(x).offset)
             .attr("y", d => {
               return y(minY)
             })
             .attr("height", 0)
-            .attr("width", x.bandwidth() )
+            .attr("width", svgDo({}).shapeBandwidth(x).size )
 
         svg.selectAll('rect')
             .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
@@ -187,7 +187,7 @@ const StackedColumn = memo(({
 
     return (
         <div
-            className={`c-visualizations__chart c-visualizations__stackedColumn c-bar`}
+            className={`c-visualizations__chart c-visualizations__stackedColumn`}
             id={`c-visualizations__stackedColumn--${chartId}`}
         ></div>
     )

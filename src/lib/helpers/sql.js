@@ -129,7 +129,7 @@ const SQL = {
 
             return `SELECT country_name, COUNT(*) AS requests, COUNT(DISTINCT client_ip) as clients, COUNT(DISTINCT user) as users FROM api_usage GROUP BY country_name ORDER BY requests DESC;;`
         },
-        cities: ({from, to}) => {
+        topCities: ({from, to}) => {
             // TODO use whereClause
             const whereClause = SQL.whereClause({
                 from,
@@ -137,7 +137,7 @@ const SQL = {
                 field: indexFixtures.apiRequests.date
             })
 
-            return `SELECT country_name, city_name, region_name, COUNT(*) AS requests, COUNT(DISTINCT client_ip) as unique_client_ips, COUNT(DISTINCT user) as unique_users FROM api_usage GROUP BY city_name ORDER BY requests DESC;;`
+            return `SELECT country_name, city_name, region_name, COUNT(*) AS requests, COUNT(DISTINCT client_ip) as clients, COUNT(DISTINCT user) as users FROM api_usage GROUP BY country_name, city_name, region_name ORDER BY requests DESC;`
         },
         lastXMonths: {
             totalRequests: ({ months = 12 }) => {

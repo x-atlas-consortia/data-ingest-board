@@ -34,7 +34,6 @@ const World = memo(
             // Construct the radius scale.
             const radius = d3.scaleSqrt([0, d3.max(formattedData, d => d.value)], [0, 40]);
 
-
             const width = 1300
             const height = 700
             
@@ -103,8 +102,8 @@ const World = memo(
 
         useEffect(() => {
             if (
-                chartData.current.length !== data.length ||
-                !hasLoaded.current
+                !hasLoaded.current ||
+                JSON.stringify(chartData.current) !== JSON.stringify(data)
             ) {
                 hasLoaded.current = true
                 chartData.current = Array.from(data)

@@ -809,7 +809,7 @@ const locationsCharts = (from, to) => {
                         const onBuildToolTip = (id, e, d) => {
                             return `<div>
                                 <span>${d.data.city}, ${d.data.region}, ${d.data.country}</span> <br>
-                                <span>${formatNum(d.data.terabytes)} TB</span> <br>
+                                <span>${d.data.terabytes} TB</span> <br>
                                 <span>${formatNum(d.data.files)} files</span> <br>
                                 <span>${formatNum(d.data.users)} users</span>
                                 
@@ -846,11 +846,11 @@ const locationsCharts = (from, to) => {
                                         value: d.terabytes,
                                         data: d
                                     })),
-                                    style: {
-                                        valueFormatter: ({ d, v }) => {
-                                            return formatNum(v)
-                                        }
-                                    },
+                                    // style: {
+                                    //     valueFormatter: ({ d, v }) => {
+                                    //         return formatNum(v)
+                                    //     }
+                                    // },
                                 }
                             }
                         ]

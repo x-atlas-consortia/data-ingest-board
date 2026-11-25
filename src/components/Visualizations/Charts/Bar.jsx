@@ -22,7 +22,7 @@ const Bar = memo(({
 
     const buildChart = () => {
         colors.current = {}
-        let names = svgDo({ data, xAxis }).sortLabels()
+        const names = svgDo({ data, xAxis }).sortLabels()
 
         // Declare the chart dimensions and margins.
         const sizing = svgDo({ data }).sizing(style, chartId, chartType)
@@ -111,9 +111,6 @@ const Bar = memo(({
                 return i * 100
             })
 
-        // g.selectAll('rect')
-            
-
         // Add the x-axis and label.
         const xAxisGroup = g.append('g')
             .attr('transform', `translate(0,${height})`)
@@ -127,6 +124,7 @@ const Bar = memo(({
             )
             .selectAll('text')
             .style('font-size', '14px')
+            
             
         svgDo({ xAxis }).rotateLabels({ axisGroup: xAxisGroup, axis: xAxis })
 
@@ -143,6 +141,14 @@ const Bar = memo(({
             )
             .selectAll('text')
             .style('font-size', '14px')
+
+            .text(function (d) {
+                return svgDo({ xAxis }).truncateLabel(d, 20)
+            })
+            .append('title')
+            .text((d) => {
+                return d
+            })
 
         g.selectAll('.text')
             .data(data)
@@ -183,8 +189,8 @@ const Bar = memo(({
     }
     useEffect(() => {
         if (
-            chartData.current.length !== data.length ||
-            !hasLoaded.current
+            !hasLoaded.current ||
+            JSON.stringify(chartData.current) !== JSON.stringify(data)
         ) {
             hasLoaded.current = true
             chartData.current = Array.from(data)

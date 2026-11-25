@@ -118,10 +118,10 @@ const GroupedColumn = memo(({
                 'class',
                 (d) => `bar--${getSubgroupLabel(d.key).toDashedCase()}`
             )
-            .attr('x', (d) => xSubgroup(d.key))
+            .attr('x', (d) => xSubgroup(d.key) + svgDo({}).shapeBandwidth(xSubgroup).offset)
             .attr('y', y(minY))
             .attr('height', 0)
-            .attr('width', xSubgroup.bandwidth())
+            .attr('width', svgDo({}).shapeBandwidth(xSubgroup).size)
             .append('title')
             .text((d) => {
                 return `${d.group}\n${getSubgroupLabel(d.key)}: ${formatVal({ d, v: d.val })}`
@@ -172,7 +172,7 @@ const GroupedColumn = memo(({
 
     return (
         <div
-            className={`c-visualizations__chart c-visualizations__groupedColumn c-bar`}
+            className={`c-visualizations__chart c-visualizations__groupedColumn`}
             id={`c-visualizations__groupedColumn--${chartId}`}
         ></div>
     )

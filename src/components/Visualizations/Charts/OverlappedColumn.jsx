@@ -175,8 +175,8 @@ const OverlappedColumn = memo(({
 
     useEffect(() => {
         if (
-            chartData.current.length !== data.length ||
-            !hasLoaded.current
+            !hasLoaded.current ||
+            JSON.stringify(chartData.current) !== JSON.stringify(data)
         ) {
             hasLoaded.current = true
             chartData.current = Array.from(data)
@@ -190,7 +190,7 @@ const OverlappedColumn = memo(({
 
     return (
         <div
-            className={`c-visualizations__chart c-visualizations__overlappedColumn c-bar`}
+            className={`c-visualizations__chart c-visualizations__overlappedColumn`}
             id={`c-visualizations__overlappedColumn--${chartId}`}
         ></div>
     )

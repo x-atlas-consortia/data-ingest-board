@@ -1,14 +1,14 @@
-import {useContext, useEffect} from "react";
+import {useContext, useEffect, useRef, memo} from "react";
 import * as d3 from "d3";
 import ChartContext from "@/context/ChartContext";
 
-export default function Pie({
+const Pie = memo(({
     setLegend,
     data = [],
     chartId = 'modal',
     onSectionClick,
     style = {},
-}) {
+}) => {
 
     const {
         colors,
@@ -17,6 +17,10 @@ export default function Pie({
         selectors,
         svgDo,
         appendTooltip } = useContext(ChartContext)
+
+    const hasLoaded = useRef(false)
+    const chartType = 'pie'
+    const chartData = useRef([])
 
     const buildChart = ()  => {
         colors.current = {}
@@ -99,24 +103,36 @@ export default function Pie({
                 .text(d => '')); //d.data.value.toLocaleString("en-US")
 
         svg.selectAll('path')
-            .on("mouseover", toolTipHandlers(chartId).mouseover)
-            .on("mousemove", toolTipHandlers(chartId, 'pie').mousemove)
-            .on("mouseleave", toolTipHandlers(chartId).mouseleave)
+            .on("mouseover", toolTipHandlers(chartId, chartType).mouseover)
+            .on("mousemove", toolTipHandlers(chartId, chartType).mousemove)
+            .on("mouseleave", toolTipHandlers(chartId, chartType).mouseleave)
 
         return svg.node();
     }
 
-    useEffect(() => {
-        $(getChartSelector(chartId, 'pie')).html('')
-        appendTooltip(chartId, 'pie')
-        $(getChartSelector(chartId, 'pie')).append(buildChart())
+    const updateChart = () => {
+        $(getChartSelector(chartId, chartType)).html('')
+        appendTooltip(chartId, chartType)
+        $(getChartSelector(chartId, chartType)).append(buildChart())
         if (setLegend) {
             setLegend(colors.current)
         }
+    }
 
+    useEffect(() => {
+        if (
+            !hasLoaded.current ||
+            JSON.stringify(chartData.current) !== JSON.stringify(data)
+        ) {
+            hasLoaded.current = true
+            chartData.current = Array.from(data)
+            updateChart()
+        }
     }, [data])
 
     return (
-        <div className={`${selectors.base}chart ${selectors.base}pie c-pie`} id={`${selectors.base}pie--${chartId}`}></div>
+        <div className={`${selectors.base}chart ${selectors.base}pie`} id={`${selectors.base}pie--${chartId}`}></div>
     )
-}
+})
+
+export default Pie

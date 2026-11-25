@@ -123,7 +123,7 @@ const trafficCharts = (from, to) => {
         },
         {
             component: (
-                <div className='row mt-2' key='monthly-response-code'>
+                <div className='row mt-2' key='monthly-requests-by-api--requests-per-response-code'>
                     <div className='col-md-6'>
                         <DetailSuspence
                             key='monthly-requests-by-api'
@@ -403,7 +403,7 @@ const trafficCharts = (from, to) => {
                         const config = [
                             {
                                 label: 'Distinct client IPs',
-                                value: 'clients',
+                                value: 'when-requests-happen-clients',
                                 optionsMenu: {
                                     logScale: {
                                         checked: true
@@ -430,7 +430,7 @@ const trafficCharts = (from, to) => {
                             },
                             {
                                 label: 'Requests',
-                                value: 'requests',
+                                value: 'when-requests-happen-requests',
                                 optionsMenu: {
                                     logScale: {
                                         checked: true
@@ -668,7 +668,6 @@ const endpointsCharts = (from, to) => {
                                     />
                                 )
                             },
-
                             {
                                 title: 'Requests',
                                 dataIndex: 'requests',
@@ -814,7 +813,7 @@ const clientsAndUsersCharts = (from, to) => {
         },
         {
             component: (
-                <div className='row mt-2' key='signed-in-countries'>
+                <div className='row mt-2' key='signed-in-vs-anonymous--requests-by-countries'>
                     <div className='col-md-6'>
                         <DetailSuspence
                             key='signed-in-vs-anonymous'
@@ -892,7 +891,7 @@ const clientsAndUsersCharts = (from, to) => {
                                     legendLayout: 'flex',
                                     subGroupLabels
                                 }
-                                console.log('SIGN', config)
+                                
                                 return (
                                     <BasicCard
                                         key='signed-in-vs-anonymous'
@@ -1025,6 +1024,138 @@ const clientsAndUsersCharts = (from, to) => {
                         />
                     </div>
                 </div>
+            )
+        },
+        {
+            component: (
+                <DetailSuspence
+                    key="top-cities"
+                    suspenseBlockStyle={true}
+                    query={SQL.apiRequests.topCities({ from, to })}
+                    hostUrl={localhost}
+                    buildCallback={(rawData) => {
+                        const data = rawData // dataToArrayofObjects(rawData)
+                        const columns = [
+                            {
+                                title: 'City',
+                                dataIndex: 'city_name',
+                                key: 'city_name'
+                            },
+                            {
+                                title: 'Region',
+                                dataIndex: 'region_name',
+                                key: 'region_name'
+                            },
+                            {
+                                title: 'Country',
+                                dataIndex: 'country_name',
+                                key: 'country_name'
+                            },
+                            {
+                                title: 'Requests',
+                                dataIndex: 'requests',
+                                key: 'requests',
+                                minWidth: '150px',
+                                render: (text) => <InbarCell text={text} />
+                            },
+                            {
+                                title: 'Client IPs',
+                                dataIndex: 'clients',
+                                key: 'clients'
+                            },
+                            {
+                                title: 'Users',
+                                dataIndex: 'users',
+                                key: 'users'
+                            },
+                            
+                        ]
+                        return (
+                            <TableCard
+                                data={data}
+                                columns={columns}
+                                title='Cities'
+                                subTitle={`Request origin by city. From ${from} to ${to}`}
+                            />
+                        )
+                    }}
+                />
+            )
+            
+        },
+        {
+            component: (
+                <DetailSuspence
+                    key="requests-on-a-map"
+                    suspenseBlockStyle={true}
+                    hostUrl={localhost}
+                    query={SQL.apiRequests.topCities({ from, to })}
+                    buildCallback={(rawData) => {
+                        const data = rawData //dataToArrayofObjects(rawData)
+                        const onBuildToolTip = (id, e, d) => {
+                            return `<div>
+                                <span>${d.data.city}, ${d.data.region}, ${d.data.country}</span> <br>
+                                <span>${formatNum(d.data.requests)}</span> <br>
+                                <span>${formatNum(d.data.clients)} files</span> <br>
+                                <span>${formatNum(d.data.users)} users</span>
+                                
+                            </div>`
+                        }
+                        const config = [
+                            {
+                                label: 'United States',
+                                value: 'unitedStates',
+                                chartType: 'USA',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
+                                config: {
+                                    data: data.filter((d) => d.country_name === 'United States of America').map((d) => ({
+                                        id: d.city_name,
+                                        label: d.city_name,
+                                        value: d.requests,
+                                        data: {...d, city: d.city_name, country: d.country_name, region: d.region_name}
+                                    })),
+                                }
+                            },
+                            {
+                                label: 'World',
+                                value: 'world',
+                                chartType: 'World',
+                                providerProps: {
+                                    onBuildToolTip
+                                },
+                                config: {
+                                    data: data.map((d) => ({
+                                        id: d.country,
+                                        label: d.country,
+                                        value: d.requests,
+                                        data: {...d, city: d.city_name, country: d.country_name, region: d.region_name}
+                                    })),
+                                    style: {
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                }
+                            }
+                        ]
+                        return (
+                            <TabChartCard
+                                title='Requests on a map'
+                                subTitle={`Each circle is a city; its area shows requests, all time. Hover for client IPs and users. From ${from} to ${to}`}
+                                data={config}
+                                chartType='Column'
+                                footer={
+                                    <small>
+                                        <strong>Why this view:</strong>{' '}
+                                        shows where demand clusters at a glance, including the regions that a country ranking flattens (US coasts versus the Midwest, or Europe as a whole).
+                                    </small>
+                                }
+                            />
+                        )
+                    }}
+                />
             )
         }
     ]
