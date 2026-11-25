@@ -46,12 +46,20 @@ const StackedColumn = memo(({
             .range([margin.left, width - margin.right])
             .padding([0.2])
 
-        const xAxisGroup = g.append('g')
+        const xAxisGroup = g
+            .append('g')
             .attr('transform', `translate(0,${height - margin.bottom})`)
-            .style("color", THEME.visualizations.axis.color)
-            .call(d3.axisBottom(x).tickFormat((x, i) =>
+            .style('color', THEME.visualizations.axis.color)
+            .call(
+                d3
+                    .axisBottom(x)
+                    .tickFormat((x, i) =>
                         xAxis.formatter ? xAxis.formatter(x, i) : x
-                    ))
+                    )
+            )
+            .selectAll('text')
+            .attr('class', 'x-axis-label')
+            .style('font-size', sizing.font.size)
 
    
         const _minY = yAxis.minY || (yAxis.scaleLog ? 1 : 0)
@@ -67,7 +75,7 @@ const StackedColumn = memo(({
         const minRange = height - margin.bottom
 
     
-        const {y, domain, ticks} = svgDo({ data }).axis({max: maxY, axis: yAxis, range: [minRange, margin.top] })
+        const {y, domain, ticks} = svgDo({ data }).axis({max: maxY, addPadding: true, axis: yAxis, range: [minRange, margin.top] })
         const minY = domain[0]
 
         g.append('g')
@@ -81,6 +89,9 @@ const StackedColumn = memo(({
                         yAxis.formatter ? yAxis.formatter(y) : y.toFixed()
                     )
             )
+            .selectAll('text')
+            .attr('class', 'y-axis-label')
+            .style('font-size', sizing.font.size)
 
         svgDo({ xAxis, yAxis }).axisLabels({ svg, sizing })
 

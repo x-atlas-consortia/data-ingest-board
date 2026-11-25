@@ -54,7 +54,7 @@ const Bar = memo(({
             )
 
         // Declare the x (horizontal position) scale.
-        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', axis: xAxis, range: [margin.left, width - margin.left] })
+        const { x, domain, ticks } = svgDo({ data }).axis({ name: 'x', axis: xAxis, range: [margin.left, width - margin.left] }) 
         const minX = domain[0]
 
         // Create the SVG container.
@@ -67,7 +67,7 @@ const Bar = memo(({
                 0,
                 width + margin.left + margin.right,
                 height + margin.top + margin.bottom
-            ])
+        ])
 
         const g = svg
             .append('g')
@@ -76,6 +76,8 @@ const Bar = memo(({
         //svgDo({}).grid({ g: svg, y: x, hideGrid: style.hideGrid, ticks, sizing })
         const formatVal = ({ d, v }) =>
             svgDo({}).valueFormatter({ d, v, style })
+
+        svgDo({}).xGrid({ g, x, hideGrid: style.hideGrid, ticks, sizing })
 
         // Add a rect for each bar.
         g.append('g')
@@ -106,7 +108,7 @@ const Bar = memo(({
         g.selectAll('rect')
             .transition()
             .duration(800)
-            .attr('width', (d) => x(d.value))
+            .attr('width', (d) => x(d.value) - x(minX))
             .delay(function (d, i) {
                 return i * 100
             })
@@ -123,7 +125,7 @@ const Bar = memo(({
                     )
             )
             .selectAll('text')
-            .style('font-size', '14px')
+            .style('font-size', sizing.font.size)
             
             
         svgDo({ xAxis }).rotateLabels({ axisGroup: xAxisGroup, axis: xAxis })
@@ -140,10 +142,10 @@ const Bar = memo(({
                     )
             )
             .selectAll('text')
-            .style('font-size', '14px')
+            .style('font-size', sizing.font.size)
 
             .text(function (d) {
-                return svgDo({ xAxis }).truncateLabel(d, 20)
+                return svgDo({ xAxis }).truncateLabel(d)
             })
             .append('title')
             .text((d) => {
@@ -160,7 +162,7 @@ const Bar = memo(({
             .attr('y',(d) => y(d.label) + svgDo({}).shapeBandwidth(y).offset + (svgDo({}).shapeBandwidth(y).size / 2)) 
             .attr('x', (d) => x(minX))
             .attr('text-anchor', 'start')
-            .style('font-size', THEME.visualizations.font.size)
+            .style('font-size', sizing.font.size)
             .style('fill', THEME.visualizations.font.color)
             .style('opacity', 0)
 
@@ -168,7 +170,7 @@ const Bar = memo(({
             .transition()
             .duration(800)
             .style('opacity', 1)
-            .attr('x', (d) => x(d.value) + 20)
+            .attr('x', (d) => x(d.value) + 10)
             .delay(function (d, i) {
                 return i * 100
             })

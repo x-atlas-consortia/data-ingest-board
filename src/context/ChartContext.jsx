@@ -147,7 +147,16 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                           : colorScale(label)
                 return color
             },
-            axis: ({ name = 'y', max, axis, range}) => {
+            axis: ({ name = 'y', max, addPadding, axis, range}) => {
+                if (!max || addPadding) {
+                    max = max || d3.max(data, (d) => d.value)
+                    if (!axis.scaleLog) {
+                        const step = 50
+                        const next50 = Math.ceil(max / step) * step;
+                        // Optional: add an extra step (+50) when maxVal is within a threshold of next50
+                        max = next50 - max < 10 ? next50 + step : next50;
+                    } 
+                }
                 max = max || d3.max(data, (d) => d.value)
                 // Chart must have a minimum height/width to be able to click. 2% of the max value seems good
                 const min = axis.scaleLog ? 1 : -(max * 0.009)
@@ -212,7 +221,7 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
             
                 return {width, height, margin,
                     isMobile: width < 500,
-                    font: style.fontSize || {title: '16px'}
+                    font: style.fontSize || {title: '16px', ... THEME.visualizations.font}
                 }
             },
             truncateLabel: (label, max = 30) => {
@@ -275,6 +284,21 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                         .attr("y1", d => Math.ceil(y(d)))
                         .attr("x2", sizing.width - sizing.margin.right)
                         .attr("y2", d => Math.ceil(y(d)))
+                        .style("stroke", "#eee") // Light gray
+                        .style("stroke-width", "1px")
+                }
+            },
+            xGrid: ({g, x, hideGrid, ticks, sizing}) => {
+                if (!hideGrid) {
+                    g.append("g")
+                        .selectAll(".x-grid")
+                        .data(x.ticks(ticks))
+                        .enter().append("line")
+                        .attr("class", "x-grid")
+                        .attr("y1", sizing.margin.top)
+                        .attr("x1", d => Math.ceil(x(d)))
+                        .attr("y2", sizing.height - sizing.margin.bottom)
+                        .attr("x2", d => Math.ceil(x(d)))
                         .style("stroke", "#eee") // Light gray
                         .style("stroke-width", "1px")
                 }

@@ -58,7 +58,7 @@ const StackedBar = memo(({
         
         const maxX = d3.max(series, d => d3.max(d, d => d[1]))
 
-        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', max: maxX, axis: xAxis, range: [margin.left, width - margin.left] })
+        const {x, domain, ticks} = svgDo({ data }).axis({ name: 'x', max: maxX, addPadding: true, axis: xAxis, range: [margin.left, width - margin.left] })
         const minX = domain[0]
 
         const y =  d3.scaleBand()
@@ -127,7 +127,7 @@ const StackedBar = memo(({
             })
 
         // Append the horizontal axis.
-        const xAxisGroup = g.append('g')
+        g.append('g')
                     .attr('transform', `translate(0,${height})`)
                     .call(
                         d3
@@ -138,7 +138,7 @@ const StackedBar = memo(({
                             )
                     )
                     .selectAll('text')
-                    .style('font-size', '12px')
+                    .style('font-size', sizing.font.size)
 
         // Append the vertical axis.
         const yAxisGroup = g.append('g')
@@ -151,6 +151,9 @@ const StackedBar = memo(({
                         yAxis.formatter ? yAxis.formatter(y) : y
                     )
             )
+            .selectAll('text')
+            .attr('class', 'y-axis-label')
+            .style('font-size', sizing.font.size)
 
         yAxisGroup
              .selectAll('.tick text')

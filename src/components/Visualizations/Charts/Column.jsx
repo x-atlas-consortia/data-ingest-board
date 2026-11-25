@@ -119,7 +119,7 @@ const Column = memo(({
             .selectAll('text')
             .attr('class', 'x-axis-label')
             .style('display', svgDo({  xAxis }).showXLabels() ? 'block' : 'none')
-            .style('font-size', '11px')
+            .style('font-size', sizing.font.size)
             
 
         svgDo({ xAxis }).rotateLabels({ axisGroup: xAxisGroup, axis: xAxis })
@@ -136,6 +136,9 @@ const Column = memo(({
                         yAxis.formatter ? yAxis.formatter(y) : y.toFixed()
                     )
             )
+            .selectAll('text')
+            .attr('class', 'y-axis-label')
+            .style('font-size', sizing.font.size)
 
         svgDo({ xAxis, yAxis }).axisLabels({ svg, sizing })
 
