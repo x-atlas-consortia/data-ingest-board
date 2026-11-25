@@ -13,34 +13,10 @@ import {
 import BasicCard from './BasicCard'
 import TableCard from './TableCard'
 import InbarCell from './InbarCell'
+import UI_BLOCKS from '@/lib/helpers/uiBlocks'
 
-
-const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter }) => {
-    const colors = e.colors
-    if (!e.stacked)
-        return `<div class="c-visualizations__tooltipWrap">
-            <span class="text-muted">${formatAxisDate(d.data.group,true)}</span>
-            <br> 
-            <span>
-                <span class="c-visualizations__itemCol" style="background-color: ${colors[d.key].color};"></span>
-                <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong>
-            </span>
-        </div>`
-    
-    
-    let total = 0
-    if (!row) return null
-    return `<div class="c-visualizations__tooltipWrap">
-    <span class="text-muted">${formatAxisDate(d,true)}</span>
-    <br>${Object.values(colors)
-        .map(({ color, label, key, value }) => {
-            total += row[key] || 0
-            return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>
-            ${label}: <strong>${formatter(row[key])}</strong></span>`
-        })
-        .join('<br>')}
-        <br>Total: <strong>${formatter(total)}</strong>
-    </div>`
+const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
+    return UI_BLOCKS.visualizations.onBuildToolTip(id, e, d, {subGroupLabels, row, formatter, title})
 }
 
 const downloadsCharts = (from, to) => {
@@ -62,6 +38,12 @@ const downloadsCharts = (from, to) => {
                         const datasetPullsTouchedData = dataToArrayofObjects(
                             rawData[1]
                         )
+                        const _onBuildToolTip = (id, e, d, formatter) => {
+                            return `<span class="text-muted">${formatAxisDate(
+                                d.label,
+                                true
+                            )}</span><br><strong>${formatter(d.value)}</strong>`
+                        }
                         const config = [
                             {
                                 label: 'Data transferred (TB)',
@@ -73,10 +55,7 @@ const downloadsCharts = (from, to) => {
                                 },
                                 providerProps: {
                                     onBuildToolTip: (id, e, d) => {
-                                        return `<span class="text-muted">${formatAxisDate(
-                                            d.label,
-                                            true
-                                        )}</span><br><strong>${formatBytes(d.value)}</strong>`
+                                        return _onBuildToolTip(id, e, d, formatBytes)
                                     }
                                 },
                                 config: {
@@ -111,10 +90,7 @@ const downloadsCharts = (from, to) => {
                                 },
                                 providerProps: {
                                     onBuildToolTip: (id, e, d) => {
-                                        return `<span class="text-muted">${formatAxisDate(
-                                            d.label,
-                                            true
-                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                        return _onBuildToolTip(id, e, d, formatNum)
                                     }
                                 },
                                 config: {
@@ -158,10 +134,7 @@ const downloadsCharts = (from, to) => {
                                 },
                                 providerProps: {
                                     onBuildToolTip: (id, e, d) => {
-                                        return `<span class="text-muted">${formatAxisDate(
-                                            d.label,
-                                            true
-                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                        return _onBuildToolTip(id, e, d, formatNum)
                                     }
                                 },
                                 config: {
@@ -204,10 +177,7 @@ const downloadsCharts = (from, to) => {
                                 },
                                 providerProps: {
                                     onBuildToolTip: (id, e, d) => {
-                                        return `<span class="text-muted">${formatAxisDate(
-                                            d.label,
-                                            true
-                                        )}</span><br> <strong>${formatNum(d.value)}</strong>`
+                                        return _onBuildToolTip(id, e, d, formatNum)
                                     }
                                 },
                                 config: {
@@ -284,7 +254,8 @@ const downloadsCharts = (from, to) => {
                                                     formattedData[d] ||
                                                     formattedData[d.data.group],
                                                 subGroupLabels,
-                                                formatter: formatBytes
+                                                formatter: formatBytes,
+                                                title: !e.stacked ? formatAxisDate(d.data.group,true) : formatAxisDate(d,true)
                                             })
                                         }
                                     },
@@ -377,7 +348,8 @@ const downloadsCharts = (from, to) => {
                                                     formattedData[d] ||
                                                     formattedData[d.data.group],
                                                 subGroupLabels,
-                                                formatter: formatNum
+                                                formatter: formatNum,
+                                                title: !e.stacked ? formatAxisDate(d.data.group,true) : formatAxisDate(d,true)
                                             })
                                         }
                                     },
@@ -593,7 +565,7 @@ const locationsCharts = (from, to) => {
                             (d) => d.total_bytes_transferred !== 0
                         )
                         const onBuildToolTip = (id, e, d) => {
-                            return `<div>
+                            return `<div class="c-visualizations__tooltipWrap">
                                 <strong>${d.data.country}</strong> <br>
                                 <span>${formatBytes(d.data.total_bytes_transferred)}</span> <br>
                                 <span>${formatNum(d.data.files)} files</span> <br>

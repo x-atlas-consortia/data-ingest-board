@@ -83,7 +83,7 @@ const Bar = memo(({
             .data(data)
             .join('rect')
             .attr('class', (d) => `bar bar--${d.id?.toDashedCase()}`)
-            .attr('y', (d) => y(d.label))
+            .attr('y', (d) => y(d.label) + svgDo({}).shapeBandwidth(y).offset)
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', (d) => {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
@@ -96,7 +96,7 @@ const Bar = memo(({
                 return color
             })
             .attr('x', (d) => x(minX))
-            .attr('height', y.bandwidth())
+            .attr('height', svgDo({}).shapeBandwidth(y).size)
             .attr('width', (d) => x(minX) - x(minX))
             .on('mouseover', toolTipHandlers(chartId, chartType).mouseover)
             .on('mousemove', toolTipHandlers(chartId, chartType).mousemove)
@@ -150,9 +150,10 @@ const Bar = memo(({
             .append('text')
             .attr('class', 'number-label')
             .text((d) => formatVal({ d, v: d.value }))
-            .attr('y',(d) => y(d.label) + y.bandwidth() / 1.3) 
+            .attr('dy', '0.35em') // vertical optical centering
+            .attr('y',(d) => y(d.label) + svgDo({}).shapeBandwidth(y).offset + (svgDo({}).shapeBandwidth(y).size / 2)) 
             .attr('x', (d) => x(minX))
-            .attr('text-anchor', 'middle')
+            .attr('text-anchor', 'start')
             .style('font-size', THEME.visualizations.font.size)
             .style('fill', THEME.visualizations.font.color)
             .style('opacity', 0)

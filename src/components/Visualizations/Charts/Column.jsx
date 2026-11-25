@@ -72,7 +72,7 @@ const Column = memo(({
             .data(data)
             .join('rect')
             .attr('class', (d) => `column--${d.id?.toDashedCase()}`)
-            .attr('x', (d) => x(d.label))
+            .attr('x', (d) => x(d.label) + svgDo({}).shapeBandwidth(x).offset)
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
             .attr('fill', function (d) {
                 const color = svgDo({}).getColor(d.label, style, colorScale)
@@ -86,7 +86,7 @@ const Column = memo(({
             })
             .attr('y', (d) => y(minY))
             .attr('height', (d) => y(minY) - y(minY))
-            .attr('width', x.bandwidth())
+            .attr('width', svgDo({}).shapeBandwidth(x).size)
             .on('click', function (event, d) {
                 if (onSectionClick) {
                     onSectionClick(d.label)
@@ -148,8 +148,8 @@ const Column = memo(({
             .attr("class", "column-hover")
             .attr('data-label', (d) => xAxis.formatter ? xAxis.formatter(d.label, 0) : d.label)
             .attr('data-value', (d) => formatVal({ d, v: d.value }))
-            .attr("x", d => x(d.label)) // Match the x position of the data band
-            .attr("width", x.bandwidth())  // Match the exact width of the column band
+            .attr("x", d => x(d.label) + svgDo({}).shapeBandwidth(x).offset) // Match the x position of the data band
+            .attr("width", svgDo({}).shapeBandwidth(x).size)  // Match the exact width of the column band
             .attr("y", d => margin.top)                       // Start from the very top of the chart
             .attr("height", d => y(minY) - margin.top)        // Stretch to the very bottom of the chart
             .style("fill", "transparent")       // Invisible by default, but still interactive

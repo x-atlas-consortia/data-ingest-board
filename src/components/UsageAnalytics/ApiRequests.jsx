@@ -20,39 +20,10 @@ import InbarCell from './InbarCell'
 import UsageContext from '@/context/UsageContext'
 import URLS from '@/lib/helpers/urls'
 import AppContext from '@/context/AppContext'
+import UI_BLOCKS from '@/lib/helpers/uiBlocks'
 
-const onBuildToolTip = (
-    id,
-    e,
-    d,
-    { subGroupLabels, row, formatter, title }
-) => {
-    const colors = e.colors
-
-    if (!e.stacked) {
-        return `<div class="c-visualizations__tooltipWrap">
-            <span class="text-muted">${title}</span>
-            <br> 
-            <span>
-                <span class="c-visualizations__itemCol" style="background-color: ${colors[d.key].color};"></span>
-                <span>${subGroupLabels[d.key] || d.key}</span> <strong>${formatter(d.data[d.key])}</strong>
-            </span>
-        </div>`
-    }
-
-    let total = 0
-    if (!row) return null
-    return `<div class="c-visualizations__tooltipWrap">
-    <span class="text-muted">${title}</span>
-    <br>${Object.values(colors)
-        .map(({ color, label, key, value }) => {
-            total += row[key] || 0
-            return `<span><span class="c-visualizations__itemCol" style="background-color: ${color};"></span>
-            ${label}: <strong>${formatter(row[key])}</strong></span>`
-        })
-        .join('<br>')}
-        <br>Total: <strong>${formatter(total)}</strong>
-    </div>`
+const onBuildToolTip = (id, e, d, { subGroupLabels, row, formatter, title }) => {
+    return UI_BLOCKS.visualizations.onBuildToolTip(id, e, d, {subGroupLabels, row, formatter, title})
 }
 
 const subGroupLabels = {
@@ -152,7 +123,7 @@ const trafficCharts = (from, to) => {
         },
         {
             component: (
-                <div className='row mt-2'>
+                <div className='row mt-2' key='monthly-response-code'>
                     <div className='col-md-6'>
                         <DetailSuspence
                             key='monthly-requests-by-api'
@@ -820,6 +791,7 @@ const clientsAndUsersCharts = (from, to) => {
                         ]
                         return (
                             <TableCard
+                                key='client-types'
                                 data={data}
                                 columns={columns}
                                 title='Client types'
@@ -842,7 +814,7 @@ const clientsAndUsersCharts = (from, to) => {
         },
         {
             component: (
-                <div className='row mt-2'>
+                <div className='row mt-2' key='signed-in-countries'>
                     <div className='col-md-6'>
                         <DetailSuspence
                             key='signed-in-vs-anonymous'
@@ -962,24 +934,37 @@ const clientsAndUsersCharts = (from, to) => {
                                         group: d.country_name
                                     }
                                 }
-                                const _onBuildToolTip = (id, e, d) => {
-                                    const dateString =
-                                        typeof d === 'string' ? d : d.data.group
-                                    return onBuildToolTip(id, e, d, {
-                                        row: formattedData[dateString],
-                                        subGroupLabels,
-                                        formatter: formatNum,
-                                        title: !e.stacked
-                                            ? formatAxisDate(d.data.group, true)
-                                            : formatAxisDate(dateString, true)
-                                    })
+                                const _onBuildToolTip = (id, e, d, { label, value }) => {
+                                    return `<div class="c-visualizations__tooltipWrap">
+                                        <strong>${d.data.country_name}</strong> <br>
+                                        <span>${formatNum(d.data.requests)} requests</span> <br>
+                                        <span>${formatNum(d.data.clients)} clients</span> <br>
+                                        <span>${formatNum(d.data.users)} users</span>
+                                        
+                                    </div>`
+                                }
+                                const sharedProps = {
+                                    style: {
+                                        margin: {left: 0},
+                                        monoColor:
+                                            THEME.visualizations
+                                                .defaultFill,
+                                        valueFormatter: ({ d, v }) => {
+                                            return formatNum(v)
+                                        }
+                                    },
+                                    xAxis: {
+                                        formatter: (v, i) =>
+                                            formatNum(v)
+                                    }
                                 }
                                 const config = [
                                     {
                                         label: 'Requests',
-                                        value: 'requests',
-                                        chartType: 'Bar',
-
+                                        value: 'requests-by-countries-requests',
+                                        providerProps: {
+                                            onBuildToolTip: _onBuildToolTip
+                                        },
                                         config: {
                                             data: data.map((d) => ({
                                                 id: d.country_name,
@@ -988,19 +973,12 @@ const clientsAndUsersCharts = (from, to) => {
                                                 data: d
                                             })),
 
-                                            xAxis: {
-                                                formatter: (v, i) =>
-                                                    formatNum(v)
-                                            },
-                                            legendLayout: 'flex',
-                                            subGroupLabels
+                                            ...sharedProps
                                         }
                                     },
                                     {
                                         label: 'Client IPs',
-                                        value: 'clients',
-                                        chartType: 'Bar',
-
+                                        value: 'requests-by-countries-clients',
                                         config: {
                                             data: data.map((d) => ({
                                                 id: d.country_name,
@@ -1008,25 +986,12 @@ const clientsAndUsersCharts = (from, to) => {
                                                 value: d.clients,
                                                 data: d
                                             })),
-                                            style: {
-                                                monoColor:
-                                                    THEME.visualizations
-                                                        .defaultFill,
-                                                valueFormatter: ({ d, v }) => {
-                                                    return formatNum(v)
-                                                }
-                                            },
-                                            xAxis: {
-                                                formatter: (v, i) =>
-                                                    formatNum(v)
-                                            }
+                                            ...sharedProps
                                         }
                                     },
                                     {
                                         label: 'Users',
-                                        value: 'users',
-                                        chartType: 'Bar',
-
+                                        value: 'requests-by-countries-users',
                                         config: {
                                             data: data.map((d) => ({
                                                 id: d.country_name,
@@ -1034,18 +999,7 @@ const clientsAndUsersCharts = (from, to) => {
                                                 value: d.users,
                                                 data: d
                                             })),
-                                            style: {
-                                                monoColor:
-                                                    THEME.visualizations
-                                                        .defaultFill,
-                                                valueFormatter: ({ d, v }) => {
-                                                    return formatNum(v)
-                                                }
-                                            },
-                                            xAxis: {
-                                                formatter: (v, i) =>
-                                                    formatNum(v)
-                                            }
+                                            ...sharedProps
                                         }
                                     }
                                 ]

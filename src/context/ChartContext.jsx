@@ -180,6 +180,10 @@ export const ChartProvider = ({ children, onBuildToolTip }) => {
                 }
                 return names
             },
+            shapeBandwidth: (axis, maxSize = 50) => {
+                const size = Math.min(axis.bandwidth(), maxSize)
+                return {size, offset: (axis.bandwidth() - size) / 2}
+            },
             sizing: (style, chartId, chart = 'column') => {
                 let $parent = $(getChartSelector(chartId, chart))
                 let divWidth = $parent.width()
