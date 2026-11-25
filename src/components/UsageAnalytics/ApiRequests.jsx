@@ -411,10 +411,11 @@ const trafficCharts = (from, to) => {
                                 },
                                 providerProps: {
                                     onBuildToolTip: (id, e, d) => {
-                                        return `<span class="text-muted">${formatAxisDate(
-                                            d.label,
-                                            true
-                                        )}</span><br><strong>${formatBytes(d.value)}</strong>`
+                                       
+                                        return `<div class="c-visualizations__tooltipWrap">
+                                        <span class="text-muted">${formatting.yAxis.formatter(d.data.dow)} ${formatting.xAxis.formatter(d.data.hour)} UTC</span>
+                                        <br><span>${formatNum(d.data.requests)} requests</span>
+                                        <br><span>${formatNum(d.data.clients)} distinct client ips</span></div>`
                                     }
                                 },
                                 config: {
